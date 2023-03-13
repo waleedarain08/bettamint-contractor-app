@@ -7,6 +7,7 @@ export const Colors = {
 	Secondary: "#A179F2",
 	Background: "#303030",
 	White: "white",
+	WhiteGray: "#F9F9F9",
 	Black: "black",
 	LightGray: "#cecaca",
 };
