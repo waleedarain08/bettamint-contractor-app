@@ -23,7 +23,7 @@ const BottomNavigation = () => {
 			screenOptions={{ headerShown: false }}
 		>
 			<Tab.Screen name={payments} component={Payments} />
-			<Tab.Screen name={projects} component={Profile} />
+			<Tab.Screen name={projects} component={Projects} />
 			<Tab.Screen name={dashboard} component={Dashboard} />
 			<Tab.Screen name={attendance} component={Attendance} />
 			<Tab.Screen name={profile} component={Profile} />

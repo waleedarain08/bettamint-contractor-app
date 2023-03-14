@@ -114,12 +114,21 @@ export const MyLocation = ({ color, size, style }) => (
 		style={style}
 	/>
 );
-export const ArrowLongRight = ({ color, size, style }) => (
+export const Search = ({ color, size, style }) => (
 	<VectorIcon
-		name="arrow-long-right"
+		name="search"
 		color={color}
 		size={size}
-		type="Entypo"
+		type="Feather"
+		style={style}
+	/>
+);
+export const Building = ({ color, size, style }) => (
+	<VectorIcon
+		name="building-o"
+		color={color}
+		size={size}
+		type="FontAwesome"
 		style={style}
 	/>
 );

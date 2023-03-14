@@ -1,12 +1,71 @@
 import React from "react";
-import { View, Text, Image, ImageBackground, StyleSheet } from "react-native";
+import {
+	View,
+	Text,
+	Image,
+	ImageBackground,
+	StyleSheet,
+	FlatList,
+	Dimensions,
+} from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../assets/images/logo.png";
 import Menu from "../assets/icons/Menu.png";
 import { Colors } from "../utils/Colors";
-import { PersonRunning } from "../icons";
-import { LineGraph } from "react-native-graph";
-// const priceHistory = usePriceHistory("ethereum");
+import Spacer from "../components/Spacer";
+import BarChart from "../assets/images/barchart.png";
+import LineChart from "../assets/images/linechart.png";
+export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
+export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
+const screenWidth = Dimensions.get("window").width;
+const DATA = [
+	{
+		id: "1",
+		title: "Total Projects*",
+		num: "175",
+		image: require("../assets/images/totalprojects.png"),
+		stat: "Daily Stats*",
+	},
+	{
+		id: "2",
+		title: "Active Projects*",
+		num: "175",
+		image: require("../assets/images/totalworker.png"),
+		stat: "Daily Stats*",
+	},
+	{
+		id: "3",
+		title: "Total Workers*",
+		num: "175",
+		image: require("../assets/images/activeprojects.png"),
+		stat: "Daily Stats*",
+	},
+	{
+		id: "4",
+		title: "Active Workers*",
+		num: "175",
+		image: require("../assets/images/activeworker.png"),
+		stat: "Daily Stats*",
+	},
+];
+const Item = ({ item }) => (
+	<View style={styles.item}>
+		<Text style={styles.title}>{item.title}</Text>
+		<View style={{ flexDirection: "row", alignItems: "center" }}>
+			<Image
+				source={item.image}
+				style={{
+					width: 30,
+					height: 30,
+					resizeMode: "contain",
+					alignItems: "center",
+				}}
+			/>
+			<Text style={styles.num}>{item.num}</Text>
+		</View>
+		<Text style={styles.stat}>{item.stat}</Text>
+	</View>
+);
 const Dashboard = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
@@ -20,8 +79,11 @@ const Dashboard = ({ navigation }) => {
 				</View>
 			</View>
 			<View style={styles.graph}>
-				<View style={{ height: "60%" }}>
-					<Text>Graph Area</Text>
+				<View style={{ height: "60%", alignItems: "center" }}>
+					<Image
+						source={BarChart}
+						style={{ height: 200, width: 360, resizeMode: "contain" }}
+					/>
 				</View>
 				<View style={styles.graphBottom}>
 					<View style={styles.graphBottomTabs}>
@@ -36,7 +98,28 @@ const Dashboard = ({ navigation }) => {
 					</View>
 				</View>
 			</View>
-			<ScrollView></ScrollView>
+			<ScrollView>
+				<FlatList
+					data={DATA}
+					renderItem={({ item }) => <Item item={item} />}
+					keyExtractor={(item) => item.id}
+					numColumns={2}
+				/>
+
+				<View style={styles.scrollGraph}>
+					<Spacer bottom={50} />
+					<Image
+						source={LineChart}
+						style={{ height: 200, width: 340, resizeMode: "contain" }}
+					/>
+					{/* <LineChart
+						data={chartData}
+						width={screenWidth}
+						height={220}
+						chartConfig={chartConfig}
+					/> */}
+				</View>
+			</ScrollView>
 		</View>
 	);
 };
@@ -64,7 +147,7 @@ const styles = StyleSheet.create({
 		height: "40%",
 		backgroundColor: Colors.White,
 		marginTop: -100,
-		margin: 20,
+		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {
 			width: 0,
@@ -99,5 +182,51 @@ const styles = StyleSheet.create({
 		backgroundColor: Colors.WhiteGray,
 		borderRadius: 8,
 		padding: 12,
+	},
+	item: {
+		flex: 1,
+		padding: 20,
+		marginVertical: 8,
+		marginHorizontal: 15,
+		backgroundColor: Colors.White,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.2,
+		shadowRadius: 5,
+		elevation: 4,
+		borderRadius: 10,
+	},
+	title: {
+		fontFamily: "Lexend-Bold",
+		fontSize: 12,
+		color: Colors.LightGray,
+	},
+	num: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 26,
+		color: Colors.Black,
+	},
+	stat: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 6,
+		textAlign: "right",
+		color: Colors.LightGray,
+	},
+	scrollGraph: {
+		height: "50%",
+		backgroundColor: Colors.White,
+		margin: 15,
+		shadowColor: "#000",
+		shadowOffset: {
+			width: 0,
+			height: 2,
+		},
+		shadowOpacity: 0.2,
+		shadowRadius: 5,
+		elevation: 4,
+		borderRadius: 10,
 	},
 });
