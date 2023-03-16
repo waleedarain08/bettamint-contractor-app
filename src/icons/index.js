@@ -112,3 +112,39 @@ export const CardText = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+export const Whatsapp = ({ color, size, style }) => (
+	<VectorIcon
+		name="whatsapp"
+		color={color}
+		size={size}
+		type="FontAwesome"
+		style={style}
+	/>
+);
+export const Tick = ({ color, size, style }) => (
+	<VectorIcon
+		name="check"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);
+export const Cross = ({ color, size, style }) => (
+	<VectorIcon
+		name="cross"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);
+export const Picture = ({ color, size, style }) => (
+	<VectorIcon
+		name="picture"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
