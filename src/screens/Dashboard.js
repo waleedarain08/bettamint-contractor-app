@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	FlatList,
 	Dimensions,
+	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../assets/images/logo.png";
@@ -18,6 +19,7 @@ import LineChart from "../assets/images/linechart.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
+LogBox.ignoreAllLogs();
 const DATA = [
 	{
 		id: "1",

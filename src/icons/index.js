@@ -48,72 +48,7 @@ export const VectorIcon = ({ name, color, size, type, style }) => {
 			return <></>;
 	}
 };
-export const PersonRunning = ({ color, size, style }) => (
-	<VectorIcon
-		name="running"
-		color={color}
-		size={size}
-		type="FontAwesome5"
-		style={style}
-	/>
-);
 
-export const Biking = ({ color, size, style }) => (
-	<VectorIcon
-		name="biking"
-		color={color}
-		size={size}
-		type="FontAwesome5"
-		style={style}
-	/>
-);
-
-export const ArrowSwapIcon = ({ color, size, style }) => (
-	<VectorIcon
-		name="arrow-swap"
-		color={color}
-		size={size}
-		type="Fontisto"
-		style={style}
-	/>
-);
-
-export const QuestionMark = ({ color, size, style }) => (
-	<VectorIcon
-		name="question"
-		color={color}
-		size={size}
-		type="FontAwesome5"
-		style={style}
-	/>
-);
-export const CheckIcon = ({ color, size, style }) => (
-	<VectorIcon
-		name="check-circle"
-		color={color}
-		size={size}
-		type="FontAwesome5"
-		style={style}
-	/>
-);
-export const ArrowLeft = ({ color, size, style }) => (
-	<VectorIcon
-		name="chevron-left"
-		color={color}
-		size={size}
-		type="Feather"
-		style={style}
-	/>
-);
-export const MyLocation = ({ color, size, style }) => (
-	<VectorIcon
-		name="my-location"
-		color={color}
-		size={size}
-		type="MaterialIcons"
-		style={style}
-	/>
-);
 export const Search = ({ color, size, style }) => (
 	<VectorIcon
 		name="search"
@@ -129,6 +64,51 @@ export const Building = ({ color, size, style }) => (
 		color={color}
 		size={size}
 		type="FontAwesome"
+		style={style}
+	/>
+);
+export const User = ({ color, size, style }) => (
+	<VectorIcon
+		name="user-circle"
+		color={color}
+		size={size}
+		type="FontAwesome5"
+		style={style}
+	/>
+);
+export const AccountType = ({ color, size, style }) => (
+	<VectorIcon
+		name="pager"
+		color={color}
+		size={size}
+		type="FontAwesome5"
+		style={style}
+	/>
+);
+export const Email = ({ color, size, style }) => (
+	<VectorIcon
+		name="email-outline"
+		color={color}
+		size={size}
+		type="MaterialCommunityIcons"
+		style={style}
+	/>
+);
+export const Phone = ({ color, size, style }) => (
+	<VectorIcon
+		name="phone"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);
+export const CardText = ({ color, size, style }) => (
+	<VectorIcon
+		name="card-text"
+		color={color}
+		size={size}
+		type="MaterialCommunityIcons"
 		style={style}
 	/>
 );

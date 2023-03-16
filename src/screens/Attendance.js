@@ -7,6 +7,7 @@ import {
 	StyleSheet,
 	FlatList,
 	Dimensions,
+	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../assets/images/logo.png";
@@ -19,108 +20,138 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 import { Building, Search } from "../icons";
+LogBox.ignoreAllLogs();
 const DATA = [
 	{
-		id: "1",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "1247",
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
 	},
 	{
-		id: "2",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "1247",
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
 	},
 	{
-		id: "3",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "1247",
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
 	},
 	{
-		id: "4",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "1247",
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
+	},
+	{
+		name: "Arvind Chauhan",
+		days: "2",
+		present: "2",
+		absent: "0",
 	},
 ];
 const Item = ({ item, index }) => (
 	<View style={[styles.item]}>
-		<View style={{ flexDirection: "row", alignItems: "center" }}>
-			<Image
-				source={{ uri: item.image }}
-				style={{
-					width: 100,
-					height: 100,
-					resizeMode: "contain",
-					alignItems: "center",
-					borderRadius: 10,
-				}}
-			/>
-			<Spacer left={10} />
-			<View>
-				<Text style={styles.title}>{item.title}</Text>
-				<Text style={styles.num}>RERA ID: {item.id}</Text>
-				<Text style={styles.num}>
-					REMAINING {"\n"}WORK DAYS {item.id}
-				</Text>
+		<View style={{ flexDirection: "row", alignItems: "center", width: "100%" }}>
+			<View style={{ width: "30%", alignItems: "center" }}>
+				<Text style={styles.flatListText}>{item.name}</Text>
 			</View>
-		</View>
-		<Spacer bottom={10} />
-		<View
-			style={{
-				flexDirection: "row",
-				justifyContent: "space-between",
-				borderTopColor: Colors.LightGray,
-				borderTopWidth: 1,
-				paddingTop: 10,
-				borderStyle: "dashed",
-			}}
-		>
-			<View
+			<View style={{ width: "15%" }}>
+				<Text style={styles.flatListText}>{item.days}</Text>
+			</View>
+			<View style={{ width: "15%" }}>
+				<Text style={styles.flatListText}>{item.present}</Text>
+			</View>
+			<View style={{ width: "15%" }}>
+				<Text style={styles.flatListText}>{item.absent}</Text>
+			</View>
+			<TouchableOpacity
 				style={{
+					backgroundColor: "#ECE5FC",
+					padding: 5,
+					margin: 5,
+					borderRadius: 5,
+					width: "20%",
+					justifyContent: "center",
 					alignItems: "center",
-					borderRightColor: Colors.LightGray,
-					borderRightWidth: 1,
-					paddingRight: 20,
-					borderStyle: "dashed",
 				}}
 			>
-				<Text style={styles.workerHeading}>Total Workers</Text>
-				<Text style={styles.workerNumber}>{item.worker}</Text>
-			</View>
-			<View
-				style={{
-					alignItems: "center",
-					borderRightColor: Colors.LightGray,
-					borderRightWidth: 1,
-					paddingRight: 20,
-					borderStyle: "dashed",
-				}}
-			>
-				<Text style={styles.workerHeading}>Total Workers</Text>
-				<Text style={styles.workerNumber}>{item.worker}</Text>
-			</View>
-			<View style={{ alignItems: "center" }}>
-				<Text style={styles.workerHeading}>Total Workers</Text>
-				<Text style={styles.workerNumber}>{item.worker}</Text>
-			</View>
+				<Text style={styles.smallButton}>View</Text>
+			</TouchableOpacity>
 		</View>
 	</View>
 );
+const ListHeader = () => {
+	return (
+		<View style={[styles.item]}>
+			<View
+				style={{ flexDirection: "row", alignItems: "center", width: "100%" }}
+			>
+				<View style={{ width: "30%" }}>
+					<Text style={styles.flatListText}>Name</Text>
+				</View>
+				<View style={{ width: "15%" }}>
+					<Text style={styles.flatListText}>Days</Text>
+				</View>
+				<View style={{ width: "15%" }}>
+					<Text style={styles.flatListText}>Present</Text>
+				</View>
+				<View style={{ width: "15%" }}>
+					<Text style={styles.flatListText}>Absent</Text>
+				</View>
+				<View style={{ width: "20%" }}>
+					<Text style={styles.flatListText}>Action</Text>
+				</View>
+			</View>
+		</View>
+	);
+};
 const Attendance = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
@@ -192,15 +223,31 @@ const Attendance = ({ navigation }) => {
 					</TouchableOpacity>
 				</View>
 			</View>
-			<Text style={styles.linkText}>
-				Please type a Project Name here to link*
-			</Text>
 			<ScrollView>
-				<FlatList
-					data={DATA}
-					renderItem={({ item }) => <Item item={item} />}
-					keyExtractor={(item) => item.id}
-				/>
+				<View
+					style={{
+						backgroundColor: Colors.White,
+						alignItems: "center",
+						margin: 10,
+						padding: 10,
+						borderRadius: 10,
+						shadowColor: "#000",
+						shadowOffset: {
+							width: 0,
+							height: 2,
+						},
+						shadowOpacity: 0.2,
+						shadowRadius: 5,
+						elevation: 4,
+					}}
+				>
+					<FlatList
+						data={DATA}
+						renderItem={({ item }) => <Item item={item} />}
+						keyExtractor={(item) => item.id}
+						ListHeaderComponent={ListHeader}
+					/>
+				</View>
 			</ScrollView>
 		</View>
 	);
@@ -280,8 +327,8 @@ const styles = StyleSheet.create({
 	},
 	item: {
 		padding: 10,
-		marginVertical: 8,
-		marginHorizontal: 15,
+		// marginVertical: 8,
+		// marginHorizontal: 15,
 		backgroundColor: Colors.White,
 		shadowColor: "#000",
 		shadowOffset: {
@@ -291,7 +338,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.2,
 		shadowRadius: 5,
 		elevation: 4,
-		borderRadius: 10,
+		// borderRadius: 10,
 	},
 	title: {
 		fontFamily: "Lexend-Bold",
@@ -336,6 +383,11 @@ const styles = StyleSheet.create({
 	workerNumber: {
 		fontFamily: "Lexend-Medium",
 		fontSize: 20,
+		color: Colors.Black,
+	},
+	flatListText: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 12,
 		color: Colors.Black,
 	},
 });
