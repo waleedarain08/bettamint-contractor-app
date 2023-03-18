@@ -11,7 +11,7 @@ import React from "react";
 import Vector from "../assets/images/bgvector.png";
 import Logo from "../assets/images/logo.png";
 import { Colors } from "../utils/Colors";
-const Login = ({ navigation }) => {
+const SelectLanguage = ({ navigation }) => {
 	return (
 		<ImageBackground source={Vector} style={styles.container}>
 			<View style={{ padding: 40 }}>
@@ -42,7 +42,7 @@ const Login = ({ navigation }) => {
 	);
 };
 
-export default Login;
+export default SelectLanguage;
 
 const styles = StyleSheet.create({
 	container: {
