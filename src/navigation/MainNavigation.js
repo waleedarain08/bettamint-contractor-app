@@ -1,4 +1,3 @@
-/* eslint-disable react-native/no-inline-styles */
 import "react-native-gesture-handler";
 import React, { useEffect, useState } from "react";
 import {
@@ -18,29 +17,49 @@ import {
   DefaultTheme,
   // DarkTheme,
 } from "@react-navigation/native";
+import Animated, { interpolateNode } from "react-native-reanimated";
+
 import Logo from "../assets/images/logo.png";
 import Menu from "../assets/icons/Menu.png";
 
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { createDrawerNavigator } from "@react-navigation/drawer";
-import Profile from "../screens/Profile";
-import Payments from "../screens/Payments";
-import Attendance from "../screens/Attendance";
+import {
+  createDrawerNavigator,
+  useDrawerProgress,
+} from "@react-navigation/drawer";
+import Profile from "../screens/Profile/Profile";
+import Payments from "../screens/Payments/Payments";
+import Attendance from "../screens/Attendance/Attendance";
 import { Colors } from "../utils/Colors";
-import Workers from "../screens/Workers";
-import Login from "../screens/Login";
-import SelectLanguage from "../screens/SelectLanguage";
-import Dashboard from "../screens/Dashboard";
-import Projects from "../screens/Projects";
+import Workers from "../screens/Workers/Workers";
+import Login from "../screens/Auth/Login";
+import SelectLanguage from "../screens/Auth/SelectLanguage";
+import Dashboard from "../screens/Dashboard/Dashboard";
+import Projects from "../screens/Project/Projects";
 import CustomDrawer from "./CustomDrawer";
+import MainLayout from "../screens/MainLayout";
+import CreateNewProject from "../screens/Project/CreateNewProject";
+import ProjectDetails from "../screens/Project/ProjectDetails";
+import PaymentMusterCard from "../screens/Payments/PaymentMusterCard";
+import AttendanceMusterCard from "../screens/Attendance/AttendanceMusterCard";
+import Jobs from "../screens/Jobs/Jobs";
+import CreateNewJob from "../screens/Jobs/CreateNewJob";
+import JobDetails from "../screens/Jobs/JobDetails";
+import WorkerDetails from "../screens/Workers/WorkerDetails";
+import CreateNewWorker from "../screens/Workers/CreateNewWorker";
+import Users from "../screens/Users/Users";
+import CreateNewUser from "../screens/Users/CreateNewUser";
 // import SplashScreen from 'react-native-splash-screen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
 const AttendanceStack = createNativeStackNavigator();
-const MyWorkStack = createNativeStackNavigator();
+const WorkerStack = createNativeStackNavigator();
 const ProjectStack = createNativeStackNavigator();
+const JobStack = createNativeStackNavigator();
+const ProfileStack = createNativeStackNavigator();
+const UserStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 LogBox.ignoreAllLogs();
 
@@ -64,7 +83,6 @@ const PaymentNavigator = ({ navigation }) => (
             style={{
               fontSize: 18,
               fontFamily: "Lexend-Medium",
-              fontWeight: "500",
               color: Colors.White,
               marginHorizontal: 13,
             }}
@@ -80,54 +98,128 @@ const PaymentNavigator = ({ navigation }) => (
             />
           </Pressable>
         ),
-        // headerTitle: () => (
-        //   // <Text
-        //   //   style={{
-        //   //     fontSize: 18,
-        //   //     fontFamily: 'Lexend-Medium',
-        //   //     color: Colors.white,
-        //   //   }}>
-        //   //   {t('paymentScreen.bettaPay')}
-        //   // </Text>
-        //   <Image
-        //     style={{ width: 80, height: 40, marginTop: 15, marginLeft: 10 }}
-        //     source={require("../Assets/bettapayLogo.png")}
-        //   />
-        // ),
-        // headerStyle: {
-        //   backgroundColor: Colors.black,
-        // },
-        // headerLeft: () => (
-        //   <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-        //     <Item
-        //       title="menu"
-        //       iconName={"menu"}
-        //       onPress={() => navigation.toggleDrawer("Menu")}
-        //     />
-        //   </HeaderButtons>
-        // ),
-        // headerBackground: () => (
-        //   <Image
-        //     style={{width: 100, height: 50}}
-        //     source={require('../Assets/bettapayLogo.png')}
-        //   />
-        // ),
-        // headerRight: () => (
-        //   <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-        //     <Item
-        //       title="notifications"
-        //       iconName={'notifications'}
-        //       onPress={() => navigation.navigate('NotificationScreen')}
-        //     />
-        //   </HeaderButtons>
-        // ),
+      }}
+    />
+    <PaymentStack.Screen
+      name="PaymentMusterCard"
+      component={PaymentMusterCard}
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+            }}
+          >
+            Muster Card
+          </Text>
+        ),
       }}
     />
   </PaymentStack.Navigator>
 );
 
+const JobsNavigator = ({ navigation }) => (
+  <JobStack.Navigator
+    screenOptions={{
+      headerBackTitleVisible: false,
+      headerShadowVisible: false,
+      headerTintColor: Colors.White,
+      headerStyle: {
+        backgroundColor: Colors.Primary,
+      },
+    }}
+  >
+    <JobStack.Screen
+      name="JobStack"
+      component={Jobs}
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+              marginHorizontal: 13,
+            }}
+          >
+            Jobs
+          </Text>
+        ),
+        headerLeft: () => (
+          <Pressable onPress={() => navigation.openDrawer()}>
+            <Image
+              source={Menu}
+              style={{ height: 20, width: 20, marginLeft: 0 }}
+            />
+          </Pressable>
+        ),
+        headerRight: () => (
+          <Pressable
+            onPress={() => {
+              navigation.navigate("CreateNewJob");
+            }}
+            style={{
+              backgroundColor: Colors.Purple,
+              padding: 5,
+              borderRadius: 12,
+              paddingHorizontal: 10,
+            }}
+          >
+            <View>
+              <Text
+                style={{
+                  fontFamily: "Lexend-Medium",
+                  fontSize: 11,
+                  color: Colors.White,
+                }}
+              >
+                New Job
+              </Text>
+            </View>
+          </Pressable>
+        ),
+      }}
+    />
+    <JobStack.Screen
+      name="CreateNewJob"
+      component={CreateNewJob}
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+            }}
+          >
+            Create New Job
+          </Text>
+        ),
+      }}
+    />
+    <JobStack.Screen
+      name="JobDetails"
+      component={JobDetails}
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+            }}
+          >
+            Job Details
+          </Text>
+        ),
+      }}
+    />
+  </JobStack.Navigator>
+);
+
 const AttendanceNavigator = ({ navigation }) => {
-  //   const { t } = useTranslation();
   return (
     <AttendanceStack.Navigator
       screenOptions={{
@@ -164,37 +256,25 @@ const AttendanceNavigator = ({ navigation }) => {
               />
             </Pressable>
           ),
-          //   headerTitle: () => (
-          //     <Text
-          //       style={{
-          //         fontSize: 18,
-          //         fontFamily: "Lexend-Medium",
-          //         fontWeight: "500",
-          //         color: Colors.Black,
-          //       }}
-          //     >
-          //       Muster Card
-          //       {/* {t('attendanceScreen.attendance')} */}
-          //     </Text>
-          //   ),
-          //   headerLeft: () => (
-          //     <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //       <Item
-          //         title="menu"
-          //         iconName={"menu"}
-          //         onPress={() => navigation.toggleDrawer("Menu")}
-          //       />
-          //     </HeaderButtons>
-          //   ),
-          // headerRight: () => (
-          //   <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //     <Item
-          //       title="notifications"
-          //       iconName={'notifications'}
-          //       onPress={() => navigation.navigate('NotificationScreen')}
-          //     />
-          //   </HeaderButtons>
-          // ),
+        }}
+      />
+      <AttendanceStack.Screen
+        name="AttendanceMusterCard"
+        component={AttendanceMusterCard}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                // fontWeight: "500",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Muster Card
+            </Text>
+          ),
         }}
       />
     </AttendanceStack.Navigator>
@@ -203,7 +283,7 @@ const AttendanceNavigator = ({ navigation }) => {
 
 const WorkersNavigator = ({ navigation }) => {
   return (
-    <MyWorkStack.Navigator
+    <WorkerStack.Navigator
       screenOptions={{
         headerBackTitleVisible: false,
         headerShadowVisible: false,
@@ -213,16 +293,17 @@ const WorkersNavigator = ({ navigation }) => {
         },
       }}
     >
-      <MyWorkStack.Screen
+      <WorkerStack.Screen
         name="WorkerStack"
         component={Workers}
         options={{
+          headerBackVisible: false,
           headerTitle: () => (
             <Text
               style={{
                 fontSize: 18,
                 fontFamily: "Lexend-Medium",
-                fontWeight: "500",
+                // fontWeight: "500",
                 color: Colors.White,
                 marginHorizontal: 13,
               }}
@@ -231,50 +312,108 @@ const WorkersNavigator = ({ navigation }) => {
             </Text>
           ),
           headerLeft: () => (
-            <Pressable onPress={() => navigation.openDrawer()}>
+            <Pressable onPress={() => navigation.goBack()}>
               <Image
                 source={Menu}
                 style={{ height: 20, width: 20, marginLeft: 0 }}
               />
             </Pressable>
           ),
-          //   headerTitle: () => (
-          //     <Text
-          //       style={{
-          //         fontSize: 18,
-          //         fontFamily: "Lexend-Medium",
-          //         fontWeight: "500",
-          //         color: Colors.Black,
-          //       }}
-          //     >
-          //       {t("myWorkScreen.myWork")}
-          //     </Text>
-          //   ),
-          //   headerLeft: () => (
-          //     <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //       <Item
-          //         title="menu"
-          //         iconName={"menu"}
-          //         onPress={() => navigation.toggleDrawer("Menu")}
-          //       />
-          //     </HeaderButtons>
-          //   ),
-          // headerRight: () => (
-          //   <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //     <Item
-          //       title="notifications"
-          //       iconName={'notifications'}
-          //       onPress={() => alert('No Notification')}
-          //     />
-          //   </HeaderButtons>
-          // ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                navigation.navigate("CreateNewWorker");
+              }}
+              style={{
+                backgroundColor: Colors.Purple,
+                padding: 5,
+                borderRadius: 12,
+                paddingHorizontal: 10,
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 11,
+                    color: Colors.White,
+                  }}
+                >
+                  Worker
+                </Text>
+              </View>
+            </Pressable>
+          ),
         }}
       />
-    </MyWorkStack.Navigator>
+      <WorkerStack.Screen
+        name="CreateNewWorker"
+        component={CreateNewWorker}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                // fontWeight: "500",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Create New Worker
+            </Text>
+          ),
+        }}
+      />
+      <WorkerStack.Screen
+        name="WorkerDetails"
+        component={WorkerDetails}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                // fontWeight: "500",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Worker Details
+            </Text>
+          ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                navigation.navigate("CreateNewWorker");
+              }}
+              style={{
+                backgroundColor: Colors.Purple,
+                padding: 5,
+                borderRadius: 12,
+                paddingHorizontal: 10,
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 11,
+                    color: Colors.White,
+                  }}
+                >
+                  Edit
+                </Text>
+              </View>
+            </Pressable>
+          ),
+        }}
+      />
+    </WorkerStack.Navigator>
   );
 };
+
 const ProjectNavigator = ({ navigation }) => {
-  //   const { t } = useTranslation();
   return (
     <ProjectStack.Navigator
       screenOptions={{
@@ -312,35 +451,196 @@ const ProjectNavigator = ({ navigation }) => {
               />
             </Pressable>
           ),
-          //   headerLeft: () => (
-          //     <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //       <Item
-          //         title="menu"
-          //         iconName={"menu"}
-          //         onPress={() => navigation.toggleDrawer("Menu")}
-          //       />
-          //     </HeaderButtons>
-          //   ),
-          // headerRight: () => (
-          //   <HeaderButtons HeaderButtonComponent={CustomHeaderButton}>
-          //     <Item
-          //       title="notifications"
-          //       iconName={'notifications'}
-          //       onPress={() => alert('No Notification')}
-          //     />
-          //   </HeaderButtons>
-          // ),
+          headerRight: () => (
+            <Pressable
+              onPress={() => {
+                navigation.navigate("CreateNewProject");
+              }}
+              style={{
+                backgroundColor: Colors.Purple,
+                padding: 5,
+                borderRadius: 12,
+                paddingHorizontal: 10,
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 11,
+                    color: Colors.White,
+                  }}
+                >
+                  New Project
+                </Text>
+              </View>
+            </Pressable>
+          ),
+        }}
+      />
+      <ProjectStack.Screen
+        name="CreateNewProject"
+        component={CreateNewProject}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Create New Project
+            </Text>
+          ),
+        }}
+      />
+      <ProjectStack.Screen
+        name="ProjectDetails"
+        component={ProjectDetails}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Project Details
+            </Text>
+          ),
         }}
       />
     </ProjectStack.Navigator>
   );
 };
 
-function MainNavigation({}) {
-  //   const { t } = useTranslation();
-  //   const authToken = useSelector((state) => state?.auth?.isWorkerLogin);
-  //   const dispatch = useDispatch();
+const ProfileNavigator = ({ navigation }) => (
+  <ProfileStack.Navigator
+    screenOptions={{
+      headerBackTitleVisible: false,
+      headerShadowVisible: false,
+      headerTintColor: Colors.White,
+      headerStyle: {
+        backgroundColor: Colors.Primary,
+      },
+    }}
+  >
+    <ProfileStack.Screen
+      name="ProfileStack"
+      component={Profile}
+      options={{
+        headerBackVisible: false,
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+              marginHorizontal: 13,
+            }}
+          >
+            Profile
+          </Text>
+        ),
+        headerLeft: () => (
+          <Pressable onPress={() => navigation.goBack()}>
+            <Image
+              source={Menu}
+              style={{ height: 20, width: 20, marginLeft: 0 }}
+            />
+          </Pressable>
+        ),
+      }}
+    />
+  </ProfileStack.Navigator>
+);
 
+const UserNavigator = ({ navigation }) => (
+  <UserStack.Navigator
+    screenOptions={{
+      headerBackTitleVisible: false,
+      headerShadowVisible: false,
+      headerTintColor: Colors.White,
+      headerStyle: {
+        backgroundColor: Colors.Primary,
+      },
+    }}
+  >
+    <UserStack.Screen
+      name="UserStack"
+      component={Users}
+      options={{
+        headerBackVisible: false,
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+              marginHorizontal: 13,
+            }}
+          >
+            Users
+          </Text>
+        ),
+        headerLeft: () => (
+          <Pressable onPress={() => navigation.goBack()}>
+            <Image
+              source={Menu}
+              style={{ height: 20, width: 20, marginLeft: 0 }}
+            />
+          </Pressable>
+        ),
+        headerRight: () => (
+          <Pressable
+            onPress={() => {
+              navigation.navigate("CreateNewUser");
+            }}
+            style={{
+              backgroundColor: Colors.Purple,
+              padding: 5,
+              borderRadius: 12,
+              paddingHorizontal: 10,
+            }}
+          >
+            <View>
+              <Text
+                style={{
+                  fontFamily: "Lexend-Medium",
+                  fontSize: 11,
+                  color: Colors.White,
+                }}
+              >
+                User
+              </Text>
+            </View>
+          </Pressable>
+        ),
+      }}
+    />
+    <UserStack.Screen
+      name="CreateNewUser"
+      component={CreateNewUser}
+      options={{
+        headerTitle: () => (
+          <Text
+            style={{
+              fontSize: 18,
+              fontFamily: "Lexend-Medium",
+              color: Colors.White,
+            }}
+          >
+            Create New User
+          </Text>
+        ),
+      }}
+    />
+  </UserStack.Navigator>
+);
+
+function MainNavigation({}) {
   //   React.useEffect(() => {
   //     setTimeout(() => {
   //       SplashScreen.hide();
@@ -355,14 +655,9 @@ function MainNavigation({}) {
     },
   };
 
-  //   const linking = {
-  //     prefixes: ["bettamint://"],
-  //   };
-
   return (
     <>
       <NavigationContainer
-        // linking={linking}
         theme={MyTheme}
         // ref={navigationRef}
       >
@@ -372,6 +667,7 @@ function MainNavigation({}) {
             headerBackTitleVisible: false,
             headerTitle: "",
             headerTintColor: Colors.Primary,
+            headerShown: false,
           }}
         >
           <Stack.Screen
@@ -398,6 +694,27 @@ function MainNavigation({}) {
               headerShown: false,
             }}
           />
+          <Stack.Screen
+            name="Workers"
+            component={WorkersNavigator}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={ProfileNavigator}
+            options={{
+              headerShown: false,
+            }}
+          />
+          <Stack.Screen
+            name="Users"
+            component={UserNavigator}
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </>
@@ -406,21 +723,33 @@ function MainNavigation({}) {
 
 function TabDrawer() {
   return (
-    <Drawer.Navigator
-      screenOptions={{
-        drawerStyle: styles.drawerStyles,
-        drawerType: "front",
-        swipeEdgeWidth: Platform.OS === "android" && 180,
-        // headerShown: false,
-      }}
-      drawerContent={(props) => <CustomDrawer {...props} />}
-    >
-      <Drawer.Screen
-        name="DrawerTab"
-        component={TabNavigator}
-        options={{ headerShown: false }}
-      />
-    </Drawer.Navigator>
+    <View style={{ flex: 1, backgroundColor: Colors.Primary }}>
+      <Drawer.Navigator
+        screenOptions={{
+          drawerType: "slide",
+          overlayColor: "transparent",
+          drawerStyle: {
+            flex: 1,
+            width: "65%",
+            backgroundColor: "transparent",
+          },
+          sceneContainerStyle: { backgroundColor: "transparent" },
+          // headerShown: true,
+        }}
+        drawerContent={(props) => {
+          return <CustomDrawer {...props} />;
+        }}
+      >
+        {/* <Drawer.Screen name="DrawerTab">
+          {(props) => <Dashboard {...props} />}
+        </Drawer.Screen> */}
+        <Drawer.Screen
+          name="DrawerTab"
+          component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </Drawer.Navigator>
+    </View>
   );
 }
 
@@ -429,39 +758,13 @@ function TabNavigator({ navigation }) {
     <Tab.Navigator
       initialRouteName={"Dashboard"}
       screenOptions={{
-        headerShown: true,
+        // headerShown: true,
         headerStyle: {
           backgroundColor: Colors.Primary,
         },
         headerShadowVisible: false,
       }}
     >
-      <Tab.Screen
-        name="Payments"
-        component={PaymentNavigator}
-        options={{
-          headerShadowVisible: false,
-          //   tabBarStyle,
-          tabBarActiveTintColor: Colors.Primary,
-          headerShown: false,
-          tabBarLabelStyle: {
-            fontFamily: "Lexend-Medium",
-            marginBottom: 5,
-          },
-          //   tabBarLabel: t("myWorkScreen.myWork"),
-          //   tabBarIcon: ({ size, focused }) => (
-          //     <Image
-          //       source={require("../Assets/my-work.png")}
-          //       style={{
-          //         width: 24,
-          //         height: 26,
-          //         resizeMode: "contain",
-          //         tintColor: focused ? Colors.green : Colors.lightGray,
-          //       }}
-          //     />
-          //   ),
-        }}
-      />
       <Tab.Screen
         name="Projects"
         component={ProjectNavigator}
@@ -489,13 +792,39 @@ function TabNavigator({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="Dashboard"
-        component={Dashboard}
+        name="Jobs"
+        component={JobsNavigator}
         options={{
           headerShadowVisible: false,
           //   tabBarStyle,
           tabBarActiveTintColor: Colors.Primary,
-          //   headerShown: false,
+          headerShown: false,
+          tabBarLabelStyle: {
+            fontFamily: "Lexend-Medium",
+            marginBottom: 5,
+          },
+          //   tabBarLabel: t("myWorkScreen.myWork"),
+          //   tabBarIcon: ({ size, focused }) => (
+          //     <Image
+          //       source={require("../Assets/my-work.png")}
+          //       style={{
+          //         width: 24,
+          //         height: 26,
+          //         resizeMode: "contain",
+          //         tintColor: focused ? Colors.green : Colors.lightGray,
+          //       }}
+          //     />
+          //   ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Dashboard"
+        options={{
+          headerShadowVisible: false,
+          //   tabBarStyle,
+          tabBarActiveTintColor: Colors.Primary,
+          headerShown: true,
           tabBarLabelStyle: {
             fontFamily: "Lexend-Medium",
             marginBottom: 5,
@@ -532,7 +861,54 @@ function TabNavigator({ navigation }) {
           //     />
           //   ),
         }}
-      />
+      >
+        {(props) => <Dashboard {...props} />}
+      </Tab.Screen>
+      {/* <Tab.Screen
+          name="Dashboard"
+          component={Dashboard}
+          options={{
+            headerShadowVisible: false,
+            //   tabBarStyle,
+            tabBarActiveTintColor: Colors.Primary,
+            //   headerShown: false,
+            tabBarLabelStyle: {
+              fontFamily: "Lexend-Medium",
+              marginBottom: 5,
+            },
+            headerLeft: () => (
+              <Pressable onPress={() => navigation.openDrawer()}>
+                <Image
+                  source={Menu}
+                  style={{ height: 20, width: 20, marginLeft: 16 }}
+                />
+              </Pressable>
+            ),
+            headerTitle: () => (
+              <Image
+                source={Logo}
+                style={{
+                  width: 110,
+                  height: 22,
+                  resizeMode: "contain",
+                  // right: 0,
+                }}
+              />
+            ),
+            //   tabBarLabel: t("myWorkScreen.myWork"),
+            //   tabBarIcon: ({ size, focused }) => (
+            //     <Image
+            //       source={require("../Assets/my-work.png")}
+            //       style={{
+            //         width: 24,
+            //         height: 26,
+            //         resizeMode: "contain",
+            //         tintColor: focused ? Colors.green : Colors.lightGray,
+            //       }}
+            //     />
+            //   ),
+          }}
+        /> */}
       <Tab.Screen
         name="Attendance"
         component={AttendanceNavigator}
@@ -560,8 +936,8 @@ function TabNavigator({ navigation }) {
         }}
       />
       <Tab.Screen
-        name="Workers"
-        component={WorkersNavigator}
+        name="Payments"
+        component={PaymentNavigator}
         options={{
           headerShadowVisible: false,
           //   tabBarStyle,
@@ -589,14 +965,4 @@ function TabNavigator({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  drawerStyles: {
-    width: 260,
-    //   backgroundColor: 'transparent',
-  },
-  safeArea: {
-    flex: 1,
-    backgroundColor: "white",
-  },
-});
 export default MainNavigation;

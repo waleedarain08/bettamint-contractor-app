@@ -8,9 +8,9 @@ import {
 	Image,
 } from "react-native";
 import React from "react";
-import Vector from "../assets/images/bgvector.png";
-import Logo from "../assets/images/logo.png";
-import { Colors } from "../utils/Colors";
+import Vector from "../../assets/images/bgvector.png";
+import Logo from "../../assets/images/logo.png";
+import { Colors } from "../../utils/Colors";
 const SelectLanguage = ({ navigation }) => {
 	return (
 		<ImageBackground source={Vector} style={styles.container}>

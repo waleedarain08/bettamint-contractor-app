@@ -12,15 +12,15 @@ import {
 	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../assets/images/logo.png";
-import Menu from "../assets/icons/Menu.png";
-import { Colors } from "../utils/Colors";
-import Spacer from "../components/Spacer";
-import BarChart from "../assets/images/barchart.png";
-import LineChart from "../assets/images/linechart.png";
+// import Logo from "../assets/images/logo.png";
+import Menu from "../../assets/icons/Menu.png";
+import { Colors } from "../../utils/Colors";
+import Spacer from "../../components/Spacer";
+// import BarChart from "../assets/images/barchart.png";
+// import LineChart from "../assets/images/linechart.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { User, Tick, Cross, Search, Building } from "../icons";
+import { User, Tick, Cross, Search, Building } from "../../icons";
 LogBox.ignoreAllLogs();
 const DATA = [
 	{
@@ -88,6 +88,7 @@ const Workers = ({ navigation }) => {
 				</View>
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<TouchableOpacity
+						onPress={() => {navigation.navigate('WorkerDetails')}}
 						style={{
 							justifyContent: "center",
 							alignItems: "center",

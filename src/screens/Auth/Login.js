@@ -8,10 +8,10 @@ import {
 	Image,
 } from "react-native";
 import React from "react";
-import Vector from "../assets/images/bgvector.png";
-import Profile from "../assets/icons/Profile.png";
-import Lock from "../assets/icons/Lock.png";
-import { Colors } from "../utils/Colors";
+import Vector from "../../assets/images/bgvector.png";
+import Profile from "../../assets/icons/Profile.png";
+import Lock from "../../assets/icons/Lock.png";
+import { Colors } from "../../utils/Colors";
 const Login = ({ navigation }) => {
 	return (
 		<ImageBackground source={Vector} style={styles.container}>

@@ -148,3 +148,23 @@ export const Picture = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+
+export const Right = ({ color, size, style }) => (
+	<VectorIcon
+		name="right"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
+
+export const Logout = ({ color, size, style }) => (
+	<VectorIcon
+		name="logout"
+		color={color}
+		size={size}
+		type="MaterialIcons"
+		style={style}
+	/>
+);

@@ -10,30 +10,22 @@ import {
 	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../assets/images/logo.png";
-import Menu from "../assets/icons/Menu.png";
-import { Colors } from "../utils/Colors";
-import Spacer from "../components/Spacer";
-import BarChart from "../assets/images/barchart.png";
-import LineChart from "../assets/images/linechart.png";
-import { Picture } from "../icons";
+import Logo from "../../assets/images/logo.png";
+import Menu from "../../assets/icons/Menu.png";
+import { Colors } from "../../utils/Colors";
+// import Spacer from "../components/Spacer";
+// import BarChart from "../assets/images/barchart.png";
+// import LineChart from "../assets/images/linechart.png";
+import { Picture } from "../../icons";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
-const NewProject = ({ navigation }) => {
+const CreateNewProject = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}>
-				<View style={styles.headerLogo}>
-					<Image source={Menu} style={{ height: 20, width: 20 }} />
-					<Image
-						source={Logo}
-						style={{ width: 150, height: 25, resizeMode: "contain", left: 15 }}
-					/>
-				</View>
-			</View>
+			<View style={styles.header} />
 			<View style={styles.graph}>
 				<View style={{ justifyContent: "center", alignItems: "center" }}>
 					<Picture size={50} color={Colors.LightGray} />
@@ -44,7 +36,7 @@ const NewProject = ({ navigation }) => {
 		</View>
 	);
 };
-export default NewProject;
+export default CreateNewProject;
 
 const styles = StyleSheet.create({
 	container: {

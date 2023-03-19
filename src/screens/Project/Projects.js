@@ -12,157 +12,150 @@ import {
 	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../assets/images/logo.png";
-import Menu from "../assets/icons/Menu.png";
-import { Colors } from "../utils/Colors";
-import Spacer from "../components/Spacer";
-import BarChart from "../assets/images/barchart.png";
-import LineChart from "../assets/images/linechart.png";
+import Logo from "../../assets/images/logo.png";
+import Menu from "../../assets/icons/Menu.png";
+import { Colors } from "../../utils/Colors";
+import Spacer from "../../components/Spacer";
+// import BarChart from "../assets/images/barchart.png";
+// import LineChart from "../assets/images/linechart.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { Search } from "../icons";
-import { Building, Whatsapp } from "../icons";
+const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
+import { Building } from "../../icons";
 const DATA = [
 	{
-		occupation: "Plumber",
-		des: "Description",
-		req: "13",
-		start: "8 Mar, 2023",
-		wage: "₹ 500",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
+		id: "1",
+		title: "Ram Parshad Twin Towers",
+		num: "175",
+		image:
+			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		stat: "Daily Stats*",
+		worker: "1247",
+		type: "Residential",
+		days: "30",
+		supervisor: "Laxmi",
+		location: "Mumbai",
 	},
 	{
-		occupation: "Plumber",
-		des: "Description",
-		req: "13",
-		start: "8 Mar, 2023",
-		wage: "₹ 500",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
+		id: "2",
+		title: "Ram Parshad Twin Towers",
+		num: "175",
+		image:
+			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		stat: "Daily Stats*",
+		worker: "1247",
+		type: "Residential",
+		days: "30",
+		supervisor: "Laxmi",
+		location: "Delhi",
 	},
 	{
-		occupation: "Plumber",
-		des: "Description",
-		req: "13",
-		start: "8 Mar, 2023",
-		wage: "₹ 500",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
+		id: "3",
+		title: "Ram Parshad Twin Towers",
+		num: "175",
+		image:
+			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		stat: "Daily Stats*",
+		worker: "1247",
+		type: "Residential",
+		days: "30",
+		supervisor: "Laxmi",
+		location: "Mumbai",
 	},
 	{
-		occupation: "Plumber",
-		des: "Description",
-		req: "13",
-		start: "8 Mar, 2023",
-		wage: "₹ 500",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-	},
-	{
-		occupation: "Plumber",
-		des: "Description",
-		req: "13",
-		start: "8 Mar, 2023",
-		wage: "₹ 500",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
+		id: "4",
+		title: "Ram Parshad Twin Towers",
+		num: "175",
+		image:
+			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		stat: "Daily Stats*",
+		worker: "1247",
+		type: "Residential",
+		days: "30",
+		supervisor: "Laxmi",
+		location: "Mumbai",
 	},
 ];
 
-const Jobs = ({ navigation }) => {
+const Projects = ({ navigation }) => {
 	const [details, setDetails] = useState(null);
 	const [modalVisible, setModalVisible] = useState(false);
 	const Item = ({ item }) => (
 		<Pressable
 			style={styles.item}
 			onPress={() => {
-				setModalVisible(true);
-				setDetails(item);
+				// setModalVisible(true);
+				// setDetails(item);
+				navigation.navigate('ProjectDetails')
 			}}
 		>
-			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+			<View style={{ flexDirection: "row", alignItems: "center" }}>
+				<Image
+					source={{ uri: item.image }}
+					style={{
+						width: 100,
+						height: 100,
+						resizeMode: "contain",
+						alignItems: "center",
+						borderRadius: 10,
+					}}
+				/>
+				<Spacer left={10} />
 				<View>
-					<Text style={styles.flatlistHeading}>{item.occupation}</Text>
-					<Text style={styles.flatlistSubHeading}>{item.des}</Text>
-				</View>
-				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-					<TouchableOpacity
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={styles.smallButton}>View</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#E4F1D6",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={[styles.smallButton, { color: "#ADD07C" }]}>
-							Complete
-						</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							flexDirection: "row",
-							justifyContent: "space-between",
-							alignItems: "center",
-							backgroundColor: "#1BD741",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Whatsapp size={20} color={Colors.White} />
-						<Spacer right={5} />
-						<Text style={[styles.smallButton, { color: Colors.White }]}>
-							Share
-						</Text>
-					</TouchableOpacity>
-				</View>
-			</View>
-			<Spacer bottom={20} />
-			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Required Workers</Text>
-					<Text style={[styles.flatlistText, { textAlign: "center" }]}>
-						{item.req}
+					<Text style={styles.title}>{item.title}</Text>
+					<Text style={styles.num}>RERA ID: {item.id}</Text>
+					<Text style={styles.num}>
+						REMAINING {"\n"}WORK DAYS {item.id}
 					</Text>
 				</View>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Start Date</Text>
-					<Text style={styles.flatlistText}>{item.start}</Text>
-				</View>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Wage</Text>
-					<Text style={styles.flatlistText}>{item.wage}</Text>
-				</View>
 			</View>
-			<Spacer bottom={20} />
+			<Spacer bottom={10} />
 			<View
 				style={{
+					flexDirection: "row",
+					justifyContent: "space-between",
 					borderTopColor: Colors.LightGray,
 					borderTopWidth: 1,
 					paddingTop: 10,
 					borderStyle: "dashed",
 				}}
 			>
-				<Text style={styles.flatlistSubHeading}>Location</Text>
-				<Text style={styles.flatlistText}>{item.location}</Text>
+				<View
+					style={{
+						alignItems: "center",
+						borderRightColor: Colors.LightGray,
+						borderRightWidth: 1,
+						paddingRight: 20,
+						borderStyle: "dashed",
+					}}
+				>
+					<Text style={styles.workerHeading}>Total Workers</Text>
+					<Text style={styles.workerNumber}>{item.worker}</Text>
+				</View>
+				<View
+					style={{
+						alignItems: "center",
+						borderRightColor: Colors.LightGray,
+						borderRightWidth: 1,
+						paddingRight: 20,
+						borderStyle: "dashed",
+					}}
+				>
+					<Text style={styles.workerHeading}>Total Workers</Text>
+					<Text style={styles.workerNumber}>{item.worker}</Text>
+				</View>
+				<View style={{ alignItems: "center" }}>
+					<Text style={styles.workerHeading}>Total Workers</Text>
+					<Text style={styles.workerNumber}>{item.worker}</Text>
+				</View>
 			</View>
 		</Pressable>
 	);
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}>
-				<View style={styles.headerLogo}>
+			<View style={styles.header}/>
+				{/* <View style={styles.headerLogo}>
 					<Image source={Menu} style={{ height: 20, width: 20 }} />
 					<Text style={styles.heading}>Projects</Text>
 				</View>
@@ -171,7 +164,7 @@ const Jobs = ({ navigation }) => {
 						<Text>New Project</Text>
 					</TouchableOpacity>
 				</View>
-			</View>
+			</View> */}
 			<View style={styles.graph}>
 				<View
 					style={{
@@ -194,41 +187,13 @@ const Jobs = ({ navigation }) => {
 					</View>
 					<Text style={styles.selectText}>Link a Project</Text>
 				</View>
-				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-					<TouchableOpacity
-						style={{
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={styles.smallButton}>Sort by</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={styles.smallButton}>Filter</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Search size={20} color={Colors.Secondary} />
-					</TouchableOpacity>
-				</View>
+				<TouchableOpacity style={{ backgroundColor: "#F7F8F9", padding: 5 }}>
+					<Text style={styles.smallButton}>Submit</Text>
+				</TouchableOpacity>
 			</View>
+			<Text style={styles.linkText}>
+				Please type a Project Name here to link*
+			</Text>
 			<ScrollView>
 				<FlatList
 					data={DATA}
@@ -428,7 +393,7 @@ const Jobs = ({ navigation }) => {
 		</View>
 	);
 };
-export default Jobs;
+export default Projects;
 
 const styles = StyleSheet.create({
 	container: {
@@ -436,8 +401,10 @@ const styles = StyleSheet.create({
 		backgroundColor: "#FFF",
 	},
 	header: {
+		// flexDirection: "row",
+		// justifyContent: "space-between",
 		backgroundColor: Colors.Primary,
-		height: "35%",
+		height: "28%",
 		width: "100%",
 		borderBottomLeftRadius: 50,
 		borderBottomRightRadius: 50,
@@ -500,7 +467,7 @@ const styles = StyleSheet.create({
 		padding: 12,
 	},
 	item: {
-		padding: 20,
+		padding: 10,
 		marginVertical: 8,
 		marginHorizontal: 15,
 		backgroundColor: Colors.White,
@@ -542,19 +509,21 @@ const styles = StyleSheet.create({
 		fontSize: 10,
 		color: Colors.Secondary,
 	},
-	flatlistHeading: {
+	linkText: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 10,
+		color: Colors.White,
+		textAlign: "right",
+		marginRight: 15,
+	},
+	workerHeading: {
 		fontFamily: "Lexend-Medium",
 		fontSize: 12,
-		color: Colors.Black,
+		color: Colors.Gray,
 	},
-	flatlistSubHeading: {
+	workerNumber: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 10,
-		color: Colors.LightGray,
-	},
-	flatlistText: {
-		fontFamily: "Lexend-Bold",
-		fontSize: 10,
+		fontSize: 20,
 		color: Colors.Black,
 	},
 	modalView: {
