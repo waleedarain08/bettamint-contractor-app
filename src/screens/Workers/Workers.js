@@ -12,143 +12,213 @@ import {
 	LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-// import Logo from "../assets/images/logo.png";
+
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
+
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { User, Tick, Cross, Search, Building } from "../../icons";
+import { User, TickIcon, Cross, Search, Building } from "../../icons";
 LogBox.ignoreAllLogs();
-const DATA = [
-	{
-		name: "Rajesh",
-		occupation: "Plumber",
-		phone: "1234567890",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-		bank: "HDFC",
-		account: "123 4567 890",
-		img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-	},
-	{
-		name: "Rajesh",
-		occupation: "Plumber",
-		phone: "1234567890",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-		bank: "HDFC",
-		account: "123 4567 890",
-		img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-	},
-	{
-		name: "Rajesh",
-		occupation: "Plumber",
-		phone: "1234567890",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-		bank: "HDFC",
-		account: "123 4567 890",
-		img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-	},
-	{
-		name: "Rajesh",
-		occupation: "Plumber",
-		phone: "1234567890",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-		bank: "HDFC",
-		account: "123 4567 890",
-		img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-	},
-	{
-		name: "Rajesh",
-		occupation: "Plumber",
-		phone: "1234567890",
-		location: "Koramangala, Bengaluru, Karnataka 560095, India",
-		bank: "HDFC",
-		account: "123 4567 890",
-		img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-	},
-];
-
 const Workers = ({ navigation }) => {
 	const [details, setDetails] = useState(null);
 	const [modalVisible, setModalVisible] = useState(false);
-	const Item = ({ item }) => (
-		<Pressable
-			style={styles.item}
-			onPress={() => {
-				setModalVisible(true);
-				setDetails(item);
-			}}
-		>
-			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-				<View>
-					<Text style={styles.flatlistHeading}>{item.name}</Text>
-					<Text style={styles.flatlistSubHeading}>{item.occupation}</Text>
-				</View>
-				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-					<TouchableOpacity
-						onPress={() => {navigation.navigate('WorkerDetails')}}
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={styles.smallButton}>View</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#E4F1D6",
-							padding: 5,
-							margin: 5,
-							borderRadius: 5,
-						}}
-					>
-						<Text style={[styles.smallButton, { color: "#ADD07C" }]}>
-							Verified
-						</Text>
-					</TouchableOpacity>
-				</View>
-			</View>
-			<Spacer bottom={20} />
-			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Phone</Text>
-					<Text style={[styles.flatlistText, { textAlign: "center" }]}>
+	const DATA = [
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+		{
+			name: "Rajesh",
+			status: "Online",
+			phone: "1234567890",
+			location: "Koramangala, Bengaluru, Karnataka 560095, India",
+			bank: "HDFC",
+			account: "123 4567 890",
+			img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+		},
+	];
+	const Item = ({ item, index }) => (
+		<View style={[styles.item]}>
+			<View
+				style={{
+					flexDirection: "row",
+					alignItems: "center",
+					width: "100%",
+					justifyContent: "space-between",
+				}}
+			>
+				<View
+					style={{
+						width: "25%",
+					}}
+				>
+					<Text style={[styles.flatListText, { textAlign: "left" }]}>
+						{item.name}
 						{item.phone}
 					</Text>
 				</View>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Adhar Card</Text>
-					<Tick size={25} color={Colors.Primary} />
+				<View style={{ width: "20%" }}>
+					<Text style={styles.flatListText}>{item.status}</Text>
 				</View>
-				<View>
-					<Text style={styles.flatlistSubHeading}>Pan Card</Text>
-					<Cross size={25} color="red" />
+				<View style={{ width: "15%", alignItems: "center" }}>
+					<TickIcon size={20} color={Colors.Primary} />
+				</View>
+				<View style={{ width: "15%", alignItems: "center" }}>
+					<TickIcon size={20} color={Colors.Primary} />
+				</View>
+				<TouchableOpacity
+					onPress={() => {
+						setModalVisible(true);
+						setDetails(item);
+					}}
+					style={{
+						backgroundColor: "#ECE5FC",
+						padding: 5,
+						margin: 5,
+						borderRadius: 3,
+						width: "15%",
+						justifyContent: "center",
+						alignItems: "center",
+					}}
+				>
+					<Text style={styles.smallButton}>View</Text>
+				</TouchableOpacity>
+			</View>
+		</View>
+	);
+	const ListHeader = () => {
+		return (
+			<View style={[styles.item]}>
+				<View
+					style={{
+						flexDirection: "row",
+						alignItems: "center",
+						width: "100%",
+						justifyContent: "space-between",
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.flatListText, { textAlign: "left" }]}>
+							Name
+						</Text>
+					</View>
+					<View style={{ width: "20%" }}>
+						<Text style={styles.flatListText}>Status</Text>
+					</View>
+					<View style={{ width: "25%" }}>
+						<Text style={styles.flatListText}>Adhar</Text>
+					</View>
+					<View style={{ width: "15%" }}>
+						<Text style={styles.flatListText}>Bank</Text>
+					</View>
+					<View style={{ width: "15%" }}>
+						<Text style={styles.flatListText}>Action</Text>
+					</View>
 				</View>
 			</View>
-			<Spacer bottom={10} />
-		</Pressable>
-	);
+		);
+	};
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}>
-				<View style={styles.headerLogo}>
-					<Image source={Menu} style={{ height: 20, width: 20 }} />
-					<Text style={styles.heading}>Projects</Text>
-				</View>
-				<View>
-					<TouchableOpacity>
-						<Text>New Project</Text>
-					</TouchableOpacity>
-				</View>
-			</View>
+			<View style={styles.header} />
+			{/* <View style={styles.headerLogo}>
+          <Image source={Menu} style={{ height: 20, width: 20 }} />
+          <Text style={styles.heading}>Projects</Text>
+        </View>
+        <View>
+          <TouchableOpacity>
+            <Text>New Project</Text>
+          </TouchableOpacity>
+        </View>
+      </View> */}
 			<View style={styles.graph}>
 				<View
 					style={{
@@ -169,7 +239,7 @@ const Workers = ({ navigation }) => {
 					>
 						<Building size={20} color={Colors.LightGray} />
 					</View>
-					<Text style={styles.selectText}>Link a Project</Text>
+					<Text style={styles.selectText}>Select Project</Text>
 				</View>
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<TouchableOpacity
@@ -202,17 +272,57 @@ const Workers = ({ navigation }) => {
 							borderRadius: 5,
 						}}
 					>
-						<Search size={20} color={Colors.Secondary} />
+						<Search size={15} color={Colors.Secondary} />
 					</TouchableOpacity>
 				</View>
 			</View>
 			<ScrollView>
-				<FlatList
-					data={DATA}
-					renderItem={({ item }) => <Item item={item} />}
-					keyExtractor={(item) => item.id}
-				/>
+				<View
+					style={{
+						backgroundColor: Colors.White,
+						alignItems: "center",
+						margin: 10,
+						padding: 10,
+						borderRadius: 10,
+						shadowColor: "#000",
+						shadowOffset: {
+							width: 0,
+							height: 2,
+						},
+						shadowOpacity: 0.2,
+						shadowRadius: 5,
+						elevation: 4,
+					}}
+				>
+					<FlatList
+						data={DATA}
+						renderItem={({ item }) => <Item item={item} />}
+						keyExtractor={(item) => item.id}
+						ListHeaderComponent={ListHeader}
+					/>
+				</View>
 			</ScrollView>
+			<View
+				style={{
+					flexDirection: "row",
+					justifyContent: "space-between",
+					padding: 20,
+					position: "absolute",
+					bottom: 0,
+				}}
+			>
+				<TouchableOpacity style={[styles.button, { width: "48%" }]}>
+					<Text style={styles.buttonText}>Pay Online</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={[
+						styles.button,
+						{ width: "48%", backgroundColor: Colors.Secondary },
+					]}
+				>
+					<Text style={styles.buttonText}>Pay Offline</Text>
+				</TouchableOpacity>
+			</View>
 			<Modal
 				animationType="slide"
 				transparent={true}
@@ -336,8 +446,10 @@ const styles = StyleSheet.create({
 		backgroundColor: "#FFF",
 	},
 	header: {
+		// flexDirection: "row",
+		// justifyContent: "space-between",
 		backgroundColor: Colors.Primary,
-		height: "35%",
+		height: "28%",
 		width: "100%",
 		borderBottomLeftRadius: 50,
 		borderBottomRightRadius: 50,
@@ -400,9 +512,7 @@ const styles = StyleSheet.create({
 		padding: 12,
 	},
 	item: {
-		padding: 20,
-		marginVertical: 8,
-		marginHorizontal: 15,
+		padding: 10,
 		backgroundColor: Colors.White,
 		shadowColor: "#000",
 		shadowOffset: {
@@ -412,7 +522,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.2,
 		shadowRadius: 5,
 		elevation: 4,
-		borderRadius: 10,
+		// borderRadius: 10,
 	},
 	title: {
 		fontFamily: "Lexend-Bold",
@@ -442,20 +552,41 @@ const styles = StyleSheet.create({
 		fontSize: 10,
 		color: Colors.Secondary,
 	},
-	flatlistHeading: {
+	linkText: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 10,
+		color: Colors.White,
+		textAlign: "right",
+		marginRight: 15,
+	},
+	workerHeading: {
 		fontFamily: "Lexend-Medium",
 		fontSize: 12,
-		color: Colors.Black,
+		color: Colors.Gray,
 	},
-	flatlistSubHeading: {
+	workerNumber: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 10,
-		color: Colors.LightGray,
-	},
-	flatlistText: {
-		fontFamily: "Lexend-Bold",
-		fontSize: 10,
+		fontSize: 20,
 		color: Colors.Black,
+	},
+	flatListText: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 11,
+		color: Colors.Black,
+		textAlign: "center",
+	},
+	button: {
+		backgroundColor: Colors.Primary,
+		justifyContent: "center",
+		borderRadius: 4,
+		marginTop: 15,
+		height: 40,
+	},
+	buttonText: {
+		fontFamily: "Lexend-Regular",
+		fontSize: 12,
+		textAlign: "center",
+		color: "white",
 	},
 	modalView: {
 		paddingTop: Platform.OS === "android" ? 0 : 50,

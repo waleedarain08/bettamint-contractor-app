@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
 	View,
 	Text,
@@ -13,25 +13,99 @@ import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-// import Spacer from "../components/Spacer";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
 import { Picture } from "../../icons";
+import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewProject = ({ navigation }) => {
+	useEffect(() => {
+		navigation.getParent()?.setOptions({
+			tabBarStyle: {
+				display: "none",
+			},
+		});
+		return () =>
+			navigation.getParent()?.setOptions({
+				tabBarStyle: undefined,
+			});
+	}, [navigation]);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
-			<View style={styles.graph}>
-				<View style={{ justifyContent: "center", alignItems: "center" }}>
-					<Picture size={50} color={Colors.LightGray} />
-					<Text style={styles.imgText}>Add Picture</Text>
+			<ScrollView style={styles.graph}>
+				<View
+					style={{
+						flexDirection: "row",
+						width: "100%",
+						alignItems: "center",
+						padding: 20,
+					}}
+				>
+					<View
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							borderColor: Colors.LightGray,
+							borderStyle: "dashed",
+							borderWidth: 1,
+							borderRadius: 5,
+							width: 80,
+							height: 80,
+						}}
+					>
+						<Picture size={40} color={Colors.LightGray} />
+						<Text style={styles.imgText}>Add Picture</Text>
+					</View>
+					<Spacer right={20} />
+					<View style={{ width: "65%" }}>
+						<Text style={styles.title}>Project Type</Text>
+						<View style={styles.inputField}></View>
+					</View>
 				</View>
-				<View></View>
+				<View style={{ padding: 20 }}>
+					<Text style={styles.title}>Project Name</Text>
+					<View style={styles.inputField}>
+						<TextInput style={{ flex: 1 }} placeholder="Enter Project Name" />
+					</View>
+				</View>
+				<Spacer top={20} />
+				<View>
+					<ImageBackground
+						style={{ width: "100%", height: 365 }}
+						source={require("../../assets/images/map.png")}
+					>
+						<View style={[styles.inputField, { margin: 20 }]}>
+							<TextInput style={{ flex: 1 }} placeholder="Search Location" />
+						</View>
+					</ImageBackground>
+				</View>
+			</ScrollView>
+			<Spacer top={-20} />
+			<View
+				style={{
+					flexDirection: "row",
+					justifyContent: "space-between",
+					padding: 20,
+				}}
+			>
+				<TouchableOpacity
+					style={[styles.button, { width: "60%" }]}
+					onPress={() => navigation.navigate("Password")}
+				>
+					<Text style={styles.buttonText}>Create Project</Text>
+				</TouchableOpacity>
+				<TouchableOpacity
+					style={[
+						styles.button,
+						{ width: "35%", backgroundColor: Colors.Secondary },
+					]}
+					onPress={() => navigation.navigate("Password")}
+				>
+					<Text style={styles.buttonText}>Cancel</Text>
+				</TouchableOpacity>
 			</View>
 		</View>
 	);
@@ -45,7 +119,7 @@ const styles = StyleSheet.create({
 	},
 	header: {
 		backgroundColor: Colors.Primary,
-		height: "28%",
+		height: "15%",
 		borderBottomLeftRadius: 50,
 		borderBottomRightRadius: 50,
 		paddingHorizontal: 20,
@@ -57,9 +131,7 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	graph: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		height: "100%",
+		height: "88%",
 		backgroundColor: Colors.White,
 		marginTop: -100,
 		margin: 15,
@@ -72,6 +144,7 @@ const styles = StyleSheet.create({
 		shadowRadius: 5,
 		elevation: 4,
 		borderRadius: 10,
+		// padding: 20,
 	},
 	graphBottom: {
 		flexDirection: "row",
@@ -121,7 +194,7 @@ const styles = StyleSheet.create({
 	},
 	imgText: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 12,
+		fontSize: 10,
 		color: Colors.Primary,
 		textTransform: "uppercase",
 		textDecorationLine: "underline",
@@ -145,5 +218,30 @@ const styles = StyleSheet.create({
 		shadowRadius: 5,
 		elevation: 4,
 		borderRadius: 10,
+	},
+	inputField: {
+		flexDirection: "row",
+		justifyContent: "center",
+		alignItems: "center",
+		fontFamily: "Lexend-Regular",
+		height: 40,
+		borderColor: "#C4C4C4",
+		borderWidth: 1,
+		borderRadius: 4,
+		marginTop: 15,
+		backgroundColor: Colors.White,
+		paddingLeft: 10,
+	},
+	button: {
+		backgroundColor: Colors.Primary,
+		padding: 15,
+		borderRadius: 4,
+		marginTop: 15,
+	},
+	buttonText: {
+		fontFamily: "Lexend-Regular",
+		fontSize: 15,
+		textAlign: "center",
+		color: "white",
 	},
 });

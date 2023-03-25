@@ -87,10 +87,10 @@ export const AccountType = ({ color, size, style }) => (
 );
 export const Email = ({ color, size, style }) => (
 	<VectorIcon
-		name="email-outline"
+		name="email"
 		color={color}
 		size={size}
-		type="MaterialCommunityIcons"
+		type="Fontisto"
 		style={style}
 	/>
 );
@@ -105,10 +105,10 @@ export const Phone = ({ color, size, style }) => (
 );
 export const CardText = ({ color, size, style }) => (
 	<VectorIcon
-		name="card-text"
+		name="creditcard"
 		color={color}
 		size={size}
-		type="MaterialCommunityIcons"
+		type="AntDesign"
 		style={style}
 	/>
 );
@@ -165,6 +165,90 @@ export const Logout = ({ color, size, style }) => (
 		color={color}
 		size={size}
 		type="MaterialIcons"
+		style={style}
+	/>
+);
+
+export const JobIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="briefcase-outline"
+		color={color}
+		size={size}
+		type="Ionicons"
+		style={style}
+	/>
+);
+export const DashboardIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="appstore-o"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
+export const AttendanceIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="calendar"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);
+export const PaymentIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="currency-inr"
+		color={color}
+		size={size}
+		type="MaterialCommunityIcons"
+		style={style}
+	/>
+);
+
+export const LocationIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="location-outline"
+		color={color}
+		size={size}
+		type="Ionicons"
+		style={style}
+	/>
+);
+
+export const TickIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="check"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);
+export const EditIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="edit"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
+export const PersonIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="person-circle-outline"
+		color={color}
+		size={size}
+		type="Ionicons"
+		style={style}
+	/>
+);
+export const TypeIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="briefcase-outline"
+		color={color}
+		size={size}
+		type="Ionicons"
 		style={style}
 	/>
 );

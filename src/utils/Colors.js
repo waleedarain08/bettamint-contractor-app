@@ -5,10 +5,10 @@ export const Colors = {
 	Success: "#22bb33",
 	Primary: "#81B734",
 	Secondary: "#A179F2",
-	Purple: '#986FEF',
+	Purple: "#986FEF",
 	Background: "#303030",
 	White: "white",
 	WhiteGray: "#F9F9F9",
 	Black: "black",
-	LightGray: "#cecaca",
+	LightGray: "#ADBAC3",
 };

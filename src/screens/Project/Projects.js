@@ -22,7 +22,7 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
-import { Building } from "../../icons";
+import { Building, Search, LocationIcon } from "../../icons";
 const DATA = [
 	{
 		id: "1",
@@ -35,7 +35,8 @@ const DATA = [
 		type: "Residential",
 		days: "30",
 		supervisor: "Laxmi",
-		location: "Mumbai",
+		location:
+			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
 	},
 	{
 		id: "2",
@@ -48,7 +49,8 @@ const DATA = [
 		type: "Residential",
 		days: "30",
 		supervisor: "Laxmi",
-		location: "Delhi",
+		location:
+			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
 	},
 	{
 		id: "3",
@@ -61,7 +63,8 @@ const DATA = [
 		type: "Residential",
 		days: "30",
 		supervisor: "Laxmi",
-		location: "Mumbai",
+		location:
+			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
 	},
 	{
 		id: "4",
@@ -74,7 +77,8 @@ const DATA = [
 		type: "Residential",
 		days: "30",
 		supervisor: "Laxmi",
-		location: "Mumbai",
+		location:
+			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
 	},
 ];
 
@@ -85,86 +89,85 @@ const Projects = ({ navigation }) => {
 		<Pressable
 			style={styles.item}
 			onPress={() => {
-				// setModalVisible(true);
-				// setDetails(item);
-				navigation.navigate('ProjectDetails')
+				setModalVisible(true);
+				setDetails(item);
+				// navigation.navigate('ProjectDetails')
 			}}
 		>
-			<View style={{ flexDirection: "row", alignItems: "center" }}>
-				<Image
-					source={{ uri: item.image }}
-					style={{
-						width: 100,
-						height: 100,
-						resizeMode: "contain",
-						alignItems: "center",
-						borderRadius: 10,
-					}}
-				/>
-				<Spacer left={10} />
-				<View>
-					<Text style={styles.title}>{item.title}</Text>
-					<Text style={styles.num}>RERA ID: {item.id}</Text>
-					<Text style={styles.num}>
-						REMAINING {"\n"}WORK DAYS {item.id}
-					</Text>
-				</View>
-			</View>
-			<Spacer bottom={10} />
 			<View
-				style={{
-					flexDirection: "row",
-					justifyContent: "space-between",
-					borderTopColor: Colors.LightGray,
-					borderTopWidth: 1,
-					paddingTop: 10,
-					borderStyle: "dashed",
-				}}
+				style={{ flexDirection: "row", alignItems: "center", width: "100%" }}
 			>
-				<View
-					style={{
-						alignItems: "center",
-						borderRightColor: Colors.LightGray,
-						borderRightWidth: 1,
-						paddingRight: 20,
-						borderStyle: "dashed",
-					}}
-				>
-					<Text style={styles.workerHeading}>Total Workers</Text>
-					<Text style={styles.workerNumber}>{item.worker}</Text>
+				<View style={{ width: "30%" }}>
+					<ImageBackground
+						source={{ uri: item.image }}
+						style={{
+							width: 100,
+							height: 100,
+							resizeMode: "contain",
+							alignItems: "center",
+							borderRadius: 10,
+						}}
+					>
+						<Text
+							style={[
+								styles.heading,
+								{ fontSize: 12, bottom: 0, position: "absolute" },
+							]}
+						>
+							{item.type}
+						</Text>
+					</ImageBackground>
 				</View>
-				<View
-					style={{
-						alignItems: "center",
-						borderRightColor: Colors.LightGray,
-						borderRightWidth: 1,
-						paddingRight: 20,
-						borderStyle: "dashed",
-					}}
-				>
-					<Text style={styles.workerHeading}>Total Workers</Text>
-					<Text style={styles.workerNumber}>{item.worker}</Text>
-				</View>
-				<View style={{ alignItems: "center" }}>
-					<Text style={styles.workerHeading}>Total Workers</Text>
-					<Text style={styles.workerNumber}>{item.worker}</Text>
+				<Spacer left={10} />
+				<View style={{ width: "65%" }}>
+					<Text style={styles.title}>{item.title}</Text>
+					<Spacer bottom={10} />
+					<View
+						style={{
+							flexDirection: "row",
+						}}
+					>
+						<LocationIcon size={22} color={Colors.LightGray} />
+						<Text style={styles.num}>{item.location}</Text>
+					</View>
+					<Spacer bottom={20} />
+					<View
+						style={{
+							flexDirection: "row",
+							justifyContent: "space-between",
+						}}
+					>
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "space-between",
+								alignItems: "center",
+								borderRightColor: Colors.LightGray,
+								borderRightWidth: 1,
+								paddingRight: 10,
+								borderStyle: "dashed",
+							}}
+						>
+							<Text style={styles.workerHeading}>Required{"\n"}Workers:</Text>
+							<Text style={styles.workerNumber}>{item.worker}</Text>
+						</View>
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "space-between",
+							}}
+						>
+							<Text style={styles.workerHeading}>Active{"\n"}Workers:</Text>
+							<Text style={styles.workerNumber}>{item.worker}</Text>
+						</View>
+					</View>
 				</View>
 			</View>
 		</Pressable>
 	);
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}/>
-				{/* <View style={styles.headerLogo}>
-					<Image source={Menu} style={{ height: 20, width: 20 }} />
-					<Text style={styles.heading}>Projects</Text>
-				</View>
-				<View>
-					<TouchableOpacity>
-						<Text>New Project</Text>
-					</TouchableOpacity>
-				</View>
-			</View> */}
+			<View style={styles.header} />
 			<View style={styles.graph}>
 				<View
 					style={{
@@ -187,9 +190,30 @@ const Projects = ({ navigation }) => {
 					</View>
 					<Text style={styles.selectText}>Link a Project</Text>
 				</View>
-				<TouchableOpacity style={{ backgroundColor: "#F7F8F9", padding: 5 }}>
-					<Text style={styles.smallButton}>Submit</Text>
-				</TouchableOpacity>
+				<View style={{ flexDirection: "row" }}>
+					<TouchableOpacity
+						style={{
+							backgroundColor: "#ECE5FC",
+							padding: 5,
+							margin: 5,
+							borderRadius: 5,
+						}}
+					>
+						<Text style={styles.smallButton}>Submit</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							backgroundColor: "#ECE5FC",
+							padding: 5,
+							margin: 5,
+							borderRadius: 5,
+						}}
+					>
+						<Search size={15} color={Colors.Secondary} />
+					</TouchableOpacity>
+				</View>
 			</View>
 			<Text style={styles.linkText}>
 				Please type a Project Name here to link*
@@ -245,69 +269,6 @@ const Projects = ({ navigation }) => {
 									<Building size={20} color={Colors.White} />
 								</View>
 								<Spacer bottom={10} />
-								<View
-									style={{
-										flexDirection: "row",
-										justifyContent: "space-between",
-										borderTopColor: Colors.LightGray,
-										borderTopWidth: 1,
-										paddingTop: 10,
-										borderStyle: "dashed",
-									}}
-								>
-									<View
-										style={{
-											alignItems: "center",
-											borderRightColor: Colors.LightGray,
-											borderRightWidth: 1,
-											paddingRight: 20,
-											borderStyle: "dashed",
-										}}
-									>
-										<Text
-											style={[styles.workerHeading, { color: Colors.White }]}
-										>
-											Total Workers
-										</Text>
-										<Text
-											style={[styles.workerNumber, { color: Colors.White }]}
-										>
-											{details?.worker}
-										</Text>
-									</View>
-									<View
-										style={{
-											alignItems: "center",
-											borderRightColor: Colors.LightGray,
-											borderRightWidth: 1,
-											paddingRight: 20,
-											borderStyle: "dashed",
-										}}
-									>
-										<Text
-											style={[styles.workerHeading, { color: Colors.White }]}
-										>
-											Total Workers
-										</Text>
-										<Text
-											style={[styles.workerNumber, { color: Colors.White }]}
-										>
-											{details?.worker}
-										</Text>
-									</View>
-									<View style={{ alignItems: "center" }}>
-										<Text
-											style={[styles.workerHeading, { color: Colors.White }]}
-										>
-											Total Workers
-										</Text>
-										<Text
-											style={[styles.workerNumber, { color: Colors.White }]}
-										>
-											{details?.worker}
-										</Text>
-									</View>
-								</View>
 							</View>
 						</ImageBackground>
 						<View style={{ padding: 20 }}>
@@ -333,23 +294,9 @@ const Projects = ({ navigation }) => {
 								}}
 							>
 								<Text style={[styles.modalText, { color: Colors.Gray }]}>
-									RERA ID
+									Required Workers
 								</Text>
 
-								<Text style={[styles.modalHeading, { color: Colors.Black }]}>
-									{details?.id}
-								</Text>
-							</View>
-							<View
-								style={{
-									borderBottomWidth: 1,
-									borderBottomColor: Colors.WhiteGray,
-									padding: 10,
-								}}
-							>
-								<Text style={[styles.modalText, { color: Colors.Gray }]}>
-									REMAINING WORK DAYS
-								</Text>
 								<Text style={[styles.modalHeading, { color: Colors.Black }]}>
 									{details?.days}
 								</Text>
@@ -362,12 +309,13 @@ const Projects = ({ navigation }) => {
 								}}
 							>
 								<Text style={[styles.modalText, { color: Colors.Gray }]}>
-									RSUPERVISOR
+									Active Workers
 								</Text>
 								<Text style={[styles.modalHeading, { color: Colors.Black }]}>
-									{details?.supervisor}
+									{details?.days}
 								</Text>
 							</View>
+
 							<View
 								style={{
 									borderBottomWidth: 1,
@@ -518,8 +466,9 @@ const styles = StyleSheet.create({
 	},
 	workerHeading: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 12,
-		color: Colors.Gray,
+		fontSize: 10,
+		color: Colors.LightGray,
+		paddingRight: 10,
 	},
 	workerNumber: {
 		fontFamily: "Lexend-Medium",

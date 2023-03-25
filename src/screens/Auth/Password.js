@@ -10,6 +10,7 @@ import {
 import React from "react";
 import Vector from "../../assets/images/bgvector.png";
 import Profile from "../../assets/icons/Profile.png";
+import Lock from "../../assets/icons/Lock.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 const Login = ({ navigation }) => {
@@ -17,20 +18,20 @@ const Login = ({ navigation }) => {
 		<ImageBackground source={Vector} style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
-					<Text style={styles.headingText}>Get Started</Text>
-					<Text style={styles.text}>Enter you Email/Phone Number</Text>
+					<Text style={styles.headingText}>Password</Text>
+					<Text style={styles.text}>Enter your Password to login</Text>
 					<View style={styles.inputField}>
-						<Image source={Profile} style={{ paddingRight: 15 }} />
+						<Image source={Lock} style={{ paddingRight: 15 }} />
 						<TextInput
 							style={{ flex: 1 }}
-							placeholder="Email"
+							placeholder="Password"
 							placeholderTextColor={Colors.Gray}
 						/>
 					</View>
-
+					<Text style={styles.forgotText}>Forgotten password?</Text>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => navigation.navigate("Password")}
+						onPress={() => navigation.navigate("Otp")}
 					>
 						<Text style={styles.buttonText}>Login</Text>
 					</TouchableOpacity>
@@ -79,9 +80,7 @@ const styles = StyleSheet.create({
 	forgotText: {
 		fontFamily: "Lexend-Regular",
 		fontSize: 13,
-		position: "absolute",
-		bottom: 0,
-		textAlign: "center",
+		textAlign: "right",
 		color: Colors.White,
 		marginTop: 15,
 	},

@@ -10,6 +10,7 @@ import {
 import React from "react";
 import Vector from "../../assets/images/bgvector.png";
 import Profile from "../../assets/icons/Profile.png";
+import Lock from "../../assets/icons/Lock.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 const Login = ({ navigation }) => {
@@ -17,27 +18,37 @@ const Login = ({ navigation }) => {
 		<ImageBackground source={Vector} style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
-					<Text style={styles.headingText}>Get Started</Text>
-					<Text style={styles.text}>Enter you Email/Phone Number</Text>
-					<View style={styles.inputField}>
-						<Image source={Profile} style={{ paddingRight: 15 }} />
-						<TextInput
-							style={{ flex: 1 }}
-							placeholder="Email"
-							placeholderTextColor={Colors.Gray}
-						/>
+					<Text style={styles.headingText}>Verify</Text>
+					<Text style={styles.text}>
+						We have send you the verification code on your Phone Enter the OTP
+						Code to verify your account.
+					</Text>
+					<View
+						style={{ flexDirection: "row", justifyContent: "space-between" }}
+					>
+						<View style={styles.inputField}>
+							<TextInput style={{ flex: 1 }} />
+						</View>
+						<View style={styles.inputField}>
+							<TextInput style={{ flex: 1 }} />
+						</View>
+						<View style={styles.inputField}>
+							<TextInput style={{ flex: 1 }} />
+						</View>
+						<View style={styles.inputField}>
+							<TextInput style={{ flex: 1 }} />
+						</View>
 					</View>
-
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => navigation.navigate("Password")}
+						onPress={() => navigation.navigate("Main")}
 					>
-						<Text style={styles.buttonText}>Login</Text>
+						<Text style={styles.buttonText}>Verify</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
 			<View style={styles.bottomView}>
-				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
+				<Text style={styles.forgotText}>Resent Code in 60:00</Text>
 			</View>
 		</ImageBackground>
 	);
@@ -69,6 +80,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		fontFamily: "Lexend-Regular",
 		height: 50,
+		width: 70,
 		borderColor: "#C4C4C4",
 		borderWidth: 1,
 		borderRadius: 4,
@@ -79,9 +91,7 @@ const styles = StyleSheet.create({
 	forgotText: {
 		fontFamily: "Lexend-Regular",
 		fontSize: 13,
-		position: "absolute",
-		bottom: 0,
-		textAlign: "center",
+		textAlign: "right",
 		color: Colors.White,
 		marginTop: 15,
 	},
