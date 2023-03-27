@@ -89,9 +89,9 @@ const Projects = ({ navigation }) => {
 		<Pressable
 			style={styles.item}
 			onPress={() => {
-				setModalVisible(true);
-				setDetails(item);
-				// navigation.navigate('ProjectDetails')
+				// setModalVisible(true);
+				// setDetails(item);
+				navigation.navigate('ProjectDetails')
 			}}
 		>
 			<View
