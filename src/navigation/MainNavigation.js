@@ -106,7 +106,10 @@ const PaymentNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.openDrawer()}>
-						<MenuIcon size={30} color={Colors.White} />
+						<Image
+							source={Menu}
+							style={{ height: 20, width: 20, marginLeft: 0 }}
+						/>
 					</Pressable>
 				),
 			}}

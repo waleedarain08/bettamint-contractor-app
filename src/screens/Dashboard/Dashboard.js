@@ -1,14 +1,14 @@
 import React from "react";
 import {
-	View,
-	Text,
-	Image,
-	ImageBackground,
-	StyleSheet,
-	FlatList,
-	Dimensions,
-	LogBox,
-	Pressable,
+  View,
+  Text,
+  Image,
+  ImageBackground,
+  StyleSheet,
+  FlatList,
+  Dimensions,
+  LogBox,
+  Pressable,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -25,221 +25,245 @@ export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 const DATA = [
-	{
-		id: "1",
-		title: "Total Projects*",
-		num: "175",
-		image: require("../../assets/images/totalprojects.png"),
-		stat: "Daily Stats*",
-	},
-	{
-		id: "2",
-		title: "Active Projects*",
-		num: "175",
-		image: require("../../assets/images/totalworker.png"),
-		stat: "Daily Stats*",
-	},
-	{
-		id: "3",
-		title: "Total Workers*",
-		num: "175",
-		image: require("../../assets/images/activeprojects.png"),
-		stat: "Daily Stats*",
-	},
-	{
-		id: "4",
-		title: "Active Workers*",
-		num: "175",
-		image: require("../../assets/images/activeworker.png"),
-		stat: "Daily Stats*",
-	},
+  {
+    id: "1",
+    title: "Total Projects*",
+    num: "175",
+    image: require("../../assets/images/totalprojects.png"),
+    stat: "Daily Stats*",
+  },
+  {
+    id: "2",
+    title: "Active Projects*",
+    num: "175",
+    image: require("../../assets/images/totalworker.png"),
+    stat: "Daily Stats*",
+  },
+  {
+    id: "3",
+    title: "Total Workers*",
+    num: "175",
+    image: require("../../assets/images/activeprojects.png"),
+    stat: "Daily Stats*",
+  },
+  {
+    id: "4",
+    title: "Active Workers*",
+    num: "175",
+    image: require("../../assets/images/activeworker.png"),
+    stat: "Daily Stats*",
+  },
 ];
 const Item = ({ item }) => (
-	<View style={styles.item}>
-		<Text style={styles.title}>{item.title}</Text>
-		<View style={{ flexDirection: "row", alignItems: "center" }}>
-			<Image
-				source={item.image}
-				style={{
-					width: 25,
-					height: 25,
-					resizeMode: "contain",
-				}}
-			/>
-			<Spacer right={10} />
-			<Text style={styles.num}>{item.num}</Text>
-		</View>
-		<Text style={styles.stat}>{item.stat}</Text>
-	</View>
+  <View style={styles.item}>
+    <Text style={styles.title}>{item.title}</Text>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Image
+        source={item.image}
+        style={{
+          width: 25,
+          height: 25,
+          resizeMode: "contain",
+        }}
+      />
+      <Spacer right={10} />
+      <Text style={styles.num}>{item.num}</Text>
+    </View>
+    <Text style={styles.stat}>{item.stat}</Text>
+  </View>
 );
 const Dashboard = ({ navigation }) => {
-	const progress = useDrawerProgress();
+  const progress = useDrawerProgress();
 
-	const scale = Animated.interpolateNode(progress.value, {
-		inputRange: [0, 1],
-		outputRange: [1, 0.8],
-	});
-	const borderRadius = Animated.interpolateNode(progress.value, {
-		inputRange: [0, 1],
-		outputRange: [1, 30],
-	});
+  const scale = Animated.interpolateNode(progress.value, {
+    inputRange: [0, 1],
+    outputRange: [1, 0.8],
+  });
+  const borderRadius = Animated.interpolateNode(progress.value, {
+    inputRange: [0, 1],
+    outputRange: [1, 30],
+  });
 
-	const animatedStyle = { borderRadius, transform: [{ scale: scale }] };
+  const animatedStyle = { borderRadius, transform: [{ scale: scale }] };
 
-	return (
-		<ScrollView style={styles.container}>
-			<View style={styles.header} />
-
-			<View style={{ top: -200, height: "100%" }}>
-				<View style={styles.graph}>
-					<View style={{ height: "45%", alignItems: "center" }}>
-						<Image
-							source={BarChart}
-							style={{ height: 200, width: 360, resizeMode: "contain" }}
-						/>
-					</View>
-					<View style={styles.graphBottom}>
-						<View style={styles.graphBottomTabs}>
-							<Text style={styles.graphBottomText}>
-								Avg Active {"\n"}Workforce{" "}
-							</Text>
-							<Text style={styles.graphBottomTextBold}>350</Text>
-						</View>
-						<View style={styles.graphBottomTabs}>
-							<Text style={styles.graphBottomText}>
-								Average {"\n"}Workforce
-							</Text>
-							<Text
-								style={[styles.graphBottomTextBold, { color: Colors.Primary }]}
-							>
-								350
-							</Text>
-						</View>
-					</View>
-				</View>
-				<View style={{ height: "30%" }}>
-					<FlatList
-						data={DATA}
-						renderItem={({ item }) => <Item item={item} />}
-						keyExtractor={(item) => item.id}
-						numColumns={2}
-					/>
-				</View>
-				<View style={styles.scrollGraph}>
-					<Image
-						source={LineChart}
-						style={{ height: 180, width: 350, resizeMode: "contain" }}
-					/>
-				</View>
-				<Spacer bottom={50} />
-			</View>
-		</ScrollView>
-	);
+  return (
+    <View
+      style={{
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "white",
+        width: "100%",
+        // ...animatedStyle,
+      }}
+    >
+      <View style={styles.header} />
+      <View style={styles.graph}>
+        <View
+          style={{
+            width: "100%",
+            alignItems: "center",
+            marginTop: 15,
+            justifyContent: "center",
+          }}
+        >
+          <Image
+            source={BarChart}
+            style={{
+              height: 190,
+              width: "100%",
+              resizeMode: "contain",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          />
+        </View>
+        <View style={styles.graphBottom}>
+          <View style={styles.graphBottomTabs}>
+            <Text style={styles.graphBottomText}>
+              Avg Active {"\n"}Workforce{" "}
+            </Text>
+            <Text style={styles.graphBottomTextBold}>350</Text>
+          </View>
+          <View style={styles.graphBottomTabs}>
+            <Text style={styles.graphBottomText}>Average {"\n"}Workforce</Text>
+            <Text
+              style={[styles.graphBottomTextBold, { color: Colors.Primary }]}
+            >
+              350
+            </Text>
+          </View>
+        </View>
+      </View>
+      <ScrollView>
+        <FlatList
+          data={DATA}
+          renderItem={({ item }) => <Item item={item} />}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+        />
+        <Spacer bottom={10} />
+        <View style={styles.scrollGraph}>
+          <Image
+            source={LineChart}
+            style={{ height: 190, width: 340, resizeMode: "contain" }}
+          />
+        </View>
+      </ScrollView>
+    </View>
+  );
 };
 export default Dashboard;
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-		backgroundColor: "#FFF",
-	},
-	header: {
-		backgroundColor: Colors.Primary,
-		height: "28%",
-		width: "100%",
-		borderBottomLeftRadius: 50,
-		borderBottomRightRadius: 50,
-		paddingHorizontal: 20,
-	},
-	headerLogo: {
-		flexDirection: "row",
-		alignItems: "center",
-		marginTop: 25,
-		width: "100%",
-	},
-	graph: {
-		height: "35%",
-		backgroundColor: Colors.White,
-		margin: 15,
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.2,
-		shadowRadius: 5,
-		elevation: 4,
-		borderRadius: 10,
-	},
-	graphBottom: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		paddingHorizontal: 20,
-		paddingTop: 20,
-	},
-	graphBottomText: {
-		fontSize: 10,
-		fontFamily: "Lexend-Regular",
-		color: Colors.Black,
-	},
-	graphBottomTextBold: {
-		fontSize: 32,
-		fontFamily: "Lexend-Bold",
-		color: Colors.Secondary,
-		paddingLeft: 10,
-	},
-	graphBottomTabs: {
-		flexDirection: "row",
-		justifyContent: "space-between",
-		alignItems: "center",
-		backgroundColor: Colors.WhiteGray,
-		borderRadius: 8,
-		padding: 12,
-	},
-	item: {
-		flex: 1,
-		padding: 20,
-		marginVertical: 8,
-		marginHorizontal: 15,
-		backgroundColor: Colors.White,
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.2,
-		shadowRadius: 5,
-		elevation: 4,
-		borderRadius: 10,
-	},
-	title: {
-		fontFamily: "Lexend-Bold",
-		fontSize: 12,
-		color: Colors.LightGray,
-	},
-	num: {
-		fontFamily: "Lexend-Medium",
-		fontSize: 26,
-		color: Colors.Black,
-	},
-	stat: {
-		fontFamily: "Lexend-Medium",
-		fontSize: 6,
-		textAlign: "right",
-		color: Colors.LightGray,
-	},
-	scrollGraph: {
-		height: "25%",
-		backgroundColor: Colors.White,
-		margin: 15,
-		shadowColor: "#000",
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.2,
-		shadowRadius: 5,
-		elevation: 4,
-		borderRadius: 10,
-	},
+  container: {
+    flex: 1,
+    backgroundColor: "#FFF",
+  },
+  header: {
+    backgroundColor: Colors.Primary,
+    height: "28%",
+    width: "100%",
+    borderBottomLeftRadius: 50,
+    borderBottomRightRadius: 50,
+    paddingHorizontal: 20,
+  },
+  headerLogo: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 25,
+    width: "100%",
+  },
+  graph: {
+    height: 320,
+    backgroundColor: Colors.White,
+    marginTop: -160,
+    // position: "absolute",
+    // top: 100,
+    margin: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    borderRadius: 10,
+    width: "90%",
+  },
+  graphBottom: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    marginTop: 20,
+    width: "100%",
+  },
+  graphBottomText: {
+    fontSize: 10,
+    fontFamily: "Lexend-Regular",
+    color: Colors.Black,
+  },
+  graphBottomTextBold: {
+    fontSize: 32,
+    fontFamily: "Lexend-Bold",
+    color: Colors.Secondary,
+    paddingLeft: 10,
+  },
+  graphBottomTabs: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    backgroundColor: Colors.WhiteGray,
+    borderRadius: 8,
+    padding: 12,
+    width: "45%",
+  },
+  item: {
+    flex: 1,
+    padding: 20,
+    marginVertical: 8,
+    marginHorizontal: 15,
+    backgroundColor: Colors.White,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    borderRadius: 10,
+  },
+  title: {
+    fontFamily: "Lexend-Bold",
+    fontSize: 12,
+    color: Colors.LightGray,
+  },
+  num: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 26,
+    color: Colors.Black,
+  },
+  stat: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 6,
+    textAlign: "right",
+    color: Colors.LightGray,
+  },
+  scrollGraph: {
+    height: 210,
+    backgroundColor: Colors.White,
+    margin: 15,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    borderRadius: 10,
+    width: "90%",
+  },
 });
