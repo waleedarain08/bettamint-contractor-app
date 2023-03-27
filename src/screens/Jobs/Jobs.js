@@ -73,8 +73,7 @@ const Jobs = ({ navigation }) => {
 		<Pressable
 			style={styles.item}
 			onPress={() => {
-				// setModalVisible(true);
-				// setDetails(item);
+				navigation.navigate("JobDetails", { details: item });
 			}}
 		>
 			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -164,17 +163,7 @@ const Jobs = ({ navigation }) => {
 	);
 	return (
 		<View style={styles.container}>
-			<View style={styles.header}>
-				{/* <View style={styles.headerLogo}>
-					<Image source={Menu} style={{ height: 20, width: 20 }} />
-					<Text style={styles.heading}>Projects</Text>
-				</View>
-				<View>
-					<TouchableOpacity>
-						<Text>New Project</Text>
-					</TouchableOpacity>
-				</View> */}
-			</View>
+			<View style={styles.header}></View>
 			<View style={styles.graph}>
 				<View
 					style={{
@@ -195,7 +184,7 @@ const Jobs = ({ navigation }) => {
 					>
 						<Building size={20} color={Colors.LightGray} />
 					</View>
-					<Text style={styles.selectText}>Link a Project</Text>
+					<Text style={styles.selectText}>Select Project</Text>
 				</View>
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<TouchableOpacity
@@ -228,7 +217,7 @@ const Jobs = ({ navigation }) => {
 							borderRadius: 5,
 						}}
 					>
-						<Search size={15} color={Colors.Secondary} />
+						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -462,9 +451,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		height: "8%",
+		height: "10%",
 		backgroundColor: Colors.White,
-		marginTop: -180,
+		marginTop: -140,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",

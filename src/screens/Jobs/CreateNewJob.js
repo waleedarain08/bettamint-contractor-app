@@ -8,6 +8,7 @@ import {
 	FlatList,
 	Dimensions,
 	LogBox,
+	Alert,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -21,17 +22,6 @@ const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewJob = ({ navigation }) => {
-	useEffect(() => {
-		navigation.getParent()?.setOptions({
-			tabBarStyle: {
-				display: "none",
-			},
-		});
-		return () =>
-			navigation.getParent()?.setOptions({
-				tabBarStyle: undefined,
-			});
-	}, [navigation]);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
@@ -169,16 +159,16 @@ const CreateNewJob = ({ navigation }) => {
 			>
 				<TouchableOpacity
 					style={[styles.button, { width: "60%" }]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => alert("Job Created")}
 				>
-					<Text style={styles.buttonText}>Create User</Text>
+					<Text style={styles.buttonText}>Create Job</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
 					style={[
 						styles.button,
 						{ width: "35%", backgroundColor: Colors.Secondary },
 					]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => navigation.goBack()}
 				>
 					<Text style={styles.buttonText}>Cancel</Text>
 				</TouchableOpacity>
@@ -216,7 +206,7 @@ const styles = StyleSheet.create({
 	graph: {
 		height: "88%",
 		backgroundColor: Colors.White,
-		marginTop: -100,
+		marginTop: -80,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {

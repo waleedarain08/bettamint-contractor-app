@@ -14,7 +14,9 @@ import { Colors } from "../../utils/Colors";
 const SelectLanguage = ({ navigation }) => {
 	return (
 		<ImageBackground source={Vector} style={styles.container}>
-			<View style={{ padding: 40 }}>
+			<View
+				style={{ padding: 40, justifyContent: "center", alignItems: "center" }}
+			>
 				<View>
 					<Image
 						source={Logo}

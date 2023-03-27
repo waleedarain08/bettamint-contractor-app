@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -8,6 +8,7 @@ import {
 	FlatList,
 	Dimensions,
 	LogBox,
+	Alert,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -17,21 +18,12 @@ import { Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
+import CheckBox from "@react-native-community/checkbox";
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewUser = ({ navigation }) => {
-	useEffect(() => {
-		navigation.getParent()?.setOptions({
-			tabBarStyle: {
-				display: "none",
-			},
-		});
-		return () =>
-			navigation.getParent()?.setOptions({
-				tabBarStyle: undefined,
-			});
-	}, [navigation]);
+	const [toggleCheckBox, setToggleCheckBox] = useState(false);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
@@ -75,6 +67,306 @@ const CreateNewUser = ({ navigation }) => {
 						/>
 					</View>
 				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							Dashboard
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							Project
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							Jobs
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							Attendance
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							Worker
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
+
+				<View
+					style={{
+						flexDirection: "row",
+						justifyContent: "space-between",
+						flex: 1,
+						width: "100%",
+						alignItems: "center",
+						padding: 10,
+					}}
+				>
+					<View style={{ width: "25%" }}>
+						<Text style={[styles.title, { color: Colors.Black, fontSize: 15 }]}>
+							User
+						</Text>
+					</View>
+
+					<View
+						style={{
+							padding: 10,
+							width: "30%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
+					</View>
+					<View
+						style={{
+							padding: 10,
+							width: "40%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
+						<Text style={[styles.title, { color: Colors.Black }]}>
+							Create/Edit
+						</Text>
+					</View>
+				</View>
 				<Spacer top={20} />
 				{/* <View>
 					<Text style={styles.heading}>
@@ -92,7 +384,7 @@ const CreateNewUser = ({ navigation }) => {
 			>
 				<TouchableOpacity
 					style={[styles.button, { width: "60%" }]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => alert("User Created")}
 				>
 					<Text style={styles.buttonText}>Create User</Text>
 				</TouchableOpacity>
@@ -101,7 +393,7 @@ const CreateNewUser = ({ navigation }) => {
 						styles.button,
 						{ width: "35%", backgroundColor: Colors.Secondary },
 					]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => navigation.goBack()}
 				>
 					<Text style={styles.buttonText}>Cancel</Text>
 				</TouchableOpacity>
@@ -139,7 +431,7 @@ const styles = StyleSheet.create({
 	graph: {
 		height: "88%",
 		backgroundColor: Colors.White,
-		marginTop: -100,
+		marginTop: -80,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {

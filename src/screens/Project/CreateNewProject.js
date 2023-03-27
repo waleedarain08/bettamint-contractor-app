@@ -8,6 +8,7 @@ import {
 	FlatList,
 	Dimensions,
 	LogBox,
+	Alert,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -93,7 +94,7 @@ const CreateNewProject = ({ navigation }) => {
 			>
 				<TouchableOpacity
 					style={[styles.button, { width: "60%" }]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => alert("Project Created")}
 				>
 					<Text style={styles.buttonText}>Create Project</Text>
 				</TouchableOpacity>
@@ -102,7 +103,7 @@ const CreateNewProject = ({ navigation }) => {
 						styles.button,
 						{ width: "35%", backgroundColor: Colors.Secondary },
 					]}
-					onPress={() => navigation.navigate("Password")}
+					onPress={() => navigation.goBack()}
 				>
 					<Text style={styles.buttonText}>Cancel</Text>
 				</TouchableOpacity>
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
 	graph: {
 		height: "88%",
 		backgroundColor: Colors.White,
-		marginTop: -100,
+		marginTop: -80,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {

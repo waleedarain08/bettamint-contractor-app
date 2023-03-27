@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
 	View,
 	Text,
@@ -17,8 +17,10 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 import { Building, Search } from "../../icons";
+import CheckBox from "@react-native-community/checkbox";
 LogBox.ignoreAllLogs();
 const Payments = ({ navigation }) => {
+	const [toggleCheckBox, setToggleCheckBox] = useState(false);
 	const DATA = [
 		{
 			name: "Arvind Chauhan",
@@ -107,8 +109,15 @@ const Payments = ({ navigation }) => {
 				<View
 					style={{
 						width: "25%",
+						flexDirection: "row",
+						alignItems: "center",
 					}}
 				>
+					<CheckBox
+						disabled={false}
+						value={toggleCheckBox}
+						onValueChange={(newValue) => setToggleCheckBox(newValue)}
+					/>
 					<Text style={[styles.flatListText, { textAlign: "left" }]}>
 						{item.name}
 					</Text>
@@ -131,7 +140,7 @@ const Payments = ({ navigation }) => {
 						padding: 5,
 						margin: 5,
 						borderRadius: 3,
-						width: "15%",
+						width: "13%",
 						justifyContent: "center",
 						alignItems: "center",
 					}}
@@ -152,7 +161,18 @@ const Payments = ({ navigation }) => {
 						justifyContent: "space-between",
 					}}
 				>
-					<View style={{ width: "25%" }}>
+					<View
+						style={{
+							width: "25%",
+							flexDirection: "row",
+							alignItems: "center",
+						}}
+					>
+						<CheckBox
+							disabled={false}
+							value={toggleCheckBox}
+							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						/>
 						<Text style={[styles.flatListText, { textAlign: "left" }]}>
 							Name
 						</Text>
@@ -326,9 +346,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		height: "8%",
+		height: "10%",
 		backgroundColor: Colors.White,
-		marginTop: -180,
+		marginTop: -140,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",

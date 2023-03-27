@@ -252,3 +252,13 @@ export const TypeIcon = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+
+export const PlusIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="plus"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);

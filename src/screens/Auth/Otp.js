@@ -13,6 +13,7 @@ import Profile from "../../assets/icons/Profile.png";
 import Lock from "../../assets/icons/Lock.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
+import OTPInputView from "@twotalltotems/react-native-otp-input";
 const Login = ({ navigation }) => {
 	return (
 		<ImageBackground source={Vector} style={styles.container}>
@@ -23,22 +24,18 @@ const Login = ({ navigation }) => {
 						We have send you the verification code on your Phone Enter the OTP
 						Code to verify your account.
 					</Text>
-					<View
-						style={{ flexDirection: "row", justifyContent: "space-between" }}
-					>
-						<View style={styles.inputField}>
-							<TextInput style={{ flex: 1 }} />
-						</View>
-						<View style={styles.inputField}>
-							<TextInput style={{ flex: 1 }} />
-						</View>
-						<View style={styles.inputField}>
-							<TextInput style={{ flex: 1 }} />
-						</View>
-						<View style={styles.inputField}>
-							<TextInput style={{ flex: 1 }} />
-						</View>
-					</View>
+					<OTPInputView
+						style={{ width: "80%", height: 200 }}
+						pinCount={4}
+						// code={this.state.code} //You can supply this prop or not. The component will be used as a controlled / uncontrolled component respectively.
+						// onCodeChanged = {code => { this.setState({code})}}
+						autoFocusOnLoad
+						codeInputFieldStyle={styles.inputField}
+						codeInputHighlightStyle={styles.underlineStyleHighLighted}
+						onCodeFilled={(code) => {
+							console.log(`Code is ${code}, you are good to go!`);
+						}}
+					/>
 					<TouchableOpacity
 						style={styles.button}
 						onPress={() => navigation.navigate("Main")}
@@ -48,7 +45,7 @@ const Login = ({ navigation }) => {
 				</View>
 			</View>
 			<View style={styles.bottomView}>
-				<Text style={styles.forgotText}>Resent Code in 60:00</Text>
+				<Text style={styles.forgotText}>Resend Code in 60:00</Text>
 			</View>
 		</ImageBackground>
 	);
@@ -61,12 +58,16 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: Colors.Primary,
 		justifyContent: "center",
+		alignItems: "center",
 	},
 	headingText: {
 		fontFamily: "Lexend-Medium",
 		fontSize: 27,
 		textAlign: "left",
 		color: Colors.White,
+	},
+	underlineStyleHighLighted: {
+		borderColor: "#03DAC6",
 	},
 	text: {
 		fontFamily: "Lexend-Regular",
@@ -87,6 +88,7 @@ const styles = StyleSheet.create({
 		marginTop: 15,
 		backgroundColor: Colors.White,
 		paddingLeft: 10,
+		margin: 6,
 	},
 	forgotText: {
 		fontFamily: "Lexend-Regular",

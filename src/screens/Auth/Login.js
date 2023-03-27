@@ -22,8 +22,13 @@ const Login = ({ navigation }) => {
 					<View style={styles.inputField}>
 						<Image source={Profile} style={{ paddingRight: 15 }} />
 						<TextInput
-							style={{ flex: 1 }}
-							placeholder="Email"
+							style={{
+								flex: 1,
+								fontFamily: "Lexend-Regular",
+								fontSize: 13,
+								color: Colors.Black,
+							}}
+							placeholder="Email Address or Phone Number"
 							placeholderTextColor={Colors.Gray}
 						/>
 					</View>

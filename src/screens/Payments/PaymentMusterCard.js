@@ -22,17 +22,6 @@ const screenWidth = Dimensions.get("window").width;
 import { Building, Search, TickIcon } from "../../icons";
 LogBox.ignoreAllLogs();
 const PaymentMusterCard = ({ navigation }) => {
-	useEffect(() => {
-		navigation.getParent()?.setOptions({
-			tabBarStyle: {
-				display: "none",
-			},
-		});
-		return () =>
-			navigation.getParent()?.setOptions({
-				tabBarStyle: undefined,
-			});
-	}, [navigation]);
 	const DATA = [
 		{
 			date: "01/01/2021",
@@ -246,6 +235,7 @@ const PaymentMusterCard = ({ navigation }) => {
 					/>
 				</View>
 			</ScrollView>
+			<Spacer bottom={60} />
 			<View
 				style={{
 					flexDirection: "row",
@@ -300,9 +290,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	graph: {
-		height: "28%",
+		height: "35%",
 		backgroundColor: Colors.White,
-		marginTop: -180,
+		marginTop: -140,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",

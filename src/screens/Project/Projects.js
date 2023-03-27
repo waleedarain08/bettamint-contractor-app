@@ -89,9 +89,7 @@ const Projects = ({ navigation }) => {
 		<Pressable
 			style={styles.item}
 			onPress={() => {
-				// setModalVisible(true);
-				// setDetails(item);
-				navigation.navigate('ProjectDetails')
+				navigation.navigate("ProjectDetails");
 			}}
 		>
 			<View
@@ -211,7 +209,7 @@ const Projects = ({ navigation }) => {
 							borderRadius: 5,
 						}}
 					>
-						<Search size={15} color={Colors.Secondary} />
+						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
 				</View>
 			</View>
@@ -374,9 +372,9 @@ const styles = StyleSheet.create({
 		flexDirection: "row",
 		justifyContent: "space-between",
 		alignItems: "center",
-		height: "8%",
+		height: "10%",
 		backgroundColor: Colors.White,
-		marginTop: -180,
+		marginTop: -140,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",

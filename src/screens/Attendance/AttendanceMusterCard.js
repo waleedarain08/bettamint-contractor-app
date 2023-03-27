@@ -22,17 +22,17 @@ import PersonImage from "../../assets/images/personimage.png";
 import typeIcon from "../../assets/icons/typeIcon.png";
 LogBox.ignoreAllLogs();
 const AttendanceMusterCard = ({ navigation }) => {
-	useEffect(() => {
-		navigation.getParent()?.setOptions({
-			tabBarStyle: {
-				display: "none",
-			},
-		});
-		return () =>
-			navigation.getParent()?.setOptions({
-				tabBarStyle: undefined,
-			});
-	}, [navigation]);
+	// useEffect(() => {
+	// 	navigation.getParent()?.setOptions({
+	// 		tabBarStyle: {
+	// 			display: "none",
+	// 		},
+	// 	});
+	// 	return () =>
+	// 		navigation.getParent()?.setOptions({
+	// 			tabBarStyle: undefined,
+	// 		});
+	// }, [navigation]);
 	const DATA = [
 		{
 			date: "01/01/2021",

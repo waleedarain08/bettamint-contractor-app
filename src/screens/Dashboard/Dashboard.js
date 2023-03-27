@@ -87,77 +87,53 @@ const Dashboard = ({ navigation }) => {
 	const animatedStyle = { borderRadius, transform: [{ scale: scale }] };
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				alignItems: "center",
-				justifyContent: "center",
-				backgroundColor: "white",
-				// ...animatedStyle,
-			}}
-		>
+		<ScrollView style={styles.container}>
 			<View style={styles.header} />
-			{/* <View style={styles.headerLogo}>
-          <Pressable
-            onPress={() => {
-              navigation.openDrawer();
-            }}
-          >
-            <Image source={Menu} style={{ height: 20, width: 20 }} />
-          </Pressable>
-          <Image
-            source={Logo}
-            style={{ width: 150, height: 25, resizeMode: "contain", left: 15 }}
-          />
-        </View>
-      </View> */}
-			<View style={styles.graph}>
-				<View style={{ height: "60%", alignItems: "center" }}>
-					<Image
-						source={BarChart}
-						style={{ height: 200, width: 360, resizeMode: "contain" }}
+
+			<View style={{ top: -200, height: "100%" }}>
+				<View style={styles.graph}>
+					<View style={{ height: "45%", alignItems: "center" }}>
+						<Image
+							source={BarChart}
+							style={{ height: 200, width: 360, resizeMode: "contain" }}
+						/>
+					</View>
+					<View style={styles.graphBottom}>
+						<View style={styles.graphBottomTabs}>
+							<Text style={styles.graphBottomText}>
+								Avg Active {"\n"}Workforce{" "}
+							</Text>
+							<Text style={styles.graphBottomTextBold}>350</Text>
+						</View>
+						<View style={styles.graphBottomTabs}>
+							<Text style={styles.graphBottomText}>
+								Average {"\n"}Workforce
+							</Text>
+							<Text
+								style={[styles.graphBottomTextBold, { color: Colors.Primary }]}
+							>
+								350
+							</Text>
+						</View>
+					</View>
+				</View>
+				<View style={{ height: "30%" }}>
+					<FlatList
+						data={DATA}
+						renderItem={({ item }) => <Item item={item} />}
+						keyExtractor={(item) => item.id}
+						numColumns={2}
 					/>
 				</View>
-				<View style={styles.graphBottom}>
-					<View style={styles.graphBottomTabs}>
-						<Text style={styles.graphBottomText}>
-							Avg Active {"\n"}Workforce{" "}
-						</Text>
-						<Text style={styles.graphBottomTextBold}>350</Text>
-					</View>
-					<View style={styles.graphBottomTabs}>
-						<Text style={styles.graphBottomText}>Average {"\n"}Workforce</Text>
-						<Text
-							style={[styles.graphBottomTextBold, { color: Colors.Primary }]}
-						>
-							350
-						</Text>
-					</View>
-				</View>
-			</View>
-			<ScrollView>
-				<FlatList
-					data={DATA}
-					renderItem={({ item }) => <Item item={item} />}
-					keyExtractor={(item) => item.id}
-					numColumns={2}
-				/>
-
 				<View style={styles.scrollGraph}>
-					<Spacer bottom={50} />
 					<Image
 						source={LineChart}
-						style={{ height: 200, width: 340, resizeMode: "contain" }}
+						style={{ height: 180, width: 350, resizeMode: "contain" }}
 					/>
-					{/* <LineChart
-						data={chartData}
-						width={screenWidth}
-						height={220}
-						chartConfig={chartConfig}
-					/> */}
 				</View>
-			</ScrollView>
-		</View>
+				<Spacer bottom={50} />
+			</View>
+		</ScrollView>
 	);
 };
 export default Dashboard;
@@ -182,11 +158,8 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	graph: {
-		height: "40%",
+		height: "35%",
 		backgroundColor: Colors.White,
-		marginTop: -160,
-		// position: "absolute",
-		// top: 100,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {
@@ -256,7 +229,7 @@ const styles = StyleSheet.create({
 		color: Colors.LightGray,
 	},
 	scrollGraph: {
-		height: "50%",
+		height: "25%",
 		backgroundColor: Colors.White,
 		margin: 15,
 		shadowColor: "#000",

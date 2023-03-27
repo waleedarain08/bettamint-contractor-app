@@ -62,6 +62,7 @@ import {
 	JobIcon,
 	DashboardIcon,
 	PaymentIcon,
+	PlusIcon,
 } from "../icons";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -168,29 +169,50 @@ const JobsNavigator = ({ navigation }) => (
 					</Pressable>
 				),
 				headerRight: () => (
-					<Pressable
-						onPress={() => {
-							navigation.navigate("CreateNewJob");
-						}}
+					<View
 						style={{
-							backgroundColor: Colors.Purple,
-							padding: 5,
-							borderRadius: 12,
-							paddingHorizontal: 10,
+							flexDirection: "row",
+							justifyContent: "space-between",
+							alignItems: "center",
 						}}
 					>
-						<View>
-							<Text
+						<Pressable
+							onPress={() => {
+								navigation.navigate("CreateNewJob");
+							}}
+							style={{
+								backgroundColor: Colors.Purple,
+								padding: 5,
+								borderRadius: 12,
+								paddingHorizontal: 10,
+							}}
+						>
+							<View
 								style={{
-									fontFamily: "Lexend-Medium",
-									fontSize: 11,
-									color: Colors.White,
+									flexDirection: "row",
+									justifyContent: "space-between",
+									alignItems: "center",
 								}}
 							>
-								New Job
-							</Text>
-						</View>
-					</Pressable>
+								<PlusIcon size={20} color={Colors.White} />
+								<Text
+									style={{
+										fontFamily: "Lexend-Medium",
+										fontSize: 11,
+										color: Colors.White,
+									}}
+								>
+									New Job
+								</Text>
+							</View>
+						</Pressable>
+						<Pressable style={{ marginLeft: 10 }}>
+							<Image
+								source={require("../assets/icons/ProfileButton.png")}
+								style={{ height: 30, width: 30, marginRight: 16 }}
+							/>
+						</Pressable>
+					</View>
 				),
 			}}
 		/>
@@ -464,29 +486,50 @@ const ProjectNavigator = ({ navigation }) => {
 						</Pressable>
 					),
 					headerRight: () => (
-						<Pressable
-							onPress={() => {
-								navigation.navigate("CreateNewProject");
-							}}
+						<View
 							style={{
-								backgroundColor: Colors.Purple,
-								padding: 5,
-								borderRadius: 12,
-								paddingHorizontal: 10,
+								flexDirection: "row",
+								justifyContent: "space-between",
+								alignItems: "center",
 							}}
 						>
-							<View>
-								<Text
+							<Pressable
+								onPress={() => {
+									navigation.navigate("CreateNewProject");
+								}}
+								style={{
+									backgroundColor: Colors.Purple,
+									padding: 5,
+									borderRadius: 12,
+									paddingHorizontal: 10,
+								}}
+							>
+								<View
 									style={{
-										fontFamily: "Lexend-Medium",
-										fontSize: 11,
-										color: Colors.White,
+										flexDirection: "row",
+										justifyContent: "space-between",
+										alignItems: "center",
 									}}
 								>
-									New Project
-								</Text>
-							</View>
-						</Pressable>
+									<PlusIcon size={20} color={Colors.White} />
+									<Text
+										style={{
+											fontFamily: "Lexend-Medium",
+											fontSize: 11,
+											color: Colors.White,
+										}}
+									>
+										New Project
+									</Text>
+								</View>
+							</Pressable>
+							<Pressable style={{ marginLeft: 10 }}>
+								<Image
+									source={require("../assets/icons/ProfileButton.png")}
+									style={{ height: 30, width: 30, marginRight: 16 }}
+								/>
+							</Pressable>
+						</View>
 					),
 				}}
 			/>
@@ -620,7 +663,14 @@ const UserNavigator = ({ navigation }) => (
 								paddingHorizontal: 10,
 							}}
 						>
-							<View>
+							<View
+								style={{
+									flexDirection: "row",
+									justifyContent: "space-between",
+									alignItems: "center",
+								}}
+							>
+								<PlusIcon size={20} color={Colors.White} />
 								<Text
 									style={{
 										fontFamily: "Lexend-Medium",
@@ -628,11 +678,11 @@ const UserNavigator = ({ navigation }) => (
 										color: Colors.White,
 									}}
 								>
-									User
+									USER
 								</Text>
 							</View>
 						</Pressable>
-						<Pressable>
+						<Pressable style={{ marginLeft: 10 }}>
 							<Image
 								source={require("../assets/icons/ProfileButton.png")}
 								style={{ height: 30, width: 30, marginRight: 16 }}
