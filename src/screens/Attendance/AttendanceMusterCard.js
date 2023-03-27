@@ -277,9 +277,9 @@ const styles = StyleSheet.create({
 		width: "100%",
 	},
 	graph: {
-		height: "28%",
+		height: "35%",
 		backgroundColor: Colors.White,
-		marginTop: -180,
+		marginTop: -140,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",

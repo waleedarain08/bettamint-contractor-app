@@ -63,6 +63,7 @@ import {
 	DashboardIcon,
 	PaymentIcon,
 	PlusIcon,
+	MenuIcon,
 } from "../icons";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -105,10 +106,7 @@ const PaymentNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.openDrawer()}>
-						<Image
-							source={Menu}
-							style={{ height: 20, width: 20, marginLeft: 0 }}
-						/>
+						<MenuIcon size={30} color={Colors.White} />
 					</Pressable>
 				),
 			}}
@@ -162,10 +160,7 @@ const JobsNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.openDrawer()}>
-						<Image
-							source={Menu}
-							style={{ height: 20, width: 20, marginLeft: 0 }}
-						/>
+						<MenuIcon size={30} color={Colors.White} />
 					</Pressable>
 				),
 				headerRight: () => (
@@ -206,7 +201,10 @@ const JobsNavigator = ({ navigation }) => (
 								</Text>
 							</View>
 						</Pressable>
-						<Pressable style={{ marginLeft: 10 }}>
+						<Pressable
+							style={{ marginLeft: 10 }}
+							onPress={() => navigation.navigate("Users")}
+						>
 							<Image
 								source={require("../assets/icons/ProfileButton.png")}
 								style={{ height: 30, width: 30, marginRight: 16 }}
@@ -284,10 +282,7 @@ const AttendanceNavigator = ({ navigation }) => {
 					),
 					headerLeft: () => (
 						<Pressable onPress={() => navigation.openDrawer()}>
-							<Image
-								source={Menu}
-								style={{ height: 20, width: 20, marginLeft: 0 }}
-							/>
+							<MenuIcon size={30} color={Colors.White} />
 						</Pressable>
 					),
 				}}
@@ -347,10 +342,7 @@ const WorkersNavigator = ({ navigation }) => {
 					),
 					headerLeft: () => (
 						<Pressable onPress={() => navigation.goBack()}>
-							<Image
-								source={Menu}
-								style={{ height: 20, width: 20, marginLeft: 0 }}
-							/>
+							<MenuIcon size={30} color={Colors.White} />
 						</Pressable>
 					),
 					headerRight: () => (
@@ -387,7 +379,7 @@ const WorkersNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable>
+							<Pressable onPress={() => navigation.navigate("Users")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30, marginRight: 16 }}
@@ -416,7 +408,7 @@ const WorkersNavigator = ({ navigation }) => {
 					),
 					headerRight: () => (
 						<View style={{ flexDirection: "row", alignItems: "center" }}>
-							<Pressable>
+							<Pressable onPress={() => navigation.navigate("Users")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30, marginRight: 16 }}
@@ -471,7 +463,7 @@ const WorkersNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable>
+							<Pressable onPress={() => navigation.navigate("Users")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30 }}
@@ -517,10 +509,7 @@ const ProjectNavigator = ({ navigation }) => {
 					),
 					headerLeft: () => (
 						<Pressable onPress={() => navigation.openDrawer()}>
-							<Image
-								source={Menu}
-								style={{ height: 20, width: 20, marginLeft: 0 }}
-							/>
+							<MenuIcon size={30} color={Colors.White} />
 						</Pressable>
 					),
 					headerRight: () => (
@@ -561,7 +550,10 @@ const ProjectNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable style={{ marginLeft: 10 }}>
+							<Pressable
+								style={{ marginLeft: 10 }}
+								onPress={() => navigation.navigate("Users")}
+							>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30, marginRight: 16 }}
@@ -639,10 +631,7 @@ const ProfileNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.goBack()}>
-						<Image
-							source={Menu}
-							style={{ height: 20, width: 20, marginLeft: 0 }}
-						/>
+						<MenuIcon size={30} color={Colors.White} />
 					</Pressable>
 				),
 			}}
@@ -680,10 +669,7 @@ const UserNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.goBack()}>
-						<Image
-							source={Menu}
-							style={{ height: 20, width: 20, marginLeft: 0 }}
-						/>
+						<MenuIcon size={30} color={Colors.White} />
 					</Pressable>
 				),
 				headerRight: () => (
@@ -720,7 +706,10 @@ const UserNavigator = ({ navigation }) => (
 								</Text>
 							</View>
 						</Pressable>
-						<Pressable style={{ marginLeft: 10 }}>
+						<Pressable
+							style={{ marginLeft: 10 }}
+							onPress={() => navigation.navigate("Users")}
+						>
 							<Image
 								source={require("../assets/icons/ProfileButton.png")}
 								style={{ height: 30, width: 30, marginRight: 16 }}
@@ -987,11 +976,14 @@ function TabNavigator({ navigation }) {
 							marginBottom: 5,
 						},
 						headerLeft: () => (
-							<Pressable onPress={() => navigation.openDrawer()}>
-								<Image
-									source={Menu}
-									style={{ height: 20, width: 20, marginLeft: 16 }}
-								/>
+							<Pressable
+								onPress={() => navigation.openDrawer()}
+								style={{
+									padding: 10,
+									marginLeft: 10,
+								}}
+							>
+								<MenuIcon size={30} color={Colors.White} />
 							</Pressable>
 						),
 						headerTitle: () => (
@@ -1018,7 +1010,7 @@ function TabNavigator({ navigation }) {
 										style={{ height: 30, width: 30, marginRight: 10 }}
 									/>
 								</Pressable>
-								<Pressable>
+								<Pressable onPress={() => navigation.navigate("Users")}>
 									<Image
 										source={require("../assets/icons/ProfileButton.png")}
 										style={{ height: 30, width: 30, marginRight: 16 }}

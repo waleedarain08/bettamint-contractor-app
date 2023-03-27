@@ -262,3 +262,12 @@ export const PlusIcon = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+export const MenuIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="menu"
+		color={color}
+		size={size}
+		type="Entypo"
+		style={style}
+	/>
+);

@@ -96,6 +96,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -111,6 +112,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit
@@ -146,6 +148,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -161,6 +164,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit
@@ -196,6 +200,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -211,6 +216,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit
@@ -246,6 +252,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -261,6 +268,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit
@@ -296,6 +304,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -311,6 +320,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit
@@ -346,6 +356,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>view</Text>
 					</View>
@@ -361,6 +372,7 @@ const CreateNewUser = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.title, { color: Colors.Black }]}>
 							Create/Edit

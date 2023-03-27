@@ -117,6 +117,7 @@ const Payments = ({ navigation }) => {
 						disabled={false}
 						value={toggleCheckBox}
 						onValueChange={(newValue) => setToggleCheckBox(newValue)}
+						tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 					/>
 					<Text style={[styles.flatListText, { textAlign: "left" }]}>
 						{item.name}
@@ -172,6 +173,7 @@ const Payments = ({ navigation }) => {
 							disabled={false}
 							value={toggleCheckBox}
 							onValueChange={(newValue) => setToggleCheckBox(newValue)}
+							tintColors={{ true: Colors.Primary, false: Colors.Gray }}
 						/>
 						<Text style={[styles.flatListText, { textAlign: "left" }]}>
 							Name
