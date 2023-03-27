@@ -55,7 +55,7 @@ import WorkerDetails from "../screens/Workers/WorkerDetails";
 import CreateNewWorker from "../screens/Workers/CreateNewWorker";
 import Users from "../screens/Users/Users";
 import CreateNewUser from "../screens/Users/CreateNewUser";
-import SplashScreen from 'react-native-splash-screen';
+import SplashScreen from "react-native-splash-screen";
 import {
   Building,
   AttendanceIcon,
@@ -332,29 +332,46 @@ const WorkersNavigator = ({ navigation }) => {
             </Pressable>
           ),
           headerRight: () => (
-            <Pressable
-              onPress={() => {
-                navigation.navigate("CreateNewWorker");
-              }}
-              style={{
-                backgroundColor: Colors.Purple,
-                padding: 5,
-                borderRadius: 12,
-                paddingHorizontal: 10,
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 11,
-                    color: Colors.White,
-                  }}
-                >
-                  Worker
-                </Text>
-              </View>
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable>
+                <Image
+                  source={require("../assets/icons/download.png")}
+                  style={{ height: 30, width: 30, marginRight: 10 }}
+                />
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("CreateNewWorker");
+                }}
+                style={{
+                  backgroundColor: Colors.Purple,
+                  padding: 5,
+                  borderRadius: 12,
+                  paddingHorizontal: 10,
+                  marginRight: 10,
+                  justifyContent: "center",
+                  height: 28,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 11,
+                      color: Colors.White,
+                    }}
+                  >
+                    Worker
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable>
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 16 }}
+                />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -372,8 +389,18 @@ const WorkersNavigator = ({ navigation }) => {
                 // marginHorizontal: 13,
               }}
             >
-              Create New Worker
+              Add New Worker
             </Text>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable>
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 16 }}
+                />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -395,29 +422,40 @@ const WorkersNavigator = ({ navigation }) => {
             </Text>
           ),
           headerRight: () => (
-            <Pressable
-              onPress={() => {
-                navigation.navigate("CreateNewWorker");
-              }}
-              style={{
-                backgroundColor: Colors.Purple,
-                padding: 5,
-                borderRadius: 12,
-                paddingHorizontal: 10,
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 11,
-                    color: Colors.White,
-                  }}
-                >
-                  Edit
-                </Text>
-              </View>
-            </Pressable>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("CreateNewWorker");
+                }}
+                style={{
+                  backgroundColor: Colors.Purple,
+                  padding: 5,
+                  borderRadius: 12,
+                  paddingHorizontal: 10,
+                  marginRight: 10,
+                  justifyContent: "center",
+                  height: 28,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 11,
+                      color: Colors.White,
+                    }}
+                  >
+                    Edit
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable>
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30 }}
+                />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -663,11 +701,11 @@ const UserNavigator = ({ navigation }) => (
 );
 
 function MainNavigation({}) {
-    React.useEffect(() => {
-      setTimeout(() => {
-        SplashScreen.hide();
-      }, 5000);
-    }, []);
+  React.useEffect(() => {
+    setTimeout(() => {
+      SplashScreen.hide();
+    }, 5000);
+  }, []);
 
   const MyTheme = {
     ...DefaultTheme,

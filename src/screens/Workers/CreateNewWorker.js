@@ -97,9 +97,9 @@ const CreateNewWorker = ({ navigation }) => {
 					</View>
 				</View>
 				<View style={{ padding: 10 }}>
-					<Text style={styles.title}>Password</Text>
+					<Text style={styles.title}>Contact Number</Text>
 					<View style={styles.inputField}>
-						<TextInput style={styles.placeholderText} placeholder="*****" />
+						<TextInput style={styles.placeholderText} placeholder="Contact Number" />
 					</View>
 				</View>
 				<View style={{ padding: 10 }}>
