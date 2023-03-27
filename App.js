@@ -2,7 +2,7 @@ import { View, Text, StatusBar, SafeAreaView } from "react-native";
 import React from "react";
 import Navigation from "./src/navigation/StackNavigation";
 import MainNavigation from "./src/navigation/MainNavigation";
-import { Colors } from "react-native/Libraries/NewAppScreen";
+import { Colors } from "./src/utils/Colors";
 
 const App = () => {
   return (
