@@ -258,7 +258,7 @@ const styles = StyleSheet.create({
 		// flexDirection: "row",
 		// justifyContent: "space-between",
 		backgroundColor: Colors.Primary,
-		height: "28%",
+		height: "35%",
 		width: "100%",
 		borderBottomLeftRadius: 50,
 		borderBottomRightRadius: 50,

@@ -48,6 +48,7 @@ import CreateNewProject from "../screens/Project/CreateNewProject";
 import ProjectDetails from "../screens/Project/ProjectDetails";
 import PaymentMusterCard from "../screens/Payments/PaymentMusterCard";
 import AttendanceMusterCard from "../screens/Attendance/AttendanceMusterCard";
+import ApproveAttendance from "../screens/Attendance/ApproveAttendance";
 import Jobs from "../screens/Jobs/Jobs";
 import CreateNewJob from "../screens/Jobs/CreateNewJob";
 import JobDetails from "../screens/Jobs/JobDetails";
@@ -56,6 +57,7 @@ import CreateNewWorker from "../screens/Workers/CreateNewWorker";
 import Users from "../screens/Users/Users";
 import CreateNewUser from "../screens/Users/CreateNewUser";
 import SplashScreen from "react-native-splash-screen";
+
 import {
 	Building,
 	AttendanceIcon,
@@ -64,6 +66,7 @@ import {
 	PaymentIcon,
 	PlusIcon,
 	MenuIcon,
+	DonwloadIcon,
 } from "../icons";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -106,10 +109,7 @@ const PaymentNavigator = ({ navigation }) => (
 				),
 				headerLeft: () => (
 					<Pressable onPress={() => navigation.openDrawer()}>
-						<Image
-							source={Menu}
-							style={{ height: 20, width: 20, marginLeft: 0 }}
-						/>
+						<MenuIcon size={30} color={Colors.White} />
 					</Pressable>
 				),
 			}}
@@ -206,7 +206,7 @@ const JobsNavigator = ({ navigation }) => (
 						</Pressable>
 						<Pressable
 							style={{ marginLeft: 10 }}
-							onPress={() => navigation.navigate("Users")}
+							onPress={() => navigation.navigate("Profile")}
 						>
 							<Image
 								source={require("../assets/icons/ProfileButton.png")}
@@ -288,6 +288,65 @@ const AttendanceNavigator = ({ navigation }) => {
 							<MenuIcon size={30} color={Colors.White} />
 						</Pressable>
 					),
+					headerRight: () => (
+						<View
+							style={{
+								flexDirection: "row",
+								justifyContent: "space-between",
+								alignItems: "center",
+							}}
+						>
+							{/* <Pressable
+								style={{
+									backgroundColor: Colors.Purple,
+									padding: 5,
+									borderRadius: 20,
+									paddingHorizontal: 10,
+									paddingVertical: 5,
+								}}
+							>
+								<DonwloadIcon size={20} color={Colors.White} />
+							</Pressable> */}
+							<Pressable
+								onPress={() => {
+									navigation.navigate("ApproveAttendance");
+								}}
+								style={{
+									backgroundColor: Colors.Purple,
+									padding: 5,
+									borderRadius: 12,
+									paddingHorizontal: 10,
+								}}
+							>
+								<View
+									style={{
+										flexDirection: "row",
+										justifyContent: "space-between",
+										alignItems: "center",
+									}}
+								>
+									<Text
+										style={{
+											fontFamily: "Lexend-Medium",
+											fontSize: 11,
+											color: Colors.White,
+										}}
+									>
+										Attendance for Today
+									</Text>
+								</View>
+							</Pressable>
+							<Pressable
+								style={{ marginLeft: 10 }}
+								onPress={() => navigation.navigate("Profile")}
+							>
+								<Image
+									source={require("../assets/icons/ProfileButton.png")}
+									style={{ height: 30, width: 30, marginRight: 16 }}
+								/>
+							</Pressable>
+						</View>
+					),
 				}}
 			/>
 			<AttendanceStack.Screen
@@ -305,6 +364,25 @@ const AttendanceNavigator = ({ navigation }) => {
 							}}
 						>
 							Muster Card
+						</Text>
+					),
+				}}
+			/>
+			<AttendanceStack.Screen
+				name="ApproveAttendance"
+				component={ApproveAttendance}
+				options={{
+					headerTitle: () => (
+						<Text
+							style={{
+								fontSize: 18,
+								fontFamily: "Lexend-Medium",
+								// fontWeight: "500",
+								color: Colors.White,
+								// marginHorizontal: 13,
+							}}
+						>
+							Approve Attendance
 						</Text>
 					),
 				}}
@@ -382,7 +460,7 @@ const WorkersNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable onPress={() => navigation.navigate("Users")}>
+							<Pressable onPress={() => navigation.navigate("Profile")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30, marginRight: 16 }}
@@ -411,7 +489,7 @@ const WorkersNavigator = ({ navigation }) => {
 					),
 					headerRight: () => (
 						<View style={{ flexDirection: "row", alignItems: "center" }}>
-							<Pressable onPress={() => navigation.navigate("Users")}>
+							<Pressable onPress={() => navigation.navigate("Profile")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30, marginRight: 16 }}
@@ -466,7 +544,7 @@ const WorkersNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable onPress={() => navigation.navigate("Users")}>
+							<Pressable onPress={() => navigation.navigate("Profile")}>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
 									style={{ height: 30, width: 30 }}
@@ -555,7 +633,7 @@ const ProjectNavigator = ({ navigation }) => {
 							</Pressable>
 							<Pressable
 								style={{ marginLeft: 10 }}
-								onPress={() => navigation.navigate("Users")}
+								onPress={() => navigation.navigate("Profile")}
 							>
 								<Image
 									source={require("../assets/icons/ProfileButton.png")}
@@ -711,7 +789,7 @@ const UserNavigator = ({ navigation }) => (
 						</Pressable>
 						<Pressable
 							style={{ marginLeft: 10 }}
-							onPress={() => navigation.navigate("Users")}
+							onPress={() => navigation.navigate("Profile")}
 						>
 							<Image
 								source={require("../assets/icons/ProfileButton.png")}
@@ -1013,7 +1091,7 @@ function TabNavigator({ navigation }) {
 										style={{ height: 30, width: 30, marginRight: 10 }}
 									/>
 								</Pressable>
-								<Pressable onPress={() => navigation.navigate("Users")}>
+								<Pressable onPress={() => navigation.navigate("Profile")}>
 									<Image
 										source={require("../assets/icons/ProfileButton.png")}
 										style={{ height: 30, width: 30, marginRight: 16 }}

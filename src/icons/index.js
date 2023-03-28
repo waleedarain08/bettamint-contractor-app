@@ -271,3 +271,12 @@ export const MenuIcon = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+export const DonwloadIcon = ({ color, size, style }) => (
+	<VectorIcon
+		name="download"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
