@@ -22,17 +22,17 @@ const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewProject = ({ navigation }) => {
-	useEffect(() => {
-		navigation.getParent()?.setOptions({
-			tabBarStyle: {
-				display: "none",
-			},
-		});
-		return () =>
-			navigation.getParent()?.setOptions({
-				tabBarStyle: undefined,
-			});
-	}, [navigation]);
+	// useEffect(() => {
+	// 	navigation.getParent()?.setOptions({
+	// 		tabBarStyle: {
+	// 			display: "none",
+	// 		},
+	// 	});
+	// 	return () =>
+	// 		navigation.getParent()?.setOptions({
+	// 			tabBarStyle: undefined,
+	// 		});
+	// }, [navigation]);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
 	graph: {
 		height: "88%",
 		backgroundColor: Colors.White,
-		marginTop: -80,
+		marginTop: -90,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {
