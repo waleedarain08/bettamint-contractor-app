@@ -20,48 +20,48 @@ import Spacer from "../../components/Spacer";
 // import LineChart from "../assets/images/linechart.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { Search } from "../../icons";
+import { LocationIcon, Search } from "../../icons";
 import { Building, Whatsapp } from "../../icons";
 LogBox.ignoreAllLogs();
 const DATA = [
   {
     occupation: "Plumber",
     des: "Description",
-    req: "13",
+    req: "13/06",
     start: "8 Mar, 2023",
-    wage: "₹ 500",
+    wage: "Total: ₹36 | Daily: ₹6",
     location: "Koramangala, Bengaluru, Karnataka 560095, India",
   },
   {
     occupation: "Plumber",
     des: "Description",
-    req: "13",
+    req: "13/06",
     start: "8 Mar, 2023",
-    wage: "₹ 500",
+    wage: "Total: ₹36 | Daily: ₹6",
     location: "Koramangala, Bengaluru, Karnataka 560095, India",
   },
   {
     occupation: "Plumber",
     des: "Description",
-    req: "13",
+    req: "13/06",
     start: "8 Mar, 2023",
-    wage: "₹ 500",
+    wage: "Total: ₹36 | Daily: ₹6",
     location: "Koramangala, Bengaluru, Karnataka 560095, India",
   },
   {
     occupation: "Plumber",
     des: "Description",
-    req: "13",
+    req: "13/06",
     start: "8 Mar, 2023",
-    wage: "₹ 500",
+    wage: "Total: ₹36 | Daily: ₹6",
     location: "Koramangala, Bengaluru, Karnataka 560095, India",
   },
   {
     occupation: "Plumber",
     des: "Description",
-    req: "13",
+    req: "13/06",
     start: "8 Mar, 2023",
-    wage: "₹ 500",
+    wage: "Total: ₹36 | Daily: ₹6",
     location: "Koramangala, Bengaluru, Karnataka 560095, India",
   },
 ];
@@ -73,13 +73,12 @@ const Jobs = ({ navigation }) => {
     <Pressable
       style={styles.item}
       onPress={() => {
-        // navigation.navigate("JobDetails", { details: item });
+        navigation.navigate("JobDetails", { details: item });
       }}
     >
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View>
           <Text style={styles.flatlistHeading}>{item.occupation}</Text>
-          <Text style={styles.flatlistSubHeading}>{item.des}</Text>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <TouchableOpacity
@@ -92,7 +91,8 @@ const Jobs = ({ navigation }) => {
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 8,
             }}
           >
             <Text style={styles.smallButton}>View</Text>
@@ -104,10 +104,11 @@ const Jobs = ({ navigation }) => {
               backgroundColor: "#E4F1D6",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 8,
             }}
           >
-            <Text style={[styles.smallButton, { color: "#ADD07C" }]}>
+            <Text style={[styles.smallButton, { color: "#7EB734" }]}>
               Complete
             </Text>
           </TouchableOpacity>
@@ -118,11 +119,12 @@ const Jobs = ({ navigation }) => {
               alignItems: "center",
               backgroundColor: "#1BD741",
               padding: 5,
+              paddingHorizontal: 7,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
             }}
           >
-            <Whatsapp size={20} color={Colors.White} />
+            <Whatsapp size={15} color={Colors.White} />
             <Spacer right={5} />
             <Text style={[styles.smallButton, { color: Colors.White }]}>
               Share
@@ -130,21 +132,48 @@ const Jobs = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-      <Spacer bottom={20} />
+      <Text style={styles.flatlistSubHeading}>{item.des}</Text>
+      <Text style={{ fontFamily: "Lexend-Regular" }}>{"------"}</Text>
+      <Spacer bottom={10} />
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
         <View>
-          <Text style={styles.flatlistSubHeading}>Required Workers</Text>
-          <Text style={[styles.flatlistText, { textAlign: "center" }]}>
+          <Text style={[styles.flatlistSubHeading, { textAlign: "center" }]}>
+            Required Workers
+          </Text>
+          <Text
+            style={[
+              styles.flatlistText,
+              { textAlign: "center", marginTop: 6, fontSize: 9.5 },
+            ]}
+          >
             {item.req}
           </Text>
         </View>
         <View>
-          <Text style={styles.flatlistSubHeading}>Start Date</Text>
-          <Text style={styles.flatlistText}>{item.start}</Text>
+          <Text style={[styles.flatlistSubHeading, { textAlign: "center" }]}>
+            Start Date
+          </Text>
+          <Text
+            style={[
+              styles.flatlistText,
+              { textAlign: "center", marginTop: 6, fontSize: 9.5 },
+            ]}
+          >
+            {item.start}
+          </Text>
         </View>
         <View>
-          <Text style={styles.flatlistSubHeading}>Wage</Text>
-          <Text style={styles.flatlistText}>{item.wage}</Text>
+          <Text style={[styles.flatlistSubHeading, { textAlign: "center" }]}>
+            Wage
+          </Text>
+          <Text
+            style={[
+              styles.flatlistText,
+              { textAlign: "center", marginTop: 6, fontSize: 9.5 },
+            ]}
+          >
+            {item.wage}
+          </Text>
         </View>
       </View>
       <Spacer bottom={20} />
@@ -154,10 +183,19 @@ const Jobs = ({ navigation }) => {
           borderTopWidth: 1,
           paddingTop: 10,
           borderStyle: "dashed",
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
         }}
       >
-        <Text style={styles.flatlistSubHeading}>Location</Text>
-        <Text style={styles.flatlistText}>{item.location}</Text>
+        <View style={{ width: "92%" }}>
+          <Text style={styles.flatlistSubHeading}>Location</Text>
+          <Text style={styles.flatlistText}>{item.location}</Text>
+        </View>
+        <View style={{ width: "5%" }}>
+          <LocationIcon style={{ marginTop: 5 }} size={20} color={"#ADBAC3"} />
+        </View>
       </View>
     </Pressable>
   );
@@ -192,7 +230,7 @@ const Jobs = ({ navigation }) => {
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
             }}
           >
             <Text style={styles.smallButton}>Sort by</Text>
@@ -202,7 +240,7 @@ const Jobs = ({ navigation }) => {
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
             }}
           >
             <Text style={styles.smallButton}>Filter</Text>
@@ -451,9 +489,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    height: "10%",
+    // height: "10%",
     backgroundColor: Colors.White,
-    marginTop: -140,
+    marginTop: -170,
     padding: 10,
     margin: 15,
     shadowColor: "#000",
@@ -536,16 +574,19 @@ const styles = StyleSheet.create({
   },
   flatlistHeading: {
     fontFamily: "Lexend-Medium",
-    fontSize: 12,
+    fontSize: 14,
+    textTransform: "uppercase",
     color: Colors.Black,
   },
   flatlistSubHeading: {
     fontFamily: "Lexend-Medium",
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.LightGray,
+    textTransform: "uppercase",
+    // marginTop: 5
   },
   flatlistText: {
-    fontFamily: "Lexend-Bold",
+    fontFamily: "Lexend-SemiBold",
     fontSize: 10,
     color: Colors.Black,
   },

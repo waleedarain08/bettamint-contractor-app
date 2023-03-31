@@ -8,6 +8,8 @@ import {
   FlatList,
   Dimensions,
   LogBox,
+  Modal,
+  Pressable,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
@@ -17,199 +19,126 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 import { Building, Search } from "../../icons";
-import CheckBox from "@react-native-community/checkbox";
+import { OptionsButton } from "react-native-options-button";
+// import DropDownPicker from "react-native-dropdown-picker";
 LogBox.ignoreAllLogs();
-const Payments = ({ navigation }) => {
-  const [toggleCheckBox, setToggleCheckBox] = useState(false);
-  const [toggleCheckBoxSep, setToggleCheckBoxSep] = useState(false);
-  const [data, setData] = useState({
-    array: [
-      {
-        id: 1,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 2,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 3,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 4,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 5,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 6,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 7,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 8,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 9,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 10,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-
-      {
-        id: 11,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 12,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-    ],
-  });
+const ApproveAttendance = ({ navigation }) => {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(null);
+  const [items, setItems] = useState([
+    { label: "P", value: "P" },
+    { label: "1/2P", value: "1/2P" },
+    { label: "P1", value: "P1" },
+    { label: "P2", value: "P2" },
+    { label: "P3", value: "P3" },
+    { label: "P4", value: "P4" },
+    { label: "P5", value: "P5" },
+  ]);
+  const OPTIONS = [
+    { label: "P", value: "P" },
+    { label: "1/2P", value: "1/2P" },
+    { label: "P1", value: "P1" },
+    { label: "P2", value: "P2" },
+    { label: "P3", value: "P3" },
+    { label: "P4", value: "P4" },
+    { label: "P5", value: "P5" },
+  ];
   const DATA = [
     {
-      id: 1,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 2,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 3,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 4,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 5,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 6,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 7,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 8,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 9,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 10,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
-    },
-
-    {
-      id: 11,
-      name: "Arvind Chauhan",
-      status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
     },
     {
-      id: 12,
       name: "Arvind Chauhan",
       status: "Online",
-      due: "₹ 10,350",
-      issued: "₹ 8,650",
+    },
+    {
+      name: "Arvind Chauhan",
+      status: "Online",
     },
   ];
+
+  const Options = ({ item }) => (
+    <View style={[styles.item]}>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+      >
+        <Pressable
+          style={{
+            width: "100%",
+          }}
+          onPress={() => setModalVisible(false)}
+        >
+          <Text style={[styles.flatListText, { textAlign: "left" }]}>
+            {item.label}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+  const OptionsHeader = () => {
+    return (
+      <View style={[styles.item]}>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={{ width: "100%" }}>
+            <Text style={[styles.flatListText, { textAlign: "left" }]}>
+              Approve Status
+            </Text>
+          </View>
+        </View>
+      </View>
+    );
+  };
+
   const Item = ({ item, index }) => (
     <View style={[styles.item]}>
       <View
@@ -222,58 +151,38 @@ const Payments = ({ navigation }) => {
       >
         <View
           style={{
-            width: "25%",
-            flexDirection: "row",
-            alignItems: "center",
+            width: "28%",
           }}
         >
-          <CheckBox
-            disabled={false}
-            value={toggleCheckBox ? toggleCheckBox : item.selected}
-            onValueChange={(newValue) => {
-              const newData = data?.array?.map((newItem) => {
-                if (newItem.id == item.id) {
-                  return {
-                    ...newItem,
-                    selected: newValue,
-                  };
-                }
-                return newItem;
-              });
-              const updated = { array: newData };
-              setData(updated);
-            }}
-            tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-          />
           <Text style={[styles.flatListText, { textAlign: "left" }]}>
             {item.name}
           </Text>
         </View>
-        <View style={{ width: "20%" }}>
+        <View style={{ width: "15%" }}>
           <Text style={styles.flatListText}>{item.status}</Text>
         </View>
-        <View style={{ width: "25%" }}>
-          <Text style={styles.flatListText}>{item.due}</Text>
+        <View style={{ width: "18%" }}>
+          <Text style={styles.flatListText}>--</Text>
         </View>
-        <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>{item.issued}</Text>
+        <View style={{ width: "18%" }}>
+          <Text style={styles.flatListText}>--</Text>
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            navigation.navigate("PaymentMusterCard");
-          }}
-          style={{
-            backgroundColor: "#ECE5FC",
-            padding: 5,
-            margin: 5,
-            borderRadius: 3,
-            width: "13%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.smallButton}>View</Text>
-        </TouchableOpacity>
+        <View style={{ width: "17%" }}>
+          <TouchableOpacity
+            onPress={() => setModalVisible(true)}
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 3,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={[styles.smallButton]}>Approve</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -288,33 +197,21 @@ const Payments = ({ navigation }) => {
             justifyContent: "space-between",
           }}
         >
-          <View
-            style={{
-              width: "25%",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <CheckBox
-              disabled={false}
-              value={toggleCheckBox}
-              onValueChange={(newValue) => setToggleCheckBox(newValue)}
-              tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-            />
+          <View style={{ width: "28%" }}>
             <Text style={[styles.flatListText, { textAlign: "left" }]}>
-              Name
+              Name & Skill Set
             </Text>
           </View>
-          <View style={{ width: "20%" }}>
+          <View style={{ width: "15%" }}>
             <Text style={styles.flatListText}>Status</Text>
           </View>
-          <View style={{ width: "25%" }}>
-            <Text style={styles.flatListText}>Due Amount</Text>
+          <View style={{ width: "18%" }}>
+            <Text style={styles.flatListText}>Check-In</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListText}>Issued</Text>
+          <View style={{ width: "18%" }}>
+            <Text style={styles.flatListText}>Check Out</Text>
           </View>
-          <View style={{ width: "15%" }}>
+          <View style={{ width: "17%" }}>
             <Text style={styles.flatListText}>Action</Text>
           </View>
         </View>
@@ -324,16 +221,27 @@ const Payments = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      {/* <View style={styles.headerLogo}>
-          <Image source={Menu} style={{ height: 20, width: 20 }} />
-          <Text style={styles.heading}>Projects</Text>
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setModalVisible(!modalVisible);
+        }}
+      >
+        <View style={{ width: "100%", alignItems: "flex-end" }}>
+          <View style={styles.modalView}>
+            <FlatList
+              data={OPTIONS}
+              renderItem={({ item }) => <Options item={item} />}
+              keyExtractor={(item) => item.id}
+              ListHeaderComponent={OptionsHeader}
+            />
+          </View>
         </View>
-        <View>
-          <TouchableOpacity>
-            <Text>New Project</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
+      </Modal>
+
       <View style={styles.graph}>
         <View
           style={{
@@ -342,7 +250,7 @@ const Payments = ({ navigation }) => {
             alignItems: "center",
           }}
         >
-          <View
+          {/* <View
             style={{
               backgroundColor: "#F7F8F9",
               borderRadius: 50,
@@ -354,29 +262,49 @@ const Payments = ({ navigation }) => {
           >
             <Building size={20} color={Colors.LightGray} />
           </View>
-          <Text style={styles.selectText}>Select Project</Text>
+          <Text style={styles.selectText}>Select Project</Text> */}
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 5,
+            }}
+          >
+            <Text style={styles.smallButton}>Online-90</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 5,
+            }}
+          >
+            <Text style={styles.smallButton}>Offline-20</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 5,
+            }}
+          >
+            <Text style={styles.smallButton}>Present-87</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 5,
+            }}
+          >
+            <Text style={styles.smallButton}>Absent-05</Text>
+          </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>Sort by</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </TouchableOpacity>
           <TouchableOpacity
             style={{
               justifyContent: "center",
@@ -410,38 +338,17 @@ const Payments = ({ navigation }) => {
           }}
         >
           <FlatList
-            data={data.array}
+            data={DATA}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={ListHeader}
           />
         </View>
       </ScrollView>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          padding: 20,
-          position: "absolute",
-          bottom: 0,
-        }}
-      >
-        <TouchableOpacity style={[styles.button, { width: "48%" }]}>
-          <Text style={styles.buttonText}>Pay Online</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            { width: "48%", backgroundColor: Colors.Secondary },
-          ]}
-        >
-          <Text style={styles.buttonText}>Pay Offline</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
-export default Payments;
+export default ApproveAttendance;
 
 const styles = StyleSheet.create({
   container: {
@@ -552,7 +459,7 @@ const styles = StyleSheet.create({
   },
   smallButton: {
     fontFamily: "Lexend-Medium",
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.Secondary,
   },
   linkText: {
@@ -574,21 +481,27 @@ const styles = StyleSheet.create({
   },
   flatListText: {
     fontFamily: "Lexend-Medium",
-    fontSize: 11,
+    fontSize: 10,
     color: Colors.Black,
     textAlign: "center",
   },
-  button: {
-    backgroundColor: Colors.Primary,
-    justifyContent: "center",
-    borderRadius: 4,
-    marginTop: 15,
-    height: 40,
-  },
-  buttonText: {
-    fontFamily: "Lexend-Regular",
-    fontSize: 12,
-    textAlign: "center",
-    color: "white",
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    top: 200,
+    // left: 250,
+    width: "30%",
+    height: "60%",
+    borderRadius: 10,
+    padding: 5,
+    // alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
   },
 });

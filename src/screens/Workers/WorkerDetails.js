@@ -420,7 +420,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     height: "2%",
     // backgroundColor: Colors.White,
-    marginTop: -180,
+    marginTop: -200,
     // padding: 10,
     // margin: 15,
     // shadowColor: "#000",
