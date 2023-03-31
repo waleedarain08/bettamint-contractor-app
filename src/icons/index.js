@@ -280,3 +280,12 @@ export const DonwloadIcon = ({ color, size, style }) => (
 		style={style}
 	/>
 );
+export const SquareCheckBox = ({ color, size, style }) => (
+	<VectorIcon
+		name="checksquare"
+		color={color}
+		size={size}
+		type="AntDesign"
+		style={style}
+	/>
+);
