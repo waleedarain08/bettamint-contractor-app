@@ -11,4 +11,5 @@ export const Colors = {
 	WhiteGray: "#F9F9F9",
 	Black: "black",
 	LightGray: "#ADBAC3",
+	NewGray: "#58677D",
 };

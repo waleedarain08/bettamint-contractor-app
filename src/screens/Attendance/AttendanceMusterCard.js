@@ -17,7 +17,13 @@ import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
-import { Building, Search, TickIcon, Picture } from "../../icons";
+import {
+	Building,
+	Search,
+	TickIcon,
+	Picture,
+	SquareCheckBox,
+} from "../../icons";
 import PersonImage from "../../assets/images/personimage.png";
 import typeIcon from "../../assets/icons/typeIcon.png";
 LogBox.ignoreAllLogs();
@@ -160,21 +166,21 @@ const AttendanceMusterCard = ({ navigation }) => {
 					}}
 				>
 					<View style={{ width: "20%" }}>
-						<Text style={[styles.flatListText, { textAlign: "left" }]}>
+						<Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
 							Date
 						</Text>
 					</View>
 					<View style={{ width: "20%" }}>
-						<Text style={styles.flatListText}>Attendance</Text>
+						<Text style={styles.flatListTextHeader}>Attendance</Text>
 					</View>
 					<View style={{ width: "15%" }}>
-						<Text style={styles.flatListText}>Advance</Text>
+						<Text style={styles.flatListTextHeader}>Advance</Text>
 					</View>
 					<View style={{ width: "15%" }}>
-						<Text style={styles.flatListText}>Verified</Text>
+						<Text style={styles.flatListTextHeader}>Verified</Text>
 					</View>
 					<View style={{ width: "20%" }}>
-						<Text style={styles.flatListText}>Action</Text>
+						<Text style={styles.flatListTextHeader}>Action</Text>
 					</View>
 				</View>
 			</View>
@@ -191,15 +197,24 @@ const AttendanceMusterCard = ({ navigation }) => {
 						padding: 10,
 					}}
 				>
-					<View style={{ width: "35%" }}>
+					<View style={{ width: "25%" }}>
 						<Image
-							style={{ width: 100, height: 100, borderRadius: 10 }}
+							style={{ width: 70, height: 70, borderRadius: 10 }}
 							source={PersonImage}
 						/>
 					</View>
 
-					<View style={{ width: "65%" }}>
-						<Text style={styles.title}>Pritam Pandit Tripathi</Text>
+					<View style={{ width: "75%" }}>
+						<View style={{ flexDirection: "row" }}>
+							<Text style={[styles.title, { paddingRight: 10 }]}>
+								Pritam Pandit Tripathi
+							</Text>
+							<SquareCheckBox
+								size={20}
+								color={Colors.Primary}
+								style={{ borderRadius: 10 }}
+							/>
+						</View>
 						<Text style={styles.typeText}>Electrician</Text>
 					</View>
 				</View>
@@ -217,33 +232,27 @@ const AttendanceMusterCard = ({ navigation }) => {
 						<Text style={styles.typeText}>Delhi 11 Guru Mandir Road...</Text>
 					</View>
 				</View>
-			</View>
-			<ScrollView>
-				<View
-					style={{
-						backgroundColor: Colors.White,
-						alignItems: "center",
-						margin: 10,
-						padding: 10,
-						borderRadius: 10,
-						shadowColor: "#000",
-						shadowOffset: {
-							width: 0,
-							height: 2,
-						},
-						shadowOpacity: 0.2,
-						shadowRadius: 5,
-						elevation: 4,
-					}}
-				>
-					<FlatList
-						data={DATA}
-						renderItem={({ item }) => <Item item={item} />}
-						keyExtractor={(item) => item.id}
-						ListHeaderComponent={ListHeader}
-					/>
+				<View style={{ flexDirection: "row", padding: 10 }}>
+					<Text style={[styles.title, { fontSize: 19 }]}>March 2023</Text>
 				</View>
-			</ScrollView>
+
+				<ScrollView showsHorizontalScrollIndicator={false}>
+					<View
+						style={{
+							margin: 5,
+							padding: 5,
+						}}
+					>
+						<FlatList
+							data={DATA}
+							renderItem={({ item }) => <Item item={item} />}
+							keyExtractor={(item) => item.id}
+							ListHeaderComponent={ListHeader}
+							showsHorizontalScrollIndicator={false}
+						/>
+					</View>
+				</ScrollView>
+			</View>
 		</View>
 	);
 };
@@ -279,7 +288,7 @@ const styles = StyleSheet.create({
 	graph: {
 		// height: "32%",
 		backgroundColor: Colors.White,
-		marginTop: -210,
+		marginTop: -190,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",
@@ -378,6 +387,12 @@ const styles = StyleSheet.create({
 		fontFamily: "Lexend-Medium",
 		fontSize: 11,
 		color: Colors.Black,
+		textAlign: "center",
+	},
+	flatListTextHeader: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 11,
+		color: Colors.NewGray,
 		textAlign: "center",
 	},
 });

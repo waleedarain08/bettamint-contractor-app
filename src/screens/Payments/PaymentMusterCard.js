@@ -19,68 +19,68 @@ import typeIcon from "../../assets/icons/typeIcon.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
-import { Building, Search, TickIcon } from "../../icons";
+import { Building, Search, TickIcon, SquareCheckBox } from "../../icons";
 LogBox.ignoreAllLogs();
 const PaymentMusterCard = ({ navigation }) => {
 	const DATA = [
 		{
-			date: "01/01/2021",
+			date: "01 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "02 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "03 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "04 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "04 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "04 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "05 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "06 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "07 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "08 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 
 		{
-			date: "01/01/2021",
+			date: "09 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
 		{
-			date: "01/01/2021",
+			date: "10 Mar",
 			attendance: "P1",
 			advance: "-",
 		},
@@ -151,21 +151,21 @@ const PaymentMusterCard = ({ navigation }) => {
 					}}
 				>
 					<View style={{ width: "20%" }}>
-						<Text style={[styles.flatListText, { textAlign: "left" }]}>
+						<Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
 							Date
 						</Text>
 					</View>
 					<View style={{ width: "20%" }}>
-						<Text style={styles.flatListText}>Attendance</Text>
+						<Text style={styles.flatListTextHeader}>Attendance</Text>
 					</View>
 					<View style={{ width: "15%" }}>
-						<Text style={styles.flatListText}>Advance</Text>
+						<Text style={styles.flatListTextHeader}>Advance</Text>
 					</View>
 					<View style={{ width: "15%" }}>
-						<Text style={styles.flatListText}>Verified</Text>
+						<Text style={styles.flatListTextHeader}>Verified</Text>
 					</View>
 					<View style={{ width: "20%" }}>
-						<Text style={styles.flatListText}>Action</Text>
+						<Text style={styles.flatListTextHeader}>Action</Text>
 					</View>
 				</View>
 			</View>
@@ -182,15 +182,24 @@ const PaymentMusterCard = ({ navigation }) => {
 						padding: 10,
 					}}
 				>
-					<View style={{ width: "35%" }}>
+					<View style={{ width: "25%" }}>
 						<Image
-							style={{ width: 100, height: 100, borderRadius: 10 }}
+							style={{ width: 70, height: 70, borderRadius: 10 }}
 							source={PersonImage}
 						/>
 					</View>
 
-					<View style={{ width: "65%" }}>
-						<Text style={styles.title}>Pritam Pandit Tripathi</Text>
+					<View style={{ width: "75%" }}>
+						<View style={{ flexDirection: "row" }}>
+							<Text style={[styles.title, { paddingRight: 10 }]}>
+								Pritam Pandit Tripathi
+							</Text>
+							<SquareCheckBox
+								size={20}
+								color={Colors.Primary}
+								style={{ borderRadius: 10 }}
+							/>
+						</View>
 						<Text style={styles.typeText}>Electrician</Text>
 					</View>
 				</View>
@@ -208,54 +217,47 @@ const PaymentMusterCard = ({ navigation }) => {
 						<Text style={styles.typeText}>Delhi 11 Guru Mandir Road...</Text>
 					</View>
 				</View>
-			</View>
-			<ScrollView>
+				<View style={{ flexDirection: "row", padding: 10 }}>
+					<Text style={[styles.title, { fontSize: 19 }]}>March 2023</Text>
+				</View>
+
+				<ScrollView>
+					<View
+						style={{
+							margin: 5,
+							padding: 5,
+						}}
+					>
+						<FlatList
+							data={DATA}
+							renderItem={({ item }) => <Item item={item} />}
+							keyExtractor={(item) => item.id}
+							ListHeaderComponent={ListHeader}
+						/>
+					</View>
+				</ScrollView>
+				<Spacer bottom={60} />
 				<View
 					style={{
-						backgroundColor: Colors.White,
-						alignItems: "center",
-						margin: 10,
-						padding: 10,
-						borderRadius: 10,
-						shadowColor: "#000",
-						shadowOffset: {
-							width: 0,
-							height: 2,
-						},
-						shadowOpacity: 0.2,
-						shadowRadius: 5,
-						elevation: 4,
+						flexDirection: "row",
+						justifyContent: "space-between",
+						padding: 20,
+						position: "absolute",
+						bottom: 0,
 					}}
 				>
-					<FlatList
-						data={DATA}
-						renderItem={({ item }) => <Item item={item} />}
-						keyExtractor={(item) => item.id}
-						ListHeaderComponent={ListHeader}
-					/>
+					<TouchableOpacity style={[styles.button, { width: "48%" }]}>
+						<Text style={styles.buttonText}>Pay Online</Text>
+					</TouchableOpacity>
+					<TouchableOpacity
+						style={[
+							styles.button,
+							{ width: "48%", backgroundColor: Colors.Secondary },
+						]}
+					>
+						<Text style={styles.buttonText}>Pay Offline</Text>
+					</TouchableOpacity>
 				</View>
-			</ScrollView>
-			<Spacer bottom={60} />
-			<View
-				style={{
-					flexDirection: "row",
-					justifyContent: "space-between",
-					padding: 20,
-					position: "absolute",
-					bottom: 0,
-				}}
-			>
-				<TouchableOpacity style={[styles.button, { width: "48%" }]}>
-					<Text style={styles.buttonText}>Pay Online</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
-					style={[
-						styles.button,
-						{ width: "48%", backgroundColor: Colors.Secondary },
-					]}
-				>
-					<Text style={styles.buttonText}>Pay Offline</Text>
-				</TouchableOpacity>
 			</View>
 		</View>
 	);
@@ -292,7 +294,7 @@ const styles = StyleSheet.create({
 	graph: {
 		// height: "35%",
 		backgroundColor: Colors.White,
-		marginTop: -170,
+		marginTop: -150,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",
@@ -411,5 +413,11 @@ const styles = StyleSheet.create({
 		fontSize: 12,
 		textAlign: "center",
 		color: "white",
+	},
+	flatListTextHeader: {
+		fontFamily: "Lexend-Medium",
+		fontSize: 11,
+		color: Colors.NewGray,
+		textAlign: "center",
 	},
 });

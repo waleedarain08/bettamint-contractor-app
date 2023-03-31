@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		// height: "10%",
 		backgroundColor: Colors.White,
-		marginTop: -170,
+		marginTop: -150,
 		padding: 10,
 		margin: 15,
 		shadowColor: "#000",
@@ -429,12 +429,12 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		fontFamily: "Lexend-Bold",
-		fontSize: 16,
+		fontSize: 15,
 		color: Colors.Black,
 	},
 	num: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 12,
+		fontSize: 11,
 		color: Colors.LightGray,
 	},
 	stat: {
@@ -470,7 +470,7 @@ const styles = StyleSheet.create({
 	},
 	workerNumber: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 20,
+		fontSize: 18,
 		color: Colors.Black,
 	},
 	modalView: {

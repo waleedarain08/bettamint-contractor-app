@@ -35,7 +35,7 @@ const SelectLanguage = ({ navigation }) => {
 							style={[styles.button, { backgroundColor: Colors.Secondary }]}
 							onPress={() => navigation.navigate("Login")}
 						>
-							<Text style={styles.buttonText}>Hindi</Text>
+							<Text style={styles.buttonText}>हिंदी</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

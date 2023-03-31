@@ -14,7 +14,7 @@ import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import { Picture } from "../../icons";
+import { LocationIcon, Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
@@ -62,14 +62,26 @@ const CreateNewProject = ({ navigation }) => {
 					</View>
 					<Spacer right={20} />
 					<View style={{ width: "65%" }}>
-						<Text style={styles.title}>Project Type</Text>
-						<View style={styles.inputField}></View>
+						<Text style={styles.title}>PROJECT TYPE</Text>
+						<View style={styles.inputField}>
+							<TextInput
+								style={{ flex: 1, fontFamily: "Lexend-Regular", fontSize: 11 }}
+								placeholder="Select"
+								editable={false}
+								placeholderTextColor={Colors.LightGray}
+							/>
+						</View>
 					</View>
 				</View>
 				<View style={{ padding: 20 }}>
-					<Text style={styles.title}>Project Name</Text>
+					<Text style={styles.title}>PROJECT NAME</Text>
 					<View style={styles.inputField}>
-						<TextInput style={{ flex: 1 }} placeholder="Enter Project Name" />
+						<TextInput
+							style={{ flex: 1, fontFamily: "Lexend-Regular", fontSize: 11 }}
+							placeholder="Enter your project name"
+							editable={false}
+							placeholderTextColor={Colors.LightGray}
+						/>
 					</View>
 				</View>
 				<Spacer top={20} />
@@ -79,7 +91,13 @@ const CreateNewProject = ({ navigation }) => {
 						source={require("../../assets/images/map.png")}
 					>
 						<View style={[styles.inputField, { margin: 20 }]}>
-							<TextInput style={{ flex: 1 }} placeholder="Search Location" />
+							<TextInput
+								style={{ flex: 1, fontFamily: "Lexend-Regular", fontSize: 11 }}
+								placeholder="Search Location"
+								editable={false}
+								placeholderTextColor={Colors.LightGray}
+							/>
+							<LocationIcon size={20} color={Colors.LightGray} />
 						</View>
 					</ImageBackground>
 				</View>
@@ -134,7 +152,7 @@ const styles = StyleSheet.create({
 	graph: {
 		height: "88%",
 		backgroundColor: Colors.White,
-		marginTop: -90,
+		marginTop: -70,
 		margin: 15,
 		shadowColor: "#000",
 		shadowOffset: {
@@ -222,7 +240,7 @@ const styles = StyleSheet.create({
 	},
 	inputField: {
 		flexDirection: "row",
-		justifyContent: "center",
+		justifyContent: "space-between",
 		alignItems: "center",
 		fontFamily: "Lexend-Regular",
 		height: 40,
@@ -232,6 +250,7 @@ const styles = StyleSheet.create({
 		marginTop: 15,
 		backgroundColor: Colors.White,
 		paddingLeft: 10,
+		paddingRight: 10,
 	},
 	button: {
 		backgroundColor: Colors.Primary,
