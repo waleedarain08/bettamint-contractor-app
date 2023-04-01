@@ -69,6 +69,8 @@ import {
   DonwloadIcon,
   NotificationIcon,
   EditIcon,
+  DotIcon,
+  RestoreIcon,
 } from "../icons";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -114,6 +116,44 @@ const PaymentNavigator = ({ navigation }) => (
             <MenuIcon size={30} color={Colors.White} />
           </Pressable>
         ),
+        headerRight: () => (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Pressable
+              style={{
+                height: 30,
+                width: 30,
+                backgroundColor: Colors.Purple,
+                borderRadius: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <RestoreIcon size={22} color={Colors.White} />
+            </Pressable>
+            <Pressable
+              style={{ marginLeft: 8 }}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <Image
+                source={require("../assets/icons/ProfileButton.png")}
+                style={{ height: 30, width: 30, marginRight: 8 }}
+              />
+            </Pressable>
+            <Pressable
+              style={{
+                marginLeft: 0,
+                height: 30,
+                width: 30,
+                backgroundColor: Colors.Purple,
+                borderRadius: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <NotificationIcon size={22} color={Colors.White} />
+            </Pressable>
+          </View>
+        ),
       }}
     />
     <PaymentStack.Screen
@@ -130,6 +170,19 @@ const PaymentNavigator = ({ navigation }) => (
           >
             Muster Card
           </Text>
+        ),
+        headerRight: () => (
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Pressable
+              style={{ marginLeft: 8 }}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <Image
+                source={require("../assets/icons/ProfileButton.png")}
+                style={{ height: 30, width: 30, marginRight: 8 }}
+              />
+            </Pressable>
+          </View>
         ),
       }}
     />
@@ -183,7 +236,7 @@ const JobsNavigator = ({ navigation }) => (
               style={{
                 backgroundColor: Colors.Purple,
                 padding: 5,
-                borderRadius: 12,
+                borderRadius: 15,
                 paddingHorizontal: 10,
               }}
             >
@@ -207,13 +260,26 @@ const JobsNavigator = ({ navigation }) => (
               </View>
             </Pressable>
             <Pressable
-              style={{ marginLeft: 10 }}
+              style={{ marginLeft: 8 }}
               onPress={() => navigation.navigate("Profile")}
             >
               <Image
                 source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 16 }}
+                style={{ height: 30, width: 30, marginRight: 8 }}
               />
+            </Pressable>
+            <Pressable
+              style={{
+                marginLeft: 0,
+                height: 30,
+                width: 30,
+                backgroundColor: Colors.Purple,
+                borderRadius: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <NotificationIcon size={22} color={Colors.White} />
             </Pressable>
           </View>
         ),
@@ -250,6 +316,56 @@ const JobsNavigator = ({ navigation }) => (
           >
             Job Details
           </Text>
+        ),
+        headerRight: () => (
+          <View
+            style={{
+              flexDirection: "row",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                navigation.navigate("CreateNewJob");
+              }}
+              style={{
+                backgroundColor: Colors.Purple,
+                padding: 5,
+                borderRadius: 15,
+                paddingHorizontal: 10,
+              }}
+            >
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <EditIcon size={20} color={Colors.White} />
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 11,
+                    color: Colors.White,
+                    paddingLeft: 5,
+                  }}
+                >
+                  Edit
+                </Text>
+              </View>
+            </Pressable>
+            <Pressable
+              style={{ marginLeft: 10 }}
+              onPress={() => navigation.navigate("Profile")}
+            >
+              <Image
+                source={require("../assets/icons/ProfileButton.png")}
+                style={{ height: 30, width: 30, marginRight: 16 }}
+              />
+            </Pressable>
+          </View>
         ),
       }}
     />
@@ -476,8 +592,22 @@ const WorkersNavigator = ({ navigation }) => {
               <Pressable onPress={() => navigation.navigate("Profile")}>
                 <Image
                   source={require("../assets/icons/ProfileButton.png")}
-                  style={{ height: 30, width: 30, marginRight: 16 }}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
                 />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                // onPress={() => navigation.navigate("Profile")}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
               </Pressable>
             </View>
           ),
@@ -538,19 +668,21 @@ const WorkersNavigator = ({ navigation }) => {
                 style={{
                   backgroundColor: Colors.Purple,
                   padding: 5,
-                  borderRadius: 12,
+                  borderRadius: 14,
                   paddingHorizontal: 10,
                   marginRight: 10,
                   justifyContent: "center",
                   height: 28,
                 }}
               >
-                <View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <EditIcon color={Colors.White} size={14} />
                   <Text
                     style={{
                       fontFamily: "Lexend-Medium",
                       fontSize: 11,
                       color: Colors.White,
+                      paddingLeft: 6,
                     }}
                   >
                     Edit
@@ -805,6 +937,21 @@ const ProfileNavigator = ({ navigation }) => (
             <MenuIcon size={30} color={Colors.White} />
           </Pressable>
         ),
+        headerRight: () => (
+          <Pressable
+            style={{
+              marginLeft: 0,
+              height: 30,
+              width: 30,
+              backgroundColor: Colors.Purple,
+              borderRadius: 15,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <NotificationIcon size={22} color={Colors.White} />
+          </Pressable>
+        ),
       }}
     />
   </ProfileStack.Navigator>
@@ -883,8 +1030,22 @@ const UserNavigator = ({ navigation }) => (
             >
               <Image
                 source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 16 }}
+                style={{ height: 30, width: 30, marginRight: 8 }}
               />
+            </Pressable>
+            <Pressable
+              style={{
+                marginLeft: 0,
+                height: 30,
+                width: 30,
+                backgroundColor: Colors.Purple,
+                borderRadius: 15,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              // onPress={() => navigation.navigate("Profile")}
+            >
+              <NotificationIcon size={22} color={Colors.White} />
             </Pressable>
           </View>
         ),
@@ -1184,8 +1345,23 @@ function TabNavigator({ navigation }) {
                 <Pressable onPress={() => navigation.navigate("Profile")}>
                   <Image
                     source={require("../assets/icons/ProfileButton.png")}
-                    style={{ height: 30, width: 30, marginRight: 16 }}
+                    style={{ height: 30, width: 30, marginRight: 8 }}
                   />
+                </Pressable>
+                <Pressable
+                  style={{
+                    marginLeft: 0,
+                    height: 30,
+                    width: 30,
+                    backgroundColor: Colors.Purple,
+                    borderRadius: 15,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    marginRight: 15,
+                  }}
+                  // onPress={() => navigation.navigate("Profile")}
+                >
+                  <NotificationIcon size={22} color={Colors.White} />
                 </Pressable>
               </View>
             ),

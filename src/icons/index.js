@@ -9,7 +9,7 @@ import Feather from "react-native-vector-icons/Feather";
 import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 import Fontisto from "react-native-vector-icons/Fontisto";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-export const VectorIcon = ({ name, color, size, type, style }) => {
+export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
   switch (type) {
     case "FontAwesome":
       return (
@@ -33,7 +33,13 @@ export const VectorIcon = ({ name, color, size, type, style }) => {
       return <Fontisto name={name} color={color} size={size} style={style} />;
     case "MaterialIcons":
       return (
-        <MaterialIcons name={name} color={color} size={size} style={style} />
+        <MaterialIcons
+          onPress={onPress}
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+        />
       );
     case "MaterialCommunityIcons":
       return (
@@ -69,10 +75,10 @@ export const Building = ({ color, size, style }) => (
 );
 export const User = ({ color, size, style }) => (
   <VectorIcon
-    name="user-circle"
+    name="user"
     color={color}
     size={size}
-    type="FontAwesome5"
+    type="EvilIcons"
     style={style}
   />
 );
@@ -304,6 +310,61 @@ export const DotIcon = ({ color, size, style }) => (
     color={color}
     size={size}
     type="Entypo"
+    style={style}
+  />
+);
+export const DateIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="date-range"
+    color={color}
+    size={size}
+    type="MaterialIcons"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const ClockIcon = ({ color, size, style }) => (
+  <VectorIcon
+    name="clock"
+    color={color}
+    size={size}
+    type="EvilIcons"
+    style={style}
+  />
+);
+export const RupeesIcon = ({ color, size, style }) => (
+  <VectorIcon
+    name="rupee"
+    color={color}
+    size={size}
+    type="FontAwesome"
+    style={style}
+  />
+);
+export const CardIcon = ({ color, size, style }) => (
+  <VectorIcon
+    name="idcard"
+    color={color}
+    size={size}
+    type="AntDesign"
+    style={style}
+  />
+);
+export const LockIcon = ({ color, size, style }) => (
+  <VectorIcon
+    name="lock-closed-outline"
+    color={color}
+    size={size}
+    type="Ionicons"
+    style={style}
+  />
+);
+export const RestoreIcon = ({ color, size, style }) => (
+  <VectorIcon
+    name="restore"
+    color={color}
+    size={size}
+    type="MaterialIcons"
     style={style}
   />
 );

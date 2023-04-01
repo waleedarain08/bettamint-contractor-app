@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,8 +9,9 @@ import {
   Dimensions,
   LogBox,
   Pressable,
+  TextInput,
+  TouchableOpacity,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
@@ -24,22 +25,15 @@ import {
   Picture,
   SquareCheckBox,
   DotIcon,
+  DateIcon,
 } from "../../icons";
 import PersonImage from "../../assets/images/personimage.png";
 import typeIcon from "../../assets/icons/typeIcon.png";
+import DatePicker from "react-native-date-picker";
 LogBox.ignoreAllLogs();
 const AttendanceMusterCard = ({ navigation }) => {
-  // useEffect(() => {
-  // 	navigation.getParent()?.setOptions({
-  // 		tabBarStyle: {
-  // 			display: "none",
-  // 		},
-  // 	});
-  // 	return () =>
-  // 		navigation.getParent()?.setOptions({
-  // 			tabBarStyle: undefined,
-  // 		});
-  // }, [navigation]);
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
   const DATA = [
     {
       date: "01 Mar",
@@ -344,21 +338,82 @@ const AttendanceMusterCard = ({ navigation }) => {
           style={{
             flexDirection: "row",
             alignItems: "center",
-            marginTop: 10,
+            marginTop: 5,
             paddingHorizontal: 10,
+            width: "100%",
+            justifyContent: "space-between",
           }}
         >
-          <View>
+          <View style={{ width: "60%" }}>
             <Text
               style={[
                 styles.title,
                 { fontSize: 15, textTransform: "uppercase" },
               ]}
             >
-              March 2023
+              April 2023
             </Text>
           </View>
-          <View></View>
+          <View style={{ width: "38%" }}>
+            <View style={{ padding: 5, width: "100%" }}>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  borderWidth: 0.2,
+                  borderColor: Colors.FormBorder,
+                  // marginTop: 7,
+                  borderRadius: 4,
+                  paddingHorizontal: 7,
+                  fontSize: 12,
+                  height: 32,
+                  backgroundColor: "#F0F1F3",
+                  elevation: 1,
+                  color: Colors.Black,
+                }}
+              >
+                <TextInput
+                  style={{
+                    fontFamily: "Lexend-Regular",
+                    color: Colors.Black,
+                    fontSize: 10,
+                    width: "80%",
+                  }}
+                  placeholderTextColor={Colors.FormText}
+                  placeholder="Date Range"
+                />
+                {/* <View
+                  style={{
+                    backgroundColor: Colors.White,
+                    width: 25,
+                    height: 28,
+                    alignItems: "center",
+                  }}
+                > */}
+                <DateIcon
+                  onPress={() => setOpen(true)}
+                  color={Colors.FormText}
+                  size={17}
+                />
+                {/* </View> */}
+              </View>
+            </View>
+            <DatePicker
+              modal
+              mode="date"
+              textColor={Colors.Black}
+              open={open}
+              date={date}
+              onConfirm={(date) => {
+                setOpen(false);
+                setDate(date);
+              }}
+              onCancel={() => {
+                setOpen(false);
+              }}
+            />
+          </View>
         </View>
 
         {/* <ScrollView showsHorizontalScrollIndicator={false}> */}

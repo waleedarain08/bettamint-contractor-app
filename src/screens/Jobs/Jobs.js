@@ -222,18 +222,30 @@ const Jobs = ({ navigation }) => {
           >
             <Building size={20} color={Colors.LightGray} />
           </View>
-          <Text style={styles.selectText}>Select Project</Text>
+          <View>
+            <Text style={styles.selectText}>Link a Project</Text>
+            <Text
+              style={[
+                styles.selectText,
+                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+              ]}
+            >
+              Select a Project
+            </Text>
+          </View>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
               borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
             }}
           >
-            <Text style={styles.smallButton}>Sort by</Text>
+            <Text style={styles.smallButton}>Sort By</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -241,6 +253,8 @@ const Jobs = ({ navigation }) => {
               padding: 5,
               margin: 5,
               borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
             }}
           >
             <Text style={styles.smallButton}>Filter</Text>
@@ -252,7 +266,8 @@ const Jobs = ({ navigation }) => {
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 7,
             }}
           >
             <Search size={13} color={Colors.Secondary} />

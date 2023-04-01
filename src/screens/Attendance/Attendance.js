@@ -361,7 +361,7 @@ const Attendance = ({ navigation }) => {
           keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
           stickyHeaderIndices={[0]}
-		  showsVerticalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
         />
       </View>
       {/* </ScrollView> */}
@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
   flatListText: {
     fontFamily: "Lexend-Medium",
     fontSize: 12,
-    color: Colors.Black,
+    color: Colors.ListItemText,
     textAlign: "center",
   },
   flatListTextHeader: {

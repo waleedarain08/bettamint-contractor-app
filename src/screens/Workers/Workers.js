@@ -2,129 +2,176 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
-  Dimensions,
-  Pressable,
-  Modal,
   LogBox,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-
-import Menu from "../../assets/icons/Menu.png";
+import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
+import { Building, Search, TickIcon } from "../../icons";
 
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { User, TickIcon, Cross, Search, Building } from "../../icons";
 LogBox.ignoreAllLogs();
 const Workers = ({ navigation }) => {
-  const [details, setDetails] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const DATA = [
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-    {
-      name: "Rajesh",
-      status: "Online",
-      phone: "1234567890",
-      location: "Koramangala, Bengaluru, Karnataka 560095, India",
-      bank: "HDFC",
-      account: "123 4567 890",
-      img: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    },
-  ];
+  const [data, setData] = useState({
+    array: [
+      {
+        id: 1,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 2,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 3,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 4,
+        name: "Arvind Chauhan",
+        status: "Offline",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 5,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 6,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 7,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 8,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 9,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 10,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+
+      {
+        id: 11,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 12,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 13,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 14,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 15,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 16,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 17,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 18,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+      {
+        id: 19,
+        name: "Arvind Chauhan",
+        status: "Online",
+        due: "₹ 10,350",
+        issued: "₹ 8,650",
+        selected: false,
+      },
+    ],
+  });
+
+  const rowColors = ["#F3F4F4", "#FFFFFF"];
   const Item = ({ item, index }) => (
     <View style={[styles.item]}>
       <View
@@ -133,20 +180,41 @@ const Workers = ({ navigation }) => {
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
+          backgroundColor: rowColors[index % rowColors?.length],
+          paddingHorizontal: 8,
+          paddingVertical: 4,
         }}
       >
         <View
           style={{
-            width: "25%",
+            width: "30%",
           }}
         >
-          <Text style={[styles.flatListText, { textAlign: "left" }]}>
+          <Text
+            style={[
+              styles.flatListText,
+              { textAlign: "left", textTransform: "uppercase", fontSize: 10 },
+            ]}
+          >
             {item.name}
-            {item.phone}
+          </Text>
+          <Text
+            style={[
+              styles.flatListText,
+              { textAlign: "left", fontSize: 9 },
+            ]}
+          >
+            +91 231 2345 789
           </Text>
         </View>
-        <View style={{ width: "20%" }}>
-          <Text style={styles.flatListText}>{item.status}</Text>
+        <View style={{ width: "15%", alignItems: "center" }}>
+          {item.status == "Online" ? (
+            <Text style={[styles.flatListText, { color: Colors.Primary }]}>
+              {item.status}
+            </Text>
+          ) : (
+            <Text style={styles.flatListText}>{item.status}</Text>
+          )}
         </View>
         <View style={{ width: "15%", alignItems: "center" }}>
           <TickIcon size={20} color={Colors.Primary} />
@@ -154,24 +222,24 @@ const Workers = ({ navigation }) => {
         <View style={{ width: "15%", alignItems: "center" }}>
           <TickIcon size={20} color={Colors.Primary} />
         </View>
-        <TouchableOpacity
-          onPress={() => {
-            // setModalVisible(true);
-            // setDetails(item);
-            navigation.navigate("WorkerDetails");
-          }}
-          style={{
-            backgroundColor: "#ECE5FC",
-            padding: 5,
-            margin: 5,
-            borderRadius: 3,
-            width: "15%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.smallButton}>View</Text>
-        </TouchableOpacity>
+        <View style={{ width: "18%" }}>
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("WorkerDetails");
+            }}
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 2,
+              width: "80%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.smallButton}>View</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -184,24 +252,33 @@ const Workers = ({ navigation }) => {
             alignItems: "center",
             width: "100%",
             justifyContent: "space-between",
+            paddingHorizontal: 8,
+            backgroundColor: Colors.White,
+            height: 50,
+            borderTopLeftRadius: 10,
+            borderTopRightRadius: 25,
           }}
         >
-          <View style={{ width: "25%" }}>
-            <Text style={[styles.flatListText, { textAlign: "left" }]}>
+          <View
+            style={{
+              width: "30%",
+            }}
+          >
+            <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
               Name
             </Text>
           </View>
-          <View style={{ width: "20%" }}>
-            <Text style={styles.flatListText}>Status</Text>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            <Text style={styles.flatListTextHeader}>Status</Text>
           </View>
-          <View style={{ width: "25%" }}>
-            <Text style={styles.flatListText}>Adhar</Text>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            <Text style={styles.flatListTextHeader}>Aadhar</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListText}>Bank</Text>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            <Text style={styles.flatListTextHeader}>Bank</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListText}>Action</Text>
+          <View style={{ width: "18%", alignItems: "center" }}>
+            <Text style={styles.flatListTextHeader}>Action</Text>
           </View>
         </View>
       </View>
@@ -210,16 +287,6 @@ const Workers = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      {/* <View style={styles.headerLogo}>
-          <Image source={Menu} style={{ height: 20, width: 20 }} />
-          <Text style={styles.heading}>Projects</Text>
-        </View>
-        <View>
-          <TouchableOpacity>
-            <Text>New Project</Text>
-          </TouchableOpacity>
-        </View>
-      </View> */}
       <View style={styles.graph}>
         <View
           style={{
@@ -240,25 +307,39 @@ const Workers = ({ navigation }) => {
           >
             <Building size={20} color={Colors.LightGray} />
           </View>
-          <Text style={styles.selectText}>Select Project</Text>
+          <View>
+            <Text style={styles.selectText}>Link a Project</Text>
+            <Text
+              style={[
+                styles.selectText,
+                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+              ]}
+            >
+              Select a Project
+            </Text>
+          </View>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
             }}
           >
-            <Text style={styles.smallButton}>Sort by</Text>
+            <Text style={styles.smallButton}>Sort By</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
             }}
           >
             <Text style={styles.smallButton}>Filter</Text>
@@ -270,172 +351,61 @@ const Workers = ({ navigation }) => {
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
-              borderRadius: 5,
+              borderRadius: 3,
+              paddingHorizontal: 7,
             }}
           >
-            <Search size={15} color={Colors.Secondary} />
+            <Search size={13} color={Colors.Secondary} />
           </TouchableOpacity>
         </View>
       </View>
-      <ScrollView>
-        <View
-          style={{
-            backgroundColor: Colors.White,
-            alignItems: "center",
-            margin: 10,
-            padding: 10,
-            borderRadius: 10,
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.2,
-            shadowRadius: 5,
-            elevation: 4,
-          }}
-        >
-          <FlatList
-            data={DATA}
-            renderItem={({ item }) => <Item item={item} />}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={ListHeader}
-          />
-        </View>
-      </ScrollView>
+      {/* <ScrollView> */}
       <View
         style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          padding: 20,
-          position: "absolute",
-          bottom: 0,
+          backgroundColor: Colors.White,
+          alignItems: "center",
+          margin: 10,
+          borderRadius: 10,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          elevation: 4,
+          width: "93%",
+          flex: 1,
         }}
       >
-        <TouchableOpacity style={[styles.button, { width: "48%" }]}>
+        <FlatList
+          data={data.array}
+          renderItem={({ item, index }) => <Item item={item} index={index} />}
+          keyExtractor={(item) => item.id}
+          ListHeaderComponent={ListHeader}
+          stickyHeaderIndices={[0]}
+          showsVerticalScrollIndicator={false}
+        />
+      </View>
+      <Spacer bottom={60} />
+      <View
+        style={{
+          width: "93%",
+          flexDirection: "row",
+          justifyContent: "space-between",
+          position: "absolute",
+          bottom: 18,
+        }}
+      >
+        <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>Pay Online</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.button,
-            { width: "48%", backgroundColor: Colors.Secondary },
-          ]}
+          style={[styles.button, { backgroundColor: Colors.Secondary }]}
         >
           <Text style={styles.buttonText}>Pay Offline</Text>
         </TouchableOpacity>
       </View>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <View style={styles.modalView}>
-            <ImageBackground
-              source={{ uri: details?.img }}
-              style={{
-                margin: 10,
-                width: 330,
-                height: 330,
-                resizeMode: "contain",
-                alignItems: "center",
-                borderRadius: 20,
-              }}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  margin: 10,
-                }}
-              >
-                <View
-                  style={{
-                    justifyContent: "space-between",
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View>
-                    <Text style={styles.modalText}>Name</Text>
-                    <Text style={styles.modalHeading}>{details?.name}</Text>
-                  </View>
-                  <User size={20} color={Colors.White} />
-                </View>
-                <Spacer bottom={10} />
-              </View>
-            </ImageBackground>
-            <View style={{ padding: 20 }}>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Phone Number
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.phone}
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Location
-                </Text>
-
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.location}
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Bank Name
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.bank}
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Bank Account Number
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.account}
-                </Text>
-              </View>
-
-              <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
@@ -445,10 +415,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+    width: "100%",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    textAlign: "center",
+    color: "white",
+  },
+  button: {
+    width: "48%",
+    padding: 12,
+    backgroundColor: Colors.Primary,
+    borderRadius: 4,
+    justifyContent: "center",
+    alignItems: "center",
   },
   header: {
-    // flexDirection: "row",
-    // justifyContent: "space-between",
     backgroundColor: Colors.Primary,
     height: "28%",
     width: "100%",
@@ -456,23 +440,10 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 50,
     paddingHorizontal: 20,
   },
-  heading: {
-    fontSize: 20,
-    fontFamily: "Lexend-Medium",
-    color: Colors.White,
-    marginLeft: 10,
-  },
-  headerLogo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 25,
-    width: "100%",
-  },
   graph: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    // height: "8%",
     backgroundColor: Colors.White,
     marginTop: -170,
     padding: 10,
@@ -486,35 +457,9 @@ const styles = StyleSheet.create({
     shadowRadius: 5,
     elevation: 4,
     borderRadius: 10,
-  },
-  graphBottom: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 20,
-  },
-  graphBottomText: {
-    fontSize: 10,
-    fontFamily: "Lexend-Regular",
-    color: Colors.Black,
-  },
-  graphBottomTextBold: {
-    fontSize: 32,
-    fontFamily: "Lexend-Bold",
-    color: Colors.Secondary,
-    paddingLeft: 10,
-  },
-  graphBottomTabs: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: Colors.WhiteGray,
-    borderRadius: 8,
-    padding: 12,
+    width: "93%",
   },
   item: {
-    padding: 10,
-    backgroundColor: Colors.White,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,
@@ -523,25 +468,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 4,
-    // borderRadius: 10,
+    width: "100%",
   },
   title: {
     fontFamily: "Lexend-Bold",
     fontSize: 16,
     color: Colors.Black,
   },
-  num: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 12,
-    color: Colors.LightGray,
-  },
-  stat: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 6,
-    textAlign: "right",
-    color: Colors.LightGray,
-  },
-
   selectText: {
     fontFamily: "Lexend-Medium",
     fontSize: 10,
@@ -549,71 +482,20 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
   },
   smallButton: {
-    fontFamily: "Lexend-Medium",
+    fontFamily: "Lexend-SemiBold",
     fontSize: 10,
     color: Colors.Secondary,
-  },
-  linkText: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 10,
-    color: Colors.White,
-    textAlign: "right",
-    marginRight: 15,
-  },
-  workerHeading: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 12,
-    color: Colors.Gray,
-  },
-  workerNumber: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 20,
-    color: Colors.Black,
   },
   flatListText: {
     fontFamily: "Lexend-Medium",
     fontSize: 11,
-    color: Colors.Black,
+    color: Colors.ListItemText,
     textAlign: "center",
   },
-  button: {
-    backgroundColor: Colors.Primary,
-    justifyContent: "center",
-    borderRadius: 4,
-    marginTop: 15,
-    height: 40,
-  },
-  buttonText: {
-    fontFamily: "Lexend-Regular",
-    fontSize: 12,
+  flatListTextHeader: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 11,
+    color: Colors.ListHeaderText,
     textAlign: "center",
-    color: "white",
-  },
-  modalView: {
-    paddingTop: Platform.OS === "android" ? 0 : 50,
-    backgroundColor: Colors.White,
-    bottom: 0,
-    shadowColor: "#000",
-    width: "90%",
-    height: "95%",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 4,
-    elevation: 5,
-    borderRadius: 10,
-  },
-  modalText: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 12,
-    color: Colors.White,
-  },
-  modalHeading: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 16,
-    color: Colors.White,
-    textTransform: "capitalize",
   },
 });

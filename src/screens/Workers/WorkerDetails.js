@@ -183,6 +183,7 @@ const WorkerDetails = ({ navigation }) => {
                 source={{
                   uri: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
                 }}
+                imageStyle={{ borderRadius: 10 }}
                 style={{
                   // marginHorizontal: 20,
                   // padding: 10,
@@ -213,7 +214,9 @@ const WorkerDetails = ({ navigation }) => {
                       <Text style={styles.modalText}>Name</Text>
                       <Text style={styles.modalHeading}>VIKRUM RAJPUT</Text>
                     </View>
-                    <User size={20} color={Colors.White} />
+                    <View>
+                      <User size={30} color={Colors.White} />
+                    </View>
                   </View>
                   <Spacer bottom={10} />
                 </View>
@@ -369,7 +372,7 @@ const WorkerDetails = ({ navigation }) => {
                     // flexDirection: "row",
                     alignItems: "center",
                     // justifyContent: "space-between",
-                    paddingBottom: 70
+                    paddingBottom: 70,
                   }}
                 >
                   <Image
