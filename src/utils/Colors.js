@@ -11,5 +11,9 @@ export const Colors = {
 	WhiteGray: "#F9F9F9",
 	Black: "black",
 	LightGray: "#ADBAC3",
-	NewGray: "#58677D",
+	FormText: '#7C8B96',
+	FormBorder: '#C4C4C4',
+	ListHeaderText: '#58677D',
+	ListItemText: '#333333',
+	SubHeading: '#444444'
 };
