@@ -6,6 +6,7 @@ import {
 	TextInput,
 	TouchableOpacity,
 	Image,
+	Pressable,
 } from "react-native";
 import React from "react";
 import Vector from "../../assets/images/bgvector.png";
@@ -37,9 +38,12 @@ const Login = ({ navigation }) => {
 					</TouchableOpacity>
 				</View>
 			</View>
-			<View style={styles.bottomView}>
+			<Pressable
+				style={styles.bottomView}
+				onPress={() => navigation.navigate("Signup")}
+			>
 				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
-			</View>
+			</Pressable>
 		</ImageBackground>
 	);
 };
