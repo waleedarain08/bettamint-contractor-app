@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -22,6 +22,8 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { LocationIcon, Search } from "../../icons";
 import { Building, Whatsapp } from "../../icons";
+import { useDispatch } from "react-redux";
+import { getAllJobsAction } from "../../redux/slices/jobSlice";
 LogBox.ignoreAllLogs();
 const DATA = [
   {
@@ -69,6 +71,12 @@ const DATA = [
 const Jobs = ({ navigation }) => {
   const [details, setDetails] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllJobsAction());
+  }, []);
+
   const Item = ({ item }) => (
     <Pressable
       style={styles.item}

@@ -1,57 +1,58 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { PROJECT_GETALL_URL, responseHandler } from "../../utils/api_constants";
+import { JOB_GETALL_URL, responseHandler } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
+
 const initialState = {
   loading: false,
   error: null,
-  projectsList: null,
+  jobsList: null,
 };
+
 const api = new APIServiceManager();
-const projectSlice = createSlice({
-  name: "projects",
+const jobSlice = createSlice({
+  name: "jobs",
   initialState,
   reducers: {
-    getProjectsRequest: (state, action) => {
+    getJobRequest: (state, action) => {
       state.loading = true;
       state.error = null;
     },
-    getProjectsSuccess: (state, action) => {
-      state.projectsList = action.payload;
+    getJobSuccess: (state, action) => {
+      state.jobsList = action.payload;
       state.loadingProjects = false;
     },
-    getProjectsFailure: (state, action) => {
+    getJobFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
   },
 });
 
-const { getProjectsRequest, getProjectsSuccess, getProjectsFailure } =
-  projectSlice.actions;
+const { getJobRequest, getJobSuccess, getJobFailure } = jobSlice.actions;
 
-  export const projectReducer = (state) => state.projects;
+export const jobReducer = (state) => state.jobs;
 
-export const getAllProjectsAction = () => async (dispatch) => {
+export const getAllJobsAction = () => async (dispatch) => {
   try {
-    dispatch(getProjectsRequest());
+    dispatch(getJobRequest());
     await api
-      .request("GET", PROJECT_GETALL_URL, null, {
+      .request("GET", JOB_GETALL_URL, null, {
         Authorization:
           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2IiwibmJmIjoxNjgwNjM5NzE1LCJleHAiOjE2ODE1MDM3MTUsImlhdCI6MTY4MDYzOTcxNX0.y3UzWdIchnRh6spJrLA2_U3gU8WABjpsDTojTP4O9jE",
       })
       .then((res) => {
         const data = responseHandler(res);
-        console.log("Project DATA", data);
+        console.log("JOB DATA", data);
         if (data) {
-          dispatch(getProjectsSuccess(data));
+          dispatch(getJobSuccess(data));
         }
       })
       .catch((error) => {
         console.log("ERROR", error);
-        dispatch(getProjectsFailure());
+        dispatch(getJobFailure());
       });
   } catch (error) {
-    dispatch(getProjectsFailure());
+    dispatch(getJobFailure());
   }
 };
-export default projectSlice.reducer;
+export default jobSlice.reducer;
