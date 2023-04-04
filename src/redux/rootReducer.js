@@ -1,5 +1,5 @@
-import projectSlices from "./slices/projectSlices";
+import projectSlice from "./slices/projectSlice";
 
-const rootReducer = { projectSlices };
+const rootReducer = { projectSlice };
 
 export default rootReducer;
