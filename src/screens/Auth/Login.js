@@ -8,21 +8,31 @@ import {
 	Image,
 	Pressable,
 } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import Vector from "../../assets/images/bgvector.png";
 import Profile from "../../assets/icons/Profile.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
+import { Switch } from "react-native-paper";
 const Login = ({ navigation }) => {
+	const [contactType, setContactType] = useState("email");
+
+	const handleToggleSwitch = () => {
+		setContactType(contactType === "email" ? "phone" : "email");
+	};
 	return (
 		<ImageBackground source={Vector} style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
 					<Text style={styles.headingText}>Get Started</Text>
 					<Text style={styles.text}>Enter you Email/Phone Number</Text>
+					<Switch
+						value={contactType === "phone"}
+						onValueChange={handleToggleSwitch}
+					/>
 					<View style={styles.inputField}>
 						<Image source={Profile} style={{ paddingRight: 15 }} />
-						<TextInput
+						{/* <TextInput
 							style={{
 								flex: 1,
 								fontFamily: "Lexend-Regular",
@@ -31,6 +41,20 @@ const Login = ({ navigation }) => {
 							}}
 							placeholder="Email Address or Phone Number"
 							placeholderTextColor={Colors.Gray}
+						/> */}
+						<TextInput
+							style={{
+								flex: 1,
+								fontFamily: "Lexend-Regular",
+								fontSize: 13,
+								color: Colors.Black,
+							}}
+							placeholder={contactType === "email" ? "Email" : "Phone"}
+							placeholderTextColor={Colors.Gray}
+							mode="outlined"
+							keyboardType={
+								contactType === "email" ? "email-address" : "phone-pad"
+							}
 						/>
 					</View>
 
