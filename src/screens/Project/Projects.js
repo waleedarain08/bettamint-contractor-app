@@ -12,18 +12,18 @@ import {
   LogBox,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 import { useSelector, useDispatch } from "react-redux";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-LogBox.ignoreAllLogs();
 import { Building, Search, LocationIcon } from "../../icons";
-import { getAllProjectsAction } from "../../redux/slices/projectSlice";
+import {
+  getAllProjectsAction,
+  projectsListReducer,
+} from "../../redux/slices/projectSlice";
+import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
+LogBox.ignoreAllLogs();
 
 const DATA = [
   {
@@ -87,11 +87,19 @@ const DATA = [
 const Projects = ({ navigation }) => {
   const [details, setDetails] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  //! INSTANCES
   const dispatch = useDispatch();
 
+  //! SELECTORS
+  const projectsList = useSelector(projectsListReducer);
+
+  //! LIFE CYCLE
   useEffect(() => {
     dispatch(getAllProjectsAction());
   }, []);
+
+
   const Item = ({ item }) => (
     <Pressable
       style={styles.item}
@@ -104,7 +112,7 @@ const Projects = ({ navigation }) => {
       >
         <View style={{ width: "30%" }}>
           <ImageBackground
-            source={{ uri: item.image }}
+            source={{ uri: assetsUrl + item?.url }}
             imageStyle={{ borderRadius: 5 }}
             style={{
               width: 100,
@@ -119,13 +127,13 @@ const Projects = ({ navigation }) => {
                 { fontSize: 12, bottom: 0, position: "absolute" },
               ]}
             >
-              {item.type}
+              {item.projectTypeId}
             </Text>
           </ImageBackground>
         </View>
         <Spacer left={10} />
         <View style={{ width: "65%" }}>
-          <Text style={styles.title}>{item.title}</Text>
+          <Text style={styles.title}>{item.name}</Text>
           {/* <Spacer bottom={10} /> */}
           <View
             style={{
@@ -135,7 +143,10 @@ const Projects = ({ navigation }) => {
             }}
           >
             <LocationIcon size={22} color={Colors.LightGray} />
-            <Text style={styles.num}>{item.location}</Text>
+            <Text style={styles.num}>
+              Address
+              {/* {getProjectsAddress(item?.latitude, item?.longitude)} */}
+            </Text>
           </View>
           <Spacer bottom={10} />
           <View
@@ -156,7 +167,7 @@ const Projects = ({ navigation }) => {
               }}
             >
               <Text style={styles.workerHeading}>Required{"\n"}Workers:</Text>
-              <Text style={styles.workerNumber}>{item.worker}</Text>
+              <Text style={styles.workerNumber}>{item?.requiredWorkers}</Text>
             </View>
             <View
               style={{
@@ -173,7 +184,7 @@ const Projects = ({ navigation }) => {
               }}
             >
               <Text style={styles.workerHeading}>Active{"\n"}Workers:</Text>
-              <Text style={styles.workerNumber}>{item.worker}</Text>
+              <Text style={styles.workerNumber}>{item?.activeWorkers}</Text>
             </View>
           </View>
         </View>
@@ -248,124 +259,11 @@ const Projects = ({ navigation }) => {
       </Text>
       <ScrollView>
         <FlatList
-          data={DATA}
+          data={projectsList}
           renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.id}
         />
       </ScrollView>
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <View style={styles.modalView}>
-            <ImageBackground
-              source={{ uri: details?.image }}
-              style={{
-                margin: 10,
-                width: 330,
-                height: 330,
-                resizeMode: "contain",
-                alignItems: "center",
-                borderRadius: 20,
-              }}
-            >
-              <View
-                style={{
-                  position: "absolute",
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  margin: 10,
-                }}
-              >
-                <View
-                  style={{
-                    justifyContent: "space-between",
-                    flexDirection: "row",
-                    alignItems: "center",
-                  }}
-                >
-                  <View>
-                    <Text style={styles.modalText}>Project</Text>
-                    <Text style={styles.modalHeading}>{details?.title}</Text>
-                  </View>
-                  <Building size={20} color={Colors.White} />
-                </View>
-                <Spacer bottom={10} />
-              </View>
-            </ImageBackground>
-            <View style={{ padding: 20 }}>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  PROJECT TYPE
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.type}
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Required Workers
-                </Text>
-
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.days}
-                </Text>
-              </View>
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  Active Workers
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.days}
-                </Text>
-              </View>
-
-              <View
-                style={{
-                  borderBottomWidth: 1,
-                  borderBottomColor: Colors.WhiteGray,
-                  padding: 10,
-                }}
-              >
-                <Text style={[styles.modalText, { color: Colors.Gray }]}>
-                  LOCATION
-                </Text>
-                <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                  {details?.location}
-                </Text>
-              </View>
-
-              <TouchableOpacity onPress={() => setModalVisible(!modalVisible)}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };

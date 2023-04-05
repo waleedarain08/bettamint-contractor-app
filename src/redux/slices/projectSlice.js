@@ -1,5 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { PROJECT_GETALL_URL, responseHandler } from "../../utils/api_constants";
+import {
+  PROJECT_GETALL_URL,
+  responseHandler,
+  staticToken,
+} from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 const initialState = {
   loading: false,
@@ -29,22 +33,22 @@ const projectSlice = createSlice({
 const { getProjectsRequest, getProjectsSuccess, getProjectsFailure } =
   projectSlice.actions;
 
-  export const projectReducer = (state) => state.projects;
+export const projectsListReducer = (state) => state?.projectSlice?.projectsList;
 
 export const getAllProjectsAction = () => async (dispatch) => {
   try {
     dispatch(getProjectsRequest());
     await api
       .request("GET", PROJECT_GETALL_URL, null, {
-        Authorization:
-          "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2IiwibmJmIjoxNjgwNjM5NzE1LCJleHAiOjE2ODE1MDM3MTUsImlhdCI6MTY4MDYzOTcxNX0.y3UzWdIchnRh6spJrLA2_U3gU8WABjpsDTojTP4O9jE",
+        Authorization: staticToken,
       })
       .then((res) => {
         const data = responseHandler(res);
-        console.log("Project DATA", data);
+        // console.log("Project DATA", data);
         if (data) {
           dispatch(getProjectsSuccess(data));
         }
+        // return res
       })
       .catch((error) => {
         console.log("ERROR", error);
