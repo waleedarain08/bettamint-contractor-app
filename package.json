@@ -32,6 +32,7 @@
 		"react-native-gesture-handler": "^2.9.0",
 		"react-native-gifted-charts": "^1.2.42",
 		"react-native-graph": "^1.0.1",
+		"react-native-image-picker": "^5.3.1",
 		"react-native-linear-gradient": "^2.6.2",
 		"react-native-options-button": "^1.0.0",
 		"react-native-paper": "^5.6.0",
