@@ -12,6 +12,7 @@ export const staticToken =
 export const PROJECT_GETALL_URL = "dashboard/Project/getall";
 export const JOB_GETALL_URL = "dashboard/Job/getall";
 export const UPDATE_PROJECT_URL = "dashboard/Project/addupdateproject";
+export const ATTENDANCE_GETALL_URL = "dashboard/Attendance/getall";
 
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
@@ -21,4 +22,4 @@ export const responseHandler = (response) => {
 };
 
 // GOOGLE API KEY
-export const GOOGLE_API_KEY = 'AIzaSyDmPu3_XheAsKf93Ab3pwbLU_ri9nmg5XM';
+export const GOOGLE_API_KEY = "AIzaSyDmPu3_XheAsKf93Ab3pwbLU_ri9nmg5XM";
