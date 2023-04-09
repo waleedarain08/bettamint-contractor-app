@@ -13,6 +13,7 @@ export const PROJECT_GETALL_URL = "dashboard/Project/getall";
 export const JOB_GETALL_URL = "dashboard/Job/getall";
 export const UPDATE_PROJECT_URL = "dashboard/Project/addupdateproject";
 export const ATTENDANCE_GETALL_URL = "dashboard/Attendance/getall";
+export const PROJECT_GETALL_SIMPLE = "dashboard/Project/getallsimple";
 
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {

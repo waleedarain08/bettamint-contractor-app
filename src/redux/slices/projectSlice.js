@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
 	PROJECT_GETALL_URL,
 	UPDATE_PROJECT_URL,
+	PROJECT_GETALL_SIMPLE,
 	base_url,
 	responseHandler,
 	staticToken,
@@ -12,6 +13,7 @@ const initialState = {
 	error: null,
 	projectsList: null,
 	createProjectData: null,
+	projectsListSimple: null,
 };
 const api = new APIServiceManager();
 
@@ -43,6 +45,18 @@ const projectSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		getProjectsSimpleRequest: (state, action) => {
+			state.loading = true;
+			state.error = null;
+		},
+		getProjectsSimpleSuccess: (state, action) => {
+			state.projectsListSimple = action.payload;
+			state.loadingProjects = false;
+		},
+		getProjectsSimpleFailure: (state, action) => {
+			state.loading = false;
+			state.error = action.payload;
+		},
 	},
 });
 
@@ -53,9 +67,14 @@ const {
 	updateProjectRequest,
 	updateProjectSuccess,
 	updateProjectFailure,
+	getProjectsSimpleRequest,
+	getProjectsSimpleSuccess,
+	getProjectsSimpleFailure,
 } = projectSlice.actions;
 
 export const projectsListReducer = (state) => state?.projectSlice?.projectsList;
+export const projectsListSimpleReducer = (state) =>
+	state?.projectSlice?.projectsListSimple;
 
 export const getAllProjectsAction = () => async (dispatch) => {
 	try {
@@ -107,4 +126,30 @@ export const updateProjectAction = (projectData) => async (dispatch) => {
 		dispatch(updateProjectFailure());
 	}
 };
+
+export const getAllProjectsSimpleAction = () => async (dispatch) => {
+	try {
+		dispatch(getProjectsSimpleRequest());
+		await api
+
+			.request("GET", PROJECT_GETALL_SIMPLE, null, {
+				Authorization: staticToken,
+			})
+			.then((res) => {
+				const data = responseHandler(res);
+				// console.log("Project DATA Simple", data);
+				if (data) {
+					dispatch(getProjectsSimpleSuccess(data));
+				}
+				// return res
+			})
+			.catch((error) => {
+				console.log("ERROR", error);
+				dispatch(getProjectsSimpleFailure());
+			});
+	} catch (error) {
+		dispatch(getProjectsSimpleFailure());
+	}
+};
+
 export default projectSlice.reducer;

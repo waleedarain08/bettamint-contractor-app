@@ -15,89 +15,44 @@ import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 import { useSelector, useDispatch } from "react-redux";
+import DropDownPicker from "react-native-dropdown-picker";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { Building, Search, LocationIcon } from "../../icons";
 import {
 	getAllProjectsAction,
 	projectsListReducer,
+	projectsListSimpleReducer,
+	getAllProjectsSimpleAction,
 } from "../../redux/slices/projectSlice";
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
 LogBox.ignoreAllLogs();
 
-const DATA = [
-	{
-		id: "1",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "247",
-		type: "Residential",
-		days: "30",
-		supervisor: "Laxmi",
-		location:
-			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-	},
-	{
-		id: "2",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "247",
-		type: "Residential",
-		days: "30",
-		supervisor: "Laxmi",
-		location:
-			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-	},
-	{
-		id: "3",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "200",
-		type: "Residential",
-		days: "30",
-		supervisor: "Laxmi",
-		location:
-			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-	},
-	{
-		id: "4",
-		title: "Ram Parshad Twin Towers",
-		num: "175",
-		image:
-			"https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-		stat: "Daily Stats*",
-		worker: "456",
-		type: "Residential",
-		days: "30",
-		supervisor: "Laxmi",
-		location:
-			"V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-	},
-];
-
 const Projects = ({ navigation }) => {
 	const [details, setDetails] = useState(null);
 	const [modalVisible, setModalVisible] = useState(false);
+	const [selectedProject, setSelectedProject] = useState(null);
+	const [open, setOpen] = useState(false);
 
 	//! INSTANCES
 	const dispatch = useDispatch();
 
 	//! SELECTORS
 	const projectsList = useSelector(projectsListReducer);
+	const projectsListSimple = useSelector(projectsListSimpleReducer);
 
 	//! LIFE CYCLE
 	useEffect(() => {
 		dispatch(getAllProjectsAction());
 	}, []);
+
+	useEffect(() => {
+		dispatch(getAllProjectsSimpleAction());
+	}, [selectedProject]);
+
+	const onValueChange = (value) => {
+		setSelectedProject(value);
+	};
 
 	const Item = ({ item }) => (
 		<Pressable
@@ -207,9 +162,10 @@ const Projects = ({ navigation }) => {
 						flexDirection: "row",
 						justifyContent: "space-between",
 						alignItems: "center",
+						width: "100%",
 					}}
 				>
-					<View
+					{/* <View
 						style={{
 							backgroundColor: "#F7F8F9",
 							borderRadius: 50,
@@ -220,9 +176,13 @@ const Projects = ({ navigation }) => {
 						}}
 					>
 						<Building size={20} color={Colors.LightGray} />
-					</View>
-					<View>
-						<Text style={styles.selectText}>Link a Project</Text>
+					</View> */}
+					<View
+						style={{
+							width: "70%",
+						}}
+					>
+						{/* <Text style={styles.selectText}>Link a Project</Text>
 						<Text
 							style={[
 								styles.selectText,
@@ -230,10 +190,45 @@ const Projects = ({ navigation }) => {
 							]}
 						>
 							Select a Project to link
-						</Text>
+						</Text> */}
+						{projectsListSimple && (
+							<DropDownPicker
+								items={projectsListSimple.map((project) => ({
+									label: project?.name,
+									value: project?.projectId,
+								}))}
+								value={selectedProject}
+								onValueChange={onValueChange}
+								open={open}
+								setOpen={setOpen}
+								setValue={setSelectedProject}
+								placeholder="Select"
+								placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
+								listItemContainerStyle={{ borderColor: Colors.FormBorder }}
+								dropDownContainerStyle={{
+									backgroundColor: "#dfdfdf",
+									borderColor: Colors.FormBorder,
+								}}
+								// itemSeparatorStyle={{
+								//   backgroundColor: "red",
+								// }}
+								// selectedItemContainerStyle={{fo}}
+								selectedItemLabelStyle={{
+									fontWeight: "bold",
+								}}
+								style={{
+									borderColor: Colors.FormBorder,
+									borderRadius: 4,
+									height: 50,
+									backgroundColor: Colors.White,
+									elevation: 3,
+								}}
+								arrowIconStyle={{ height: 20, width: 10 }}
+							/>
+						)}
 					</View>
 				</View>
-				<View style={{ flexDirection: "row" }}>
+				{/* <View style={{ flexDirection: "row" }}>
 					<TouchableOpacity
 						style={{
 							backgroundColor: "#ECE5FC",
@@ -259,7 +254,7 @@ const Projects = ({ navigation }) => {
 					>
 						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
-				</View>
+				</View> */}
 			</View>
 			<Text style={styles.linkText}>
 				Please type a Project Name here to link*

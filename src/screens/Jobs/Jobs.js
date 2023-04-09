@@ -18,27 +18,40 @@ import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 // import BarChart from "../assets/images/barchart.png";
 // import LineChart from "../assets/images/linechart.png";
+import DropDownPicker from "react-native-dropdown-picker";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { LocationIcon, Search } from "../../icons";
 import { Building, Whatsapp } from "../../icons";
 import { useSelector, useDispatch } from "react-redux";
 import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
+import {
+	getAllProjectsSimpleAction,
+	projectsListSimpleReducer,
+} from "../../redux/slices/projectSlice";
 import moment from "moment";
 LogBox.ignoreAllLogs();
 
 const Jobs = ({ navigation }) => {
 	const [details, setDetails] = useState(null);
 	const [modalVisible, setModalVisible] = useState(false);
+	const [selectedProject, setSelectedProject] = useState(null);
+	const [open, setOpen] = useState(false);
 	const dispatch = useDispatch();
 
 	const jobsList = useSelector(jobsListReducer);
-	console.log("jobsList", jobsList);
+	const projectsListSimple = useSelector(projectsListSimpleReducer);
 
 	useEffect(() => {
 		dispatch(getAllJobsAction());
 	}, []);
+	useEffect(() => {
+		dispatch(getAllProjectsSimpleAction());
+	}, [selectedProject]);
 
+	const onValueChange = (value) => {
+		setSelectedProject(value);
+	};
 	const Item = ({ item }) => (
 		<Pressable
 			style={styles.item}
@@ -180,9 +193,10 @@ const Jobs = ({ navigation }) => {
 						flexDirection: "row",
 						justifyContent: "space-between",
 						alignItems: "center",
+						width: "100%",
 					}}
 				>
-					<View
+					{/* <View
 						style={{
 							backgroundColor: "#F7F8F9",
 							borderRadius: 50,
@@ -193,9 +207,44 @@ const Jobs = ({ navigation }) => {
 						}}
 					>
 						<Building size={20} color={Colors.LightGray} />
-					</View>
-					<View>
-						<Text style={styles.selectText}>Link a Project</Text>
+					</View> */}
+					<View style={{ width: "70%" }}>
+						{projectsListSimple && (
+							<DropDownPicker
+								items={projectsListSimple.map((project) => ({
+									label: project?.name,
+									value: project?.projectId,
+								}))}
+								value={selectedProject}
+								onValueChange={onValueChange}
+								open={open}
+								setOpen={setOpen}
+								setValue={setSelectedProject}
+								placeholder="Select"
+								placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
+								listItemContainerStyle={{ borderColor: Colors.FormBorder }}
+								dropDownContainerStyle={{
+									backgroundColor: "#dfdfdf",
+									borderColor: Colors.FormBorder,
+								}}
+								// itemSeparatorStyle={{
+								//   backgroundColor: "red",
+								// }}
+								// selectedItemContainerStyle={{fo}}
+								selectedItemLabelStyle={{
+									fontWeight: "bold",
+								}}
+								style={{
+									borderColor: Colors.FormBorder,
+									borderRadius: 4,
+									height: 50,
+									backgroundColor: Colors.White,
+									elevation: 3,
+								}}
+								arrowIconStyle={{ height: 20, width: 10 }}
+							/>
+						)}
+						{/* <Text style={styles.selectText}>Link a Project</Text>
 						<Text
 							style={[
 								styles.selectText,
@@ -203,10 +252,10 @@ const Jobs = ({ navigation }) => {
 							]}
 						>
 							Select a Project
-						</Text>
+						</Text> */}
 					</View>
 				</View>
-				<View style={{ flexDirection: "row" }}>
+				{/* <View style={{ flexDirection: "row" }}>
 					<TouchableOpacity
 						style={{
 							backgroundColor: "#ECE5FC",
@@ -244,7 +293,7 @@ const Jobs = ({ navigation }) => {
 					>
 						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
-				</View>
+				</View> */}
 			</View>
 			<ScrollView>
 				<FlatList
