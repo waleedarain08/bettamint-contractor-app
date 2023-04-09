@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
 	ATTENDANCE_GETALL_URL,
 	responseHandler,
+	staticToken,
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 
@@ -43,7 +44,7 @@ export const getAllAttendanceAction = () => async (dispatch) => {
 		await api
 			.request("GET", ATTENDANCE_GETALL_URL, null, {
 				Authorization:
-					"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2IiwibmJmIjoxNjgwNjM5NzE1LCJleHAiOjE2ODE1MDM3MTUsImlhdCI6MTY4MDYzOTcxNX0.y3UzWdIchnRh6spJrLA2_U3gU8WABjpsDTojTP4O9jE",
+					staticToken,
 			})
 			.then((res) => {
 				const data = responseHandler(res);

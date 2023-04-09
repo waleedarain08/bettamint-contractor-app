@@ -20,7 +20,15 @@ export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
         <FontAwesome5 name={name} color={color} size={size} style={style} />
       );
     case "Ionicons":
-      return <Ionicons name={name} color={color} size={size} style={style} />;
+      return (
+        <Ionicons
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+          onPress={onPress}
+        />
+      );
     case "AntDesign":
       return <AntDesign name={name} color={color} size={size} style={style} />;
     case "EvilIcons":
@@ -366,5 +374,15 @@ export const RestoreIcon = ({ color, size, style }) => (
     size={size}
     type="MaterialIcons"
     style={style}
+  />
+);
+export const BackIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="chevron-back"
+    color={color}
+    size={size}
+    type="Ionicons"
+    style={style}
+    onPress={onPress}
   />
 );

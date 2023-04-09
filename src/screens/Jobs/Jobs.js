@@ -208,7 +208,7 @@ const Jobs = ({ navigation }) => {
 					>
 						<Building size={20} color={Colors.LightGray} />
 					</View> */}
-					<View style={{ width: "70%" }}>
+					<View style={{ width: "70%", position: 'relative' }}>
 						{projectsListSimple && (
 							<DropDownPicker
 								items={projectsListSimple.map((project) => ({

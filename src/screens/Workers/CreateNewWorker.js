@@ -9,6 +9,7 @@ import {
   Dimensions,
   LogBox,
   Alert,
+  Pressable,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -17,20 +18,108 @@ import { Colors } from "../../utils/Colors";
 import { CardIcon, Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Dropdown } from "react-native-element-dropdown";
+
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getAllProjectsSimpleAction,
+  projectsListSimpleReducer,
+} from "../../redux/slices/projectSlice";
+import { launchImageLibrary } from "react-native-image-picker";
+import {
+  getSkillsAction,
+  skillsListReducer,
+  updateWorkerAction,
+} from "../../redux/slices/workerSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewWorker = ({ navigation }) => {
-  const [open, setOpen] = useState(false);
-  const [openProject, setOpenProject] = useState(false);
-  const [openJob, setOpenJob] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: "Apple", value: "apple" },
-    // { label: "Banana", value: "banana" },
-  ]);
+  const dispatch = useDispatch();
+  const [skills, setSkills] = useState([]);
+  const [projects, setProjects] = useState([]);
+  const [skillValue, setSkillValue] = useState(null);
+  const [projectValue, setProjectValue] = useState(null);
+  const [genderValue, setGenderValue] = useState(null);
+  const [skillLevelValue, setSkillLevelValue] = useState(null);
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [ifscCode, setIfscCode] = useState("");
+  const [profilePic, setProfilePic] = useState("");
+  const [profilePicForm, setProfilePicForm] = useState("");
+  const [aadharCard, setAadharCard] = useState("");
+  const [aadharCardForm, setAadharCardForm] = useState("");
+  const [uploadType, setUploadType] = useState(null);
+  const [initialFetch, setInitialFetch] = useState(true);
+  const projectsList = useSelector(projectsListSimpleReducer);
+  const skillsList = useSelector(skillsListReducer);
+  console.log(skillsList);
+  useEffect(() => {
+    dispatch(getAllProjectsSimpleAction());
+  }, []);
+  // useEffect(() => {
+  //   dispatch(getSkillsAction());
+  // }, []);
+  const data = [
+    { label: "Supervisor", value: "Supervisor" },
+    { label: "Skilled", value: "Skilled" },
+    { label: "Helper", value: "Helper" },
+  ];
+  const genders = [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" },
+  ];
+  console.log(skillValue);
+  const submitHandler = async () => {
+    const formData = new FormData();
+    formData.append("SkillId", parseInt(skillValue, 10));
+    formData.append("SkillTypeId", skillLevelValue);
+    formData.append("WorkerId", 0);
+    formData.append("FullName", fullName);
+    formData.append("PhoneNumber", phoneNumber);
+    formData.append("Status", "Init");
+    formData.append("BankName", bankName);
+    formData.append("BankAccountNumber", bankAccountNumber);
+    formData.append("IFSCCode", ifscCode);
+    formData.append("HealthCard", true);
+    formData.append("PoliceVerification", true);
+    formData.append("Gender", genderValue);
+
+    dispatch(updateWorkerAction(formData, profilePicForm, aadharCardForm));
+  };
+
+  const handleImagePicker = async () => {
+    const result = await launchImageLibrary({
+      mediaType: "photo",
+      quality: 0.5,
+      selectionLimit: 1,
+    });
+    if (result?.assets?.length > 0) {
+      if (uploadType === "Profile") {
+        const profileFormData = new FormData();
+        profileFormData.append("file", {
+          name: result?.assets[0]?.fileName,
+          type: result?.assets[0]?.type,
+          uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+        });
+        setProfilePicForm(profileFormData);
+        setProfilePic(result?.assets[0]?.uri);
+      } else if (uploadType === "Aadhar") {
+        const aadharFormData = new FormData();
+        aadharFormData.append("file", {
+          name: result?.assets[0]?.fileName,
+          type: result?.assets[0]?.type,
+          uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+        });
+        setAadharCardForm(aadharFormData);
+        setAadharCard(result?.assets[0]?.uri);
+      }
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -47,55 +136,64 @@ const CreateNewWorker = ({ navigation }) => {
             paddingBottom: 15,
           }}
         >
-          <View style={{ width: "28%" }}>
-            <View
-              style={{
-                justifyContent: "center",
-                alignItems: "center",
-                borderColor: Colors.FormBorder,
-                borderStyle: "dashed",
-                borderWidth: 1,
-                borderRadius: 5,
-                width: "100%",
-                height: 82,
-              }}
-            >
-              <Picture size={38} color={Colors.FormBorder} />
-              <Text style={styles.imgText}>Add Picture</Text>
-            </View>
-          </View>
+          <Pressable
+            onPress={() => {
+              handleImagePicker();
+              setUploadType("Profile");
+            }}
+            style={{ width: "28%" }}
+          >
+            {profilePic ? (
+              <Image
+                source={{ uri: profilePic }}
+                style={{ width: "100%", height: 82, borderRadius: 5 }}
+              />
+            ) : (
+              <View
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  borderColor: Colors.FormBorder,
+                  borderStyle: "dashed",
+                  borderWidth: 1,
+                  borderRadius: 5,
+                  width: "100%",
+                  height: 82,
+                }}
+              >
+                <Picture size={38} color={"#D1E0EE"} />
+                <Text style={styles.imgText}>Add Picture</Text>
+              </View>
+            )}
+          </Pressable>
           <View style={{ width: "68%" }}>
             <Text style={styles.title}>Select Skill</Text>
             <View style={{ marginTop: 7 }}>
-              <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                placeholder="Select"
-                placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
-                listItemContainerStyle={{ borderColor: Colors.FormBorder }}
-                dropDownContainerStyle={{
-                  backgroundColor: "#dfdfdf",
-                  borderColor: Colors.FormBorder,
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
                 }}
-                // itemSeparatorStyle={{
-                //   backgroundColor: "red",
-                // }}
-                // selectedItemContainerStyle={{fo}}
-                selectedItemLabelStyle={{
-                  fontWeight: "bold",
+                iconStyle={styles.iconStyle}
+                data={skillsList?.map((ele) => ({
+                  label: ele?.name,
+                  value: ele.skillId,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Skill"}
+                value={skillValue}
+                // onFocus={() => setIsFocus(true)}
+                // onBlur={() => setIsFocus(false)}
+                onChange={(item) => {
+                  setSkillValue(item.value);
+                  // setIsFocus(false);
                 }}
-                style={{
-                  borderColor: Colors.FormBorder,
-                  borderRadius: 4,
-                  height: 50,
-                  backgroundColor: Colors.White,
-                  elevation: 3,
-                }}
-                arrowIconStyle={{ height: 20, width: 10 }}
               />
             </View>
           </View>
@@ -114,39 +212,70 @@ const CreateNewWorker = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: Colors.Black,
             }}
+            onChangeText={(e) => setFullName(e)}
+            value={fullName}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Name"
           />
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
+          <Text style={styles.title}>Gender</Text>
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={genders}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Gender"}
+              value={genderValue}
+              // onFocus={() => setIsFocus(true)}
+              // onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setGenderValue(item.value);
+                // setIsFocus(false);
+              }}
+            />
+          </View>
+        </View>
+        <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
           <Text style={styles.title}>Project</Text>
           <View style={{ marginTop: 7 }}>
-            <DropDownPicker
-              open={openProject}
-              value={value}
-              items={items}
-              setOpen={setOpenProject}
-              setValue={setValue}
-              setItems={setItems}
-              placeholder="Select Project"
-              placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
-              listItemContainerStyle={{ borderColor: Colors.FormBorder }}
-              dropDownContainerStyle={{
-                backgroundColor: "#dfdfdf",
-                borderColor: Colors.FormBorder,
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
               }}
-              selectedItemLabelStyle={{
-                fontWeight: "bold",
+              iconStyle={styles.iconStyle}
+              data={projectsList?.map((ele) => ({
+                label: ele?.name,
+                value: ele.projectId,
+              }))}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Project"}
+              value={projectValue}
+              // onFocus={() => setIsFocus(true)}
+              // onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setProjectValue(item.value);
+                // setIsFocus(false);
               }}
-              style={{
-                borderColor: Colors.FormBorder,
-                borderRadius: 4,
-                height: 50,
-                backgroundColor: Colors.White,
-                elevation: 3,
-              }}
-              arrowIconStyle={{ height: 20, width: 10 }}
             />
           </View>
         </View>
@@ -154,36 +283,30 @@ const CreateNewWorker = ({ navigation }) => {
           style={{
             paddingHorizontal: 15,
             paddingBottom: 15,
-            marginTop: openProject ? 30 : 0,
+            // marginTop: openProject ? 30 : 0,
           }}
         >
-          <Text style={styles.title}>Job</Text>
+          <Text style={styles.title}>Skill Level</Text>
           <View style={{ marginTop: 7 }}>
-            <DropDownPicker
-              open={openJob}
-              value={value}
-              items={items}
-              setOpen={setOpenJob}
-              setValue={setValue}
-              setItems={setItems}
-              placeholder="Select Job"
-              placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
-              listItemContainerStyle={{ borderColor: Colors.FormBorder }}
-              dropDownContainerStyle={{
-                backgroundColor: "#dfdfdf",
-                borderColor: Colors.FormBorder,
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
               }}
-              selectedItemLabelStyle={{
-                fontWeight: "bold",
+              iconStyle={styles.iconStyle}
+              data={data}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Skill Level"}
+              value={skillLevelValue}
+              onChange={(item) => {
+                setSkillLevelValue(item.value);
               }}
-              style={{
-                borderColor: Colors.FormBorder,
-                borderRadius: 4,
-                height: 50,
-                backgroundColor: Colors.White,
-                elevation: 3,
-              }}
-              arrowIconStyle={{ height: 20, width: 10 }}
             />
           </View>
         </View>
@@ -191,7 +314,7 @@ const CreateNewWorker = ({ navigation }) => {
           style={{
             paddingHorizontal: 15,
             paddingBottom: 15,
-            marginTop: openJob ? 30 : 0,
+            // marginTop: openJob ? 30 : 0,
           }}
         >
           <Text style={styles.title}>Contact Number</Text>
@@ -207,7 +330,10 @@ const CreateNewWorker = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: Colors.Black,
             }}
+            onChangeText={(e) => setPhoneNumber(e)}
+            value={phoneNumber}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Contact Number"
           />
@@ -226,7 +352,10 @@ const CreateNewWorker = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: Colors.Black,
             }}
+            onChangeText={(e) => setBankName(e)}
+            value={bankName}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Bank Name"
           />
@@ -245,7 +374,10 @@ const CreateNewWorker = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: Colors.Black,
             }}
+            onChangeText={(e) => setBankAccountNumber(e)}
+            value={bankAccountNumber}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Bank Account Number"
           />
@@ -264,13 +396,20 @@ const CreateNewWorker = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: Colors.Black,
             }}
+            onChangeText={(e) => setIfscCode(e)}
+            value={ifscCode}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Code"
           />
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
-          <View
+          <Pressable
+            onPress={() => {
+              handleImagePicker();
+              setUploadType("Aadhar");
+            }}
             style={{
               width: "100%",
               backgroundColor: Colors.White,
@@ -283,17 +422,38 @@ const CreateNewWorker = ({ navigation }) => {
               elevation: 3,
             }}
           >
-            <CardIcon color={Colors.FormBorder} size={40} />
-            <Text
-              style={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 12,
-                color: Colors.Primary,
-              }}
-            >
-              Upload Aadhar Card
-            </Text>
-          </View>
+            {aadharCard ? (
+              <Image
+                source={{ uri: aadharCard }}
+                style={{ width: "100%", height: 200, borderRadius: 4 }}
+              />
+            ) : (
+              <View
+                style={{
+                  width: "100%",
+                  backgroundColor: Colors.White,
+                  borderWidth: 0.5,
+                  borderColor: Colors.FormBorder,
+                  height: 200,
+                  alignItems: "center",
+                  justifyContent: "center",
+                  borderRadius: 4,
+                  elevation: 3,
+                }}
+              >
+                <CardIcon color={Colors.FormBorder} size={40} />
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 12,
+                    color: Colors.Primary,
+                  }}
+                >
+                  Upload Aadhar Card
+                </Text>
+              </View>
+            )}
+          </Pressable>
         </View>
         {/* <Spacer top={20} /> */}
       </ScrollView>
@@ -308,7 +468,9 @@ const CreateNewWorker = ({ navigation }) => {
       >
         <TouchableOpacity
           style={[styles.button, { width: "60%" }]}
-          onPress={() => alert("Worker Created")}
+          onPress={() => {
+            submitHandler();
+          }}
         >
           <Text style={styles.buttonText}>Create Worker</Text>
         </TouchableOpacity>
@@ -462,5 +624,45 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     color: "white",
+  },
+  dropdown: {
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    elevation: 4,
+    backgroundColor: Colors.White,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "white",
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+  },
+  placeholderStyle: {
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+    color: Colors.FormText,
+  },
+  selectedTextStyle: {
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+    color: Colors.Black,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });

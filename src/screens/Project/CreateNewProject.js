@@ -90,13 +90,6 @@ const CreateNewProject = ({ navigation }) => {
       selectionLimit: 1,
     });
     if (result?.assets?.length > 0) {
-    //   const requestData = new FormData();
-    //   requestData.append("file", {
-    //     name: result?.assets[0]?.fileName,
-    //     type: result?.assets[0]?.type,
-    //     uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
-    //   });
-    //   console.log(requestData);
       setProjectImage(result);
       setProjectImageUri(result?.assets[0]?.uri);
     }
