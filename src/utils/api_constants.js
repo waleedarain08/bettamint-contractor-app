@@ -18,6 +18,7 @@ export const WORKER_GETALL_URL = "Dashboard/worker";
 export const UPDATE_WORKER_URL = "Dashboard/worker/addupdateworker";
 export const GET_SKILLS_URL = "app/Skills";
 export const ATTENDANCE_MUSTER_URL = "dashboard/Attendance/mustercard";
+export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
 
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {

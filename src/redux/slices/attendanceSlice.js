@@ -140,7 +140,7 @@ export const getAttendanceApproveAction =
 
 				.request(
 					"POST",
-					ATTENDANCE_MUSTER_URL + `?jobId=${jobId}&workerId=${workerId}`,
+					ATTENDANCE_APPROVE_URL + `?jobId=${jobId}&workerId=${workerId}`,
 					null,
 					{
 						Authorization: staticToken,

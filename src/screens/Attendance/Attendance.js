@@ -99,13 +99,13 @@ const Attendance = ({ navigation }) => {
 					</Text>
 				</View>
 				<View style={{ width: "15%" }}>
-					<Text style={styles.flatListText}>{item.days}</Text>
+					<Text style={styles.flatListText}>{item?.workingDays.length}</Text>
 				</View>
 				<View style={{ width: "15%" }}>
-					<Text style={styles.flatListText}>{item.present}</Text>
+					<Text style={styles.flatListText}>{item?.presentDays.length}</Text>
 				</View>
 				<View style={{ width: "13%" }}>
-					<Text style={styles.flatListText}>{item.absent}</Text>
+					<Text style={styles.flatListText}>{item?.absentDays.length}</Text>
 				</View>
 				<TouchableOpacity
 					onPress={() => {
