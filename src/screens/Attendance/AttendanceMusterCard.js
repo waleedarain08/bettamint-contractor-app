@@ -15,6 +15,7 @@ import {
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
+import moment from "moment";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -27,150 +28,42 @@ import {
 	DotIcon,
 	DateIcon,
 } from "../../icons";
+import { useSelector, useDispatch } from "react-redux";
+import {
+	getAttendanceMusterAction,
+	attendanceMusterReducer,
+	getAttendanceApproveAction,
+	attendanceApproveReducer,
+} from "../../redux/slices/attendanceSlice";
 import PersonImage from "../../assets/images/personimage.png";
 import typeIcon from "../../assets/icons/typeIcon.png";
 import DatePicker from "react-native-date-picker";
 LogBox.ignoreAllLogs();
-const AttendanceMusterCard = ({ navigation }) => {
+const AttendanceMusterCard = ({ navigation, route }) => {
 	const [date, setDate] = useState(new Date());
 	const [open, setOpen] = useState(false);
-	const DATA = [
-		{
-			date: "01 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "02 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "03 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "04 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "05 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "06 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "07 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-		{
-			date: "08 Mar",
-			attendance: "P1",
-			advance: "-",
-		},
-	];
+	const [selectedDate, setSelectedDate] = useState("");
+	const { workerId, jobId } = route.params;
+	console.log("workerId", workerId);
+	console.log("jobId", jobId);
+	const dispatch = useDispatch();
+	const attendanceMuster = useSelector(attendanceMusterReducer);
+	console.log("attendanceMuster", attendanceMuster);
+
+	const attendance = attendanceMuster?.attendance;
+	console.log("attendance", attendance);
+
+	useEffect(() => {
+		dispatch(getAttendanceMusterAction(workerId, jobId));
+	}, []);
+
+	useEffect(() => {
+		if (attendance) {
+			setSelectedDate(attendance?.date);
+		}
+	}, [attendance]);
+
+	console.log("attendance from screen", attendance);
 	const rowColors = ["#F3F4F4", "#FFFFFF"];
 
 	const Item = ({ item, index }) => (
@@ -192,7 +85,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 					}}
 				>
 					<Text style={[styles.flatListText, { textAlign: "left" }]}>
-						{item.date}
+						{moment(item?.attendance?.date).format("DD MMMM, YYYY")}
 					</Text>
 				</View>
 				<View
@@ -204,12 +97,12 @@ const AttendanceMusterCard = ({ navigation }) => {
 					}}
 				>
 					<Text style={[styles.flatListText, { color: Colors.Primary }]}>
-						{item.attendance}
+						{item?.day}
 					</Text>
 					<DotIcon size={25} color={Colors.Primary} />
 				</View>
 				<View style={{ width: "20%" }}>
-					<Text style={styles.flatListText}>{item.advance}</Text>
+					<Text style={styles.flatListText}>{item?.advance}</Text>
 				</View>
 				<View style={{ width: "15%", alignItems: "center" }}>
 					<TickIcon size={20} color={Colors.Primary} />
@@ -295,7 +188,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 					<View style={{ width: "70%", bottom: 10 }}>
 						<View style={{ flexDirection: "row", alignItems: "center" }}>
 							<Text style={[styles.title, { paddingRight: 10 }]}>
-								Pritam Pandit Tripathi
+								{attendanceMuster?.workerName}
 							</Text>
 							<SquareCheckBox
 								size={20}
@@ -303,7 +196,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 								style={{ borderRadius: 10 }}
 							/>
 						</View>
-						<Text style={styles.typeText}>Electrician</Text>
+						<Text style={styles.typeText}>{attendanceMuster?.jobName}</Text>
 					</View>
 				</View>
 				<View
@@ -322,7 +215,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 					<Spacer right={10} />
 					<View>
 						<Text style={[styles.title, { fontSize: 13 }]}>
-							Guru Heights Phase-2 Construction
+							{attendanceMuster?.projectName}
 						</Text>
 						<Text
 							style={[
@@ -330,7 +223,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 								{ color: Colors.SubHeading, fontSize: 11 },
 							]}
 						>
-							Delhi 11 Guru Mandir Road...
+							{attendanceMuster?.cityName}
 						</Text>
 					</View>
 				</View>
@@ -443,7 +336,7 @@ const AttendanceMusterCard = ({ navigation }) => {
 					}}
 				>
 					<FlatList
-						data={DATA}
+						data={attendance}
 						renderItem={({ item, index }) => <Item item={item} index={index} />}
 						keyExtractor={(item) => item.id}
 						ListHeaderComponent={ListHeader}

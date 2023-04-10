@@ -109,7 +109,10 @@ const Attendance = ({ navigation }) => {
 				</View>
 				<TouchableOpacity
 					onPress={() => {
-						navigation.navigate("AttendanceMusterCard");
+						navigation.navigate("AttendanceMusterCard", {
+							workerId: item?.workerId,
+							jobId: item?.jobId,
+						});
 					}}
 					style={{
 						backgroundColor: "#ECE5FC",

@@ -12,6 +12,7 @@ const initialState = {
 	error: null,
 	attendanceList: null,
 	attendanceMuster: null,
+	attendanceApprove: null,
 };
 
 const api = new APIServiceManager();
@@ -43,6 +44,18 @@ const attendanceSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		getAttendanceApproveRequest: (state, action) => {
+			state.loading = true;
+			state.error = null;
+		},
+		getAttendanceApproveSuccess: (state, action) => {
+			state.attendanceApprove = action.payload;
+			state.loading = false;
+		},
+		getAttendanceApproveFailure: (state, action) => {
+			state.loading = false;
+			state.error = action.payload;
+		},
 	},
 });
 
@@ -53,12 +66,18 @@ const {
 	getAttendanceMusterRequest,
 	getAttendanceMusterSuccess,
 	getAttendanceMusterFailure,
+	getAttendanceApproveRequest,
+	getAttendanceApproveSuccess,
+	getAttendanceApproveFailure,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
 	state?.attendanceSlice?.attendanceList;
 export const attendanceMusterReducer = (state) =>
 	state?.attendanceSlice?.attendanceMuster;
+export const attendanceApproveReducer = (state) =>
+	state?.attendanceSlice?.attendanceApprove;
+
 export const getAllAttendanceAction = (projectId) => async (dispatch) => {
 	try {
 		dispatch(getAttendanceRequest());
@@ -90,7 +109,7 @@ export const getAttendanceMusterAction =
 
 				.request(
 					"GET",
-					ATTENDANCE_MUSTER_URL + `?workerId=${workerId}` + `?jobId=${jobId}`,
+					ATTENDANCE_MUSTER_URL + `?workerId=${workerId}&jobId=${jobId}`,
 					null,
 					{
 						Authorization: staticToken,
@@ -110,6 +129,36 @@ export const getAttendanceMusterAction =
 				});
 		} catch (error) {
 			dispatch(getAttendanceMusterFailure());
+		}
+	};
+
+export const getAttendanceApproveAction =
+	(jobId, workerId) => async (dispatch) => {
+		try {
+			dispatch(getAttendanceApproveRequest());
+			await api
+
+				.request(
+					"POST",
+					ATTENDANCE_MUSTER_URL + `?jobId=${jobId}&workerId=${workerId}`,
+					null,
+					{
+						Authorization: staticToken,
+					}
+				)
+				.then((res) => {
+					const data = responseHandler(res);
+					console.log("ATTENDANCE APPROVE", data);
+					if (data) {
+						dispatch(getAttendanceApproveSuccess(data));
+					}
+				})
+				.catch((error) => {
+					console.log("ATTENDANCE APPROVE ERROR", error);
+					dispatch(getAttendanceApproveFailure());
+				});
+		} catch (error) {
+			dispatch(getAttendanceApproveFailure());
 		}
 	};
 
