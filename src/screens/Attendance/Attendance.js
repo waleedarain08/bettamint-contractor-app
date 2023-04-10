@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -8,169 +8,68 @@ import {
 	FlatList,
 	Dimensions,
 	LogBox,
+	Pressable,
+	Modal,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
+import { Searchbar } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import {
 	getAllAttendanceAction,
 	attendanceListReducer,
 } from "../../redux/slices/attendanceSlice";
+import {
+	projectsListSimpleReducer,
+	getAllProjectsSimpleAction,
+} from "../../redux/slices/projectSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
-import { Building, Search } from "../../icons";
+import { Building, Search, BackIcon, Cross } from "../../icons";
 LogBox.ignoreAllLogs();
 const Attendance = ({ navigation }) => {
+	const [openSearchModal, setOpenSearchModal] = useState(false);
+	const [selectedProject, setSelectedProject] = useState(null);
+	const [filteredDataSource, setFilteredDataSource] = useState([]);
+	const [masterDataSource, setMasterDataSource] = useState([]);
+	const [search, setSearch] = useState("");
 	const dispatch = useDispatch();
 	const attendanceList = useSelector(attendanceListReducer);
-	console.log("ATTENDANCE LIST", attendanceList);
-	React.useEffect(() => {
-		dispatch(getAllAttendanceAction());
+	const projectsListSimple = useSelector(projectsListSimpleReducer);
+	// console.log("ATTENDANCE LIST", attendanceList);
+	useEffect(() => {
+		dispatch(getAllAttendanceAction(selectedProject?.projectId));
+	}, [selectedProject]);
+	useEffect(() => {
+		dispatch(getAllProjectsSimpleAction());
 	}, []);
-	const DATA = [
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-		{
-			name: "Arvind Chauhan",
-			days: "2",
-			present: "2",
-			absent: "0",
-		},
-	];
+	useEffect(() => {
+		setFilteredDataSource(projectsListSimple);
+		setMasterDataSource(projectsListSimple);
+	}, [projectsListSimple]);
+	const searchFilterFunction = (text) => {
+		// Check if searched text is not blank
+		if (text) {
+			// Inserted text is not blank
+			// Filter the masterDataSource and update FilteredDataSource
+			const newData = masterDataSource.filter(function (item) {
+				// Applying filter for the inserted text in search bar
+				const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
+				const textData = text.toUpperCase();
+				return itemData.indexOf(textData) > -1;
+			});
+			setFilteredDataSource(newData);
+			setSearch(text);
+		} else {
+			// Inserted text is blank
+			// Update FilteredDataSource with masterDataSource
+			setFilteredDataSource(masterDataSource);
+			setSearch(text);
+		}
+	};
 	const rowColors = ["#F3F4F4", "#FFFFFF"];
 	const Item = ({ item, index }) => (
 		<View style={[styles.item]}>
@@ -196,7 +95,7 @@ const Attendance = ({ navigation }) => {
 							{ textAlign: "left", textTransform: "uppercase" },
 						]}
 					>
-						{item?.fullName}
+						{item?.workerName}
 					</Text>
 				</View>
 				<View style={{ width: "15%" }}>
@@ -269,7 +168,12 @@ const Attendance = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
-			<View style={styles.graph}>
+			<Pressable
+				onPress={() => {
+					setOpenSearchModal(true);
+				}}
+				style={styles.graph}
+			>
 				<View
 					style={{
 						flexDirection: "row",
@@ -297,7 +201,11 @@ const Attendance = ({ navigation }) => {
 								{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
 							]}
 						>
-							Select a Project
+							{selectedProject
+								? selectedProject?.name
+								: projectsListSimple
+								? projectsListSimple[0]?.name
+								: "Select a project"}
 						</Text>
 					</View>
 				</View>
@@ -340,7 +248,7 @@ const Attendance = ({ navigation }) => {
 						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
 				</View>
-			</View>
+			</Pressable>
 			<View style={{ alignItems: "flex-end", paddingRight: 20, width: "100%" }}>
 				<Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
 					Attendance is validated via two-factor authentication*{"\n"} i.e.
@@ -375,7 +283,96 @@ const Attendance = ({ navigation }) => {
 					showsVerticalScrollIndicator={false}
 				/>
 			</View>
-			{/* </ScrollView> */}
+			<Modal
+				visible={openSearchModal}
+				animationType="slide"
+				onRequestClose={() => {
+					setOpenSearchModal(false);
+				}}
+				presentationStyle="pageSheet"
+			>
+				<View style={{ width: "100%" }}>
+					<View
+						style={{
+							width: "100%",
+							padding: 15,
+							flexDirection: "row",
+							alignItems: "center",
+							marginTop: 10,
+						}}
+					>
+						<View style={{ width: "12%" }}>
+							<BackIcon
+								onPress={() => {
+									setOpenSearchModal(false);
+								}}
+								size={30}
+								color={Colors.Black}
+							/>
+						</View>
+						<View style={{ width: "88%" }}>
+							<Text
+								style={{
+									fontFamily: "Lexend-Medium",
+									fontSize: 18,
+									color: Colors.Black,
+								}}
+							>
+								Search
+							</Text>
+						</View>
+					</View>
+					<View style={{ width: "100%", alignItems: "center" }}>
+						<Searchbar
+							style={{
+								backgroundColor: "#F1F5F8",
+								borderRadius: 5,
+								width: "90%",
+							}}
+							placeholder="Search Project"
+							placeholderTextColor={Colors.FormText}
+							mode="bar"
+							icon={() => <Search size={20} color={Colors.Black} />}
+							clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+							onChangeText={(text) => searchFilterFunction(text)}
+							value={search}
+						/>
+					</View>
+					<View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
+						<FlatList
+							data={filteredDataSource}
+							renderItem={({ item }) => (
+								<Pressable
+									style={{
+										width: "88%",
+										borderWidth: 1,
+										marginBottom: 5,
+										alignSelf: "center",
+										padding: 10,
+										borderRadius: 7,
+										borderColor: Colors.FormBorder,
+									}}
+									onPress={() => {
+										setSelectedProject(item);
+										setOpenSearchModal(false);
+									}}
+								>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: "Lexend-Regular",
+											color: Colors.FormText,
+										}}
+									>
+										{item.name}
+									</Text>
+								</Pressable>
+							)}
+							keyExtractor={(item) => item.projectId}
+						/>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 };

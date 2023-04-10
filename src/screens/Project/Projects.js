@@ -16,9 +16,10 @@ import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 import { useSelector, useDispatch } from "react-redux";
 import DropDownPicker from "react-native-dropdown-picker";
+import { Searchbar } from "react-native-paper";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { Building, Search, LocationIcon } from "../../icons";
+import { Building, Search, BackIcon, Cross, TickIcon } from "../../icons";
 import {
 	getAllProjectsAction,
 	projectsListReducer,
@@ -30,9 +31,12 @@ LogBox.ignoreAllLogs();
 
 const Projects = ({ navigation }) => {
 	const [details, setDetails] = useState(null);
-	const [modalVisible, setModalVisible] = useState(false);
-	const [selectedProject, setSelectedProject] = useState(null);
 	const [open, setOpen] = useState(false);
+	const [openSearchModal, setOpenSearchModal] = useState(false);
+	const [selectedProject, setSelectedProject] = useState(null);
+	const [filteredDataSource, setFilteredDataSource] = useState([]);
+	const [masterDataSource, setMasterDataSource] = useState([]);
+	const [search, setSearch] = useState("");
 
 	//! INSTANCES
 	const dispatch = useDispatch();
@@ -43,17 +47,40 @@ const Projects = ({ navigation }) => {
 
 	//! LIFE CYCLE
 	useEffect(() => {
-		dispatch(getAllProjectsAction());
-	}, []);
+		dispatch(getAllProjectsAction(selectedProject?.projectId));
+	}, [selectedProject]);
 
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction());
-	}, [selectedProject]);
+	}, []);
 
 	const onValueChange = (value) => {
 		setSelectedProject(value);
 	};
-
+	useEffect(() => {
+		setFilteredDataSource(projectsListSimple);
+		setMasterDataSource(projectsListSimple);
+	}, [projectsListSimple]);
+	const searchFilterFunction = (text) => {
+		// Check if searched text is not blank
+		if (text) {
+			// Inserted text is not blank
+			// Filter the masterDataSource and update FilteredDataSource
+			const newData = masterDataSource.filter(function (item) {
+				// Applying filter for the inserted text in search bar
+				const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
+				const textData = text.toUpperCase();
+				return itemData.indexOf(textData) > -1;
+			});
+			setFilteredDataSource(newData);
+			setSearch(text);
+		} else {
+			// Inserted text is blank
+			// Update FilteredDataSource with masterDataSource
+			setFilteredDataSource(masterDataSource);
+			setSearch(text);
+		}
+	};
 	const Item = ({ item }) => (
 		<Pressable
 			style={styles.item}
@@ -156,16 +183,20 @@ const Projects = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
-			<View style={styles.graph}>
+			<Pressable
+				onPress={() => {
+					setOpenSearchModal(true);
+				}}
+				style={styles.graph}
+			>
 				<View
 					style={{
 						flexDirection: "row",
 						justifyContent: "space-between",
 						alignItems: "center",
-						width: "100%",
 					}}
 				>
-					{/* <View
+					<View
 						style={{
 							backgroundColor: "#F7F8F9",
 							borderRadius: 50,
@@ -176,22 +207,22 @@ const Projects = ({ navigation }) => {
 						}}
 					>
 						<Building size={20} color={Colors.LightGray} />
-					</View> */}
-					<View
-						style={{
-							width: "70%",
-						}}
-					>
-						{/* <Text style={styles.selectText}>Link a Project</Text>
+					</View>
+					<View>
+						<Text style={styles.selectText}>Link a Project</Text>
 						<Text
 							style={[
 								styles.selectText,
 								{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
 							]}
 						>
-							Select a Project to link
-						</Text> */}
-						{projectsListSimple && (
+							{selectedProject
+								? selectedProject?.name
+								: projectsListSimple
+								? projectsListSimple[0]?.name
+								: "Select a project"}
+						</Text>
+						{/* {projectsListSimple && (
 							<DropDownPicker
 								items={projectsListSimple.map((project) => ({
 									label: project?.name,
@@ -225,10 +256,10 @@ const Projects = ({ navigation }) => {
 								}}
 								arrowIconStyle={{ height: 20, width: 10 }}
 							/>
-						)}
+						)} */}
 					</View>
 				</View>
-				{/* <View style={{ flexDirection: "row" }}>
+				<View style={{ flexDirection: "row" }}>
 					<TouchableOpacity
 						style={{
 							backgroundColor: "#ECE5FC",
@@ -254,8 +285,8 @@ const Projects = ({ navigation }) => {
 					>
 						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity>
-				</View> */}
-			</View>
+				</View>
+			</Pressable>
 			<Text style={styles.linkText}>
 				Please type a Project Name here to link*
 			</Text>
@@ -266,6 +297,96 @@ const Projects = ({ navigation }) => {
 					keyExtractor={(item) => item.id}
 				/>
 			</ScrollView>
+			<Modal
+				visible={openSearchModal}
+				animationType="slide"
+				onRequestClose={() => {
+					setOpenSearchModal(false);
+				}}
+				presentationStyle="pageSheet"
+			>
+				<View style={{ width: "100%" }}>
+					<View
+						style={{
+							width: "100%",
+							padding: 15,
+							flexDirection: "row",
+							alignItems: "center",
+							marginTop: 10,
+						}}
+					>
+						<View style={{ width: "12%" }}>
+							<BackIcon
+								onPress={() => {
+									setOpenSearchModal(false);
+								}}
+								size={30}
+								color={Colors.Black}
+							/>
+						</View>
+						<View style={{ width: "88%" }}>
+							<Text
+								style={{
+									fontFamily: "Lexend-Medium",
+									fontSize: 18,
+									color: Colors.Black,
+								}}
+							>
+								Search
+							</Text>
+						</View>
+					</View>
+					<View style={{ width: "100%", alignItems: "center" }}>
+						<Searchbar
+							style={{
+								backgroundColor: "#F1F5F8",
+								borderRadius: 5,
+								width: "90%",
+							}}
+							placeholder="Search Project"
+							placeholderTextColor={Colors.FormText}
+							mode="bar"
+							icon={() => <Search size={20} color={Colors.Black} />}
+							clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+							onChangeText={(text) => searchFilterFunction(text)}
+							value={search}
+						/>
+					</View>
+					<View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
+						<FlatList
+							data={filteredDataSource}
+							renderItem={({ item }) => (
+								<Pressable
+									style={{
+										width: "88%",
+										borderWidth: 1,
+										marginBottom: 5,
+										alignSelf: "center",
+										padding: 10,
+										borderRadius: 7,
+										borderColor: Colors.FormBorder,
+									}}
+									onPress={() => {
+										setSelectedProject(item);
+										setOpenSearchModal(false);
+									}}
+								>
+									<Text
+										style={{
+											fontSize: 14,
+											fontFamily: "Lexend-Regular",
+											color: Colors.FormText,
+										}}
+									>
+										{item.name}
+									</Text>
+								</Pressable>
+							)}
+							keyExtractor={(item) => item.projectId}
+						/>
+					</View>
+				</View>
+			</Modal>
 		</View>
 	);
 };
