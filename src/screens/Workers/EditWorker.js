@@ -28,11 +28,9 @@ import {
 import { launchImageLibrary } from "react-native-image-picker";
 import {
   getSkillsAction,
-  selectedWorkerReducer,
   skillsListReducer,
   updateWorkerAction,
 } from "../../redux/slices/workerSlice";
-import { assetsUrl } from "../../utils/api_constants";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -55,20 +53,17 @@ const CreateNewWorker = ({ navigation }) => {
   const [profilePicForm, setProfilePicForm] = useState("");
   const [aadharCard, setAadharCard] = useState("");
   const [aadharCardForm, setAadharCardForm] = useState("");
-  const [workerId, setWorkerId] = useState(null);
   const [uploadType, setUploadType] = useState(null);
   const [initialFetch, setInitialFetch] = useState(true);
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
-  // console.log(skillsList);
+  console.log(skillsList);
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction());
   }, []);
   // useEffect(() => {
   //   dispatch(getSkillsAction());
   // }, []);
-  const worker = useSelector(selectedWorkerReducer);
-  // console.log("Worker Data", skillValue);
   const data = [
     { label: "Supervisor", value: "Supervisor" },
     { label: "Skilled", value: "Skilled" },
@@ -78,26 +73,7 @@ const CreateNewWorker = ({ navigation }) => {
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
   ];
-  const selectedProfilePic = worker?.workerDocuments?.filter(
-    (ele) => ele?.documentId === "ProfilePicture"
-  );
-  const selectedAadharCard = worker?.workerDocuments?.filter(
-    (ele) => ele?.documentId === "IdentityCard"
-  );
-  useEffect(() => {
-    if (worker) {
-      setFullName(worker?.fullName);
-      setGenderValue(worker?.gender);
-      setSkillLevelValue(worker?.workerSkills[0]?.skillTypeId);
-      setPhoneNumber(worker?.phoneNumber);
-      setBankName(worker?.bankName);
-      setSkillValue(worker?.workerSkills[0]?.skill?.name?.toString());
-      setBankAccountNumber(worker?.bankAccountNumber);
-      setProfilePic(assetsUrl + selectedProfilePic[0]?.url);
-      setAadharCard(assetsUrl + selectedAadharCard[0]?.url);
-    }
-  }, [worker]);
-  // console.log(typ skillValue)
+  console.log(skillValue);
   const submitHandler = async () => {
     const formData = new FormData();
     formData.append("SkillId", parseInt(skillValue, 10));
@@ -113,8 +89,7 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
 
-    const response = await dispatch(updateWorkerAction(formData, aadharCardForm, profilePicForm));
-    console.log('worker res',response)
+    dispatch(updateWorkerAction(formData, profilePicForm, aadharCardForm));
   };
 
   const handleImagePicker = async () => {
@@ -124,32 +99,25 @@ const CreateNewWorker = ({ navigation }) => {
       selectionLimit: 1,
     });
     if (result?.assets?.length > 0) {
-      const profileFormData = new FormData();
-      profileFormData.append("file", {
-        name: result?.assets[0]?.fileName,
-        type: result?.assets[0]?.type,
-        uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
-      });
-      setProfilePicForm(profileFormData);
-      setProfilePic(result?.assets[0]?.uri);
-    }
-  };
-
-  const handleAadharPicker = async () => {
-    const result = await launchImageLibrary({
-      mediaType: "photo",
-      quality: 0.5,
-      selectionLimit: 1,
-    });
-    if (result?.assets?.length > 0) {
-      const aadharFormData = new FormData();
-      aadharFormData.append("file", {
-        name: result?.assets[0]?.fileName,
-        type: result?.assets[0]?.type,
-        uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
-      });
-      setAadharCardForm(aadharFormData);
-      setAadharCard(result?.assets[0]?.uri);
+      if (uploadType === "Profile") {
+        const profileFormData = new FormData();
+        profileFormData.append("file", {
+          name: result?.assets[0]?.fileName,
+          type: result?.assets[0]?.type,
+          uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+        });
+        setProfilePicForm(profileFormData);
+        setProfilePic(result?.assets[0]?.uri);
+      } else if (uploadType === "Aadhar") {
+        const aadharFormData = new FormData();
+        aadharFormData.append("file", {
+          name: result?.assets[0]?.fileName,
+          type: result?.assets[0]?.type,
+          uri: result?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+        });
+        setAadharCardForm(aadharFormData);
+        setAadharCard(result?.assets[0]?.uri);
+      }
     }
   };
 
@@ -171,6 +139,7 @@ const CreateNewWorker = ({ navigation }) => {
           <Pressable
             onPress={() => {
               handleImagePicker();
+              setUploadType("Profile");
             }}
             style={{ width: "28%" }}
           >
@@ -210,10 +179,9 @@ const CreateNewWorker = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                // data={data}
                 data={skillsList?.map((ele) => ({
                   label: ele?.name,
-                  value: ele?.skillId,
+                  value: ele.skillId,
                 }))}
                 maxHeight={300}
                 labelField="label"
@@ -280,7 +248,7 @@ const CreateNewWorker = ({ navigation }) => {
             />
           </View>
         </View>
-        {/* <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
+        <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
           <Text style={styles.title}>Project</Text>
           <View style={{ marginTop: 7 }}>
             <Dropdown
@@ -310,7 +278,7 @@ const CreateNewWorker = ({ navigation }) => {
               }}
             />
           </View>
-        </View> */}
+        </View>
         <View
           style={{
             paddingHorizontal: 15,
@@ -439,7 +407,8 @@ const CreateNewWorker = ({ navigation }) => {
         <View style={{ paddingHorizontal: 15, paddingBottom: 20 }}>
           <Pressable
             onPress={() => {
-              handleAadharPicker();
+              handleImagePicker();
+              setUploadType("Aadhar");
             }}
             style={{
               width: "100%",
@@ -503,9 +472,7 @@ const CreateNewWorker = ({ navigation }) => {
             submitHandler();
           }}
         >
-          <Text style={styles.buttonText}>
-            {!worker ? "Create Worker" : "Update Worker"}
-          </Text>
+          <Text style={styles.buttonText}>Create Worker</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[

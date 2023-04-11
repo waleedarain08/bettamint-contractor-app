@@ -72,6 +72,11 @@ import {
   DotIcon,
   RestoreIcon,
 } from "../icons";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  selectWorkerAction,
+  selectedWorkerReducer,
+} from "../redux/slices/workerSlice";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -521,6 +526,8 @@ const AttendanceNavigator = ({ navigation }) => {
 };
 
 const WorkersNavigator = ({ navigation }) => {
+  const worker = useSelector(selectedWorkerReducer);
+  const dispatch = useDispatch();
   return (
     <WorkerStack.Navigator
       screenOptions={{
@@ -566,6 +573,7 @@ const WorkersNavigator = ({ navigation }) => {
               <Pressable
                 onPress={() => {
                   navigation.navigate("CreateNewWorker");
+                  dispatch(selectWorkerAction(null));
                 }}
                 style={{
                   backgroundColor: Colors.Purple,
@@ -627,7 +635,7 @@ const WorkersNavigator = ({ navigation }) => {
                 // marginHorizontal: 13,
               }}
             >
-              Add New Worker
+              {!worker ? "Add New Worker" : "Edit Worker"}
             </Text>
           ),
           headerRight: () => (

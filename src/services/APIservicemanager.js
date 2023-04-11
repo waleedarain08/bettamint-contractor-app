@@ -50,7 +50,7 @@ export default class APIServiceManager {
       route = this.clean(route);
       method = method.toUpperCase();
       const value = dataVerbs.indexOf(method);
-      console.log("VALUE", value);
+      // console.log("VALUE", value);
       switch (value) {
         case 0:
           console.log("header", {
@@ -109,12 +109,13 @@ export default class APIServiceManager {
         .catch((error) => {
           console.log("error in service", error);
           if (error.response) {
-            console.log("error response", error.response);
-            if (error.response.status === 400) {
+            // console.log("error response", error.response?.data.status);
+            // console.log("CODE----", error.response?.data.status);
+            if (error.response.data.status === 400) {
               // this.forceLogin();
               // alert(JSON.stringify(error.response))
               reject({
-                error: error?.response?.data?.message,
+                error: error?.response?.data?.errors,
                 code: error.response.status,
                 offline: false,
               });
@@ -123,7 +124,7 @@ export default class APIServiceManager {
             if (error.response.status === 401) {
               this.forceLogin();
               reject({
-                error: error?.response?.data?.message,
+                error: error?.response?.data?.errors,
                 code: error.response.status,
                 offline: false,
               });
@@ -149,7 +150,7 @@ export default class APIServiceManager {
               //   type:'danger'
               // });
               reject({
-                error: error?.response?.data?.message,
+                error: error?.response?.data?.errors,
                 code: error.response.status,
                 offline: false,
               });
@@ -160,7 +161,7 @@ export default class APIServiceManager {
               //   message: "You have been logged out. Please log in again.",
               // });
               reject({
-                error: error?.response?.data?.message,
+                error: error?.response?.data?.errors,
                 code: error.response.status,
                 offline: false,
               });
