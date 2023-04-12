@@ -31,8 +31,15 @@ const ApproveAttendance = ({ navigation, route }) => {
 	const [open, setOpen] = useState(false);
 	const [value, setValue] = useState(null);
 	const dispatch = useDispatch();
-	const { projectId } = route.params.projectId;
+	// const { projectId } = route.params.projectId;
 	const attendanceReport = useSelector(attendanceReportReducer);
+
+	const attendance = attendanceReport?.attendance;
+	console.log("attendance report", attendance);
+
+	useEffect(() => {
+		dispatch(getAttendanceReportAction(77));
+	}, []);
 
 	const [items, setItems] = useState([
 		{ label: "P", value: "P" },
@@ -234,7 +241,7 @@ const ApproveAttendance = ({ navigation, route }) => {
 							},
 						]}
 					>
-						{item.name}
+						{item?.workerName}
 					</Text>
 					<Text
 						style={[
@@ -454,7 +461,7 @@ const ApproveAttendance = ({ navigation, route }) => {
 				}}
 			>
 				<FlatList
-					data={DATA}
+					data={attendance}
 					renderItem={({ item, index }) => <Item item={item} index={index} />}
 					keyExtractor={(item) => item.id}
 					ListHeaderComponent={ListHeader}
