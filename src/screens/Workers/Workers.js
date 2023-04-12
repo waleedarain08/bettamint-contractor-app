@@ -21,6 +21,7 @@ import {
 import {
   getAllWorkersAction,
   getSkillsAction,
+  selectWorkerAction,
   workersListReducer,
 } from "../../redux/slices/workerSlice";
 
@@ -46,8 +47,8 @@ const Workers = ({ navigation }) => {
   }, []);
   useEffect(() => {
     dispatch(getAllWorkersAction(selectedProject?.projectId));
-  }, [selectedProject]);
-  // console.log(projectsListSimple);
+  }, [selectedProject])
+;
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -129,6 +130,7 @@ const Workers = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("WorkerDetails");
+              dispatch(selectWorkerAction(item));
             }}
             style={{
               backgroundColor: "#ECE5FC",

@@ -12,12 +12,14 @@ import {
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 import axios from "axios";
+import { navigate } from "../../navigation/NavigationRef";
 const initialState = {
   loading: false,
   error: null,
   workersList: null,
   createWorkerData: null,
   skillsList: null,
+  selectedWorker: null,
 };
 const api = new APIServiceManager();
 
@@ -61,6 +63,10 @@ const workerSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    selectedWorkerSuccess: (state, action) => {
+      state.loading = false;
+      state.selectedWorker = action.payload;
+    },
   },
 });
 
@@ -74,13 +80,20 @@ const {
   getSkillsRequest,
   getSkillsSuccess,
   getSkillsFailure,
+  selectedWorkerSuccess,
 } = workerSlice.actions;
 
 export const workersListReducer = (state) => state?.workerSlice?.workersList;
 export const skillsListReducer = (state) => state?.workerSlice?.skillsList;
+export const selectedWorkerReducer = (state) =>
+  state?.workerSlice?.selectedWorker;
 
 // export const projectsListSimpleReducer = (state) =>
 // 	state?.projectSlice?.projectsListSimple;
+
+export const selectWorkerAction = (data) => (dispatch) => {
+  dispatch(selectedWorkerSuccess(data));
+};
 
 export const getAllWorkersAction = (projectId) => async (dispatch) => {
   try {
@@ -107,7 +120,9 @@ export const getAllWorkersAction = (projectId) => async (dispatch) => {
 };
 
 export const updateWorkerAction =
-  (data, profilePic, aadharCard) => async (dispatch) => {
+  (data, profilePicture, adharCard) => async (dispatch) => {
+    console.log('test')
+    navigate("WorkerDetails");
     try {
       dispatch(updateWorkerRequest());
       await api
@@ -123,35 +138,29 @@ export const updateWorkerAction =
           if (data) {
             dispatch(updateWorkerSuccess(data));
             let workerId = data.workerId;
-            // formData.append('panCard', panCard);
             console.log("WORKER ID: ", workerId);
-            [(1, 2)].map(async (item) => {
-              if (item === 1 && aadharCard) {
-                // let formData = new FormData();
-                // formData.append("file", aadharCard);
+            [1, 2].map(async (item) => {
+              if (item === 1 && adharCard) {
                 let resp = await axios.post(
                   `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=IdentityCard`,
-                  aadharCard,
+                  adharCard,
                   {
                     headers: {
-                      "Content-Type": "multipart/form-data",
                       Authorization: staticToken,
+                      "Content-Type": "multipart/form-data",
                     },
                   }
                 );
                 console.log("aadhar resp", resp);
               }
-              if (item === 2 && profilePic) {
-                // let formData = new FormData();
-
-                // formData.append("file", profilePic);
+              if (item === 2 && profilePicture) {
                 let resp = await axios.post(
                   `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=ProfilePicture`,
-                  profilePic,
+                  profilePicture,
                   {
                     headers: {
-                      "Content-Type": "multipart/form-data",
                       Authorization: staticToken,
+                      "Content-Type": "multipart/form-data",
                     },
                   }
                 );
@@ -159,7 +168,7 @@ export const updateWorkerAction =
               }
             });
           }
-          // return res
+          return res;
         })
         .catch((error) => {
           console.log("WORKER ERROR", error);
@@ -170,6 +179,65 @@ export const updateWorkerAction =
     }
   };
 
+// export const updateWorkerAction =
+//   (worker, adharCard, profilePicture) => async (dispatch) => {
+//     dispatch(updateWorkerRequest());
+//     try {
+//       const response = await axios.post(
+//         `${base_url}/dashboard/worker/addupdateworker`,
+//         worker,
+//         {
+//           headers: {
+//             Authorization: staticToken,
+//             "Content-Type": "multipart/form-data",
+//             Accept: "text/plain",
+//           },
+//         }
+//       );
+//       // console.log("reponse", response?.data?.workerId);
+//       if (response.status === 200) {
+//         navigate("Workers");
+//         dispatch(updateWorkerSuccess(response.data));
+
+//         let workerId = response.data.workerId;
+//         // formData.append('panCard', panCard);
+//         [1, 2].map(async (item) => {
+//           if (item === 1 && adharCard) {
+//             let resp = await axios.post(
+//               `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=IdentityCard`,
+//               adharCard,
+//               {
+//                 headers: {
+//                   Authorization: staticToken,
+//                   "Content-Type": "multipart/form-data",
+//                 },
+//               }
+//             );
+//             // console.log("aadhar resp", resp);
+//           }
+//           if (item === 2 && profilePicture) {
+//             let resp = await axios.post(
+//               `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=ProfilePicture`,
+//               profilePicture,
+//               {
+//                 headers: {
+//                   Authorization: staticToken,
+//                   "Content-Type": "multipart/form-data",
+//                 },
+//               }
+//             );
+//             // console.log("profile resp", resp);
+//           }
+//         });
+//       }
+//       // return response;
+//     } catch (e) {
+//       console.log("Error", e);
+//       dispatch(
+//         updateWorkerFailure("Something went wrong while getting users!")
+//       );
+//     }
+//   };
 export const getSkillsAction = () => async (dispatch) => {
   try {
     dispatch(getSkillsRequest());
@@ -179,7 +247,7 @@ export const getSkillsAction = () => async (dispatch) => {
       })
       .then((res) => {
         const data = responseHandler(res);
-        console.log("Skills DATA", data);
+        // console.log("Skills DATA", data);
         if (data) {
           dispatch(getSkillsSuccess(data));
         }

@@ -27,6 +27,7 @@ import {
 	SquareCheckBox,
 	DotIcon,
 	DateIcon,
+	Cross,
 } from "../../icons";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -38,6 +39,7 @@ import {
 import PersonImage from "../../assets/images/personimage.png";
 import typeIcon from "../../assets/icons/typeIcon.png";
 import DatePicker from "react-native-date-picker";
+import { assetsUrl } from "../../utils/api_constants";
 LogBox.ignoreAllLogs();
 const AttendanceMusterCard = ({ navigation, route }) => {
 	const [date, setDate] = useState(new Date());
@@ -48,20 +50,20 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 	console.log("jobId", jobId);
 	const dispatch = useDispatch();
 	const attendanceMuster = useSelector(attendanceMusterReducer);
-	console.log("attendanceMuster", attendanceMuster);
+	// console.log("attendanceMuster", attendanceMuster);
 
 	const attendance = attendanceMuster?.attendance;
-	console.log("attendance", attendance);
+	// console.log("attendance", attendance);
 
 	useEffect(() => {
 		dispatch(getAttendanceMusterAction(workerId, jobId));
 	}, []);
 
-	useEffect(() => {
-		if (attendance) {
-			setSelectedDate(attendance?.date);
-		}
-	}, [attendance]);
+	// useEffect(() => {
+	// 	if (attendance) {
+	// 		setSelectedDate(attendance?.date);
+	// 	}
+	// }, [attendance]);
 
 	console.log("attendance from screen", attendance);
 	const rowColors = ["#F3F4F4", "#FFFFFF"];
@@ -85,7 +87,8 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 					}}
 				>
 					<Text style={[styles.flatListText, { textAlign: "left" }]}>
-						{moment(item?.attendance?.date).format("DD MMMM, YYYY")}
+						{item?.date}
+						{/* {moment(new Date(item?.date)).format("DD MMMM")} */}
 					</Text>
 				</View>
 				<View
@@ -96,22 +99,30 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 						justifyContent: "space-around",
 					}}
 				>
-					{item?.hoursAbbreviation === "P" ? (
-						<Text style={[styles.flatListText, { color: Colors.Primary }]}>
-							{item?.hoursAbbreviation}
-						</Text>
-					) : (
-						<Text style={[styles.flatListText, { color: "Red" }]}>
-							{item?.hoursAbbreviation}
-						</Text>
-					)}
-					<DotIcon size={25} color={Colors.Primary} />
+					<Text
+						style={[
+							styles.flatListText,
+							{
+								color: item?.hoursAbbreviation === "A" ? "red" : Colors.Primary,
+							},
+						]}
+					>
+						{item?.hoursAbbreviation}
+					</Text>
+					<DotIcon
+						size={25}
+						color={item?.hoursAbbreviation === "A" ? "red" : Colors.Primary}
+					/>
 				</View>
 				<View style={{ width: "20%" }}>
 					<Text style={styles.flatListText}>{item?.advance}</Text>
 				</View>
 				<View style={{ width: "15%", alignItems: "center" }}>
-					<TickIcon size={20} color={Colors.Primary} />
+					{item?.isApproved ? (
+						<TickIcon size={20} color={Colors.Primary} />
+					) : (
+						<Cross size={20} color={"red"} />
+					)}
 				</View>
 				<TouchableOpacity
 					onPress={() => {
@@ -187,7 +198,13 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 					<View style={{ width: "27%" }}>
 						<Image
 							style={{ width: 92, height: 90, borderRadius: 15 }}
-							source={PersonImage}
+							source={
+								attendanceMuster?.profilePicture
+									? { uri: assetsUrl + attendanceMuster?.profilePicture }
+									: {
+											uri: "https://media.istockphoto.com/id/1327592506/vector/default-avatar-photo-placeholder-icon-grey-profile-picture-business-man.jpg?s=612x612&w=0&k=20&c=BpR0FVaEa5F24GIw7K8nMWiiGmbb8qmhfkpXcp1dhQg=",
+									  }
+							}
 						/>
 					</View>
 
@@ -215,8 +232,8 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 					}}
 				>
 					<Image
-						style={{ width: 35, height: 35, borderRadius: 4 }}
-						source={typeIcon}
+						style={{ width: 40, height: 40, borderRadius: 4 }}
+						source={{ uri: assetsUrl + attendanceMuster?.projectImage }}
 					/>
 					<Spacer right={10} />
 					<View>

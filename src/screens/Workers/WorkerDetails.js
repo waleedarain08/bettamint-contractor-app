@@ -23,6 +23,9 @@ export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 import { Building, Search, LocationIcon, User, AccountType } from "../../icons";
+import { assetsUrl } from "../../utils/api_constants";
+import { useSelector } from "react-redux";
+import { selectedWorkerReducer } from "../../redux/slices/workerSlice";
 const DATA = [
   {
     id: "1",
@@ -82,89 +85,15 @@ const DATA = [
   },
 ];
 
-const WorkerDetails = ({ navigation }) => {
-  const [details, setDetails] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const Item = ({ item }) => (
-    <Pressable
-      style={styles.item}
-      onPress={() => {
-        // setModalVisible(true);
-        // setDetails(item);
-        navigation.navigate("ProjectDetails");
-      }}
-    >
-      <View
-        style={{ flexDirection: "row", alignItems: "center", width: "100%" }}
-      >
-        <View style={{ width: "30%" }}>
-          <ImageBackground
-            source={{ uri: item.image }}
-            style={{
-              width: 100,
-              height: 100,
-              resizeMode: "contain",
-              alignItems: "center",
-              borderRadius: 10,
-            }}
-          >
-            <Text
-              style={[
-                styles.heading,
-                { fontSize: 12, bottom: 0, position: "absolute" },
-              ]}
-            >
-              {item.type}
-            </Text>
-          </ImageBackground>
-        </View>
-        <Spacer left={10} />
-        <View style={{ width: "65%" }}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Spacer bottom={10} />
-          <View
-            style={{
-              flexDirection: "row",
-            }}
-          >
-            <LocationIcon size={22} color={Colors.LightGray} />
-            <Text style={styles.num}>{item.location}</Text>
-          </View>
-          <Spacer bottom={20} />
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-                borderRightColor: Colors.LightGray,
-                borderRightWidth: 1,
-                paddingRight: 10,
-                borderStyle: "dashed",
-              }}
-            >
-              <Text style={styles.workerHeading}>Required{"\n"}Workers:</Text>
-              <Text style={styles.workerNumber}>{item.worker}</Text>
-            </View>
-            <View
-              style={{
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <Text style={styles.workerHeading}>Active{"\n"}Workers:</Text>
-              <Text style={styles.workerNumber}>{item.worker}</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-    </Pressable>
+const WorkerDetails = ({ navigation, route }) => {
+  const worker = useSelector(selectedWorkerReducer);
+  const profilePic = worker?.workerDocuments?.filter(
+    (ele) => ele?.documentId === "ProfilePicture"
   );
+  const aadharCard = worker?.workerDocuments?.filter(
+    (ele) => ele?.documentId === "IdentityCard"
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -181,7 +110,8 @@ const WorkerDetails = ({ navigation }) => {
             <View style={{ width: "95%", margin: 10, borderRadius: 30 }}>
               <ImageBackground
                 source={{
-                  uri: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
+                  uri: assetsUrl + profilePic[0]?.url,
+                  // uri: "https://images.pexels.com/photos/2880871/pexels-photo-2880871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
                 }}
                 imageStyle={{ borderRadius: 10 }}
                 style={{
@@ -212,7 +142,9 @@ const WorkerDetails = ({ navigation }) => {
                   >
                     <View>
                       <Text style={styles.modalText}>Name</Text>
-                      <Text style={styles.modalHeading}>VIKRUM RAJPUT</Text>
+                      <Text style={styles.modalHeading}>
+                        {worker?.fullName}
+                      </Text>
                     </View>
                     <View>
                       <User size={30} color={Colors.White} />
@@ -261,7 +193,7 @@ const WorkerDetails = ({ navigation }) => {
                     Phone Number
                   </Text>
                   <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                    +91 234 5678 9
+                    {worker?.phoneNumber}
                   </Text>
                 </View>
                 <View
@@ -276,7 +208,7 @@ const WorkerDetails = ({ navigation }) => {
                   </Text>
 
                   <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                    Mysore Rd, Jnana Bharathi, Bengalure Karnataka.
+                    {worker?.address}
                   </Text>
                 </View>
                 <View
@@ -290,7 +222,7 @@ const WorkerDetails = ({ navigation }) => {
                     Bank Name
                   </Text>
                   <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                    ICC India pvt ltd
+                    {worker?.bankName}
                   </Text>
                 </View>
                 <View
@@ -304,7 +236,7 @@ const WorkerDetails = ({ navigation }) => {
                     Bank Account Number
                   </Text>
                   <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                    2345 7895 6543
+                    {worker?.bankAccountNumber}
                   </Text>
                 </View>
                 <View
@@ -318,7 +250,7 @@ const WorkerDetails = ({ navigation }) => {
                     IFC Code
                   </Text>
                   <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                    ----
+                    {worker?.ifscCode}
                   </Text>
                 </View>
                 <View
@@ -339,7 +271,7 @@ const WorkerDetails = ({ navigation }) => {
                     <Text
                       style={[styles.modalHeading, { color: Colors.Black }]}
                     >
-                      150 Jobs Completed
+                      {`${worker?.workerJobs?.length} Jobs`}
                     </Text>
                   </View>
                   <View style={{ width: "20%" }}>
@@ -376,7 +308,7 @@ const WorkerDetails = ({ navigation }) => {
                   }}
                 >
                   <Image
-                    source={require("../../assets/images/aadhar.png")}
+                    source={{ uri: assetsUrl + aadharCard[0]?.url }}
                     style={{ width: 300, height: 150 }}
                   />
                 </View>
