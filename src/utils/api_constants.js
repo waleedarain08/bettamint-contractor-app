@@ -19,7 +19,7 @@ export const UPDATE_WORKER_URL = "Dashboard/worker/addupdateworker";
 export const GET_SKILLS_URL = "app/Skills";
 export const ATTENDANCE_MUSTER_URL = "dashboard/Attendance/mustercard";
 export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
-
+export const ATTENDANCE_REPORT_URL = "dashboard/Attendance/getbyprojectreport";
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
 	if (response && response?.data && response?.status === 200) {

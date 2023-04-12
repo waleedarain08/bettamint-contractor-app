@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
 	ATTENDANCE_MUSTER_URL,
 	ATTENDANCE_GETALL_URL,
+	ATTENDANCE_REPORT_URL,
 	responseHandler,
 	staticToken,
 } from "../../utils/api_constants";
@@ -13,6 +14,7 @@ const initialState = {
 	attendanceList: null,
 	attendanceMuster: null,
 	attendanceApprove: null,
+	attendanceReport: null,
 };
 
 const api = new APIServiceManager();
@@ -56,6 +58,18 @@ const attendanceSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		getAttendanceReportRequest: (state, action) => {
+			state.loading = true;
+			state.error = null;
+		},
+		getAttendanceReportSuccess: (state, action) => {
+			state.attendanceReport = action.payload;
+			state.loading = false;
+		},
+		getAttendanceReportFailure: (state, action) => {
+			state.loading = false;
+			state.error = action.payload;
+		},
 	},
 });
 
@@ -69,6 +83,9 @@ const {
 	getAttendanceApproveRequest,
 	getAttendanceApproveSuccess,
 	getAttendanceApproveFailure,
+	getAttendanceReportRequest,
+	getAttendanceReportSuccess,
+	getAttendanceReportFailure,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
@@ -77,6 +94,8 @@ export const attendanceMusterReducer = (state) =>
 	state?.attendanceSlice?.attendanceMuster;
 export const attendanceApproveReducer = (state) =>
 	state?.attendanceSlice?.attendanceApprove;
+export const attendanceReportReducer = (state) =>
+	state?.attendanceSlice?.attendanceReport;
 
 export const getAllAttendanceAction = (projectId) => async (dispatch) => {
 	try {
@@ -161,5 +180,29 @@ export const getAttendanceApproveAction =
 			dispatch(getAttendanceApproveFailure());
 		}
 	};
+
+export const getAttendanceReportAction = (projectId) => async (dispatch) => {
+	try {
+		dispatch(getAttendanceReportRequest());
+		await api
+
+			.request("GET", ATTENDANCE_REPORT_URL + `?projectId=${projectId}`, null, {
+				Authorization: staticToken,
+			})
+			.then((res) => {
+				const data = responseHandler(res);
+				console.log("ATTENDANCE REPORT", data);
+				if (data) {
+					dispatch(getAttendanceReportSuccess(data));
+				}
+			})
+			.catch((error) => {
+				console.log("ATTENDANCE REPORT ERROR", error);
+				dispatch(getAttendanceReportFailure());
+			});
+	} catch (error) {
+		dispatch(getAttendanceReportFailure());
+	}
+};
 
 export default attendanceSlice.reducer;

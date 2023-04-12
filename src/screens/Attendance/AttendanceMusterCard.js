@@ -96,9 +96,15 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 						justifyContent: "space-around",
 					}}
 				>
-					<Text style={[styles.flatListText, { color: Colors.Primary }]}>
-						{item?.day}
-					</Text>
+					{item?.hoursAbbreviation === "P" ? (
+						<Text style={[styles.flatListText, { color: Colors.Primary }]}>
+							{item?.hoursAbbreviation}
+						</Text>
+					) : (
+						<Text style={[styles.flatListText, { color: "Red" }]}>
+							{item?.hoursAbbreviation}
+						</Text>
+					)}
 					<DotIcon size={25} color={Colors.Primary} />
 				</View>
 				<View style={{ width: "20%" }}>
