@@ -20,6 +20,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
 	getAllAttendanceAction,
 	attendanceListReducer,
+	saveProjectDataAction,
 } from "../../redux/slices/attendanceSlice";
 import {
 	projectsListSimpleReducer,
@@ -358,6 +359,8 @@ const Attendance = ({ navigation }) => {
 									onPress={() => {
 										setSelectedProject(item);
 										setOpenSearchModal(false);
+										dispatch(saveProjectDataAction(item));
+										console.log("selected project", item);
 									}}
 								>
 									<Text

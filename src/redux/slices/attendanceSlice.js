@@ -15,6 +15,7 @@ const initialState = {
 	attendanceMuster: null,
 	attendanceApprove: null,
 	attendanceReport: null,
+	projectData: null,
 };
 
 const api = new APIServiceManager();
@@ -70,6 +71,9 @@ const attendanceSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		saveProjectData: (state, action) => {
+			state.projectData = action.payload;
+		},
 	},
 });
 
@@ -86,6 +90,7 @@ const {
 	getAttendanceReportRequest,
 	getAttendanceReportSuccess,
 	getAttendanceReportFailure,
+	saveProjectData,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
@@ -96,7 +101,12 @@ export const attendanceApproveReducer = (state) =>
 	state?.attendanceSlice?.attendanceApprove;
 export const attendanceReportReducer = (state) =>
 	state?.attendanceSlice?.attendanceReport;
+export const projectDataReducer = (state) =>
+	state?.attendanceSlice?.projectData;
 
+export const saveProjectDataAction = (data) => async (dispatch) => {
+	dispatch(saveProjectData(data));
+};
 export const getAllAttendanceAction = (projectId) => async (dispatch) => {
 	try {
 		dispatch(getAttendanceRequest());
@@ -107,7 +117,7 @@ export const getAllAttendanceAction = (projectId) => async (dispatch) => {
 			})
 			.then((res) => {
 				const data = responseHandler(res);
-				console.log("ATTENDANCE", data);
+				// console.log("ATTENDANCE", data);
 				if (data) {
 					dispatch(getAttendanceSuccess(data));
 				}
@@ -137,7 +147,7 @@ export const getAttendanceMusterAction =
 
 				.then((res) => {
 					const data = responseHandler(res);
-					console.log("ATTENDANCE MUSTER", data);
+					// console.log("ATTENDANCE MUSTER", data);
 					if (data) {
 						dispatch(getAttendanceMusterSuccess(data));
 					}
@@ -167,7 +177,7 @@ export const getAttendanceApproveAction =
 				)
 				.then((res) => {
 					const data = responseHandler(res);
-					console.log("ATTENDANCE APPROVE", data);
+					// console.log("ATTENDANCE APPROVE", data);
 					if (data) {
 						dispatch(getAttendanceApproveSuccess(data));
 					}
@@ -191,7 +201,7 @@ export const getAttendanceReportAction = (projectId) => async (dispatch) => {
 			})
 			.then((res) => {
 				const data = responseHandler(res);
-				console.log("ATTENDANCE REPORT", data);
+				// console.log("ATTENDANCE REPORT", data);
 				if (data) {
 					dispatch(getAttendanceReportSuccess(data));
 				}

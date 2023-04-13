@@ -24,6 +24,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
 	getAttendanceReportAction,
 	attendanceReportReducer,
+	projectDataReducer,
 } from "../../redux/slices/attendanceSlice";
 LogBox.ignoreAllLogs();
 const ApproveAttendance = ({ navigation, route }) => {
@@ -35,10 +36,9 @@ const ApproveAttendance = ({ navigation, route }) => {
 	const attendanceReport = useSelector(attendanceReportReducer);
 
 	const attendance = attendanceReport?.attendance;
-	console.log("attendance report", attendance);
-
+	const projectData = useSelector(projectDataReducer);
 	useEffect(() => {
-		dispatch(getAttendanceReportAction(77));
+		dispatch(getAttendanceReportAction(projectData?.projectId));
 	}, []);
 
 	const [items, setItems] = useState([
@@ -58,80 +58,6 @@ const ApproveAttendance = ({ navigation, route }) => {
 		{ label: "P3", value: "P3" },
 		{ label: "P4", value: "P4" },
 		{ label: "P5", value: "P5" },
-	];
-	const DATA = [
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Offline",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Offline",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
-		{
-			name: "Arvind Chauhan",
-			status: "Online",
-		},
 	];
 
 	const Options = ({ item }) => (
@@ -258,13 +184,13 @@ const ApproveAttendance = ({ navigation, route }) => {
 					</Text>
 				</View>
 				<View style={{ width: "12%" }}>
-					{item.status === "Online" ? (
+					{item?.isOnline ? (
 						<Text style={[styles.flatListText, { color: Colors.Primary }]}>
-							{item.status}
+							Online
 						</Text>
 					) : (
 						<Text style={[styles.flatListText, { color: Colors.Black }]}>
-							{item.status}
+							Offline
 						</Text>
 					)}
 				</View>
