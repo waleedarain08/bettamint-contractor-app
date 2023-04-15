@@ -84,6 +84,7 @@ const {
 } = workerSlice.actions;
 
 export const workersListReducer = (state) => state?.workers?.workersList;
+export const workerLoading = (state) => state?.workers?.loading;
 export const skillsListReducer = (state) => state?.workers?.skillsList;
 export const selectedWorkerReducer = (state) =>
   state?.workers?.selectedWorker;

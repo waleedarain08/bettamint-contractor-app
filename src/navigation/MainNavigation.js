@@ -1004,7 +1004,7 @@ const UserNavigator = ({ navigation }) => (
           <View
             style={{ flexDirection: "row", justifyContent: "space-evenly" }}
           >
-            <Pressable
+            {/* <Pressable
               onPress={() => {
                 navigation.navigate("CreateNewUser");
               }}
@@ -1033,7 +1033,7 @@ const UserNavigator = ({ navigation }) => (
                   USER
                 </Text>
               </View>
-            </Pressable>
+            </Pressable> */}
             <Pressable
               style={{ marginLeft: 10 }}
               onPress={() => navigation.navigate("Profile")}
@@ -1088,7 +1088,7 @@ function MainNavigation({}) {
     }, 5000);
   }, []);
   const auth = useSelector(authToken);
-  console.log("Auth Token", auth);
+
   const MyTheme = {
     ...DefaultTheme,
     colors: {

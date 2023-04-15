@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,10 @@ import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { User, Tick, Cross, Search, Building } from "../../icons";
+import { useDispatch, useSelector } from "react-redux";
+import { authToken } from "../../redux/slices/authSlice";
+import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
+import { Searchbar } from "react-native-paper";
 LogBox.ignoreAllLogs();
 const DATA = [
   {
@@ -63,6 +67,40 @@ const DATA = [
 const Users = ({ navigation }) => {
   const [details, setDetails] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [filteredDataSource, setFilteredDataSource] = useState([]);
+  const [masterDataSource, setMasterDataSource] = useState([]);
+  const [search, setSearch] = useState("");
+
+  const token = useSelector(authToken);
+  const usersList = useSelector(usersListReducer);
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(getUsersAction(token));
+  }, []);
+  useEffect(() => {
+    setFilteredDataSource(usersList);
+    setMasterDataSource(usersList);
+  }, [usersList]);
+  const searchFilterFunction = (text) => {
+    // Check if searched text is not blank
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.fullName ? item.fullName.toUpperCase() : "".toUpperCase();
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataSource(newData);
+      setSearch(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataSource(masterDataSource);
+      setSearch(text);
+    }
+  };
   const Item = ({ item }) => (
     <Pressable
       style={styles.item}
@@ -79,7 +117,7 @@ const Users = ({ navigation }) => {
         }}
       >
         <View>
-          <Text style={styles.flatlistHeading}>{item.name}</Text>
+          <Text style={styles.flatlistHeading}>{item.fullName}</Text>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <TouchableOpacity
@@ -125,7 +163,7 @@ const Users = ({ navigation }) => {
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
           >
-            {item.email}
+            {item.emailAddress}
           </Text>
         </View>
         <View style={{ alignItems: "center" }}>
@@ -133,7 +171,7 @@ const Users = ({ navigation }) => {
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
           >
-            {item.role}
+            {item.userTypeId || "N/A"}
           </Text>
         </View>
       </View>
@@ -185,10 +223,27 @@ const Users = ({ navigation }) => {
             width: "65%",
             backgroundColor: "#ECE4FC",
             alignItems: "center",
-            borderRadius: 3,
+            borderRadius: 10,
+            height: 50
           }}
         >
-          <View style={{ width: "70%", paddingLeft: 5 }}>
+          <Searchbar
+            style={{
+              backgroundColor: "#ECE4FC",
+              borderRadius: 10,
+              width: "100%",
+              // height: 40,
+              // marginBottom: 10
+            }}
+            placeholder="Search"
+            placeholderTextColor={Colors.FormText}
+            mode="bar"
+            icon={() => <Search size={20} color={Colors.Black} />}
+            clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+            onChangeText={(text) => searchFilterFunction(text)}
+            value={search}
+          />
+          {/* <View style={{ width: "70%", paddingLeft: 5 }}>
             <Text
               style={{
                 color: "#ADBAC3",
@@ -199,7 +254,7 @@ const Users = ({ navigation }) => {
               SEARCH
             </Text>
           </View>
-          <TouchableOpacity
+          <View
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -209,16 +264,17 @@ const Users = ({ navigation }) => {
               width: "15%",
             }}
           >
+           
             <Search size={20} color={Colors.Secondary} />
-          </TouchableOpacity>
+          </View> */}
         </View>
       </View>
       {/* <ScrollView> */}
       <View style={{ width: "100%", flex: 1 }}>
         <FlatList
-          data={DATA}
+          data={filteredDataSource}
           renderItem={({ item }) => <Item item={item} />}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.userId}
           showsVerticalScrollIndicator={false}
         />
       </View>

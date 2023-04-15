@@ -1,18 +1,13 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-  ATTENDANCE_MUSTER_URL,
-  ATTENDANCE_GETALL_URL,
-  responseHandler,
-  staticToken,
   base_url,
 } from "../../utils/api_constants";
-import APIServiceManager from "../../services/APIservicemanager";
 import axios from "axios";
 const initialState = {
   loading: false,
   error: null,
   userData: null,
-  isUserLogin: false,
+  token: null,
 };
 
 const authSlice = createSlice({
@@ -24,7 +19,7 @@ const authSlice = createSlice({
       state.error = null;
     },
     userLoginSuccess: (state, action) => {
-      state.attendanceList = action.payload;
+      state.userData = action.payload;
       state.loading = false;
     },
     userLoginFailure: (state, action) => {
@@ -32,10 +27,10 @@ const authSlice = createSlice({
       state.error = action.payload;
     },
     isUserLoginDone: (state, action) => {
-      state.isUserLogin = action.payload;
+      state.token = action.payload;
     },
     resetState: (state, action) => {
-      state.isUserLogin = false;
+      state.token = null;
       state.error = null;
       state.loading = false;
       state.userData = null;
@@ -51,7 +46,8 @@ const {
   resetState,
 } = authSlice.actions;
 
-export const authToken = (state) => state?.auth?.isUserLogin;
+export const authToken = (state) => state?.auth?.token;
+export const userData = (state) => state?.auth?.userData;
 export const loading = (state) => state?.auth?.loading;
 
 export const isUserLoginAction = () => async (dispatch) => {
@@ -64,16 +60,15 @@ export const logoutAction = () => async (dispatch) => {
 export const userLoginAction = (username, password) => async (dispatch) => {
   const url = `${base_url}/dashboard/User/Login`;
 
-  //   let userCred = null;
   dispatch(userLoginRequest());
   try {
     let response = await axios.post(
       `${url}?username=${username}&password=${password}`
     );
-    console.log("Auth Response", response);
     if (response.status === 200) {
       dispatch(userLoginSuccess(response.data));
-      dispatch(isUserLoginDone(true));
+      console.log("Auth Response", response.data);
+      dispatch(isUserLoginDone(response?.data?.token));
     } else {
       dispatch(userLoginFailure("Something went wrong!"));
     }

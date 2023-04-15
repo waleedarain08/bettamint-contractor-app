@@ -8,6 +8,7 @@ import jobSlice from "./slices/jobSlice";
 import attendanceSlice from "./slices/attendanceSlice";
 import workerSlice from "./slices/workerSlice";
 import authSlice from "./slices/authSlice";
+import userSlide from "./slices/userSlice";
 
 const persistConfig = {
   key: "root",
@@ -26,6 +27,7 @@ const reducers = combineReducers({
   jobs: jobSlice,
   attendance: attendanceSlice,
   workers: workerSlice,
+  users: userSlide,
 });
 const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({

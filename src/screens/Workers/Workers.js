@@ -7,6 +7,8 @@ import {
   LogBox,
   Modal,
   Pressable,
+  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
@@ -22,6 +24,7 @@ import {
   getAllWorkersAction,
   getSkillsAction,
   selectWorkerAction,
+  workerLoading,
   workersListReducer,
 } from "../../redux/slices/workerSlice";
 
@@ -35,7 +38,9 @@ const Workers = ({ navigation }) => {
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const workersList = useSelector(workersListReducer);
-  console.log("------project", projectsListSimple)
+  const isLoading = useSelector(workerLoading);
+  // console.log("------project", projectsListSimple)
+  // console.log('worker list', workersList)
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction());
   }, []);
@@ -48,8 +53,7 @@ const Workers = ({ navigation }) => {
   }, []);
   useEffect(() => {
     dispatch(getAllWorkersAction(selectedProject?.projectId));
-  }, [selectedProject])
-;
+  }, [selectedProject]);
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -72,83 +76,85 @@ const Workers = ({ navigation }) => {
   };
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
-  const Item = ({ item, index }) => (
-    <View style={[styles.item]}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          width: "100%",
-          justifyContent: "space-between",
-          backgroundColor: rowColors[index % rowColors?.length],
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        }}
-      >
+  const Item = ({ item, index }) => {
+    return (
+      <View style={[styles.item]}>
         <View
           style={{
-            width: "30%",
+            flexDirection: "row",
+            alignItems: "center",
+            width: "100%",
+            justifyContent: "space-between",
+            backgroundColor: rowColors[index % rowColors?.length],
+            paddingHorizontal: 8,
+            paddingVertical: 4,
           }}
         >
-          <Text
-            style={[
-              styles.flatListText,
-              { textAlign: "left", textTransform: "uppercase", fontSize: 10 },
-            ]}
-          >
-            {item.fullName}
-          </Text>
-          <Text
-            style={[styles.flatListText, { textAlign: "left", fontSize: 9 }]}
-          >
-            {`+${item?.phoneNumber}`}
-          </Text>
-        </View>
-        <View style={{ width: "15%", alignItems: "center" }}>
-          {item.workerTypeId == "Online" ? (
-            <Text style={[styles.flatListText, { color: Colors.Primary }]}>
-              {item.workerTypeId}
-            </Text>
-          ) : (
-            <Text style={styles.flatListText}>{item.workerTypeId}</Text>
-          )}
-        </View>
-        <View style={{ width: "15%", alignItems: "center" }}>
-          {item?.adharVerified ? (
-            <TickIcon size={20} color={Colors.Primary} />
-          ) : (
-            <Cross size={20} color={"red"} />
-          )}
-        </View>
-        <View style={{ width: "15%", alignItems: "center" }}>
-          {item?.bankVerified ? (
-            <TickIcon size={20} color={Colors.Primary} />
-          ) : (
-            <Cross size={20} color={"red"} />
-          )}
-        </View>
-        <View style={{ width: "18%" }}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate("WorkerDetails");
-              dispatch(selectWorkerAction(item));
-            }}
+          <View
             style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 2,
-              width: "80%",
-              justifyContent: "center",
-              alignItems: "center",
+              width: "30%",
             }}
           >
-            <Text style={styles.smallButton}>View</Text>
-          </TouchableOpacity>
+            <Text
+              style={[
+                styles.flatListText,
+                { textAlign: "left", textTransform: "uppercase", fontSize: 10 },
+              ]}
+            >
+              {item.fullName}
+            </Text>
+            <Text
+              style={[styles.flatListText, { textAlign: "left", fontSize: 9 }]}
+            >
+              {`+${item?.phoneNumber}`}
+            </Text>
+          </View>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            {item.workerTypeId == "Online" ? (
+              <Text style={[styles.flatListText, { color: Colors.Primary }]}>
+                {item.workerTypeId}
+              </Text>
+            ) : (
+              <Text style={styles.flatListText}>{item.workerTypeId}</Text>
+            )}
+          </View>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            {item?.adharVerified ? (
+              <TickIcon size={20} color={Colors.Primary} />
+            ) : (
+              <Cross size={20} color={"red"} />
+            )}
+          </View>
+          <View style={{ width: "15%", alignItems: "center" }}>
+            {item?.bankVerified ? (
+              <TickIcon size={20} color={Colors.Primary} />
+            ) : (
+              <Cross size={20} color={"red"} />
+            )}
+          </View>
+          <View style={{ width: "18%" }}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation.navigate("WorkerDetails");
+                dispatch(selectWorkerAction(item));
+              }}
+              style={{
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 2,
+                width: "80%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={styles.smallButton}>View</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   const ListHeader = () => {
     return (
@@ -293,14 +299,30 @@ const Workers = ({ navigation }) => {
           flex: 1,
         }}
       >
-        <FlatList
-          data={workersList}
-          renderItem={({ item, index }) => <Item item={item} index={index} />}
-          keyExtractor={(item) => item.id}
-          ListHeaderComponent={ListHeader}
-          stickyHeaderIndices={[0]}
-          showsVerticalScrollIndicator={false}
-        />
+        {workersList.length === 0 || !workersList ? (
+          <View
+            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend-Medium",
+                fontSize: 18,
+                color: Colors.Gray,
+              }}
+            >
+              No Record Found!
+            </Text>
+          </View>
+        ) : (
+          <FlatList
+            data={workersList}
+            renderItem={({ item, index }) => <Item item={item} index={index} />}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={ListHeader}
+            stickyHeaderIndices={[0]}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
       </View>
       <Modal
         visible={openSearchModal}
@@ -359,6 +381,16 @@ const Workers = ({ navigation }) => {
           </View>
           <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
             <FlatList
+              refreshControl={
+                <RefreshControl
+                  refreshing={isLoading}
+                  onRefresh={() =>
+                    dispatch(getAllWorkersAction(selectedProject?.projectId))
+                  }
+                  tintColor={Colors.Primary}
+                  colors={[Colors.Purple, Colors.Primary]}
+                />
+              }
               data={filteredDataSource}
               renderItem={({ item }) => (
                 <Pressable

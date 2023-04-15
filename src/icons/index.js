@@ -386,3 +386,14 @@ export const BackIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
+export const BackCircleIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="arrow-back-circle-sharp"
+    color={color}
+    size={size}
+    type="Ionicons"
+    style={style}
+    onPress={onPress}
+  />
+);
+

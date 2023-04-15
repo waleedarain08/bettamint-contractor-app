@@ -27,7 +27,7 @@ const projectSlice = createSlice({
 		},
 		getProjectsSuccess: (state, action) => {
 			state.projectsList = action.payload;
-			state.loadingProjects = false;
+			state.loading = false;
 		},
 		getProjectsFailure: (state, action) => {
 			state.loading = false;
@@ -51,7 +51,7 @@ const projectSlice = createSlice({
 		},
 		getProjectsSimpleSuccess: (state, action) => {
 			state.projectsListSimple = action.payload;
-			state.loadingProjects = false;
+			state.loading = false;
 		},
 		getProjectsSimpleFailure: (state, action) => {
 			state.loading = false;
@@ -73,6 +73,7 @@ const {
 } = projectSlice.actions;
 
 export const projectsListReducer = (state) => state?.projects?.projectsList;
+export const loadingProject = (state) => state?.projects?.loading;
 export const projectsListSimpleReducer = (state) =>
 	state?.projects?.projectsListSimple;
 
@@ -112,7 +113,7 @@ export const updateProjectAction = (projectData) => async (dispatch) => {
 			.then((res) => {
 				// console.log("res", res);
 				const data = responseHandler(res);
-				console.log("Project create response", data);
+				// console.log("Project create response", data);
 				if (data) {
 					dispatch(updateProjectSuccess(data));
 				}
@@ -137,7 +138,7 @@ export const getAllProjectsSimpleAction = () => async (dispatch) => {
 			})
 			.then((res) => {
 				const data = responseHandler(res);
-				console.log("Project DATA Simple", data);
+				// console.log("Project DATA Simple", data);
 				if (data) {
 					dispatch(getProjectsSimpleSuccess(data));
 				}

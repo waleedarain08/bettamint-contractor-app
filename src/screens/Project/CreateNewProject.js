@@ -1,4 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   View,
   Text,
@@ -10,20 +16,30 @@ import {
   LogBox,
   Alert,
   Pressable,
+  Modal,
+  Animated,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import { Picture } from "../../icons";
+import { BackCircleIcon, LocationIcon, Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { useSelector, useDispatch } from "react-redux";
 import { updateProjectAction } from "../../redux/slices/projectSlice";
+import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps"; // remove PROVIDER_GOOGLE import if not using Google Maps
+import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
+import { GOOGLE_API_KEY } from "../../utils/api_constants";
+import MapViewGestures from "@dev-event/react-native-maps-draw";
+import { TTouchPoint } from "@dev-event/react-native-maps-draw";
+import WebView from "react-native-webview";
+
+const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
+
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewProject = ({ navigation }) => {
@@ -39,9 +55,64 @@ const CreateNewProject = ({ navigation }) => {
   const [projectLocation, setProjectLocation] = useState("");
   const [projectImage, setProjectImage] = useState("");
   const [projectImageUri, setProjectImageUri] = useState("");
-
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [openMapModal, setOpenMapModal] = useState(false);
   const dispatch = useDispatch();
+  const mapRef = useRef();
+  const webview = useRef();
+  const initialPolygon = useRef({
+    polygons: [],
+    distance: 0,
+    lastLatLng: undefined,
+    initialLatLng: undefined,
+    centerLatLng: undefined,
+  });
 
+  const polygonOptions = {
+    clickable: false,
+    fillColor: "#303030",
+    fillOpacity: 0.1,
+    strokeColor: "#000000",
+    strokeWeight: 4,
+    strokeOpacity: 1,
+  };
+  const [isActiveDraw, setDrawMode] = useState(false);
+  const [polygon, setPolygon] = useState(initialPolygon.current);
+  const [isReady, setIsReady] = useState(false);
+  const [points, setPoints] = useState(TTouchPoint);
+  const handleMapReady = useCallback(
+    () => mapRef.current && setIsReady(true),
+    []
+  );
+
+  const convertByPoint = async (item) => {
+    await mapRef.current?.coordinateForPoint(item);
+  };
+  const handleRemovePolygon = () => {
+    setPolygon(initialPolygon.current);
+  };
+  const handleCanvasEndDraw = useCallback((locations) => {
+    setPolygon(locations);
+    setDrawMode(false);
+  }, []);
+
+  const handlePolygon = useCallback(
+    (_, index) => console.log(index),
+    // <AnimatedPolygon
+    //   key={index}
+    //   coordinates={polygon.polygons}
+    //   fillColor="red"
+    //   strokeColor="black"
+    //   strokeWidth={2}
+    // />
+    [polygon.polygons]
+  );
+
+  // console.log("Polygon", polygon);
+  const isVisiblePolygons = useMemo(
+    () => isReady && polygon.polygons && polygon.polygons.length > 0,
+    [isReady, polygon.polygons]
+  );
   const submitHandler = async () => {
     const geoArray = [
       {
@@ -62,11 +133,11 @@ const CreateNewProject = ({ navigation }) => {
     formData.append("ProjectTypeId", value);
     formData.append("DeveloperId", 0);
     formData.append("ProjectId", 0);
-	formData.append("Image", {
-        name: projectImage?.assets[0]?.fileName,
-        type: projectImage?.assets[0]?.type,
-        uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
-      });
+    formData.append("Image", {
+      name: projectImage?.assets[0]?.fileName,
+      type: projectImage?.assets[0]?.type,
+      uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+    });
     formData.append("GeofencingArray", JSON.stringify(geoArray));
     dispatch(updateProjectAction(formData));
 
@@ -95,10 +166,36 @@ const CreateNewProject = ({ navigation }) => {
     }
   };
 
+  const renderMapModal = () => {
+    const runFirst = `
+      true; // note: this is required, or you'll sometimes get silent failures
+    `;
+    return (
+      <Modal
+        visible={openMapModal}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenMapModal(false);
+        }}
+        presentationStyle="pageSheet"
+      >
+        <WebView
+          source={{ uri: "https://tiagocavaco.github.io/google-maps-draw-shape-react/" }}
+          style={{ flex: 1 }}
+          onMessage={(event) => {
+            console.log(JSON.parse(event?.nativeEvent?.data));
+            setOpenMapModal(false);
+          }}
+          injectedJavaScript={runFirst}
+        />
+      </Modal>
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <ScrollView style={styles.graph}>
+      <View style={styles.graph}>
         <View
           style={{
             flexDirection: "row",
@@ -135,11 +232,9 @@ const CreateNewProject = ({ navigation }) => {
               </View>
             )}
           </Pressable>
-          {/* <Spacer right={20} /> */}
           <View style={{ width: "68%" }}>
             <Text style={styles.title}>Project Type</Text>
             <View style={{ marginTop: 7 }}>
-              {/* <ScrollView contentContainerStyle={{flex: 1}}> */}
               <DropDownPicker
                 open={open}
                 value={value}
@@ -167,7 +262,6 @@ const CreateNewProject = ({ navigation }) => {
                 }}
                 arrowIconStyle={{ height: 20, width: 10 }}
               />
-              {/* </ScrollView> */}
             </View>
           </View>
         </View>
@@ -179,7 +273,6 @@ const CreateNewProject = ({ navigation }) => {
           }}
         >
           <Text style={styles.title}>Project Name</Text>
-          {/* <View style={styles.inputField}> */}
           <TextInput
             style={{
               fontFamily: "Lexend-Regular",
@@ -197,40 +290,36 @@ const CreateNewProject = ({ navigation }) => {
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Project Name"
           />
-          {/* </View> */}
         </View>
-        {/* <Spacer top={20} /> */}
-        <View>
-          <ImageBackground
-            style={{ width: "100%", height: 400 }}
-            // imageStyle={{borderBottomLeftRadius: 20}}
-            source={require("../../assets/images/map.png")}
-          >
-            {/* <View style={[styles.inputField, { margin: 20 }]}> */}
-            <TextInput
-              style={{
-                fontFamily: "Lexend-Regular",
-                borderWidth: 1,
-                borderColor: Colors.FormBorder,
-                marginTop: 7,
-                borderRadius: 4,
-                paddingHorizontal: 7,
-                fontSize: 12,
-                height: 45,
-                backgroundColor: Colors.White,
-                elevation: 3,
-                width: "90%",
-                alignSelf: "center",
-                marginTop: 20,
-              }}
-              placeholderTextColor={Colors.FormText}
-              placeholder="Search Location"
-              onChangeText={(e) => setProjectLocation(e)}
-            />
-            {/* </View> */}
-          </ImageBackground>
-        </View>
-      </ScrollView>
+        <Pressable
+          onPress={() => {
+            // console.log("test");
+            setOpenMapModal(true);
+          }}
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            height: 280,
+          }}
+        >
+          {/* <Pressable style={{ backgroundColor: "red" }}>
+            <Text>BUTTON</Text>
+          </Pressable> */}
+          <MapView
+            provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+            style={styles.map}
+            mapType="standard"
+            loadingEnabled={true}
+            region={{
+              latitude: selectedPosition?.lat || 0,
+              longitude: selectedPosition?.lng || 0,
+              latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
+              longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
+            }}
+          ></MapView>
+        </Pressable>
+      </View>
       <Spacer top={-20} />
       <View
         style={{
@@ -256,6 +345,7 @@ const CreateNewProject = ({ navigation }) => {
           <Text style={styles.buttonText}>Cancel</Text>
         </TouchableOpacity>
       </View>
+      {renderMapModal()}
     </View>
   );
 };
@@ -396,5 +486,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     color: "white",
+  },
+  map: {
+    position: "absolute",
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
 });

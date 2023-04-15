@@ -16,7 +16,7 @@ import Lock from "../../assets/icons/Lock.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 import { useDispatch, useSelector } from "react-redux";
-import { loading, userLoginAction } from "../../redux/slices/authSlice";
+import { authToken, loading, userLoginAction } from "../../redux/slices/authSlice";
 
 const Password = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
