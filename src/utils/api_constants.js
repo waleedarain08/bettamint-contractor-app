@@ -20,6 +20,8 @@ export const GET_SKILLS_URL = "app/Skills";
 export const ATTENDANCE_MUSTER_URL = "dashboard/Attendance/mustercard";
 export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
 export const ATTENDANCE_REPORT_URL = "dashboard/Attendance/getbyprojectreport";
+export const JOB_CREATE_URL = "dashboard/Job/createjob";
+export const PAYMENT_GETALL_URL = "dashboard/Payment/history";
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
 	if (response && response?.data && response?.status === 200) {
