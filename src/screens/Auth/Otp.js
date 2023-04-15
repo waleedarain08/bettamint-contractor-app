@@ -17,7 +17,7 @@ import { Colors } from "../../utils/Colors";
 import OTPInputView from "@twotalltotems/react-native-otp-input";
 const Login = ({ navigation }) => {
 	return (
-		<ImageBackground source={Vector} style={styles.container}>
+		<View style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
 					<Text style={styles.headingText}>Verify</Text>
@@ -51,7 +51,7 @@ const Login = ({ navigation }) => {
 			>
 				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
 			</Pressable>
-		</ImageBackground>
+		</View>
 	);
 };
 

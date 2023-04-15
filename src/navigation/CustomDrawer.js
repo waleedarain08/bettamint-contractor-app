@@ -3,7 +3,11 @@ import React from "react";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Colors } from "../utils/Colors";
 import { Logout, Right } from "../icons";
+import { useDispatch } from "react-redux";
+import { logoutAction } from "../redux/slices/authSlice";
+
 const CustomDrawer = ({ navigation }) => {
+  const dispatch = useDispatch();
   const routes = [
     { name: "Dashboard", route: "Dashboard", id: 1 },
     { name: "Project", route: "Projects", id: 2 },
@@ -94,7 +98,8 @@ const CustomDrawer = ({ navigation }) => {
         <View>
           <Pressable
             onPress={() => {
-              navigation.navigate("SelectLanguage");
+              // navigation.navigate("SelectLanguage");
+              dispatch(logoutAction());
             }}
             style={{
               marginVertical: 35,

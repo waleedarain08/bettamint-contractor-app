@@ -94,15 +94,15 @@ const {
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
-	state?.attendanceSlice?.attendanceList;
+	state?.attendance?.attendanceList;
 export const attendanceMusterReducer = (state) =>
-	state?.attendanceSlice?.attendanceMuster;
+	state?.attendance?.attendanceMuster;
 export const attendanceApproveReducer = (state) =>
-	state?.attendanceSlice?.attendanceApprove;
+	state?.attendance?.attendanceApprove;
 export const attendanceReportReducer = (state) =>
-	state?.attendanceSlice?.attendanceReport;
+	state?.attendance?.attendanceReport;
 export const projectDataReducer = (state) =>
-	state?.attendanceSlice?.projectData;
+	state?.attendance?.projectData;
 
 export const saveProjectDataAction = (data) => async (dispatch) => {
 	dispatch(saveProjectData(data));

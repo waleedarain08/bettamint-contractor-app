@@ -30,7 +30,7 @@ const jobSlice = createSlice({
 
 const { getJobRequest, getJobSuccess, getJobFailure } = jobSlice.actions;
 
-export const jobsListReducer = (state) => state?.jobSlice?.jobsList;
+export const jobsListReducer = (state) => state?.jobs?.jobsList;
 
 export const getAllJobsAction = () => async (dispatch) => {
 	try {

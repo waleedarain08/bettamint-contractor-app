@@ -13,7 +13,7 @@ import Logo from "../../assets/images/logo.png";
 import { Colors } from "../../utils/Colors";
 const SelectLanguage = ({ navigation }) => {
 	return (
-		<ImageBackground source={Vector} style={styles.container}>
+		<View style={styles.container}>
 			<View
 				style={{ padding: 40, justifyContent: "center", alignItems: "center" }}
 			>
@@ -40,7 +40,7 @@ const SelectLanguage = ({ navigation }) => {
 					</View>
 				</View>
 			</View>
-		</ImageBackground>
+		</View>
 	);
 };
 

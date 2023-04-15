@@ -72,9 +72,9 @@ const {
 	getProjectsSimpleFailure,
 } = projectSlice.actions;
 
-export const projectsListReducer = (state) => state?.projectSlice?.projectsList;
+export const projectsListReducer = (state) => state?.projects?.projectsList;
 export const projectsListSimpleReducer = (state) =>
-	state?.projectSlice?.projectsListSimple;
+	state?.projects?.projectsListSimple;
 
 export const getAllProjectsAction = () => async (dispatch) => {
 	try {
@@ -137,14 +137,14 @@ export const getAllProjectsSimpleAction = () => async (dispatch) => {
 			})
 			.then((res) => {
 				const data = responseHandler(res);
-				// console.log("Project DATA Simple", data);
+				console.log("Project DATA Simple", data);
 				if (data) {
 					dispatch(getProjectsSimpleSuccess(data));
 				}
 				// return res
 			})
 			.catch((error) => {
-				console.log("ERROR", error);
+				console.log("PROJECT ALL SIMPLE ERROR", error);
 				dispatch(getProjectsSimpleFailure());
 			});
 	} catch (error) {

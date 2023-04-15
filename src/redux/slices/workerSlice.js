@@ -83,10 +83,10 @@ const {
   selectedWorkerSuccess,
 } = workerSlice.actions;
 
-export const workersListReducer = (state) => state?.workerSlice?.workersList;
-export const skillsListReducer = (state) => state?.workerSlice?.skillsList;
+export const workersListReducer = (state) => state?.workers?.workersList;
+export const skillsListReducer = (state) => state?.workers?.skillsList;
 export const selectedWorkerReducer = (state) =>
-  state?.workerSlice?.selectedWorker;
+  state?.workers?.selectedWorker;
 
 // export const projectsListSimpleReducer = (state) =>
 // 	state?.projectSlice?.projectsListSimple;

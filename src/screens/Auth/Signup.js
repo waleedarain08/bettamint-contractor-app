@@ -23,7 +23,7 @@ import {
 } from "../../icons";
 const Signup = ({ navigation }) => {
 	return (
-		<ImageBackground source={Vector} style={styles.container}>
+		<View style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
 					<Text style={styles.headingText}>Sign Up Now</Text>
@@ -133,7 +133,7 @@ const Signup = ({ navigation }) => {
 			>
 				<Text style={styles.forgotText}>Have an Account? Login Here</Text>
 			</Pressable>
-		</ImageBackground>
+		</View>
 	);
 };
 

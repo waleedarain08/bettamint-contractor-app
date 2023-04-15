@@ -35,6 +35,7 @@ const Workers = ({ navigation }) => {
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const workersList = useSelector(workersListReducer);
+  console.log("------project", projectsListSimple)
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction());
   }, []);
