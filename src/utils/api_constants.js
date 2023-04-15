@@ -6,7 +6,7 @@ export const assetsUrl = "https://api-sandbox.bettamint.com";
 
 // STATIC AUTH TOKEN
 export const staticToken =
-	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2IiwibmJmIjoxNjgwNjM5NzE1LCJleHAiOjE2ODE1MDM3MTUsImlhdCI6MTY4MDYzOTcxNX0.y3UzWdIchnRh6spJrLA2_U3gU8WABjpsDTojTP4O9jE";
+	"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjU2IiwibmJmIjoxNjgxNTE3MzcwLCJleHAiOjE2ODIzODEzNzAsImlhdCI6MTY4MTUxNzM3MH0.9ysXjuu9fPyFLWFXj8SfvAP8RGknhe5Q44AsP8WbXDY";
 
 // API URL ROUTES
 export const PROJECT_GETALL_URL = "dashboard/Project/getall";
@@ -20,6 +20,8 @@ export const GET_SKILLS_URL = "app/Skills";
 export const ATTENDANCE_MUSTER_URL = "dashboard/Attendance/mustercard";
 export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
 export const ATTENDANCE_REPORT_URL = "dashboard/Attendance/getbyprojectreport";
+export const JOB_CREATE_URL = "dashboard/Job/createjob";
+export const PAYMENT_GETALL_URL = "dashboard/Payment/history";
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
 	if (response && response?.data && response?.status === 200) {
