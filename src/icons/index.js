@@ -34,7 +34,15 @@ export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
     case "EvilIcons":
       return <EvilIcons name={name} color={color} size={size} style={style} />;
     case "Entypo":
-      return <Entypo name={name} color={color} size={size} style={style} />;
+      return (
+        <Entypo
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+          onPress={onPress}
+        />
+      );
     case "Feather":
       return <Feather name={name} color={color} size={size} style={style} />;
     case "Fontisto":
@@ -144,13 +152,14 @@ export const Tick = ({ color, size, style }) => (
     style={style}
   />
 );
-export const Cross = ({ color, size, style }) => (
+export const Cross = ({ color, size, style, onPress }) => (
   <VectorIcon
     name="cross"
     color={color}
     size={size}
     type="Entypo"
     style={style}
+    onPress={onPress}
   />
 );
 export const Picture = ({ color, size, style }) => (
@@ -396,4 +405,3 @@ export const BackCircleIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
-

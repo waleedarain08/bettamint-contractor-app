@@ -1,218 +1,232 @@
 import { createSlice } from "@reduxjs/toolkit";
 import {
-	ATTENDANCE_MUSTER_URL,
-	ATTENDANCE_GETALL_URL,
-	ATTENDANCE_REPORT_URL,
-	responseHandler,
-	staticToken,
+  ATTENDANCE_MUSTER_URL,
+  ATTENDANCE_GETALL_URL,
+  ATTENDANCE_REPORT_URL,
+  responseHandler,
+  staticToken,
+  base_url,
+  ATTENDANCE_APPROVE_URL,
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
+import axios from "axios";
 
 const initialState = {
-	loading: false,
-	error: null,
-	attendanceList: null,
-	attendanceMuster: null,
-	attendanceApprove: null,
-	attendanceReport: null,
-	projectData: null,
+  loading: false,
+  error: null,
+  attendanceList: null,
+  attendanceMuster: null,
+  attendanceApprove: null,
+  attendanceReport: null,
+  projectData: null,
+  selectedAttendance: null,
 };
 
 const api = new APIServiceManager();
 const attendanceSlice = createSlice({
-	name: "attendance",
-	initialState,
-	reducers: {
-		getAttendanceRequest: (state, action) => {
-			state.loading = true;
-			state.error = null;
-		},
-		getAttendanceSuccess: (state, action) => {
-			state.attendanceList = action.payload;
-			state.loading = false;
-		},
-		getAttendanceFailure: (state, action) => {
-			state.loading = false;
-			state.error = action.payload;
-		},
-		getAttendanceMusterRequest: (state, action) => {
-			state.loading = true;
-			state.error = null;
-		},
-		getAttendanceMusterSuccess: (state, action) => {
-			state.attendanceMuster = action.payload;
-			state.loading = false;
-		},
-		getAttendanceMusterFailure: (state, action) => {
-			state.loading = false;
-			state.error = action.payload;
-		},
-		getAttendanceApproveRequest: (state, action) => {
-			state.loading = true;
-			state.error = null;
-		},
-		getAttendanceApproveSuccess: (state, action) => {
-			state.attendanceApprove = action.payload;
-			state.loading = false;
-		},
-		getAttendanceApproveFailure: (state, action) => {
-			state.loading = false;
-			state.error = action.payload;
-		},
-		getAttendanceReportRequest: (state, action) => {
-			state.loading = true;
-			state.error = null;
-		},
-		getAttendanceReportSuccess: (state, action) => {
-			state.attendanceReport = action.payload;
-			state.loading = false;
-		},
-		getAttendanceReportFailure: (state, action) => {
-			state.loading = false;
-			state.error = action.payload;
-		},
-		saveProjectData: (state, action) => {
-			state.projectData = action.payload;
-		},
-	},
+  name: "attendance",
+  initialState,
+  reducers: {
+    getAttendanceRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    getAttendanceSuccess: (state, action) => {
+      state.attendanceList = action.payload;
+      state.loading = false;
+    },
+    getAttendanceFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    getAttendanceMusterRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    getAttendanceMusterSuccess: (state, action) => {
+      state.attendanceMuster = action.payload;
+      state.loading = false;
+    },
+    getAttendanceMusterFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    getAttendanceApproveRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    getAttendanceApproveSuccess: (state, action) => {
+      state.attendanceApprove = action.payload;
+      state.loading = false;
+    },
+    getAttendanceApproveFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    getAttendanceReportRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    getAttendanceReportSuccess: (state, action) => {
+      state.attendanceReport = action.payload;
+      state.loading = false;
+    },
+    getAttendanceReportFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    saveProjectData: (state, action) => {
+      state.projectData = action.payload;
+    },
+    setAttendance: (state, action) => {
+      state.selectedAttendance = action.payload;
+    },
+  },
 });
 
 const {
-	getAttendanceRequest,
-	getAttendanceSuccess,
-	getAttendanceFailure,
-	getAttendanceMusterRequest,
-	getAttendanceMusterSuccess,
-	getAttendanceMusterFailure,
-	getAttendanceApproveRequest,
-	getAttendanceApproveSuccess,
-	getAttendanceApproveFailure,
-	getAttendanceReportRequest,
-	getAttendanceReportSuccess,
-	getAttendanceReportFailure,
-	saveProjectData,
+  getAttendanceRequest,
+  getAttendanceSuccess,
+  getAttendanceFailure,
+  getAttendanceMusterRequest,
+  getAttendanceMusterSuccess,
+  getAttendanceMusterFailure,
+  getAttendanceApproveRequest,
+  getAttendanceApproveSuccess,
+  getAttendanceApproveFailure,
+  getAttendanceReportRequest,
+  getAttendanceReportSuccess,
+  getAttendanceReportFailure,
+  saveProjectData,
+  setAttendance,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
-	state?.attendance?.attendanceList;
+  state?.attendance?.attendanceList;
 export const attendanceMusterReducer = (state) =>
-	state?.attendance?.attendanceMuster;
+  state?.attendance?.attendanceMuster;
 export const attendanceApproveReducer = (state) =>
-	state?.attendance?.attendanceApprove;
+  state?.attendance?.attendanceApprove;
 export const attendanceReportReducer = (state) =>
-	state?.attendance?.attendanceReport;
-export const projectDataReducer = (state) =>
-	state?.attendance?.projectData;
+  state?.attendance?.attendanceReport;
+export const projectDataReducer = (state) => state?.attendance?.projectData;
+export const selectedAttendanceData = (state) =>
+  state?.attendance?.selectedAttendance;
+export const loadingAttendance = (state) => state?.attendance?.loading;
 
 export const saveProjectDataAction = (data) => async (dispatch) => {
-	dispatch(saveProjectData(data));
+  dispatch(saveProjectData(data));
 };
-export const getAllAttendanceAction = (projectId) => async (dispatch) => {
-	try {
-		dispatch(getAttendanceRequest());
-		await api
+export const selectAttendanceAction = (data) => async (dispatch) => {
+  dispatch(setAttendance(data));
+};
 
-			.request("GET", ATTENDANCE_GETALL_URL + `?projectId=${projectId}`, null, {
-				Authorization: staticToken,
-			})
-			.then((res) => {
-				const data = responseHandler(res);
-				// console.log("ATTENDANCE", data);
-				if (data) {
-					dispatch(getAttendanceSuccess(data));
-				}
-			})
-			.catch((error) => {
-				console.log("ATTENDANCE ERROR", error);
-				dispatch(getAttendanceFailure());
-			});
-	} catch (error) {
-		dispatch(getAttendanceFailure());
-	}
+export const getAllAttendanceAction = (projectId) => async (dispatch) => {
+  try {
+    dispatch(getAttendanceRequest());
+    await api
+
+      .request("GET", ATTENDANCE_GETALL_URL + `?projectId=${projectId}`, null, {
+        Authorization: staticToken,
+      })
+      .then((res) => {
+        const data = responseHandler(res);
+        // console.log("ATTENDANCE", data);
+        if (data) {
+          dispatch(getAttendanceSuccess(data));
+        }
+      })
+      .catch((error) => {
+        console.log("ATTENDANCE ERROR", error);
+        dispatch(getAttendanceFailure());
+      });
+  } catch (error) {
+    dispatch(getAttendanceFailure());
+  }
 };
 export const getAttendanceMusterAction =
-	(workerId, jobId) => async (dispatch) => {
-		try {
-			dispatch(getAttendanceMusterRequest());
-			await api
+  (workerId, jobId) => async (dispatch) => {
+    try {
+      dispatch(getAttendanceMusterRequest());
+      await api
 
-				.request(
-					"GET",
-					ATTENDANCE_MUSTER_URL + `?workerId=${workerId}&jobId=${jobId}`,
-					null,
-					{
-						Authorization: staticToken,
-					}
-				)
+        .request(
+          "GET",
+          ATTENDANCE_MUSTER_URL + `?workerId=${workerId}&jobId=${jobId}`,
+          null,
+          {
+            Authorization: staticToken,
+          }
+        )
 
-				.then((res) => {
-					const data = responseHandler(res);
-					// console.log("ATTENDANCE MUSTER", data);
-					if (data) {
-						dispatch(getAttendanceMusterSuccess(data));
-					}
-				})
-				.catch((error) => {
-					console.log("ATTENDANCE MUSTER ERROR", error);
-					dispatch(getAttendanceMusterFailure());
-				});
-		} catch (error) {
-			dispatch(getAttendanceMusterFailure());
-		}
-	};
+        .then((res) => {
+          const data = responseHandler(res);
+          // console.log("ATTENDANCE MUSTER", data);
+          if (data) {
+            dispatch(getAttendanceMusterSuccess(data));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE MUSTER ERROR", error);
+          dispatch(getAttendanceMusterFailure());
+        });
+    } catch (error) {
+      dispatch(getAttendanceMusterFailure());
+    }
+  };
 
 export const getAttendanceApproveAction =
-	(jobId, workerId) => async (dispatch) => {
-		try {
-			dispatch(getAttendanceApproveRequest());
-			await api
-
-				.request(
-					"POST",
-					ATTENDANCE_APPROVE_URL + `?jobId=${jobId}&workerId=${workerId}`,
-					null,
-					{
-						Authorization: staticToken,
-					}
-				)
-				.then((res) => {
-					const data = responseHandler(res);
-					// console.log("ATTENDANCE APPROVE", data);
-					if (data) {
-						dispatch(getAttendanceApproveSuccess(data));
-					}
-				})
-				.catch((error) => {
-					console.log("ATTENDANCE APPROVE ERROR", error);
-					dispatch(getAttendanceApproveFailure());
-				});
-		} catch (error) {
-			dispatch(getAttendanceApproveFailure());
-		}
-	};
+  (token,jobId, workerId, dateTime, hours) => async (dispatch) => {
+    try {
+      dispatch(getAttendanceApproveRequest());
+      await api
+        .request(
+          "POST",
+          ATTENDANCE_APPROVE_URL +
+            `?jobId=${jobId}&workerId=${workerId}&dateTime=${dateTime}&hours=${hours}`,
+          null,
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          const data = responseHandler(res);
+          console.log("ATTENDANCE APPROVE", data);
+          if (data) {
+            dispatch(getAttendanceApproveSuccess(data));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE APPROVE ERROR", error);
+          dispatch(getAttendanceApproveFailure());
+        });
+    } catch (error) {
+      dispatch(getAttendanceApproveFailure());
+    }
+  };
 
 export const getAttendanceReportAction = (projectId) => async (dispatch) => {
-	try {
-		dispatch(getAttendanceReportRequest());
-		await api
+  try {
+    dispatch(getAttendanceReportRequest());
+    await api
 
-			.request("GET", ATTENDANCE_REPORT_URL + `?projectId=${projectId}`, null, {
-				Authorization: staticToken,
-			})
-			.then((res) => {
-				const data = responseHandler(res);
-				// console.log("ATTENDANCE REPORT", data);
-				if (data) {
-					dispatch(getAttendanceReportSuccess(data));
-				}
-			})
-			.catch((error) => {
-				console.log("ATTENDANCE REPORT ERROR", error);
-				dispatch(getAttendanceReportFailure());
-			});
-	} catch (error) {
-		dispatch(getAttendanceReportFailure());
-	}
+      .request("GET", ATTENDANCE_REPORT_URL + `?projectId=${projectId}`, null, {
+        Authorization: staticToken,
+      })
+      .then((res) => {
+        const data = responseHandler(res);
+        // console.log("ATTENDANCE REPORT", data);
+        if (data) {
+          dispatch(getAttendanceReportSuccess(data));
+        }
+      })
+      .catch((error) => {
+        console.log("ATTENDANCE REPORT ERROR", error);
+        dispatch(getAttendanceReportFailure());
+      });
+  } catch (error) {
+    dispatch(getAttendanceReportFailure());
+  }
 };
 
 export default attendanceSlice.reducer;
