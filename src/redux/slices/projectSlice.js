@@ -14,6 +14,7 @@ const initialState = {
 	projectsList: null,
 	createProjectData: null,
 	projectsListSimple: null,
+	selectedProject: null,
 };
 const api = new APIServiceManager();
 
@@ -57,6 +58,10 @@ const projectSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		selectedProjectSuccess: (state, action) => {
+			state.loading = false;
+			state.selectedProject = action.payload;
+		},
 	},
 });
 
@@ -70,12 +75,20 @@ const {
 	getProjectsSimpleRequest,
 	getProjectsSimpleSuccess,
 	getProjectsSimpleFailure,
+	selectedProjectSuccess,
 } = projectSlice.actions;
 
 export const projectsListReducer = (state) => state?.projects?.projectsList;
 export const loadingProject = (state) => state?.projects?.loading;
 export const projectsListSimpleReducer = (state) =>
 	state?.projects?.projectsListSimple;
+export const selectedProjectReducer = (state) =>
+	state?.projects?.selectedProject;
+
+export const selectProjectAction = (data) => async (dispatch) => {
+	dispatch(selectedProjectSuccess(data));
+	console.log("SELECTED PROJECT", data);
+};
 
 export const getAllProjectsAction = () => async (dispatch) => {
 	try {

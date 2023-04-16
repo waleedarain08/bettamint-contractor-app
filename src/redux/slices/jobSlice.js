@@ -12,6 +12,7 @@ const initialState = {
 	error: null,
 	jobsList: null,
 	createJobData: null,
+	selectedJob: null,
 };
 
 const api = new APIServiceManager();
@@ -43,6 +44,9 @@ const jobSlice = createSlice({
 			state.loading = false;
 			state.error = action.payload;
 		},
+		selectedJobSuccess: (state, action) => {
+			state.selectedJob = action.payload;
+		},
 	},
 });
 
@@ -53,10 +57,16 @@ const {
 	createJobRequest,
 	createJobSuccess,
 	createJobFailure,
+	selectedJobSuccess,
 } = jobSlice.actions;
 
 export const jobsListReducer = (state) => state?.jobs?.jobsList;
 export const createJobReducer = (state) => state?.jobs?.createJobData;
+export const selectedJobReducer = (state) => state?.jobs?.selectedJob;
+
+export const selectedJobAction = (data) => async (dispatch) => {
+	dispatch(selectedJobSuccess(data));
+};
 
 export const getAllJobsAction = () => async (dispatch) => {
 	try {

@@ -36,7 +36,7 @@ const { getPaymentRequest, getPaymentSuccess, getPaymentFailure } =
 	paymentSlice.actions;
 
 export const paymentsListReducer = (state) => state?.paymentSlice?.paymentsList;
-
+export const loadingPayments = (state) => state?.paymentSlice?.loading;
 export const getPaymentsAction = () => async (dispatch) => {
 	try {
 		dispatch(getPaymentRequest());

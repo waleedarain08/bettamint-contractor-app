@@ -29,6 +29,7 @@ const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 import { Building, Search, LocationIcon } from "../../icons";
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
+import { selectedProjectReducer } from "../../redux/slices/projectSlice";
 const DATA = [
 	{
 		id: "1",
@@ -93,10 +94,11 @@ const ProjectDetails = ({ navigation, route }) => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const projectsList = useSelector(projectsListReducer);
 	// console.log("Project", projectsList[0]);
-	const { projectId } = route.params;
-	const project = projectsList.find(
-		(project) => project.projectId === projectId
-	);
+	// const { projectId } = route.params;
+	// const project = projectsList.find(
+	// 	(project) => project.projectId === projectId
+	// );
+	const project = useSelector(selectedProjectReducer);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />

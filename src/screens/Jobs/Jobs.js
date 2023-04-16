@@ -25,7 +25,11 @@ import { LocationIcon, Search, BackIcon, Cross } from "../../icons";
 import { Building, Whatsapp } from "../../icons";
 import { useSelector, useDispatch } from "react-redux";
 import { Searchbar } from "react-native-paper";
-import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
+import {
+	getAllJobsAction,
+	jobsListReducer,
+	selectedJobAction,
+} from "../../redux/slices/jobSlice";
 import {
 	getAllProjectsSimpleAction,
 	projectsListSimpleReducer,
@@ -82,12 +86,7 @@ const Jobs = ({ navigation }) => {
 		}
 	};
 	const Item = ({ item }) => (
-		<Pressable
-			style={styles.item}
-			onPress={() => {
-				navigation.navigate("JobDetails", { details: item });
-			}}
-		>
+		<View style={styles.item}>
 			<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 				<View>
 					<Text style={styles.flatlistHeading}>{item?.projectName}</Text>
@@ -95,7 +94,8 @@ const Jobs = ({ navigation }) => {
 				<View style={{ flexDirection: "row", justifyContent: "space-between" }}>
 					<TouchableOpacity
 						onPress={() => {
-							navigation.navigate("JobDetails", { details: item });
+							navigation.navigate("JobDetails");
+							dispatch(selectedJobAction(item));
 						}}
 						style={{
 							justifyContent: "center",
@@ -211,7 +211,7 @@ const Jobs = ({ navigation }) => {
 					<LocationIcon style={{ marginTop: 5 }} size={20} color={"#ADBAC3"} />
 				</View>
 			</View>
-		</Pressable>
+		</View>
 	);
 	return (
 		<View style={styles.container}>

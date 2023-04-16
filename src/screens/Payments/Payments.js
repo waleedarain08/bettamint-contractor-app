@@ -10,6 +10,7 @@ import {
 	LogBox,
 	Pressable,
 	Modal,
+	RefreshControl,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
@@ -28,7 +29,15 @@ import {
 import {
 	paymentsListReducer,
 	getPaymentsAction,
+	loadingPayments,
 } from "../../redux/slices/paymentSlice";
+import {
+	getAllAttendanceAction,
+	attendanceListReducer,
+	saveProjectDataAction,
+	selectAttendanceAction,
+	loadingAttendance,
+} from "../../redux/slices/attendanceSlice";
 import CheckBox from "@react-native-community/checkbox";
 LogBox.ignoreAllLogs();
 const Payments = ({ navigation }) => {
@@ -41,7 +50,9 @@ const Payments = ({ navigation }) => {
 	const [search, setSearch] = useState("");
 	const dispatch = useDispatch();
 	const payments = useSelector(paymentsListReducer);
+	const attendanceList = useSelector(attendanceListReducer);
 	console.log("PAYMENTS", payments);
+	const isLoading = useSelector(loadingPayments);
 	const projectsListSimple = useSelector(projectsListSimpleReducer);
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction());
@@ -247,7 +258,7 @@ const Payments = ({ navigation }) => {
 			>
 				<View
 					style={{
-						width: "26%",
+						width: "35%",
 						flexDirection: "row",
 						alignItems: "center",
 					}}
@@ -281,19 +292,19 @@ const Payments = ({ navigation }) => {
 					</Text>
 				</View>
 				<View style={{ width: "15%" }}>
-					{item.status == "Online" ? (
+					{item.isOnline == true ? (
 						<Text style={[styles.flatListText, { color: Colors.Primary }]}>
-							{item.status}
+							Online
 						</Text>
 					) : (
-						<Text style={styles.flatListText}>{item.status}</Text>
+						<Text style={styles.flatListText}>Offline</Text>
 					)}
 				</View>
-				<View style={{ width: "25%" }}>
-					<Text style={styles.flatListText}>{item?.amount}</Text>
+				<View style={{ width: "15%" }}>
+					<Text style={styles.flatListText}>{item?.dueAmount}</Text>
 				</View>
 				<View style={{ width: "15%" }}>
-					<Text style={styles.flatListText}>{item.issued}</Text>
+					<Text style={styles.flatListText}>{item?.issuedAmount}</Text>
 				</View>
 				<TouchableOpacity
 					onPress={() => {
@@ -334,7 +345,7 @@ const Payments = ({ navigation }) => {
 				>
 					<View
 						style={{
-							width: "25%",
+							width: "35%",
 							flexDirection: "row",
 							alignItems: "center",
 						}}
@@ -349,10 +360,10 @@ const Payments = ({ navigation }) => {
 							Name
 						</Text>
 					</View>
-					<View style={{ width: "20%", alignItems: "center" }}>
+					<View style={{ width: "15%", alignItems: "center" }}>
 						<Text style={styles.flatListTextHeader}>Status</Text>
 					</View>
-					<View style={{ width: "25%", alignItems: "center" }}>
+					<View style={{ width: "15%", alignItems: "center" }}>
 						<Text style={styles.flatListTextHeader}>Due Amount</Text>
 					</View>
 					<View style={{ width: "15%", alignItems: "center" }}>
@@ -476,14 +487,44 @@ const Payments = ({ navigation }) => {
 					// marginBottom: 10
 				}}
 			>
-				<FlatList
-					data={payments}
-					renderItem={({ item, index }) => <Item item={item} index={index} />}
-					keyExtractor={(item) => item.id}
-					ListHeaderComponent={ListHeader}
-					stickyHeaderIndices={[0]}
-					showsVerticalScrollIndicator={false}
-				/>
+				{!attendanceList || attendanceList?.length === 0 ? (
+					<View
+						style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+					>
+						<Text
+							style={{
+								fontFamily: "Lexend-Medium",
+								fontSize: 18,
+								color: Colors.Gray,
+							}}
+						>
+							No Record Found!
+						</Text>
+					</View>
+				) : (
+					<FlatList
+						refreshControl={
+							<RefreshControl
+								refreshing={isLoading}
+								onRefresh={() => {
+									dispatch(
+										getAllAttendanceAction(
+											selectedProject?.projectId || attendanceList[0]?.projectId
+										)
+									);
+								}}
+								tintColor={Colors.Primary}
+								colors={[Colors.Purple, Colors.Primary]}
+							/>
+						}
+						data={attendanceList}
+						renderItem={({ item, index }) => <Item item={item} index={index} />}
+						keyExtractor={(item) => item.id}
+						ListHeaderComponent={ListHeader}
+						stickyHeaderIndices={[0]}
+						showsVerticalScrollIndicator={false}
+					/>
+				)}
 			</View>
 			<Spacer bottom={50} />
 			<View
