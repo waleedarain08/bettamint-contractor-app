@@ -1,4 +1,4 @@
-import {createNavigationContainerRef} from '@react-navigation/native';
+import { createNavigationContainerRef } from "@react-navigation/native";
 
 export const navigationRef = createNavigationContainerRef();
 
@@ -11,6 +11,15 @@ export const navigate = (route, params) => {
           params,
         })
       );
+    }
+  } catch (error) {}
+};
+export const goBack = () => {
+  try {
+    if (navigationRef.isReady() && navigationRef.canGoBack()) {
+      navigationRef.goBack();
+    } else {
+      showToast(STRINGS.cantGoBack);
     }
   } catch (error) {}
 };

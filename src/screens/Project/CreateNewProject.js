@@ -31,10 +31,11 @@ import { useSelector, useDispatch } from "react-redux";
 import { updateProjectAction } from "../../redux/slices/projectSlice";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps"; // remove PROVIDER_GOOGLE import if not using Google Maps
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { GOOGLE_API_KEY } from "../../utils/api_constants";
+import { GOOGLE_API_KEY, mapUrl } from "../../utils/api_constants";
 import MapViewGestures from "@dev-event/react-native-maps-draw";
 import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
+import { authToken } from "../../redux/slices/authSlice";
 
 const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 
@@ -54,65 +55,23 @@ const CreateNewProject = ({ navigation }) => {
   const [projectName, setProjectName] = useState("");
   const [projectLocation, setProjectLocation] = useState("");
   const [projectImage, setProjectImage] = useState("");
+  const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState("");
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
+  const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
-  const webview = useRef();
-  const initialPolygon = useRef({
-    polygons: [],
-    distance: 0,
-    lastLatLng: undefined,
-    initialLatLng: undefined,
-    centerLatLng: undefined,
-  });
-
-  const polygonOptions = {
-    clickable: false,
-    fillColor: "#303030",
-    fillOpacity: 0.1,
-    strokeColor: "#000000",
-    strokeWeight: 4,
-    strokeOpacity: 1,
-  };
-  const [isActiveDraw, setDrawMode] = useState(false);
-  const [polygon, setPolygon] = useState(initialPolygon.current);
-  const [isReady, setIsReady] = useState(false);
-  const [points, setPoints] = useState(TTouchPoint);
-  const handleMapReady = useCallback(
-    () => mapRef.current && setIsReady(true),
-    []
+  mapRef?.current?.animateToRegion(
+    {
+      latitude: geoFancingArray[0]?.lat || 20.5937,
+      longitude: geoFancingArray[0]?.lng || 78.9629,
+      latitudeDelta: geoFancingArray[0]?.lat ? 0.001 : 0.2,
+      longitudeDelta: geoFancingArray[0]?.lng ? 0.01 : 20,
+    },
+    1000
   );
 
-  const convertByPoint = async (item) => {
-    await mapRef.current?.coordinateForPoint(item);
-  };
-  const handleRemovePolygon = () => {
-    setPolygon(initialPolygon.current);
-  };
-  const handleCanvasEndDraw = useCallback((locations) => {
-    setPolygon(locations);
-    setDrawMode(false);
-  }, []);
-
-  const handlePolygon = useCallback(
-    (_, index) => console.log(index),
-    // <AnimatedPolygon
-    //   key={index}
-    //   coordinates={polygon.polygons}
-    //   fillColor="red"
-    //   strokeColor="black"
-    //   strokeWidth={2}
-    // />
-    [polygon.polygons]
-  );
-
-  // console.log("Polygon", polygon);
-  const isVisiblePolygons = useMemo(
-    () => isReady && polygon.polygons && polygon.polygons.length > 0,
-    [isReady, polygon.polygons]
-  );
   const submitHandler = async () => {
     const geoArray = [
       {
@@ -138,8 +97,12 @@ const CreateNewProject = ({ navigation }) => {
       type: projectImage?.assets[0]?.type,
       uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
     });
-    formData.append("GeofencingArray", JSON.stringify(geoArray));
-    dispatch(updateProjectAction(formData));
+    formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
+    const response = await dispatch(updateProjectAction(token, formData));
+    console.log("Create response", response);
+    if (response.status === 200) {
+      navigation.goBack()
+    }
 
     // if (projectName === "") {
     //   Alert.alert("Please enter project name");
@@ -180,10 +143,11 @@ const CreateNewProject = ({ navigation }) => {
         presentationStyle="pageSheet"
       >
         <WebView
-          source={{ uri: "https://tiagocavaco.github.io/google-maps-draw-shape-react/" }}
+          source={{ uri: mapUrl }}
           style={{ flex: 1 }}
           onMessage={(event) => {
             console.log(JSON.parse(event?.nativeEvent?.data));
+            setGeoFancingArray(JSON.parse(event?.nativeEvent?.data));
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
@@ -309,14 +273,15 @@ const CreateNewProject = ({ navigation }) => {
           <MapView
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={styles.map}
+            ref={mapRef}
             mapType="standard"
             loadingEnabled={true}
-            region={{
-              latitude: selectedPosition?.lat || 0,
-              longitude: selectedPosition?.lng || 0,
-              latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
-              longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
-            }}
+            // region={{
+            //   latitude: geoFancingArray[0]?.latitude || 20.5937,
+            //   longitude: geoFancingArray[0]?.longitude || 78.9629,
+            //   latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
+            //   longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
+            // }}
           ></MapView>
         </Pressable>
       </View>

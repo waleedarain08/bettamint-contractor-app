@@ -332,7 +332,7 @@ const JobsNavigator = ({ navigation }) => (
               alignItems: "center",
             }}
           >
-            <Pressable
+            {/* <Pressable
               onPress={() => {
                 navigation.navigate("CreateNewJob");
               }}
@@ -362,7 +362,7 @@ const JobsNavigator = ({ navigation }) => (
                   Edit
                 </Text>
               </View>
-            </Pressable>
+            </Pressable> */}
             <Pressable
               style={{ marginLeft: 10 }}
               onPress={() => navigation.navigate("Profile")}
@@ -671,7 +671,7 @@ const WorkersNavigator = ({ navigation }) => {
           ),
           headerRight: () => (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Pressable
+              {/* <Pressable
                 onPress={() => {
                   navigation.navigate("CreateNewWorker");
                 }}
@@ -698,7 +698,7 @@ const WorkersNavigator = ({ navigation }) => {
                     Edit
                   </Text>
                 </View>
-              </Pressable>
+              </Pressable> */}
               <Pressable onPress={() => navigation.navigate("Profile")}>
                 <Image
                   source={require("../assets/icons/ProfileButton.png")}
@@ -864,7 +864,7 @@ const ProjectNavigator = ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              <Pressable
+              {/* <Pressable
                 onPress={() => {
                   navigation.navigate("CreateNewProject");
                 }}
@@ -896,7 +896,7 @@ const ProjectNavigator = ({ navigation }) => {
                     Edit
                   </Text>
                 </View>
-              </Pressable>
+              </Pressable> */}
               <Pressable
                 style={{ marginLeft: 8 }}
                 onPress={() => navigation.navigate("Profile")}

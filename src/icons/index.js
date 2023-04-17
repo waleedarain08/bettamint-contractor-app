@@ -13,7 +13,13 @@ export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
   switch (type) {
     case "FontAwesome":
       return (
-        <FontAwesome name={name} color={color} size={size} style={style} />
+        <FontAwesome
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+          onPress={onPress}
+        />
       );
     case "FontAwesome5":
       return (
@@ -32,7 +38,15 @@ export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
     case "AntDesign":
       return <AntDesign name={name} color={color} size={size} style={style} />;
     case "EvilIcons":
-      return <EvilIcons name={name} color={color} size={size} style={style} />;
+      return (
+        <EvilIcons
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+          onPress={onPress}
+        />
+      );
     case "Entypo":
       return (
         <Entypo
@@ -340,22 +354,24 @@ export const DateIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
-export const ClockIcon = ({ color, size, style }) => (
+export const ClockIcon = ({ color, size, style, onPress }) => (
   <VectorIcon
     name="clock"
     color={color}
     size={size}
     type="EvilIcons"
     style={style}
+    onPress={onPress}
   />
 );
-export const RupeesIcon = ({ color, size, style }) => (
+export const RupeesIcon = ({ color, size, style, onPress }) => (
   <VectorIcon
     name="rupee"
     color={color}
     size={size}
     type="FontAwesome"
     style={style}
+    onPress={onPress}
   />
 );
 export const CardIcon = ({ color, size, style }) => (

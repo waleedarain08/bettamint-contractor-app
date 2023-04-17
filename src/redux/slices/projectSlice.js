@@ -114,32 +114,66 @@ export const getAllProjectsAction = () => async (dispatch) => {
 	}
 };
 
-export const updateProjectAction = (projectData) => async (dispatch) => {
-	try {
-		dispatch(updateProjectRequest());
-		await api
-			.request("POST", UPDATE_PROJECT_URL, projectData, {
-				Authorization: staticToken,
-				"Content-Type": "multipart/form-data",
-				Accept: "text/plain",
-			})
-			.then((res) => {
-				// console.log("res", res);
-				const data = responseHandler(res);
-				// console.log("Project create response", data);
-				if (data) {
-					dispatch(updateProjectSuccess(data));
-				}
-				// return res
-			})
-			.catch((error) => {
-				console.log("ERROR", error);
-				dispatch(updateProjectFailure());
-			});
-	} catch (error) {
-		dispatch(updateProjectFailure());
-	}
+export const updateProjectAction = (token, worker) => async (dispatch) => {
+  dispatch(updateProjectRequest());
+  try {
+    const response = await axios.post(
+      `${base_url}/dashboard/Project/addupdateproject`,
+      worker,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "multipart/form-data",
+          Accept: "text/plain",
+        },
+      }
+    );
+
+    if (response.status === 200) {
+      dispatch(updateProjectSuccess(response.data));
+    } else {
+      dispatch(
+        updateProjectFailure(
+          "Something went wrong while creating/updaing project!"
+        )
+      );
+    }
+    return response;
+  } catch (e) {
+    dispatch(
+      updateProjectFailure(
+        "Something went wrong while creating/updaing project!"
+      )
+    );
+    return e;
+  }
 };
+// export const updateProjectAction = (projectData) => async (dispatch) => {
+// 	try {
+// 		dispatch(updateProjectRequest());
+// 		await api
+// 			.request("POST", UPDATE_PROJECT_URL, projectData, {
+// 				Authorization: staticToken,
+// 				"Content-Type": "multipart/form-data",
+// 				Accept: "text/plain",
+// 			})
+// 			.then((res) => {
+// 				// console.log("res", res);
+// 				const data = responseHandler(res);
+// 				// console.log("Project create response", data);
+// 				if (data) {
+// 					dispatch(updateProjectSuccess(data));
+// 				}
+// 				// return res
+// 			})
+// 			.catch((error) => {
+// 				console.log("ERROR", error);
+// 				dispatch(updateProjectFailure());
+// 			});
+// 	} catch (error) {
+// 		dispatch(updateProjectFailure());
+// 	}
+// };
 
 export const getAllProjectsSimpleAction = () => async (dispatch) => {
 	try {
