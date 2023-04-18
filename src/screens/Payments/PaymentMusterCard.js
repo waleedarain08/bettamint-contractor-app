@@ -80,6 +80,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
   useEffect(() => {
     dispatch(
       getAttendanceMusterAction(
+        token,
         selectedAttendance?.workerId,
         selectedAttendance?.jobId
       )
@@ -190,6 +191,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
                 setTimeout(() => {
                   dispatch(
                     getAttendanceMusterAction(
+                      token,
                       selectedAttendance?.workerId,
                       selectedAttendance?.jobId
                     )
@@ -505,6 +507,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
                 onRefresh={() => {
                   dispatch(
                     getAttendanceMusterAction(
+                      token,
                       selectedAttendance?.workerId,
                       selectedAttendance?.jobId
                     )

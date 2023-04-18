@@ -5,7 +5,6 @@ import {
 	PROJECT_GETALL_SIMPLE,
 	base_url,
 	responseHandler,
-	staticToken,
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 const initialState = {
@@ -87,15 +86,15 @@ export const selectedProjectReducer = (state) =>
 
 export const selectProjectAction = (data) => async (dispatch) => {
 	dispatch(selectedProjectSuccess(data));
-	console.log("SELECTED PROJECT", data);
+	// console.log("SELECTED PROJECT", data);
 };
 
-export const getAllProjectsAction = () => async (dispatch) => {
+export const getAllProjectsAction = (token) => async (dispatch) => {
 	try {
 		dispatch(getProjectsRequest());
 		await api
 			.request("GET", PROJECT_GETALL_URL, null, {
-				Authorization: staticToken,
+				Authorization: token,
 			})
 			.then((res) => {
 				const data = responseHandler(res);
@@ -148,40 +147,14 @@ export const updateProjectAction = (token, worker) => async (dispatch) => {
     return e;
   }
 };
-// export const updateProjectAction = (projectData) => async (dispatch) => {
-// 	try {
-// 		dispatch(updateProjectRequest());
-// 		await api
-// 			.request("POST", UPDATE_PROJECT_URL, projectData, {
-// 				Authorization: staticToken,
-// 				"Content-Type": "multipart/form-data",
-// 				Accept: "text/plain",
-// 			})
-// 			.then((res) => {
-// 				// console.log("res", res);
-// 				const data = responseHandler(res);
-// 				// console.log("Project create response", data);
-// 				if (data) {
-// 					dispatch(updateProjectSuccess(data));
-// 				}
-// 				// return res
-// 			})
-// 			.catch((error) => {
-// 				console.log("ERROR", error);
-// 				dispatch(updateProjectFailure());
-// 			});
-// 	} catch (error) {
-// 		dispatch(updateProjectFailure());
-// 	}
-// };
 
-export const getAllProjectsSimpleAction = () => async (dispatch) => {
+export const getAllProjectsSimpleAction = (token) => async (dispatch) => {
 	try {
 		dispatch(getProjectsSimpleRequest());
 		await api
 
 			.request("GET", PROJECT_GETALL_SIMPLE, null, {
-				Authorization: staticToken,
+				Authorization: token,
 			})
 			.then((res) => {
 				const data = responseHandler(res);

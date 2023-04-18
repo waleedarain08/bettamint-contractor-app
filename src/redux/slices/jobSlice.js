@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
   JOB_GETALL_URL,
   responseHandler,
-  staticToken,
   JOB_CREATE_URL,
   base_url,
 } from "../../utils/api_constants";
@@ -71,12 +70,12 @@ export const selectedJobAction = (data) => async (dispatch) => {
   dispatch(selectedJobSuccess(data));
 };
 
-export const getAllJobsAction = () => async (dispatch) => {
+export const getAllJobsAction = (token, contractorId) => async (dispatch) => {
   try {
     dispatch(getJobRequest());
     await api
-      .request("GET", JOB_GETALL_URL, null, {
-        Authorization: staticToken,
+      .request("GET", JOB_GETALL_URL + `?createdBy=${contractorId}`, null, {
+        Authorization: token,
       })
       .then((res) => {
         const data = responseHandler(res);
@@ -124,28 +123,6 @@ export const createJobAction = (token, worker) => async (dispatch) => {
     return e;
   }
 };
-// export const createJobAction = (data) => async (dispatch) => {
-// 	try {
-// 		dispatch(createJobRequest());
-// 		await api
 
-// 			.request("POST", JOB_CREATE_URL, data, {
-// 				Authorization: staticToken,
-// 			})
-// 			.then((res) => {
-// 				const data = responseHandler(res);
-// 				console.log("JOB DATA", data);
-// 				if (data) {
-// 					dispatch(createJobSuccess(data));
-// 				}
-// 			})
-// 			.catch((error) => {
-// 				console.log("JOB ERROR", error);
-// 				dispatch(createJobFailure());
-// 			});
-// 	} catch (error) {
-// 		dispatch(createJobFailure());
-// 	}
-// };
 
 export default jobSlice.reducer;

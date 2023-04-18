@@ -5,7 +5,6 @@ import {
   PROJECT_GETALL_SIMPLE,
   base_url,
   responseHandler,
-  staticToken,
   WORKER_GETALL_URL,
   UPDATE_WORKER_URL,
   GET_SKILLS_URL,
@@ -86,8 +85,7 @@ const {
 export const workersListReducer = (state) => state?.workers?.workersList;
 export const workerLoading = (state) => state?.workers?.loading;
 export const skillsListReducer = (state) => state?.workers?.skillsList;
-export const selectedWorkerReducer = (state) =>
-  state?.workers?.selectedWorker;
+export const selectedWorkerReducer = (state) => state?.workers?.selectedWorker;
 
 // export const projectsListSimpleReducer = (state) =>
 // 	state?.projectSlice?.projectsListSimple;
@@ -96,39 +94,46 @@ export const selectWorkerAction = (data) => (dispatch) => {
   dispatch(selectedWorkerSuccess(data));
 };
 
-export const getAllWorkersAction = (projectId) => async (dispatch) => {
-  try {
-    dispatch(getWorkersRequest());
-    await api
-      .request("GET", WORKER_GETALL_URL + `?projectId=${projectId}`, null, {
-        Authorization: staticToken,
-      })
-      .then((res) => {
-        const data = responseHandler(res);
-        console.log("WORKERS DATA", data);
-        if (data) {
-          dispatch(getWorkersSuccess(data));
-        }
-        // return res
-      })
-      .catch((error) => {
-        console.log("GET WORKERS ERROR", error);
-        dispatch(getWorkersFailure());
-      });
-  } catch (error) {
-    dispatch(getWorkersFailure());
-  }
-};
+export const getAllWorkersAction =
+  (token, projectId, contractorId) => async (dispatch) => {
+    try {
+      dispatch(getWorkersRequest());
+      await api
+        .request(
+          "GET",
+          WORKER_GETALL_URL +
+            `?projectId=${projectId}&createdBy=${contractorId}`,
+          null,
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          const data = responseHandler(res);
+          console.log("WORKERS DATA", data);
+          if (data) {
+            dispatch(getWorkersSuccess(data));
+          }
+          // return res
+        })
+        .catch((error) => {
+          console.log("GET WORKERS ERROR", error);
+          dispatch(getWorkersFailure());
+        });
+    } catch (error) {
+      dispatch(getWorkersFailure());
+    }
+  };
 
 export const updateWorkerAction =
-  (data, profilePicture, adharCard) => async (dispatch) => {
-    console.log('test')
+  (token, data, profilePicture, adharCard) => async (dispatch) => {
+    console.log("test");
     navigate("WorkerDetails");
     try {
       dispatch(updateWorkerRequest());
       await api
         .request("POST", UPDATE_WORKER_URL, data, {
-          Authorization: staticToken,
+          Authorization: token,
           "Content-Type": "multipart/form-data",
           Accept: "text/plain",
         })
@@ -147,7 +152,7 @@ export const updateWorkerAction =
                   adharCard,
                   {
                     headers: {
-                      Authorization: staticToken,
+                      Authorization: token,
                       "Content-Type": "multipart/form-data",
                     },
                   }
@@ -160,7 +165,7 @@ export const updateWorkerAction =
                   profilePicture,
                   {
                     headers: {
-                      Authorization: staticToken,
+                      Authorization: token,
                       "Content-Type": "multipart/form-data",
                     },
                   }
@@ -180,71 +185,12 @@ export const updateWorkerAction =
     }
   };
 
-// export const updateWorkerAction =
-//   (worker, adharCard, profilePicture) => async (dispatch) => {
-//     dispatch(updateWorkerRequest());
-//     try {
-//       const response = await axios.post(
-//         `${base_url}/dashboard/worker/addupdateworker`,
-//         worker,
-//         {
-//           headers: {
-//             Authorization: staticToken,
-//             "Content-Type": "multipart/form-data",
-//             Accept: "text/plain",
-//           },
-//         }
-//       );
-//       // console.log("reponse", response?.data?.workerId);
-//       if (response.status === 200) {
-//         navigate("Workers");
-//         dispatch(updateWorkerSuccess(response.data));
-
-//         let workerId = response.data.workerId;
-//         // formData.append('panCard', panCard);
-//         [1, 2].map(async (item) => {
-//           if (item === 1 && adharCard) {
-//             let resp = await axios.post(
-//               `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=IdentityCard`,
-//               adharCard,
-//               {
-//                 headers: {
-//                   Authorization: staticToken,
-//                   "Content-Type": "multipart/form-data",
-//                 },
-//               }
-//             );
-//             // console.log("aadhar resp", resp);
-//           }
-//           if (item === 2 && profilePicture) {
-//             let resp = await axios.post(
-//               `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=ProfilePicture`,
-//               profilePicture,
-//               {
-//                 headers: {
-//                   Authorization: staticToken,
-//                   "Content-Type": "multipart/form-data",
-//                 },
-//               }
-//             );
-//             // console.log("profile resp", resp);
-//           }
-//         });
-//       }
-//       // return response;
-//     } catch (e) {
-//       console.log("Error", e);
-//       dispatch(
-//         updateWorkerFailure("Something went wrong while getting users!")
-//       );
-//     }
-//   };
-export const getSkillsAction = () => async (dispatch) => {
+export const getSkillsAction = (token) => async (dispatch) => {
   try {
     dispatch(getSkillsRequest());
     await api
       .request("GET", GET_SKILLS_URL, null, {
-        Authorization: staticToken,
+        Authorization: token,
       })
       .then((res) => {
         const data = responseHandler(res);

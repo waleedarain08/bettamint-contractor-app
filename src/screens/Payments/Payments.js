@@ -91,7 +91,7 @@ const Payments = ({ navigation }) => {
   useEffect(() => {
     dispatch(getSkillsAction(token));
     dispatch(getUsersAction(token));
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, []);
 
   useEffect(() => {

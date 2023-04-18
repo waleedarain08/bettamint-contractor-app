@@ -35,6 +35,7 @@ const { gettingUsers, gettingUsersSuccess, gettingUsersFailure, selectAUser } =
   userSlice.actions;
 
 export const usersListReducer = (state) => state.users.usersList;
+export const loadingUsers = (state) => state.users.loading;
 
 export const getUsersAction = (token) => async (dispatch) => {
   dispatch(gettingUsers());

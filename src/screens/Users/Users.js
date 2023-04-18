@@ -23,8 +23,14 @@ export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { User, Tick, Cross, Search, Building } from "../../icons";
 import { useDispatch, useSelector } from "react-redux";
 import { authToken } from "../../redux/slices/authSlice";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
+import {
+  getUsersAction,
+  loadingUsers,
+  usersListReducer,
+} from "../../redux/slices/userSlice";
 import { Searchbar } from "react-native-paper";
+import { Dropdown } from "react-native-element-dropdown";
+import { RefreshControl } from "react-native-gesture-handler";
 LogBox.ignoreAllLogs();
 const DATA = [
   {
@@ -70,9 +76,14 @@ const Users = ({ navigation }) => {
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
   const [search, setSearch] = useState("");
+  const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [userFilter, setUserFilter] = useState(null);
+  const [selectedContractor, setSelectedContractor] = useState(null);
 
   const token = useSelector(authToken);
   const usersList = useSelector(usersListReducer);
+  const isLoading = useSelector(loadingUsers);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(getUsersAction(token));
@@ -88,7 +99,9 @@ const Users = ({ navigation }) => {
       // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
         // Applying filter for the inserted text in search bar
-        const itemData = item.fullName ? item.fullName.toUpperCase() : "".toUpperCase();
+        const itemData = item.fullName
+          ? item.fullName.toUpperCase()
+          : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
@@ -101,6 +114,215 @@ const Users = ({ navigation }) => {
       setSearch(text);
     }
   };
+
+  const renderFilterModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openFilterModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenFilterModal(!openFilterModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Filter By:
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenFilterModal(!openFilterModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              {/* <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  Filer By:
+                </Text>
+              </View> */}
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={[
+                  { label: "Labour Contractor", value: "LabourContractor" },
+                ]}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={selectedContractor}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedContractor(item);
+                  setUserFilter(
+                    usersList?.filter((ele) => ele.leadTypeId === item?.value)
+                  );
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderSearchModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openSearchModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenSearchModal(!openSearchModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Search Users
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchModal(!openSearchModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterFunction(text)}
+                value={search}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const Item = ({ item }) => (
     <Pressable
       style={styles.item}
@@ -188,10 +410,10 @@ const Users = ({ navigation }) => {
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
-            width: "28%",
+            width: "20%",
           }}
         >
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -202,32 +424,34 @@ const Users = ({ navigation }) => {
             }}
           >
             <Text style={styles.smallButton}>Sort by</Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
           <TouchableOpacity
+            onPress={() => setOpenFilterModal(true)}
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
               margin: 5,
               borderRadius: 3,
-              width: "40%",
+              width: "100%",
               alignItems: "center",
             }}
           >
             <Text style={styles.smallButton}>Filter</Text>
           </TouchableOpacity>
         </View>
-        <View
+        <Pressable
+          onPress={() => setOpenSearchModal(true)}
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
-            width: "65%",
+            width: "75%",
             backgroundColor: "#ECE4FC",
             alignItems: "center",
-            borderRadius: 10,
-            height: 50
+            borderRadius: 4,
+            // height: 50
           }}
         >
-          <Searchbar
+          {/* <Searchbar
             style={{
               backgroundColor: "#ECE4FC",
               borderRadius: 10,
@@ -242,8 +466,8 @@ const Users = ({ navigation }) => {
             clearIcon={() => <Cross size={20} color={Colors.FormText} />}
             onChangeText={(text) => searchFilterFunction(text)}
             value={search}
-          />
-          {/* <View style={{ width: "70%", paddingLeft: 5 }}>
+          /> */}
+          <View style={{ width: "70%", paddingLeft: 5 }}>
             <Text
               style={{
                 color: "#ADBAC3",
@@ -264,20 +488,29 @@ const Users = ({ navigation }) => {
               width: "15%",
             }}
           >
-           
             <Search size={20} color={Colors.Secondary} />
-          </View> */}
-        </View>
+          </View>
+        </Pressable>
       </View>
       {/* <ScrollView> */}
       <View style={{ width: "100%", flex: 1 }}>
         <FlatList
-          data={filteredDataSource}
+          refreshControl={
+            <RefreshControl
+              refreshing={isLoading}
+              onRefresh={() => dispatch(getUsersAction(token))}
+              tintColor={Colors.Primary}
+              colors={[Colors.Purple, Colors.Primary]}
+            />
+          }
+          data={userFilter ? userFilter : filteredDataSource}
           renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.userId}
           showsVerticalScrollIndicator={false}
         />
       </View>
+      {renderFilterModal()}
+      {renderSearchModal()}
       {/* </ScrollView> */}
     </View>
   );
@@ -442,5 +675,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.White,
     textTransform: "capitalize",
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Regular",
+    color: Colors.FormText,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Medium",
+    color: Colors.Black,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  dropdown: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    elevation: 4,
+    backgroundColor: Colors.White,
   },
 });

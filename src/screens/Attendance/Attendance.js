@@ -47,8 +47,8 @@ const Attendance = ({ navigation }) => {
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
-  const [openFilterModal, setOpenFilterModal] = useState(false);
   const [search, setSearch] = useState("");
+  const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
@@ -81,7 +81,7 @@ const Attendance = ({ navigation }) => {
   useEffect(() => {
     dispatch(getSkillsAction(token));
     dispatch(getUsersAction(token));
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, []);
 
   useEffect(() => {

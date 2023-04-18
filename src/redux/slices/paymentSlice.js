@@ -2,7 +2,6 @@ import { createSlice } from "@reduxjs/toolkit";
 import {
 	PAYMENT_GETALL_URL,
 	responseHandler,
-	staticToken,
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 
@@ -37,12 +36,12 @@ const { getPaymentRequest, getPaymentSuccess, getPaymentFailure } =
 
 export const paymentsListReducer = (state) => state?.paymentSlice?.paymentsList;
 export const loadingPayments = (state) => state?.paymentSlice?.loading;
-export const getPaymentsAction = () => async (dispatch) => {
+export const getPaymentsAction = (token) => async (dispatch) => {
 	try {
 		dispatch(getPaymentRequest());
 		await api
 			.request("GET", PAYMENT_GETALL_URL, null, {
-				Authorization: staticToken,
+				Authorization: token,
 			})
 			.then((res) => {
 				const data = responseHandler(res);

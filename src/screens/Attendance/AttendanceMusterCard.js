@@ -79,6 +79,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
   useEffect(() => {
     dispatch(
       getAttendanceMusterAction(
+        token,
         selectedAttendance?.workerId,
         selectedAttendance?.jobId
       )
@@ -189,6 +190,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
                 setTimeout(() => {
                   dispatch(
                     getAttendanceMusterAction(
+                      token,
                       selectedAttendance?.workerId,
                       selectedAttendance?.jobId
                     )
@@ -504,6 +506,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
                 onRefresh={() => {
                   dispatch(
                     getAttendanceMusterAction(
+                      token,
                       selectedAttendance?.workerId,
                       selectedAttendance?.jobId
                     )

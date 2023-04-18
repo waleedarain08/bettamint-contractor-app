@@ -15,5 +15,6 @@ export const Colors = {
 	FormBorder: '#C4C4C4',
 	ListHeaderText: '#58677D',
 	ListItemText: '#333333',
-	SubHeading: '#444444'
+	SubHeading: '#444444',
+	PurpleOpacity: '#ECE5FC'
 };

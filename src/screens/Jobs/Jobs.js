@@ -42,6 +42,7 @@ import moment from "moment";
 import { Dropdown } from "react-native-element-dropdown";
 import { skillsListReducer } from "../../redux/slices/workerSlice";
 import { getSkillsAction } from "../../redux/slices/workerSlice";
+import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 LogBox.ignoreAllLogs();
 
 const Jobs = ({ navigation }) => {
@@ -55,9 +56,13 @@ const Jobs = ({ navigation }) => {
   const [search, setSearch] = useState("");
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [labourContractors, setLabourContractors] = useState(null);
+
   const dispatch = useDispatch();
   const skillsList = useSelector(skillsListReducer);
   // console.log('Skills', skillsList)
+  const usersList = useSelector(usersListReducer);
 
   const jobsList = useSelector(jobsListReducer);
   const isLoading = useSelector(loadingJobs);
@@ -65,14 +70,19 @@ const Jobs = ({ navigation }) => {
   const projectsListSimple = useSelector(projectsListSimpleReducer);
 
   useEffect(() => {
-    dispatch(getAllJobsAction(token));
+    dispatch(getAllJobsAction(token, 0));
+    dispatch(getUsersAction(token));
   }, []);
-  
+  useEffect(() => {
+    setLabourContractors(
+      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
+    );
+  }, [usersList]);
   useEffect(() => {
     dispatch(getSkillsAction(token));
   }, []);
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, [selectedProject]);
 
   useEffect(() => {
@@ -139,24 +149,44 @@ const Jobs = ({ navigation }) => {
                     fontFamily: "Lexend-Medium",
                     color: Colors.Black,
                     fontSize: 16,
-                    marginBottom: 10,
+                    // marginBottom: 10,
                   }}
                 >
                   Filter
                 </Text>
               </View>
-              <View>
+              <View style={{ alignItems: "flex-end" }}>
                 <Cross
                   onPress={() => {
                     setOpenFilterModal(!openFilterModal);
                   }}
                   size={22}
                   color={Colors.Black}
-                  style={{ marginBottom: 8 }}
                 />
+                <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setSelectedSkills(null);
+                    setOpenFilterModal(false);
+                    setFilterJob(null);
+                    dispatch(getAllJobsAction(token, 0));
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable>
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By skills
+                </Text>
+              </View>
               <Dropdown
                 style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
@@ -167,8 +197,6 @@ const Jobs = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                // data={data}
-                // data={attendanceOptions}
                 data={skillsList?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
@@ -178,34 +206,47 @@ const Jobs = ({ navigation }) => {
                 valueField="value"
                 placeholder={"Select Skill"}
                 value={selectedSkills}
-                // onFocus={() => setIsFocus(true)}
-                // onBlur={() => setIsFocus(false)}
                 onChange={(item) => {
                   setOpenFilterModal(false);
                   setSelectedSkills(item);
                   setFilterJob(
                     jobsList?.filter((ele) => ele.skillId === item?.value)
                   );
-                  //   setApproveStatus(item);
-                  //   // console.log(item);
-                  //   dispatch(
-                  //     getAttendanceApproveAction(
-                  //       token,
-                  //       selectedAttendance?.jobId,
-                  //       selectedAttendance?.workerId,
-                  //       selectedDate,
-                  //       item?.value
-                  //     )
-                  //   );
-                  //   setTimeout(() => {
-                  //     dispatch(
-                  //       getAttendanceMusterAction(
-                  //         selectedAttendance?.workerId,
-                  //         selectedAttendance?.jobId
-                  //       )
-                  //     );
-                  //     setApproveStatus(null);
-                  //   }, 2000);
+                }}
+              />
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By Contractor
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={labourContractors?.map((ele) => ({
+                  label: ele?.fullName,
+                  value: ele?.userId,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={selectedContractor}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedContractor(item);
+                  setSelectedSkills(null);
+                  dispatch(getAllJobsAction(token, item?.value));
                 }}
               />
             </View>

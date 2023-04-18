@@ -68,11 +68,11 @@ const CreateNewJob = ({ navigation }) => {
   const skillsList = useSelector(skillsListReducer);
 
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, [selectedProject]);
 
   useEffect(() => {
-    dispatch(getSkillsAction());
+    dispatch(getSkillsAction(token));
   }, []);
 
   useEffect(() => {

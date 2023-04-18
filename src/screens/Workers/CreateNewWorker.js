@@ -33,6 +33,7 @@ import {
   updateWorkerAction,
 } from "../../redux/slices/workerSlice";
 import { assetsUrl } from "../../utils/api_constants";
+import { authToken } from "../../redux/slices/authSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -60,9 +61,10 @@ const CreateNewWorker = ({ navigation }) => {
   const [initialFetch, setInitialFetch] = useState(true);
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
+  const token = useSelector(authToken)
   // console.log(skillsList);
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, []);
   // useEffect(() => {
   //   dispatch(getSkillsAction());
@@ -113,7 +115,7 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
 
-    const response = await dispatch(updateWorkerAction(formData, aadharCardForm, profilePicForm));
+    const response = await dispatch(updateWorkerAction(token,formData, aadharCardForm, profilePicForm));
     console.log('worker res',response)
   };
 

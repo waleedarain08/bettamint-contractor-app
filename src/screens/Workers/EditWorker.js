@@ -31,6 +31,7 @@ import {
   skillsListReducer,
   updateWorkerAction,
 } from "../../redux/slices/workerSlice";
+import { authToken } from "../../redux/slices/authSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -54,16 +55,14 @@ const CreateNewWorker = ({ navigation }) => {
   const [aadharCard, setAadharCard] = useState("");
   const [aadharCardForm, setAadharCardForm] = useState("");
   const [uploadType, setUploadType] = useState(null);
-  const [initialFetch, setInitialFetch] = useState(true);
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
-  console.log(skillsList);
+  const token = useSelector(authToken)
+
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
   }, []);
-  // useEffect(() => {
-  //   dispatch(getSkillsAction());
-  // }, []);
+
   const data = [
     { label: "Supervisor", value: "Supervisor" },
     { label: "Skilled", value: "Skilled" },

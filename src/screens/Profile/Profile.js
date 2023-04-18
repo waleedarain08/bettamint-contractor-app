@@ -24,9 +24,13 @@ import {
   EditIcon,
 } from "../../icons";
 import Spacer from "../../components/Spacer";
+import { useSelector } from "react-redux";
+import { userData } from "../../redux/slices/authSlice";
 const img =
   "https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
 const Profile = ({ navigation }) => {
+  const { user } = useSelector(userData);
+  // console.log("User", user);
   return (
     // <ImageBackground source={Vector} style={styles.container}>
     <View style={styles.container}>
@@ -48,16 +52,16 @@ const Profile = ({ navigation }) => {
           </View>
 
           <View style={{ width: "65%", justifyContent: "center" }}>
-            <Text style={styles.title}>Pyramid Builders</Text>
+            <Text style={styles.title}>{user?.fullName}</Text>
             <Spacer top={10} />
             <Text style={[styles.typeText, { color: Colors.Secondary }]}>
-              Role: Super Admin
+              {`Role: ${user?.role?.name}`}
             </Text>
             <Spacer top={5} />
-            <Text style={styles.typeText}>Username: Preet-kumar</Text>
+            <Text style={styles.typeText}> {`Username: ${user?.username}`}</Text>
           </View>
           <View>
-            <EditIcon size={20} color={Colors.Secondary} />
+            {/* <EditIcon size={20} color={Colors.Secondary} /> */}
           </View>
         </View>
         <View style={{ alignItems: "center", justifyContent: "center" }}>
@@ -84,7 +88,7 @@ const Profile = ({ navigation }) => {
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>First Name</Text>
-                <Text style={styles.text}>Hredhaan</Text>
+                <Text style={styles.text}>N/A</Text>
               </View>
             </View>
             <View
@@ -100,7 +104,7 @@ const Profile = ({ navigation }) => {
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Last Name</Text>
-                <Text style={styles.text}>Shukla</Text>
+                <Text style={styles.text}>N/A</Text>
               </View>
             </View>
             <View
@@ -116,7 +120,7 @@ const Profile = ({ navigation }) => {
               <TypeIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Account Type</Text>
-                <Text style={styles.text}>Contractor</Text>
+                <Text style={styles.text}>{user?.role?.name}</Text>
               </View>
             </View>
             <View
@@ -132,7 +136,7 @@ const Profile = ({ navigation }) => {
               <Email size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Email Address</Text>
-                <Text style={styles.text}>test@email.com</Text>
+                <Text style={styles.text}>{user?.emailAddress}</Text>
               </View>
             </View>
             <View
@@ -152,7 +156,7 @@ const Profile = ({ navigation }) => {
               />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Phone Number</Text>
-                <Text style={styles.text}>090078601</Text>
+                <Text style={styles.text}>N/A</Text>
               </View>
             </View>
             <View
@@ -168,7 +172,7 @@ const Profile = ({ navigation }) => {
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Username</Text>
-                <Text style={styles.text}>Hredhaan</Text>
+                <Text style={styles.text}>{user?.username}</Text>
               </View>
             </View>
             <View
@@ -184,7 +188,7 @@ const Profile = ({ navigation }) => {
               <CardText size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>GSTIN Number</Text>
-                <Text style={styles.text}>23 IWHEOIJ 98</Text>
+                <Text style={styles.text}>N/A</Text>
               </View>
             </View>
           </View>
@@ -220,7 +224,7 @@ const styles = StyleSheet.create({
     marginTop: -180,
     padding: 10,
     margin: 15,
-	marginBottom: 80,
+    marginBottom: 80,
     shadowColor: "#000",
     shadowOffset: {
       width: 0,

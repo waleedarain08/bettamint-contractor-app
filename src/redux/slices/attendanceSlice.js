@@ -4,7 +4,6 @@ import {
   ATTENDANCE_GETALL_URL,
   ATTENDANCE_REPORT_URL,
   responseHandler,
-  staticToken,
   base_url,
   ATTENDANCE_APPROVE_URL,
 } from "../../utils/api_constants";
@@ -151,7 +150,7 @@ export const getAllAttendanceAction =
     }
   };
 export const getAttendanceMusterAction =
-  (workerId, jobId) => async (dispatch) => {
+  (token,workerId, jobId) => async (dispatch) => {
     try {
       dispatch(getAttendanceMusterRequest());
       await api
@@ -161,7 +160,7 @@ export const getAttendanceMusterAction =
           ATTENDANCE_MUSTER_URL + `?workerId=${workerId}&jobId=${jobId}`,
           null,
           {
-            Authorization: staticToken,
+            Authorization: token,
           }
         )
 
@@ -211,13 +210,13 @@ export const getAttendanceApproveAction =
     }
   };
 
-export const getAttendanceReportAction = (projectId) => async (dispatch) => {
+export const getAttendanceReportAction = (token,projectId) => async (dispatch) => {
   try {
     dispatch(getAttendanceReportRequest());
     await api
 
       .request("GET", ATTENDANCE_REPORT_URL + `?projectId=${projectId}`, null, {
-        Authorization: staticToken,
+        Authorization: token,
       })
       .then((res) => {
         const data = responseHandler(res);
