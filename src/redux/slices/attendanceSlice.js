@@ -121,29 +121,35 @@ export const selectAttendanceAction = (data) => async (dispatch) => {
   dispatch(setAttendance(data));
 };
 
-export const getAllAttendanceAction = (projectId) => async (dispatch) => {
-  try {
-    dispatch(getAttendanceRequest());
-    await api
+export const getAllAttendanceAction =
+  (token, projectId, contractorId) => async (dispatch) => {
+    try {
+      dispatch(getAttendanceRequest());
+      await api
 
-      .request("GET", ATTENDANCE_GETALL_URL + `?projectId=${projectId}`, null, {
-        Authorization: staticToken,
-      })
-      .then((res) => {
-        const data = responseHandler(res);
-        // console.log("ATTENDANCE", data);
-        if (data) {
-          dispatch(getAttendanceSuccess(data));
-        }
-      })
-      .catch((error) => {
-        console.log("ATTENDANCE ERROR", error);
-        dispatch(getAttendanceFailure());
-      });
-  } catch (error) {
-    dispatch(getAttendanceFailure());
-  }
-};
+        .request(
+          "GET",
+          ATTENDANCE_GETALL_URL + `?projectId=${projectId}&createdBy=${contractorId || 0}`,
+          null,
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          const data = responseHandler(res);
+          // console.log("ATTENDANCE", data);
+          if (data) {
+            dispatch(getAttendanceSuccess(data));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE ERROR", error);
+          dispatch(getAttendanceFailure());
+        });
+    } catch (error) {
+      dispatch(getAttendanceFailure());
+    }
+  };
 export const getAttendanceMusterAction =
   (workerId, jobId) => async (dispatch) => {
     try {
@@ -176,7 +182,7 @@ export const getAttendanceMusterAction =
   };
 
 export const getAttendanceApproveAction =
-  (token,jobId, workerId, dateTime, hours) => async (dispatch) => {
+  (token, jobId, workerId, dateTime, hours) => async (dispatch) => {
     try {
       dispatch(getAttendanceApproveRequest());
       await api

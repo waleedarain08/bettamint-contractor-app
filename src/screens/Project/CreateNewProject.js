@@ -37,7 +37,7 @@ import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
 
-const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
+// const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
@@ -62,31 +62,33 @@ const CreateNewProject = ({ navigation }) => {
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
+
+  const geoArray = [
+    {
+      latitude: 26.04198067508024,
+      longitude: 68.94373902912463,
+    },
+    {
+      latitude: 26.04375434168726,
+      longitude: 68.94556293125476,
+    },
+    {
+      latitude: 26.042134908024217,
+      longitude: 68.94873866672839,
+    },
+  ];
+
   mapRef?.current?.animateToRegion(
     {
-      latitude: geoFancingArray[0]?.lat || 20.5937,
-      longitude: geoFancingArray[0]?.lng || 78.9629,
-      latitudeDelta: geoFancingArray[0]?.lat ? 0.001 : 0.2,
-      longitudeDelta: geoFancingArray[0]?.lng ? 0.01 : 20,
+      latitude: geoFancingArray[0]?.latitude || 20.5937,
+      longitude: geoFancingArray[0]?.longitude || 78.9629,
+      latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
+      longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
     },
     1000
   );
 
   const submitHandler = async () => {
-    const geoArray = [
-      {
-        latitude: 26.04198067508024,
-        longitude: 68.94373902912463,
-      },
-      {
-        latitude: 26.04375434168726,
-        longitude: 68.94556293125476,
-      },
-      {
-        latitude: 26.042134908024217,
-        longitude: 68.94873866672839,
-      },
-    ];
     const formData = new FormData();
     formData.append("Name", projectName);
     formData.append("ProjectTypeId", value);
@@ -101,7 +103,7 @@ const CreateNewProject = ({ navigation }) => {
     const response = await dispatch(updateProjectAction(token, formData));
     console.log("Create response", response);
     if (response.status === 200) {
-      navigation.goBack()
+      navigation.goBack();
     }
 
     // if (projectName === "") {
@@ -282,7 +284,15 @@ const CreateNewProject = ({ navigation }) => {
             //   latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
             //   longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
             // }}
-          ></MapView>
+          >
+            {geoFancingArray?.length !== 0 && (
+              <Polygon
+                coordinates={geoFancingArray}
+                strokeColor={Colors.Purple}
+                strokeWidth={3}
+              />
+            )}
+          </MapView>
         </Pressable>
       </View>
       <Spacer top={-20} />

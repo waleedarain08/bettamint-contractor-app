@@ -705,4 +705,27 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: Colors.White,
   },
+  placeholderStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Regular",
+    color: Colors.FormText,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Regular",
+    color: Colors.Black,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  dropdown: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    elevation: 4,
+    backgroundColor: Colors.White,
+  },
 });

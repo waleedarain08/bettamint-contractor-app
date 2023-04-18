@@ -34,28 +34,62 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 import { Building, Search, BackIcon, Cross } from "../../icons";
+import { authToken } from "../../redux/slices/authSlice";
+import {
+  getSkillsAction,
+  skillsListReducer,
+} from "../../redux/slices/workerSlice";
+import { Dropdown } from "react-native-element-dropdown";
+import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 LogBox.ignoreAllLogs();
 const Attendance = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
+  const [openFilterModal, setOpenFilterModal] = useState(false);
   const [search, setSearch] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [filteredAttendance, setFilteredAttendance] = useState(null);
+  const [selectedSkills, setSelectedSkills] = useState(null);
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [labourContractors, setLabourContractors] = useState(null);
+
   const dispatch = useDispatch();
+
   const attendanceList = useSelector(attendanceListReducer);
+  const skillsList = useSelector(skillsListReducer);
+  const usersList = useSelector(usersListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const isLoading = useSelector(loadingAttendance);
-  // console.log("ATTENDANCE LIST", attendanceList);
+  const token = useSelector(authToken);
+  // console.log("ATTENDANCE LIST", usersList?.filter((ele)=> ele?.leadTypeId === 'LabourContractor'));
+  const status = [
+    { label: "Online", value: "Online" },
+    { label: "Offline", value: "Offline" },
+  ];
   useEffect(() => {
     dispatch(
       getAllAttendanceAction(
-        selectedProject?.projectId || projectsListSimple[0]?.projectId
+        token,
+        selectedProject?.projectId || projectsListSimple[0]?.projectId,
+        0
       )
     );
   }, [selectedProject]);
+
   useEffect(() => {
+    dispatch(getSkillsAction(token));
+    dispatch(getUsersAction(token));
     dispatch(getAllProjectsSimpleAction());
   }, []);
+
+  useEffect(() => {
+    setLabourContractors(
+      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
+    );
+  }, [usersList]);
+
   useEffect(() => {
     setFilteredDataSource(projectsListSimple);
     setMasterDataSource(projectsListSimple);
@@ -82,6 +116,217 @@ const Attendance = ({ navigation }) => {
     }
   };
   const rowColors = ["#F3F4F4", "#FFFFFF"];
+
+  const renderFilterModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openFilterModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenFilterModal(!openFilterModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Filter
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenFilterModal(!openFilterModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setSelectedSkills(null);
+                    setSelectedStatus(null);
+                    dispatch(
+                      getAllAttendanceAction(
+                        token,
+                        selectedProject?.projectId ||
+                          projectsListSimple[0]?.projectId,
+                        0
+                      )
+                    );
+                    setOpenFilterModal(false);
+                    setFilteredAttendance(null)
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable>
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By status
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={status}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Status"}
+                value={selectedStatus}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedStatus(item);
+                  setSelectedSkills(null);
+                  setFilteredAttendance(
+                    attendanceList?.filter(
+                      (ele) => ele.workerTypeId === item?.value
+                    )
+                  );
+                }}
+              />
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By skills
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={skillsList?.map((ele) => ({
+                  label: ele?.name,
+                  value: ele?.name,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Skill"}
+                value={selectedSkills}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedSkills(item);
+                  setSelectedStatus(null);
+                  setFilteredAttendance(
+                    attendanceList?.filter(
+                      (ele) => ele.sKillName === item?.value
+                    )
+                  );
+                }}
+              />
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By Contractor
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={labourContractors?.map((ele) => ({
+                  label: ele?.fullName,
+                  value: ele?.userId,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={selectedContractor}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedContractor(item);
+                  setSelectedStatus(null);
+                  setSelectedSkills(null);
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      item?.value
+                    )
+                  );
+                  // setFilteredAttendance(
+                  //   attendanceList?.filter(
+                  //     (ele) => ele.sKillName === item?.value
+                  //   )
+                  // );
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const Item = ({ item, index }) => (
     <View style={[styles.item]}>
       <View
@@ -181,12 +426,15 @@ const Attendance = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header} />
       <Pressable
-        onPress={() => {
-          setOpenSearchModal(true);
-        }}
+        // onPress={() => {
+        //   setOpenSearchModal(true);
+        // }}
         style={styles.graph}
       >
-        <View
+        <Pressable
+          onPress={() => {
+            setOpenSearchModal(true);
+          }}
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
@@ -220,9 +468,9 @@ const Attendance = ({ navigation }) => {
                 : "Select a project"}
             </Text>
           </View>
-        </View>
+        </Pressable>
         <View style={{ flexDirection: "row" }}>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -233,8 +481,11 @@ const Attendance = ({ navigation }) => {
             }}
           >
             <Text style={styles.smallButton}>Sort By</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
+          </TouchableOpacity> */}
+          <Pressable
+            onPress={() => {
+              setOpenFilterModal(true);
+            }}
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -245,7 +496,7 @@ const Attendance = ({ navigation }) => {
             }}
           >
             <Text style={styles.smallButton}>Filter</Text>
-          </TouchableOpacity>
+          </Pressable>
           <TouchableOpacity
             style={{
               justifyContent: "center",
@@ -316,7 +567,7 @@ const Attendance = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={attendanceList}
+            data={filteredAttendance ? filteredAttendance : attendanceList}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={ListHeader}
@@ -417,6 +668,7 @@ const Attendance = ({ navigation }) => {
           </View>
         </View>
       </Modal>
+      {renderFilterModal()}
     </View>
   );
 };
@@ -567,5 +819,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: Colors.ListHeaderText,
     textAlign: "center",
+  },
+  placeholderStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Regular",
+    color: Colors.FormText,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+    fontFamily: "Lexend-Medium",
+    color: Colors.Black,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  dropdown: {
+    height: 40,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    elevation: 4,
+    backgroundColor: Colors.White,
   },
 });

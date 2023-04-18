@@ -35,6 +35,7 @@ const { gettingUsers, gettingUsersSuccess, gettingUsersFailure, selectAUser } =
   userSlice.actions;
 
 export const usersListReducer = (state) => state.users.usersList;
+
 export const getUsersAction = (token) => async (dispatch) => {
   dispatch(gettingUsers());
   try {
@@ -43,7 +44,7 @@ export const getUsersAction = (token) => async (dispatch) => {
         Authorization: token,
       },
     });
-    console.log("Users Response", response.data);
+    // console.log("Users Response", response.data);
     if (response.data) {
       dispatch(gettingUsersSuccess(response.data));
     }

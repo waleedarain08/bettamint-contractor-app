@@ -22,7 +22,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-
+ 
 import Logo from "../assets/images/logo.png";
 import Menu from "../assets/icons/Menu.png";
 import { useDrawerStatus } from "@react-navigation/drawer";
