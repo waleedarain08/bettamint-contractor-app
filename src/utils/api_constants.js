@@ -1,9 +1,9 @@
-export const base_url = "https://api-sandbox.bettamint.com/api";
-export const assetsUrl = "https://api-sandbox.bettamint.com";
+// export const base_url = "https://api-sandbox.bettamint.com/api";
+// export const assetsUrl = "https://api-sandbox.bettamint.com";
 export const mapUrl = "https://sandbox.bettamint.com/app/project/map";
 
-// export const base_url = "https://api-prod.bettamint.com/api";
-// export const assetsUrl = 'https://api-prod.bettamint.com';
+export const base_url = "https://api-prod.bettamint.com/api";
+export const assetsUrl = 'https://api-prod.bettamint.com';
 
 // API URL ROUTES
 export const PROJECT_GETALL_URL = "dashboard/Project/getall";
