@@ -127,6 +127,63 @@ export const getAllWorkersAction =
 
 export const updateWorkerAction =
   (token, data, profilePicture, adharCard) => async (dispatch) => {
+    dispatch(updateWorkerRequest());
+    try {
+      const response = await axios.post(
+        `${base_url}/dashboard/worker/addupdateworker`,
+        data,
+        {
+          headers: {
+            Authorization: token,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        dispatch(updateWorkerSuccess(response.data));
+
+        let workerId = response.data.workerId;
+        // formData.append('panCard', panCard);
+        [1, 2].map(async (item) => {
+          if (item === 1 && adharCard) {
+            let resp = await axios.post(
+              `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=IdentityCard`,
+              adharCard,
+              {
+                headers: {
+                  Authorization: token,
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            console.log("aadhar resp", resp);
+          }
+          if (item === 2 && profilePicture) {
+            let resp = await axios.post(
+              `${base_url}/dashboard/worker/upload?workerId=${workerId}&document=ProfilePicture`,
+              profilePicture,
+              {
+                headers: {
+                  Authorization: token,
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            console.log("profile resp", resp);
+          }
+        });
+        return response;
+      }
+    } catch (e) {
+      dispatch(
+        updateWorkerFailure("Something went wrong while getting users!")
+      );
+    }
+  };
+
+export const updateWorkerActionOld =
+  (token, data, profilePicture, adharCard) => async (dispatch) => {
     console.log("test");
     navigate("WorkerDetails");
     try {

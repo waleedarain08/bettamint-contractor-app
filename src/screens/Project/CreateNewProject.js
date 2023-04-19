@@ -36,7 +36,7 @@ import MapViewGestures from "@dev-event/react-native-maps-draw";
 import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
-
+import Toast from "react-native-toast-message";
 // const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
@@ -52,12 +52,10 @@ const CreateNewProject = ({ navigation }) => {
     { label: "Hospitality", value: "Hospitality" },
     { label: "Infrastructure", value: "Infrastructure" },
   ]);
-  const [projectName, setProjectName] = useState("");
-  const [projectLocation, setProjectLocation] = useState("");
-  const [projectImage, setProjectImage] = useState("");
+  const [projectName, setProjectName] = useState(null);
+  const [projectImage, setProjectImage] = useState(null);
   const [geoFancingArray, setGeoFancingArray] = useState([]);
-  const [projectImageUri, setProjectImageUri] = useState("");
-  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
   const token = useSelector(authToken);
   const dispatch = useDispatch();
@@ -90,20 +88,66 @@ const CreateNewProject = ({ navigation }) => {
 
   const submitHandler = async () => {
     const formData = new FormData();
-    formData.append("Name", projectName);
-    formData.append("ProjectTypeId", value);
-    formData.append("DeveloperId", 0);
-    formData.append("ProjectId", 0);
-    formData.append("Image", {
-      name: projectImage?.assets[0]?.fileName,
-      type: projectImage?.assets[0]?.type,
-      uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
-    });
-    formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
-    const response = await dispatch(updateProjectAction(token, formData));
-    console.log("Create response", response);
-    if (response.status === 200) {
-      navigation.goBack();
+    if (!value) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select project type.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!projectName) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter project name.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!projectImageUri) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please add project image.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (geoFancingArray.length === 0) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please draw project coordinates.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else {
+      formData.append("Name", projectName);
+      formData.append("ProjectTypeId", value);
+      formData.append("DeveloperId", 0);
+      formData.append("ProjectId", 0);
+      formData.append("Image", {
+        name: projectImage?.assets[0]?.fileName,
+        type: projectImage?.assets[0]?.type,
+        uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+      });
+      formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
+      const response = await dispatch(updateProjectAction(token, formData));
+      console.log("Create response", response);
+      if (response.status === 200) {
+        navigation.goBack();
+        Toast.show({
+          type: "info",
+          text1: "Project Created",
+          text2: "New project is created successfully.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 4000,
+        });
+      }
     }
 
     // if (projectName === "") {
@@ -160,6 +204,7 @@ const CreateNewProject = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      {/* <Toast /> */}
       <View style={styles.header} />
       <View style={styles.graph}>
         <View

@@ -478,7 +478,7 @@ const Jobs = ({ navigation }) => {
           <RefreshControl
             refreshing={isLoading}
             onRefresh={() => {
-              dispatch(getAllJobsAction(token));
+              dispatch(getAllJobsAction(token, 0));
             }}
             tintColor={Colors.Primary}
             colors={[Colors.Purple, Colors.Primary]}

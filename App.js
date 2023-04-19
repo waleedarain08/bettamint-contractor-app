@@ -8,6 +8,7 @@ import store from "./src/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { enableLatestRenderer } from "react-native-maps";
+import Toast from "react-native-toast-message";
 
 enableLatestRenderer();
 
@@ -23,6 +24,7 @@ const App = () => {
       <StatusBar backgroundColor={Colors.Primary} />
       <PersistGate loading={null} persistor={persistor}>
         <MainNavigation />
+        <Toast />
       </PersistGate>
     </Provider>
   );

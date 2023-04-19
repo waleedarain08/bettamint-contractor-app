@@ -465,6 +465,18 @@ const Workers = ({ navigation }) => {
           </View>
         ) : (
           <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() =>
+                  dispatch(
+                    getAllWorkersAction(token, selectedProject?.projectId, 0)
+                  )
+                }
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
             data={workersList}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
@@ -531,18 +543,6 @@ const Workers = ({ navigation }) => {
           </View>
           <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
             <FlatList
-              refreshControl={
-                <RefreshControl
-                  refreshing={isLoading}
-                  onRefresh={() =>
-                    dispatch(
-                      getAllWorkersAction(token, selectedProject?.projectId)
-                    )
-                  }
-                  tintColor={Colors.Primary}
-                  colors={[Colors.Purple, Colors.Primary]}
-                />
-              }
               data={filteredDataSource}
               renderItem={({ item }) => (
                 <Pressable

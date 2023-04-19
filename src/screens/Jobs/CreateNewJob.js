@@ -26,6 +26,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import CheckBox from "@react-native-community/checkbox";
 import { createJobAction, createJobReducer } from "../../redux/slices/jobSlice";
 import { useDispatch, useSelector } from "react-redux";
+import Toast from "react-native-toast-message";
 import {
   projectsListSimpleReducer,
   getAllProjectsSimpleAction,
@@ -48,13 +49,14 @@ LogBox.ignoreAllLogs();
 
 const CreateNewJob = ({ navigation }) => {
   const [selectedProject, setSelectedProject] = useState(null);
-  const [requiredWorkers, setRequiredWorkers] = useState("");
-  const [dailyWage, setDailyWage] = useState("");
-  const [jobDescription, setJobDescription] = useState("");
-  const [jobLocation, setJobLocation] = useState("");
-  const [manDay, setManDay] = useState("");
-  const [number, setNumber] = useState("");
+  const [requiredWorkers, setRequiredWorkers] = useState(null);
+  const [dailyWage, setDailyWage] = useState(null);
+  const [jobDescription, setJobDescription] = useState(null);
+  const [jobLocation, setJobLocation] = useState(null);
+  const [manDay, setManDay] = useState(null);
+  const [number, setNumber] = useState(null);
   const [date, setDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(null);
   const [openTime, setOpenTime] = useState(false);
@@ -90,7 +92,7 @@ const CreateNewJob = ({ navigation }) => {
           .then((response) => {
             const address = response.results[0].formatted_address;
             setJobLocation(address);
-            console.log("city: ", address);
+            // console.log("city: ", address);
           })
           .catch((e) => {
             console.log(e);
@@ -100,36 +102,134 @@ const CreateNewJob = ({ navigation }) => {
     getCurrentCity();
   }, [selectedProject]);
 
-
   const submitHandler = async () => {
     const formData = new FormData();
-    formData.append("contractorId", 1);
-    formData.append("startDate", moment(date).format("YYYY-MM-DD"));
-    formData.append("endDate", "");
-    formData.append("latitude", Number(projectData?.latitude));
-    formData.append("longitude", Number(projectData?.longitude));
-    formData.append("skillId", parseInt(skillValue, 10));
-    formData.append("skillLevel", 0);
-    formData.append("reportingTime", moment(time).format("hh:mm"));
-    formData.append("rating", 0);
-    formData.append("requiredWorkers", parseInt(requiredWorkers, 10));
-    formData.append("dailyWage", parseInt(dailyWage, 10));
-    formData.append("audio", "");
-    formData.append("video", "");
-    formData.append("projectId", parseInt(selectedProject, 10));
-    formData.append("description", jobDescription);
-    formData.append("contactNumber", number);
-    formData.append("manDays", manDay);
-    formData.append("isFood", toggleCheckBox);
-    formData.append("isAccomodation", toggleCheckBox2);
-    formData.append("skillTypeId", "Skilled");
-    formData.append("cityName", jobLocation);
+    if (!selectedProject) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please selected the project.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!requiredWorkers) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter required workers.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!selectedDate) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select the start date.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!manDay) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter man days.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!skillValue) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select skill.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!time) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select reporting time.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!dailyWage) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter daily wage.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!jobDescription) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter job description.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!number) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter contact number.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else {
+      formData.append("contractorId", 1);
+      formData.append("startDate", moment(date).format("YYYY-MM-DD"));
+      formData.append("endDate", "");
+      formData.append("latitude", Number(projectData?.latitude));
+      formData.append("longitude", Number(projectData?.longitude));
+      formData.append("skillId", parseInt(skillValue, 10));
+      formData.append("skillLevel", 0);
+      formData.append("reportingTime", moment(time).format("hh:mm"));
+      formData.append("rating", 0);
+      formData.append("requiredWorkers", parseInt(requiredWorkers, 10));
+      formData.append("dailyWage", parseInt(dailyWage, 10));
+      formData.append("audio", "");
+      formData.append("video", "");
+      formData.append("projectId", parseInt(selectedProject, 10));
+      formData.append("description", jobDescription);
+      formData.append("contactNumber", number);
+      formData.append("manDays", manDay);
+      formData.append("isFood", toggleCheckBox);
+      formData.append("isAccomodation", toggleCheckBox2);
+      formData.append("skillTypeId", "Skilled");
+      formData.append("cityName", jobLocation);
 
-    const response = await dispatch(createJobAction(token, formData));
-    if (response?.status === 200) {
-      navigation.goBack();
-	  dispatch(getAllJobsAction(token));
-
+      const response = await dispatch(createJobAction(token, formData));
+      if (response?.status === 200) {
+        navigation.goBack();
+        Toast.show({
+          type: "info",
+          text1: "Job Created",
+          text2: "Job is created successfully.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 4000,
+        });
+        dispatch(getAllJobsAction(token, 0));
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Job Not Created",
+          text2: "Something want wrong! Try again.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 4000,
+        });
+      }
     }
   };
   // contractorId: 1
@@ -508,6 +608,7 @@ const CreateNewJob = ({ navigation }) => {
           onConfirm={(date) => {
             setOpen(false);
             setDate(date);
+            setSelectedDate(date);
           }}
           onCancel={() => {
             setOpen(false);

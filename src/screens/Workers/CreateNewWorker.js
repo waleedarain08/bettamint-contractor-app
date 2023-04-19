@@ -34,6 +34,7 @@ import {
 } from "../../redux/slices/workerSlice";
 import { assetsUrl } from "../../utils/api_constants";
 import { authToken } from "../../redux/slices/authSlice";
+import Toast from "react-native-toast-message";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -116,6 +117,17 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("Gender", genderValue);
 
     const response = await dispatch(updateWorkerAction(token,formData, aadharCardForm, profilePicForm));
+    if (response.status === 200) {
+      navigation.goBack();
+      Toast.show({
+        type: "info",
+        text1: "Worker Created",
+        text2: "Worker is created successfully.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    }
     console.log('worker res',response)
   };
 
@@ -157,6 +169,7 @@ const CreateNewWorker = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
+      <Toast />
       <View style={styles.header} />
       <ScrollView style={styles.graph}>
         <View

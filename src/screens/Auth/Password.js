@@ -17,6 +17,7 @@ import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 import { useDispatch, useSelector } from "react-redux";
 import { authToken, loading, userLoginAction } from "../../redux/slices/authSlice";
+import Toast from "react-native-toast-message";
 
 const Password = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
@@ -30,11 +31,20 @@ const Password = ({ navigation, route }) => {
     if (res?.status === 200) {
       navigation.navigate("Main");
     } else {
-      alert("Error");
+      // alert("Error");
+      Toast.show({
+        type: 'error',
+        text1: 'Error',
+        text2: "Incorrect username & password!",
+        topOffset: 10,
+        position: 'top',
+        visibilityTime: 3000,
+      });
     }
   };
   return (
     <View style={styles.container}>
+      <Toast />
       <View style={{ padding: 40 }}>
         <View>
           <Text style={styles.headingText}>Password</Text>
