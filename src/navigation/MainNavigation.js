@@ -450,12 +450,13 @@ const AttendanceNavigator = ({ navigation }) => {
 									</Text>
 								</View>
 							</Pressable>
-							<Pressable
+							{/* <Pressable
 								style={{
 									backgroundColor: Colors.Purple,
 									paddingVertical: 8,
 									borderRadius: 14,
 									paddingHorizontal: 7,
+									marginLeft: 5
 								}}
 							>
 								<View
@@ -482,6 +483,7 @@ const AttendanceNavigator = ({ navigation }) => {
 									paddingVertical: 8,
 									borderRadius: 14,
 									paddingHorizontal: 7,
+									marginLeft: 5
 								}}
 							>
 								<View
@@ -501,7 +503,7 @@ const AttendanceNavigator = ({ navigation }) => {
 										DLR
 									</Text>
 								</View>
-							</Pressable>
+							</Pressable> */}
 							<Pressable style={{ marginLeft: 5 }}>
 								<Image
 									source={require("../assets/icons/download.png")}

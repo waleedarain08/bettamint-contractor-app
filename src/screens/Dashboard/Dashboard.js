@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -19,6 +19,9 @@ import BarChart from "../../assets/images/barchart.png";
 import LineChart from "../../assets/images/linechart.png";
 import { useDrawerProgress } from "@react-navigation/drawer";
 import Animated from "react-native-reanimated";
+import { countsReducer, getCountsData } from "../../redux/slices/userSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { authToken } from "../../redux/slices/authSlice";
 
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
@@ -54,6 +57,7 @@ const DATA = [
     stat: "Daily Stats*",
   },
 ];
+
 const Item = ({ item }) => (
   <View style={styles.item}>
     <Text style={styles.title}>{item.title}</Text>
@@ -74,7 +78,13 @@ const Item = ({ item }) => (
 );
 const Dashboard = ({ navigation }) => {
   const progress = useDrawerProgress();
-
+  const dispatch = useDispatch();
+  const token = useSelector(authToken);
+  const counts = useSelector(countsReducer);
+  console.log("COUNTS", counts);
+  useEffect(() => {
+    dispatch(getCountsData(token));
+  }, []);
   const scale = Animated.interpolateNode(progress.value, {
     inputRange: [0, 1],
     outputRange: [1, 0.8],
@@ -136,12 +146,94 @@ const Dashboard = ({ navigation }) => {
         </View>
       </View>
       <ScrollView>
-        <FlatList
+        {/* <FlatList
           data={DATA}
           renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.id}
           numColumns={2}
-        />
+        /> */}
+        <View
+          style={{
+            width: "96%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={styles.item}>
+            <Text style={styles.title}>{"Total Project"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={require("../../assets/images/totalprojects.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  resizeMode: "contain",
+                }}
+              />
+              <Spacer right={10} />
+              <Text style={styles.num}>{counts?.totalProjects}</Text>
+            </View>
+            {/* <Text style={styles.stat}>{item.stat}</Text> */}
+          </View>
+          <View style={styles.item}>
+            <Text style={styles.title}>{"Active Project"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={require("../../assets/images/totalprojects.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  resizeMode: "contain",
+                }}
+              />
+              <Spacer right={10} />
+              <Text style={styles.num}>{counts?.activeProjects}</Text>
+            </View>
+            {/* <Text style={styles.stat}>{item.stat}</Text> */}
+          </View>
+        </View>
+        <View
+          style={{
+            width: "96%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View style={styles.item}>
+            <Text style={styles.title}>{"Total Workers"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={require("../../assets/images/totalprojects.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  resizeMode: "contain",
+                }}
+              />
+              <Spacer right={10} />
+              <Text style={styles.num}>{counts?.totalWorkers}</Text>
+            </View>
+            {/* <Text style={styles.stat}>{item.stat}</Text> */}
+          </View>
+          <View style={styles.item}>
+            <Text style={styles.title}>{"Active Workers"}</Text>
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Image
+                source={require("../../assets/images/totalprojects.png")}
+                style={{
+                  width: 25,
+                  height: 25,
+                  resizeMode: "contain",
+                }}
+              />
+              <Spacer right={10} />
+              <Text style={styles.num}>{counts?.activeWorkers}</Text>
+            </View>
+            {/* <Text style={styles.stat}>{item.stat}</Text> */}
+          </View>
+        </View>
         <Spacer bottom={10} />
         <View style={styles.scrollGraph}>
           <Image
@@ -159,6 +251,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
+    width: '100%'
   },
   header: {
     backgroundColor: Colors.Primary,
@@ -220,7 +313,8 @@ const styles = StyleSheet.create({
     width: "45%",
   },
   item: {
-    flex: 1,
+    // flex: 1,
+    width: '43%',
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 15,

@@ -27,7 +27,7 @@ const Login = ({ navigation }) => {
 			Toast.show({
 				type: "error",
 				text1: "Error",
-				text2: "Please enter your email/phone number!",
+				text2: "Please enter your email address!",
 				topOffset: 10,
 				position: "top",
 				visibilityTime: 3000,
@@ -41,7 +41,7 @@ const Login = ({ navigation }) => {
 			<View style={{ padding: 40 }}>
 				<View>
 					<Text style={styles.headingText}>Get Started</Text>
-					<Text style={styles.text}>Enter you Email/Phone Number</Text>
+					<Text style={styles.text}>Enter you Email Address</Text>
 					{/* <Switch
             value={contactType === "phone"}
             onValueChange={handleToggleSwitch}
