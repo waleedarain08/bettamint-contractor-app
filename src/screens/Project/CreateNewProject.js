@@ -78,40 +78,31 @@ const CreateNewProject = ({ navigation }) => {
     },
   ];
 
-  mapRef?.current?.animateToRegion(
-    {
-      latitude: geoFancingArray[0]?.latitude || 20.5937,
-      longitude: geoFancingArray[0]?.longitude || 78.9629,
-      latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
-      longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
-    },
-    1000
-  );
-//   const requestLocationPermission = async () => {
-//     try {
-//       const granted = await PermissionsAndroid.request(
-//         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-//         {
-//           title: "Location Permission",
-//           message: "This app needs to access your location.",
-//           buttonNeutral: "Ask Me Later",
-//           buttonNegative: "Cancel",
-//           buttonPositive: "OK",
-//         }
-//       );
-//       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-//         console.log("Location permission granted");
-//       } else {
-//         console.log("Location permission denied");
-//       }
-//     } catch (err) {
-//       console.warn(err);
-//     }
-//   };
+  //   const requestLocationPermission = async () => {
+  //     try {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: "Location Permission",
+  //           message: "This app needs to access your location.",
+  //           buttonNeutral: "Ask Me Later",
+  //           buttonNegative: "Cancel",
+  //           buttonPositive: "OK",
+  //         }
+  //       );
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //         console.log("Location permission granted");
+  //       } else {
+  //         console.log("Location permission denied");
+  //       }
+  //     } catch (err) {
+  //       console.warn(err);
+  //     }
+  //   };
 
-//   useEffect(() => {
-//     requestLocationPermission();
-//   }, []);
+  //   useEffect(() => {
+  //     requestLocationPermission();
+  //   }, []);
 
   // useEffect(() => {
   // 	Geolocation.getCurrentPosition(
@@ -239,7 +230,17 @@ const CreateNewProject = ({ navigation }) => {
       </Modal>
     );
   };
-
+  setTimeout(() => {
+    mapRef?.current?.animateToRegion(
+      {
+        latitude: geoFancingArray[0]?.latitude || 20.5937,
+        longitude: geoFancingArray[0]?.longitude || 78.9629,
+        latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
+        longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
+      },
+      2000
+    );
+  }, 1000);
   return (
     <View style={styles.container}>
       {/* <Toast /> */}
@@ -340,11 +341,11 @@ const CreateNewProject = ({ navigation }) => {
             placeholder="Enter Project Name"
           />
         </View>
-        <Pressable
-          onPress={() => {
-            // console.log("test");
-            setOpenMapModal(true);
-          }}
+        <View
+          // onPress={() => {
+          // console.log("test");
+          // setOpenMapModal(true);
+          // }}
           style={{
             flex: 1,
             justifyContent: "center",
@@ -384,9 +385,39 @@ const CreateNewProject = ({ navigation }) => {
             )}
           </MapView>
           {/* )} */}
-        </Pressable>
+          <View>
+            <Pressable
+              onPress={() => {
+                // console.log("test");
+                setOpenMapModal(true);
+              }}
+              style={{
+                backgroundColor: Colors.Black,
+                padding: 5,
+                paddingHorizontal: 10,
+                borderRadius: 10,
+                position: "absolute",
+                bottom: 140,
+                right: 25,
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    color: Colors.White,
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 14,
+                    textAlign: "center",
+                  }}
+                >
+                  Draw Boundaries
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
       </View>
-      <Spacer top={-20} />
+      <Spacer top={-35} />
       <View
         style={{
           flexDirection: "row",

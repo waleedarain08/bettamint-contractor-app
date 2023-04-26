@@ -61,6 +61,7 @@ const CreateNewJob = ({ navigation }) => {
 	const [time, setTime] = useState(null);
 	const [openTime, setOpenTime] = useState(false);
 	const [skillValue, setSkillValue] = useState(null);
+	const [skillLevelValue, setSkillLevelValue] = useState(null);
 	const [projectData, setProjectData] = useState(null);
 	const [toggleCheckBox, setToggleCheckBox] = useState(false);
 	const [toggleCheckBox2, setToggleCheckBox2] = useState(false);
@@ -72,6 +73,12 @@ const CreateNewJob = ({ navigation }) => {
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction(token));
 	}, [selectedProject]);
+
+	const skillLevel = [
+		{label: 'Supervisor', value: 'Supervisor'},
+		{label: 'Skilled', value: 'Skilled'},
+		{label: 'Helper', value: 'Helper'},
+	]
 
 	useEffect(() => {
 		dispatch(getSkillsAction(token));
@@ -108,7 +115,7 @@ const CreateNewJob = ({ navigation }) => {
 			Toast.show({
 				type: "error",
 				text1: "Error",
-				text2: "Please selected the project.",
+				text2: "Please select the project.",
 				topOffset: 10,
 				position: "top",
 				visibilityTime: 4000,
@@ -118,15 +125,6 @@ const CreateNewJob = ({ navigation }) => {
 				type: "error",
 				text1: "Error",
 				text2: "Please enter required workers.",
-				topOffset: 10,
-				position: "top",
-				visibilityTime: 4000,
-			});
-		} else if (!selectedDate) {
-			Toast.show({
-				type: "error",
-				text1: "Error",
-				text2: "Please select the start date.",
 				topOffset: 10,
 				position: "top",
 				visibilityTime: 4000,
@@ -145,6 +143,15 @@ const CreateNewJob = ({ navigation }) => {
 				type: "error",
 				text1: "Error",
 				text2: "Please select skill.",
+				topOffset: 10,
+				position: "top",
+				visibilityTime: 4000,
+			});
+		} else if (!skillLevelValue) {
+			Toast.show({
+				type: "error",
+				text1: "Error",
+				text2: "Please select skill level.",
 				topOffset: 10,
 				position: "top",
 				visibilityTime: 4000,
@@ -205,7 +212,7 @@ const CreateNewJob = ({ navigation }) => {
 			formData.append("manDays", manDay);
 			formData.append("isFood", toggleCheckBox);
 			formData.append("isAccomodation", toggleCheckBox2);
-			formData.append("skillTypeId", "Skilled");
+			formData.append("skillTypeId", skillLevelValue);
 			formData.append("cityName", jobLocation);
 
 			const response = await dispatch(createJobAction(token, formData));
@@ -385,6 +392,41 @@ const CreateNewJob = ({ navigation }) => {
 						/>
 					</View>
 				</View>
+				<View style={{ padding: 10 }}>
+					<Text style={styles.title}>Skill Level</Text>
+					{/* <View style={styles.inputField}>
+            <TextInput
+              style={styles.placeholderText}
+              placeholder="Select skill set"
+              editable={false}
+            />
+          </View> */}
+					<View style={{ marginTop: 7 }}>
+						<Dropdown
+							style={styles.dropdown}
+							placeholderStyle={styles.placeholderStyle}
+							selectedTextStyle={styles.selectedTextStyle}
+							itemTextStyle={{
+								fontFamily: "Lexend-Regular",
+								fontSize: 13,
+								color: Colors.FormText,
+							}}
+							iconStyle={styles.iconStyle}
+							data={skillLevel}
+							maxHeight={300}
+							labelField="label"
+							valueField="value"
+							placeholder={"Select Level"}
+							value={skillLevelValue}
+							// onFocus={() => setIsFocus(true)}
+							// onBlur={() => setIsFocus(false)}
+							onChange={(item) => {
+								setSkillLevelValue(item.value);
+								// setIsFocus(false);
+							}}
+						/>
+					</View>
+				</View>
 				<View
 					style={{
 						flexDirection: "row",
@@ -418,8 +460,8 @@ const CreateNewJob = ({ navigation }) => {
 							/>
 							<ClockIcon
 								onPress={() => setOpenTime(true)}
-								color={Colors.FormText}
-								size={25}
+								color={Colors.FormBorder}
+								size={20}
 							/>
 						</View>
 					</View>
@@ -545,7 +587,7 @@ const CreateNewJob = ({ navigation }) => {
 						</Text>
 					</View>
 				</View>
-				<Text
+				{/* <Text
 					style={{
 						paddingLeft: 14,
 						fontFamily: "Lexend-Medium",
@@ -555,8 +597,8 @@ const CreateNewJob = ({ navigation }) => {
 					}}
 				>
 					Job Instructions
-				</Text>
-				<View style={styles.uploadBox}>
+				</Text> */}
+				{/* <View style={styles.uploadBox}>
 					<View
 						style={{
 							justifyContent: "center",
@@ -571,7 +613,6 @@ const CreateNewJob = ({ navigation }) => {
 							elevation: 4,
 						}}
 					>
-						{/* <Picture size={40} color={Colors.LightGray} /> */}
 						<Image
 							source={require("../../assets/icons/video.png")}
 							style={{ width: 50, height: 44, marginVertical: 5 }}
@@ -592,14 +633,13 @@ const CreateNewJob = ({ navigation }) => {
 							elevation: 4,
 						}}
 					>
-						{/* <Picture size={40} color={Colors.LightGray} /> */}
 						<Image
 							source={require("../../assets/icons/audio.png")}
 							style={{ width: 50, height: 44, marginVertical: 5 }}
 						/>
 						<Text style={styles.imgText}>Upload Audio File</Text>
 					</View>
-				</View>
+				</View> */}
 				<DatePicker
 					modal
 					mode="date"

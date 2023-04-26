@@ -88,7 +88,7 @@ export const getCountsData = (token) => async (dispatch) => {
       },
     });
     if (response.status === 200) {
-      console.log("Dashboard countttt", response.data);
+      // console.log("Dashboard countttt", response.data);
       dispatch(gettingCountDataSuccess(response.data));
     }
     return response;

@@ -81,7 +81,7 @@ const Dashboard = ({ navigation }) => {
   const dispatch = useDispatch();
   const token = useSelector(authToken);
   const counts = useSelector(countsReducer);
-  console.log("COUNTS", counts);
+  // console.log("COUNTS", counts);
   useEffect(() => {
     dispatch(getCountsData(token));
   }, []);

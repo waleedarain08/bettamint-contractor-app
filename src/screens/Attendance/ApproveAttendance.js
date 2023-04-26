@@ -35,12 +35,18 @@ import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
+import { Searchbar } from "react-native-paper";
 LogBox.ignoreAllLogs();
 const ApproveAttendance = ({ navigation, route }) => {
   const [selectedAttendance, setSelectedAttendance] = useState(null);
   const [openApproveModal, setOpenApproveModal] = useState(false);
   const [approveStatus, setApproveStatus] = useState(null);
   const [filterAttendance, setFilterAttendance] = useState(null);
+  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
+  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
+  const [searchAttendance, setSearchAttendance] = useState("");
+
   const token = useSelector(authToken);
   const isLoading = useSelector(loadingAttendance);
   const dispatch = useDispatch();
@@ -70,7 +76,130 @@ const ApproveAttendance = ({ navigation, route }) => {
   ];
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
-
+  useEffect(() => {
+    setFilteredDataAttSource(attendance);
+    setMasterDataAttSource(attendance);
+  }, [attendance]);
+  const searchFilterAttendanceFunction = (text) => {
+    // Check if searched text is not blank
+    console.log("TEXT", text);
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataAttSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.workerName
+          ? item.workerName.toUpperCase()
+          : "".toUpperCase();
+        console.log(itemData);
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataAttSource(newData);
+      setSearchAttendance(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataAttSource(masterDataAttSource);
+      setSearchAttendance(text);
+    }
+  };
+  const renderSearchModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openSearchUserModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenSearchUserModal(!openSearchUserModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Find by name
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchUserModal(!openSearchUserModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterAttendanceFunction(text)}
+                value={searchAttendance}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
   const renderApproveModal = () => (
     <Modal
       animationType="slide"
@@ -400,6 +529,7 @@ const ApproveAttendance = ({ navigation, route }) => {
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <TouchableOpacity
+            onPress={() => setOpenSearchUserModal(true)}
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -451,7 +581,13 @@ const ApproveAttendance = ({ navigation, route }) => {
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
-          data={!filterAttendance ? attendance : filterAttendance}
+          data={
+            filteredDataAttSource.length !== 0
+              ? filteredDataAttSource
+              : !filterAttendance
+              ? attendance
+              : filterAttendance
+          }
           renderItem={({ item, index }) => <Item item={item} index={index} />}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
@@ -461,6 +597,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       </View>
       {/* </ScrollView> */}
       {renderApproveModal()}
+      {renderSearchModal()}
     </View>
   );
 };
