@@ -436,7 +436,7 @@ const Jobs = ({ navigation }) => {
 							setOpenSearchModal(true);
 						}}
 					>
-						<Text style={styles.selectText}>Select a Project Everywhere</Text>
+						<Text style={styles.selectText}>Select a Project</Text>
 						<Text
 							style={[
 								styles.selectText,

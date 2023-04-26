@@ -375,7 +375,7 @@ const Workers = ({ navigation }) => {
 						<Building size={20} color={Colors.LightGray} />
 					</View>
 					<View>
-						<Text style={styles.selectText}>Select a Project Everywhere</Text>
+						<Text style={styles.selectText}>Select a Project</Text>
 						<Text
 							style={[
 								styles.selectText,

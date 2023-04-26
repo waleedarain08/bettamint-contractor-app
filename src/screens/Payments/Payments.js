@@ -508,7 +508,7 @@ const Payments = ({ navigation }) => {
 			>
 				<View
 					style={{
-						width: "35%",
+						width: "30%",
 						flexDirection: "row",
 						alignItems: "center",
 					}}
@@ -564,8 +564,8 @@ const Payments = ({ navigation }) => {
 						{item?.workerName}
 					</Text>
 				</View>
-				<View style={{ width: "15%" }}>
-					<Text style={[styles.flatListText, { left: 5 }]}>
+				<View style={{ width: "20%" }}>
+					<Text style={[styles.flatListText, { left: 15 }]}>
 						{item?.workerTypeId}
 					</Text>
 				</View>
@@ -615,7 +615,7 @@ const Payments = ({ navigation }) => {
 				>
 					<View
 						style={{
-							width: "35%",
+							width: "30%",
 							flexDirection: "row",
 							alignItems: "center",
 						}}
@@ -630,8 +630,10 @@ const Payments = ({ navigation }) => {
 							Name
 						</Text>
 					</View>
-					<View style={{ width: "15%", alignItems: "center" }}>
-						<Text style={styles.flatListTextHeader}>Status</Text>
+					<View style={{ width: "20%", alignItems: "center" }}>
+						<Text style={[styles.flatListTextHeader, { left: 15 }]}>
+							Status
+						</Text>
 					</View>
 					<View style={{ width: "15%", alignItems: "center" }}>
 						<Text style={styles.flatListTextHeader}>Due Amount</Text>
@@ -678,7 +680,7 @@ const Payments = ({ navigation }) => {
 						<Building size={20} color={Colors.LightGray} />
 					</View>
 					<View>
-						<Text style={styles.selectText}>Select a Project Everywhere</Text>
+						<Text style={styles.selectText}>Select a Project</Text>
 						<Text
 							style={[
 								styles.selectText,

@@ -564,7 +564,7 @@ const AttendanceNavigator = ({ navigation }) => {
 								// marginHorizontal: 13,
 							}}
 						>
-							Approve Attendance
+							Today's Muster Roll
 						</Text>
 					),
 					headerRight: () => (

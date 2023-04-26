@@ -54,7 +54,6 @@ const Attendance = ({ navigation }) => {
 	const [selectedSkills, setSelectedSkills] = useState(null);
 	const [selectedContractor, setSelectedContractor] = useState(null);
 	const [labourContractors, setLabourContractors] = useState(null);
-
 	const dispatch = useDispatch();
 
 	const attendanceList = useSelector(attendanceListReducer);
@@ -125,7 +124,7 @@ const Attendance = ({ navigation }) => {
 				visible={openFilterModal}
 				onRequestClose={() => {
 					// Alert.alert("Modal has been closed.");
-					setOpenFilterModal(!openFilterModal);
+					setOpenFilterModal(openFilterModal);
 				}}
 			>
 				<View
@@ -366,7 +365,9 @@ const Attendance = ({ navigation }) => {
 				<TouchableOpacity
 					onPress={() => {
 						navigation.navigate("AttendanceMusterCard");
-						dispatch(selectAttendanceAction(item));
+						setTimeout(() => {
+							dispatch(selectAttendanceAction(item));
+						}, 0);
 					}}
 					style={{
 						backgroundColor: "#ECE5FC",
@@ -454,7 +455,7 @@ const Attendance = ({ navigation }) => {
 						<Building size={20} color={Colors.LightGray} />
 					</View>
 					<View>
-						<Text style={styles.selectText}>Select a Project Everywhere</Text>
+						<Text style={styles.selectText}>Select a Project</Text>
 						<Text
 							style={[
 								styles.selectText,
