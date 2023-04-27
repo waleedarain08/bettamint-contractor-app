@@ -43,7 +43,7 @@ const WorkerDetails = ({ navigation, route }) => {
 	useEffect(() => {
 		setTimeout(() => {
 			dispatch(selectWorkerAction(worker));
-		}, 1000);
+		}, 500);
 	}, [worker]);
 
 	return (
@@ -131,7 +131,21 @@ const WorkerDetails = ({ navigation, route }) => {
 										Skill Level
 									</Text>
 									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
-										-----
+										{worker?.workerSkills[0]?.skillTypeId}
+									</Text>
+								</View>
+								<View
+									style={{
+										borderBottomWidth: 1,
+										borderBottomColor: Colors.WhiteGray,
+										padding: 10,
+									}}
+								>
+									<Text style={[styles.modalText, { color: Colors.Gray }]}>
+										Skill Set
+									</Text>
+									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
+										{worker?.workerSkills[0]?.skill?.name}
 									</Text>
 								</View>
 								<View

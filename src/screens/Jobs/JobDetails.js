@@ -108,7 +108,7 @@ const JobDetails = ({ navigation }) => {
 	useEffect(() => {
 		setTimeout(() => {
 			dispatch(selectedJobAction(Job));
-		}, 1000);
+		}, 500);
 	}, [Job]);
 
 	// console.log("job", Job);

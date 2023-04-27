@@ -86,7 +86,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
 					selectedAttendance?.jobId
 				)
 			);
-		}, 1000);
+		}, 500);
 	}, [selectedAttendance]);
 
 	// useEffect(() => {
@@ -515,7 +515,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
 												selectedAttendance?.jobId
 											)
 										);
-									}, 1000);
+									}, 500);
 								}}
 								tintColor={Colors.Primary}
 								colors={[Colors.Purple, Colors.Primary]}
