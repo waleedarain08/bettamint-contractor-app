@@ -28,7 +28,10 @@ import CheckBox from "@react-native-community/checkbox";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { useSelector, useDispatch } from "react-redux";
-import { selectedJobReducer } from "../../redux/slices/jobSlice";
+import {
+	selectedJobReducer,
+	selectedJobAction,
+} from "../../redux/slices/jobSlice";
 import moment from "moment";
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
@@ -41,6 +44,7 @@ const JobDetails = ({ navigation }) => {
 		{ label: "Apple", value: "apple" },
 		// { label: "Banana", value: "banana" },
 	]);
+	const dispatch = useDispatch();
 	const jobOBJ = {
 		activeWorkers: 0,
 		cityName: "2WVX+C5H, Sanghar, Sindh, Pakistan",
@@ -99,8 +103,15 @@ const JobDetails = ({ navigation }) => {
 	};
 	const [toggleCheckBox, setToggleCheckBox] = useState(false);
 	const [toggleCheckBox2, setToggleCheckBox2] = useState(false);
+
 	const Job = useSelector(selectedJobReducer);
-	console.log("job", Job);
+	useEffect(() => {
+		setTimeout(() => {
+			dispatch(selectedJobAction(Job));
+		}, 1000);
+	}, [Job]);
+
+	// console.log("job", Job);
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
