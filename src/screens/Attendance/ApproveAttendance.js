@@ -582,7 +582,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             />
           }
           data={
-            filteredDataAttSource.length !== 0
+            filteredDataAttSource?.length !== 0
               ? filteredDataAttSource
               : !filterAttendance
               ? attendance

@@ -491,12 +491,12 @@ const Attendance = ({ navigation }) => {
         <View style={{ width: "13%" }}>
           <Text style={styles.flatListText}>{item?.absentDays.length}</Text>
         </View>
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             navigation.navigate("AttendanceMusterCard");
-            setTimeout(() => {
-              dispatch(selectAttendanceAction(item));
-            }, 0);
+            // setTimeout(() => {
+            dispatch(selectAttendanceAction(item));
+            // }, 0);
           }}
           style={{
             backgroundColor: "#ECE5FC",
@@ -509,7 +509,7 @@ const Attendance = ({ navigation }) => {
           }}
         >
           <Text style={styles.smallButton}>View</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -717,7 +717,7 @@ const Attendance = ({ navigation }) => {
               />
             }
             data={
-              filteredDataAttSource.length !== 0
+              filteredDataAttSource?.length !== 0
                 ? filteredDataAttSource
                 : filteredAttendance
                 ? filteredAttendance

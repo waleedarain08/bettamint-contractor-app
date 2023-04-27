@@ -22,6 +22,8 @@ import Animated from "react-native-reanimated";
 import { countsReducer, getCountsData } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { authToken } from "../../redux/slices/authSlice";
+import { getSkillsAction } from "../../redux/slices/workerSlice";
+import { getAllProjectsSimpleAction } from "../../redux/slices/projectSlice";
 
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
@@ -82,6 +84,10 @@ const Dashboard = ({ navigation }) => {
   const token = useSelector(authToken);
   const counts = useSelector(countsReducer);
   // console.log("COUNTS", counts);
+  useEffect(() => {
+    dispatch(getSkillsAction(token));
+    dispatch(getAllProjectsSimpleAction(token));
+  }, []);
   useEffect(() => {
     dispatch(getCountsData(token));
   }, []);

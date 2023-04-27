@@ -624,7 +624,7 @@ const Workers = ({ navigation }) => {
               />
             }
             data={
-              filteredDataAttSource.length !== 0
+              filteredDataAttSource?.length !== 0
                 ? filteredDataAttSource
                 : workersList
             }

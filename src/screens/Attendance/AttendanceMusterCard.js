@@ -58,7 +58,9 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 	const attendanceMuster = useSelector(attendanceMusterReducer);
 	const token = useSelector(authToken);
 	const isLoading = useSelector(loadingAttendance);
+
 	const selectedAttendance = useSelector(selectedAttendanceData);
+	// const selectedAttendance = route?.params?.selectedAttendance;
 	// console.log("attendanceMuster", attendanceMuster);
 
 	const attendance = attendanceMuster?.attendance;
