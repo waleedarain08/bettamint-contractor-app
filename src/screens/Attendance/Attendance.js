@@ -25,6 +25,7 @@ import {
   saveProjectDataAction,
   selectAttendanceAction,
   loadingAttendance,
+  removeMusterData,
 } from "../../redux/slices/attendanceSlice";
 import {
   projectsListSimpleReducer,
@@ -86,6 +87,8 @@ const Attendance = ({ navigation }) => {
     dispatch(getSkillsAction(token));
     dispatch(getUsersAction(token));
     dispatch(getAllProjectsSimpleAction(token));
+    dispatch(selectAttendanceAction(null));
+    dispatch(removeMusterData());
   }, []);
 
   useEffect(() => {

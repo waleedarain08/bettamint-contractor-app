@@ -119,6 +119,9 @@ export const saveProjectDataAction = (data) => async (dispatch) => {
 export const selectAttendanceAction = (data) => async (dispatch) => {
   dispatch(setAttendance(data));
 };
+export const removeMusterData = () => async (dispatch) => {
+  dispatch(getAttendanceMusterSuccess(null));
+};
 
 export const getAllAttendanceAction =
   (token, projectId, contractorId) => async (dispatch) => {
