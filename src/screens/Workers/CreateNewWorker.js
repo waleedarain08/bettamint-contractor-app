@@ -62,7 +62,7 @@ const CreateNewWorker = ({ navigation }) => {
   const [initialFetch, setInitialFetch] = useState(true);
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
-  const token = useSelector(authToken)
+  const token = useSelector(authToken);
   // console.log(skillsList);
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
@@ -89,6 +89,7 @@ const CreateNewWorker = ({ navigation }) => {
   );
   useEffect(() => {
     if (worker) {
+      // console.log("WORKER", worker);
       setFullName(worker?.fullName);
       setGenderValue(worker?.gender);
       setSkillLevelValue(worker?.workerSkills[0]?.skillTypeId);
@@ -98,37 +99,42 @@ const CreateNewWorker = ({ navigation }) => {
       setBankAccountNumber(worker?.bankAccountNumber);
       setProfilePic(assetsUrl + selectedProfilePic[0]?.url);
       setAadharCard(assetsUrl + selectedAadharCard[0]?.url);
+      setIfscCode(worker?.ifscCode);
     }
   }, [worker]);
-  // console.log(typ skillValue)
+  console.log(skillLevelValue)
   const submitHandler = async () => {
     const formData = new FormData();
+    const workerId = worker ? worker?.workerId : 0;
+    const status = worker ? worker?.status : 'Init'
     formData.append("SkillId", parseInt(skillValue, 10));
     formData.append("SkillTypeId", skillLevelValue);
-    formData.append("WorkerId", 0);
+    formData.append("WorkerId", parseInt(workerId, 10));
     formData.append("FullName", fullName);
     formData.append("PhoneNumber", phoneNumber);
-    formData.append("Status", "Init");
+    formData.append("Status", status);
     formData.append("BankName", bankName);
     formData.append("BankAccountNumber", bankAccountNumber);
     formData.append("IFSCCode", ifscCode);
     formData.append("HealthCard", true);
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
-
-    const response = await dispatch(updateWorkerAction(token,formData, aadharCardForm, profilePicForm));
+    console.log('Form data', formData)
+    const response = await dispatch(
+      updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
+    );
     if (response.status === 200) {
       navigation.goBack();
       Toast.show({
         type: "info",
-        text1: "Worker Created",
-        text2: "Worker is created successfully.",
+        text1: worker ? "Worker Updated" : "Worker Created",
+        text2: worker ? "Worker is updated successfully." : "Worker is created successfully.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
       });
     }
-    console.log('worker res',response)
+    // console.log("worker res", response);
   };
 
   const handleImagePicker = async () => {

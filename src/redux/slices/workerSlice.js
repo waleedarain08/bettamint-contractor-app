@@ -139,11 +139,13 @@ export const updateWorkerAction =
           },
         }
       );
-
+      console.log("Respinse", response);
       if (response.status === 200) {
         dispatch(updateWorkerSuccess(response.data));
 
-        let workerId = response.data.workerId;
+        let workerId = selectedWorkerReducer
+          ? selectedWorkerReducer?.workerId
+          : response.data.workerId;
         // formData.append('panCard', panCard);
         [1, 2].map(async (item) => {
           if (item === 1 && adharCard) {
@@ -176,6 +178,7 @@ export const updateWorkerAction =
         return response;
       }
     } catch (e) {
+      console.log("worker error", e.response);
       dispatch(
         updateWorkerFailure("Something went wrong while getting users!")
       );
