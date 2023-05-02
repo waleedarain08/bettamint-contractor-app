@@ -460,7 +460,7 @@ const ApproveAttendance = ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.workerTypeId === "Online")
+                filteredDataAttSource?.filter((ele) => ele.workerTypeId === "Online")
               );
             }}
             style={{
@@ -471,13 +471,13 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Online-${
-              attendance?.filter((ele) => ele.workerTypeId === "Online")?.length
+              filteredDataAttSource?.filter((ele) => ele.workerTypeId === "Online")?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.workerTypeId === "Offline")
+                filteredDataAttSource?.filter((ele) => ele.workerTypeId === "Offline")
               );
             }}
             style={{
@@ -488,14 +488,14 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Offline-${
-              attendance?.filter((ele) => ele.workerTypeId === "Offline")
+              filteredDataAttSource?.filter((ele) => ele.workerTypeId === "Offline")
                 ?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.isOnline === true)
+                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
               );
             }}
             style={{
@@ -506,13 +506,13 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Present-${
-              attendance?.filter((ele) => ele.isOnline === true)?.length
+              filteredDataAttSource?.filter((ele) => ele.isOnline === true)?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.isOnline === false)
+                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
               );
             }}
             style={{
@@ -523,7 +523,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Absent-${
-              attendance?.filter((ele) => ele.isOnline === false)?.length
+              filteredDataAttSource?.filter((ele) => ele.isOnline === false)?.length
             }`}</Text>
           </TouchableOpacity>
         </View>
@@ -557,7 +557,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           backgroundColor: Colors.White,
           alignItems: "center",
           margin: 10,
-          //   paddingHorizontal: 8,
           borderRadius: 10,
           shadowColor: "#000",
           shadowOffset: {
@@ -568,6 +567,7 @@ const ApproveAttendance = ({ navigation, route }) => {
           shadowRadius: 5,
           elevation: 4,
           width: "93%",
+          flex: 1,
         }}
       >
         <FlatList
@@ -582,10 +582,8 @@ const ApproveAttendance = ({ navigation, route }) => {
             />
           }
           data={
-            filteredDataAttSource?.length !== 0
+            !filterAttendance
               ? filteredDataAttSource
-              : !filterAttendance
-              ? attendance
               : filterAttendance
           }
           renderItem={({ item, index }) => <Item item={item} index={index} />}

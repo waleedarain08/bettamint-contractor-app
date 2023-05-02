@@ -18,6 +18,7 @@ import {
   Pressable,
   Modal,
   Animated,
+  ActivityIndicator,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -28,10 +29,13 @@ import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { useSelector, useDispatch } from "react-redux";
-import { updateProjectAction } from "../../redux/slices/projectSlice";
+import {
+  selectedProjectReducer,
+  updateProjectAction,
+} from "../../redux/slices/projectSlice";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps"; // remove PROVIDER_GOOGLE import if not using Google Maps
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { GOOGLE_API_KEY, mapUrl } from "../../utils/api_constants";
+import { GOOGLE_API_KEY, assetsUrl, mapUrl } from "../../utils/api_constants";
 import MapViewGestures from "@dev-event/react-native-maps-draw";
 import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
@@ -58,11 +62,12 @@ const CreateNewProject = ({ navigation }) => {
   const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
+  const [loader, setLoader] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
-
+  const project = useSelector(selectedProjectReducer);
   const geoArray = [
     {
       latitude: 26.04198067508024,
@@ -77,7 +82,15 @@ const CreateNewProject = ({ navigation }) => {
       longitude: 68.94873866672839,
     },
   ];
-
+  useEffect(() => {
+    if (project) {
+      console.log(project);
+      setProjectImageUri(assetsUrl + project?.url);
+      setProjectName(project?.name);
+      setValue(project?.projectTypeId);
+      setGeoFancingArray(project?.geofencingArray);
+    }
+  }, [project]);
   //   const requestLocationPermission = async () => {
   //     try {
   //       const granted = await PermissionsAndroid.request(
@@ -117,6 +130,7 @@ const CreateNewProject = ({ navigation }) => {
 
   const submitHandler = async () => {
     const formData = new FormData();
+    const projectId = project ? project?.projectId : 0;
     if (!value) {
       Toast.show({
         type: "error",
@@ -157,7 +171,7 @@ const CreateNewProject = ({ navigation }) => {
       formData.append("Name", projectName);
       formData.append("ProjectTypeId", value);
       formData.append("DeveloperId", 0);
-      formData.append("ProjectId", 0);
+      formData.append("ProjectId", projectId);
       formData.append("Image", {
         name: projectImage?.assets[0]?.fileName,
         type: projectImage?.assets[0]?.type,
@@ -226,7 +240,21 @@ const CreateNewProject = ({ navigation }) => {
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
+          onLoad={() => setLoader(false)}
         />
+        {loader && (
+          <ActivityIndicator
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              top: 0,
+            }}
+            size="large"
+            color={Colors.Primary}
+          />
+        )}
       </Modal>
     );
   };
@@ -339,6 +367,7 @@ const CreateNewProject = ({ navigation }) => {
             onChangeText={(e) => setProjectName(e)}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Project Name"
+            value={projectName}
           />
         </View>
         <View
