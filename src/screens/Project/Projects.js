@@ -28,6 +28,10 @@ import {
 	getAllProjectsSimpleAction,
 	loadingProject,
 	selectProjectAction,
+	getProjectsForMapping,
+	projectsForMappingReducer,
+	projectsForLabourReducer,
+	getProjectsForLabour,
 } from "../../redux/slices/projectSlice";
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
 import { authToken, userData } from "../../redux/slices/authSlice";
@@ -48,7 +52,11 @@ const Projects = ({ navigation }) => {
 	//! SELECTORS
 	const projectsList = useSelector(projectsListReducer);
 	const projectsListSimple = useSelector(projectsListSimpleReducer);
+	const projectForMapping = useSelector(projectsForMappingReducer);
+	const projectForLabour = useSelector(projectsForLabourReducer);
 	const isLoading = useSelector(loadingProject);
+	const userInfo = useSelector(userData)
+	// console.log('USER INFO', userInfo?.user?.leadTypeId)
 
 	//! LIFE CYCLE
 	useEffect(() => {
@@ -57,15 +65,20 @@ const Projects = ({ navigation }) => {
 
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction(token));
-	}, []);
-
+		if (userInfo?.user?.leadTypeId === 'LabourContractor') {
+			dispatch(getProjectsForMapping(token));
+		} else {
+			dispatch(getAllProjectsSimpleAction(token));
+		}
+	}, [userInfo]);
+	// console.log(selectedProject)
 	const onValueChange = (value) => {
 		setSelectedProject(value);
 	};
 	useEffect(() => {
-		setFilteredDataSource(projectsListSimple);
-		setMasterDataSource(projectsListSimple);
-	}, [projectsListSimple]);
+		setFilteredDataSource(projectForMapping);
+		setMasterDataSource(projectForMapping);
+	}, [projectForMapping]);
 	const searchFilterFunction = (text) => {
 		// Check if searched text is not blank
 		if (text) {
@@ -189,6 +202,87 @@ const Projects = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
+			{userInfo?.user?.leadTypeId === 'LabourContractor' ? (
+
+			<View style={styles.graph}>
+				<Pressable
+					onPress={() => {
+						setOpenSearchModal(true);
+					}}
+					style={{
+						flexDirection: "row",
+						// justifyContent: "space-between",
+						alignItems: "center",
+						width: "70%",
+					}}
+				>
+					<View
+						style={{
+							backgroundColor: "#F7F8F9",
+							borderRadius: 50,
+							width: 40,
+							height: 40,
+							justifyContent: "center",
+							alignItems: "center",
+						}}
+					>
+						<Building size={20} color={Colors.LightGray} />
+					</View>
+					<View>
+						<Text style={styles.selectText}>Select a Project</Text>
+						<Text
+							style={[
+								styles.selectText,
+								{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
+							]}
+						>
+							{selectedProject
+								? selectedProject?.name
+								: projectForMapping
+								? projectForMapping[0]?.name
+								: "Select a project"}
+						</Text>
+					</View>
+				</Pressable>
+				<View style={{ flexDirection: "row", width: "28%" }}>
+					<TouchableOpacity
+						onPress={() => {
+							dispatch(getProjectsForLabour(token, selectedProject.projectId))
+							setTimeout(() => {
+								dispatch(getAllProjectsAction(token));
+							}, 1000)
+						}}
+						style={{
+							backgroundColor: "#ECE5FC",
+							padding: 5,
+							margin: 5,
+							borderRadius: 3,
+							paddingHorizontal: 9,
+							paddingVertical: 7,
+							//   height: 35,
+							  width: "80%",
+							justifyContent: "center",
+							alignItems: "center",
+						}}
+					>
+						<Text style={styles.smallButton}>Submit</Text>
+					</TouchableOpacity>
+					{/* <TouchableOpacity
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							backgroundColor: "#ECE5FC",
+							padding: 5,
+							margin: 5,
+							borderRadius: 3,
+							paddingHorizontal: 7,
+						}}
+					>
+						<Search size={13} color={Colors.Secondary} />
+					</TouchableOpacity> */}
+				</View>
+			</View>
+			) : (
 			<View style={styles.graph}>
 				<Pressable
 					onPress={() => {
@@ -261,6 +355,8 @@ const Projects = ({ navigation }) => {
 					</TouchableOpacity>
 				</View>
 			</View>
+
+			)} 
 			<Text style={styles.linkText}>
 				Please type a Project Name here to link*
 			</Text>

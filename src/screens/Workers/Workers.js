@@ -31,6 +31,7 @@ import {
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { authToken } from "../../redux/slices/authSlice";
+import { getAllJobsAction } from "../../redux/slices/jobSlice";
 
 LogBox.ignoreAllLogs();
 const Workers = ({ navigation }) => {
@@ -57,8 +58,9 @@ const Workers = ({ navigation }) => {
   // console.log("------project", projectsListSimple)
   // console.log('worker list', workersList)
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
     dispatch(getUsersAction(token));
+    dispatch(getAllJobsAction(token, 0));
   }, []);
   useEffect(() => {
     setLabourContractors(

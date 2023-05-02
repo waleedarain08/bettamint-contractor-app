@@ -35,6 +35,7 @@ import {
 import { assetsUrl } from "../../utils/api_constants";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
+import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -60,13 +61,20 @@ const CreateNewWorker = ({ navigation }) => {
   const [workerId, setWorkerId] = useState(null);
   const [uploadType, setUploadType] = useState(null);
   const [initialFetch, setInitialFetch] = useState(true);
+  const [filterJobs, setFilterJob] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
+  const jobsList = useSelector(jobsListReducer);
   const token = useSelector(authToken);
-  // console.log(skillsList);
+  console.log(jobsList);
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
+    // dispatch(getAllJobsAction(token, 0));
   }, []);
+
   // useEffect(() => {
   //   dispatch(getSkillsAction());
   // }, []);
@@ -102,7 +110,7 @@ const CreateNewWorker = ({ navigation }) => {
       setIfscCode(worker?.ifscCode);
     }
   }, [worker]);
-  console.log(skillLevelValue)
+  // console.log(skillLevelValue)
   const submitHandler = async () => {
     const formData = new FormData();
     const workerId = worker ? worker?.workerId : 0;
@@ -110,6 +118,8 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("SkillId", parseInt(skillValue, 10));
     formData.append("SkillTypeId", skillLevelValue);
     formData.append("WorkerId", parseInt(workerId, 10));
+    formData.append("JobId", parseInt(selectedJob, 10));
+    formData.append("ProjectId", parseInt(selectedProject, 10));
     formData.append("FullName", fullName);
     formData.append("PhoneNumber", phoneNumber);
     formData.append("Status", status);
@@ -359,6 +369,80 @@ const CreateNewWorker = ({ navigation }) => {
               value={skillLevelValue}
               onChange={(item) => {
                 setSkillLevelValue(item.value);
+              }}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingBottom: 15,
+            // marginTop: openProject ? 30 : 0,
+          }}
+        >
+          <Text style={styles.title}>Select Project</Text>
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={projectsList.map((ele) => ({
+                label: ele.name,
+                value: ele.projectId
+              }))}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Project"}
+              value={selectedProject}
+              onChange={(item) => {
+                setSelectedProject(item.value);
+                setFilterJob(
+                  jobsList?.filter(
+                    (ele) => ele?.projectId === item?.value
+                  )
+                );
+              }}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingBottom: 15,
+            // marginTop: openProject ? 30 : 0,
+          }}
+        >
+          <Text style={styles.title}>Select Job</Text>
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={filterJobs?.map((ele) => ({
+                label: ele.jobName,
+                value: ele.jobId
+              }))}
+              // data={[]}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Job"}
+              value={selectedJob}
+              onChange={(item) => {
+                setSelectedJob(item.value);
               }}
             />
           </View>

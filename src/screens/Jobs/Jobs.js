@@ -636,13 +636,7 @@ const Jobs = ({ navigation }) => {
             colors={[Colors.Purple, Colors.Primary]}
           />
         }
-        data={
-          filteredDataAttSource?.length !== 0
-            ? filteredDataAttSource
-            : filterJobs
-            ? filterJobs
-            : jobsList
-        }
+        data={filterJobs ? filterJobs : filteredDataAttSource}
         renderItem={({ item }) => <Item item={item} />}
         keyExtractor={(item) => item.id}
       />
