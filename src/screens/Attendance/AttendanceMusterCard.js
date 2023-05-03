@@ -115,13 +115,12 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 					alignItems: "center",
 					justifyContent: "center",
 					backgroundColor: "rgba(0,0,0,0.2)",
-					//   width: '90%',
-					//   height: 200
 				}}
 			>
 				<View
 					style={{
 						width: "60%",
+
 						backgroundColor: Colors.White,
 						// height: 200,
 						borderRadius: 10,
@@ -278,7 +277,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 						padding: 5,
 						// margin: 5,
 						borderRadius: 2,
-						width: "18%",
+						width: "20%",
 						justifyContent: "center",
 						alignItems: "center",
 					}}
