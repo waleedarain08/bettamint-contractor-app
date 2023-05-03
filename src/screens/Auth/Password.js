@@ -66,6 +66,7 @@ const Password = ({ navigation, route }) => {
 							placeholderTextColor={Colors.Gray}
 							value={password}
 							onChangeText={(e) => setPassword(e)}
+							secureTextEntry={true}
 						/>
 					</View>
 					{/* <Text style={styles.forgotText}>Forgotten password?</Text> */}
