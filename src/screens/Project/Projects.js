@@ -324,8 +324,8 @@ const Projects = ({ navigation }) => {
 							</Text>
 						</View>
 					</Pressable>
-					<View style={{ flexDirection: "row", width: "28%" }}>
-						<TouchableOpacity
+					<View style={{ flexDirection: "row", width: "15%" }}>
+						{/* <TouchableOpacity
 							style={{
 								backgroundColor: "#ECE5FC",
 								padding: 5,
@@ -340,7 +340,7 @@ const Projects = ({ navigation }) => {
 							}}
 						>
 							<Text style={styles.smallButton}>Filter</Text>
-						</TouchableOpacity>
+						</TouchableOpacity> */}
 						<TouchableOpacity
 							style={{
 								justifyContent: "center",

@@ -119,7 +119,8 @@ const Users = ({ navigation }) => {
 		return (
 			<Modal
 				animationType="slide"
-				transparent={true}
+				// transparent={true}
+				presentationStyle="pageSheet"
 				visible={openFilterModal}
 				onRequestClose={() => {
 					// Alert.alert("Modal has been closed.");
@@ -130,15 +131,16 @@ const Users = ({ navigation }) => {
 					style={{
 						flex: 1,
 						alignItems: "center",
-						justifyContent: "center",
-						backgroundColor: "rgba(0,0,0,0.2)",
+						marginTop: 20
+						// justifyContent: "center",
+						// backgroundColor: "rgba(0,0,0,0.2)",
 						//   width: '90%',
 						//   height: 200
 					}}
 				>
 					<View
 						style={{
-							width: "80%",
+							width: "100%",
 							backgroundColor: Colors.White,
 							// height: 200,
 							borderRadius: 10,
@@ -207,7 +209,7 @@ const Users = ({ navigation }) => {
 								data={[
 									{ label: "Labour Contractor", value: "LabourContractor" },
 								]}
-								maxHeight={300}
+								maxHeight={800}
 								labelField="label"
 								valueField="value"
 								placeholder={"Select Contractor"}

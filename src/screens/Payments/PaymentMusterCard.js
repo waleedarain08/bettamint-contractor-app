@@ -101,7 +101,8 @@ const PaymentMusterCard = ({ navigation, route }) => {
 	const renderApproveModal = () => (
 		<Modal
 			animationType="slide"
-			transparent={true}
+			// transparent={true}
+			presentationStyle="pageSheet"
 			visible={openApproveModal}
 			onRequestClose={() => {
 				// Alert.alert("Modal has been closed.");
@@ -112,15 +113,16 @@ const PaymentMusterCard = ({ navigation, route }) => {
 				style={{
 					flex: 1,
 					alignItems: "center",
-					justifyContent: "center",
-					backgroundColor: "rgba(0,0,0,0.2)",
+					marginTop: 20
+					// justifyContent: "center",
+					// backgroundColor: "rgba(0,0,0,0.2)",
 					//   width: '90%',
 					//   height: 200
 				}}
 			>
 				<View
 					style={{
-						width: "60%",
+						width: "100%",
 						backgroundColor: Colors.White,
 						// height: 200,
 						borderRadius: 10,

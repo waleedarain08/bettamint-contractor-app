@@ -62,6 +62,7 @@ const CreateNewProject = ({ navigation }) => {
   const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
+  const [projectNameClick, setProjectNameClick] = useState(false);
   const [loader, setLoader] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
   const token = useSelector(authToken);
@@ -351,6 +352,11 @@ const CreateNewProject = ({ navigation }) => {
           }}
         >
           <Text style={styles.title}>Project Name</Text>
+          {/* <Pressable
+            onPress={() => {
+              setProjectNameClick(!projectNameClick);
+            }}
+          > */}
           <TextInput
             style={{
               fontFamily: "Lexend-Regular",
@@ -363,18 +369,17 @@ const CreateNewProject = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: "black",
             }}
             onChangeText={(e) => setProjectName(e)}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Project Name"
             value={projectName}
           />
+          {/* </Pressable> */}
         </View>
+        {/* <View style={{position: 'absolute'}}> */}
         <View
-          // onPress={() => {
-          // console.log("test");
-          // setOpenMapModal(true);
-          // }}
           style={{
             flex: 1,
             justifyContent: "center",
@@ -382,28 +387,12 @@ const CreateNewProject = ({ navigation }) => {
             height: 280,
           }}
         >
-          {/* <Pressable style={{ backgroundColor: "red" }}>
-            <Text>BUTTON</Text>
-          </Pressable> */}
-          {/* {currentLocation && ( */}
           <MapView
-            // initialRegion={{
-            // 	latitude: currentLocation.latitude,
-            // 	longitude: currentLocation.longitude,
-            // 	latitudeDelta: 0.0922,
-            // 	longitudeDelta: 0.0421,
-            // }}
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={styles.map}
             ref={mapRef}
             mapType="standard"
             loadingEnabled={true}
-            // region={{
-            //   latitude: geoFancingArray[0]?.latitude || 20.5937,
-            //   longitude: geoFancingArray[0]?.longitude || 78.9629,
-            //   latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
-            //   longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
-            // }}
           >
             {geoFancingArray?.length !== 0 && (
               <Polygon
@@ -413,11 +402,22 @@ const CreateNewProject = ({ navigation }) => {
               />
             )}
           </MapView>
-          {/* )} */}
-          <View>
+          <View
+            style={{
+              flex: 1,
+              // flexDirection: "row",
+              position: "absolute",
+              top: 10,
+              left: 20,
+              alignSelf: "center",
+              // justifyContent: "space-between",
+              backgroundColor: "transparent",
+              borderWidth: 0.5,
+              borderRadius: 20,
+            }}
+          >
             <Pressable
               onPress={() => {
-                // console.log("test");
                 setOpenMapModal(true);
               }}
               style={{
@@ -425,9 +425,6 @@ const CreateNewProject = ({ navigation }) => {
                 padding: 5,
                 paddingHorizontal: 10,
                 borderRadius: 10,
-                position: "absolute",
-                bottom: 140,
-                right: 25,
               }}
             >
               <View>
@@ -446,6 +443,7 @@ const CreateNewProject = ({ navigation }) => {
           </View>
         </View>
       </View>
+      {/* </View> */}
       <Spacer top={-35} />
       <View
         style={{

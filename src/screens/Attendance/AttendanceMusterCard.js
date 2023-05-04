@@ -102,7 +102,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 	const renderApproveModal = () => (
 		<Modal
 			animationType="slide"
-			transparent={true}
+			// transparent={true}
 			visible={openApproveModal}
 			onRequestClose={() => {
 				// Alert.alert("Modal has been closed.");
@@ -114,13 +114,14 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 				style={{
 					flex: 1,
 					alignItems: "center",
-					justifyContent: "center",
-					backgroundColor: "rgba(0,0,0,0.2)",
+					// justifyContent: "center",
+					backgroundColor: "rgba(0,0,0)",
+					marginTop: 20
 				}}
 			>
 				<View
 					style={{
-						width: "60%",
+						width: "100%",
 
 						backgroundColor: Colors.White,
 						// height: 200,
@@ -171,7 +172,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 							iconStyle={styles.iconStyle}
 							// data={data}
 							data={attendanceOptions}
-							maxHeight={300}
+							maxHeight={600}
 							labelField="label"
 							valueField="value"
 							placeholder={"Approve"}

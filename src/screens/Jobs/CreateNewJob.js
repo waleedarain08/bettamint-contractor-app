@@ -55,6 +55,7 @@ const CreateNewJob = ({ navigation }) => {
 	const [jobLocation, setJobLocation] = useState(null);
 	const [manDay, setManDay] = useState(null);
 	const [number, setNumber] = useState(null);
+	const [supervisorName, setSupervisorName] = useState(null);
 	const [date, setDate] = useState(new Date());
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [open, setOpen] = useState(false);
@@ -530,6 +531,16 @@ const CreateNewJob = ({ navigation }) => {
 						/>
 						<LocationIcon color={Colors.FormBorder} size={25} />
 					</View>
+				</View>
+				<View style={{ padding: 10 }}>
+					<Text style={styles.title}>Supervisor Name</Text>
+					<TextInput
+						style={styles.inputField}
+						placeholder="Enter Supervisor Name"
+						placeholderTextColor={Colors.FormText}
+						value={supervisorName}
+						onChangeText={(text) => setSupervisorName(text)}
+					/>
 				</View>
 				<View style={{ padding: 10 }}>
 					<Text style={styles.title}>Contact Number</Text>
