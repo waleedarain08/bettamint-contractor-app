@@ -421,3 +421,13 @@ export const BackCircleIcon = ({ color, size, style, onPress }) => (
 		onPress={onPress}
 	/>
 );
+export const PackageIcon = ({ color, size, style, onPress }) => (
+	<VectorIcon
+		name="box"
+		color={color}
+		size={size}
+		type="Feather"
+		style={style}
+		onPress={onPress}
+	/>
+);

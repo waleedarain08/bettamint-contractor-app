@@ -55,7 +55,7 @@ const Projects = ({ navigation }) => {
 	const projectForMapping = useSelector(projectsForMappingReducer);
 	const projectForLabour = useSelector(projectsForLabourReducer);
 	const isLoading = useSelector(loadingProject);
-	const userInfo = useSelector(userData)
+	const userInfo = useSelector(userData);
 	// console.log('USER INFO', userInfo?.user?.leadTypeId)
 
 	//! LIFE CYCLE
@@ -65,7 +65,7 @@ const Projects = ({ navigation }) => {
 
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction(token));
-		if (userInfo?.user?.leadTypeId === 'LabourContractor') {
+		if (userInfo?.user?.leadTypeId === "LabourContractor") {
 			dispatch(getProjectsForMapping(token));
 		} else {
 			dispatch(getAllProjectsSimpleAction(token));
@@ -202,72 +202,73 @@ const Projects = ({ navigation }) => {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header} />
-			{userInfo?.user?.leadTypeId === 'LabourContractor' ? (
-
-			<View style={styles.graph}>
-				<Pressable
-					onPress={() => {
-						setOpenSearchModal(true);
-					}}
-					style={{
-						flexDirection: "row",
-						// justifyContent: "space-between",
-						alignItems: "center",
-						width: "70%",
-					}}
-				>
-					<View
-						style={{
-							backgroundColor: "#F7F8F9",
-							borderRadius: 50,
-							width: 40,
-							height: 40,
-							justifyContent: "center",
-							alignItems: "center",
-						}}
-					>
-						<Building size={20} color={Colors.LightGray} />
-					</View>
-					<View>
-						<Text style={styles.selectText}>Select a Project</Text>
-						<Text
-							style={[
-								styles.selectText,
-								{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
-							]}
-						>
-							{selectedProject
-								? selectedProject?.name
-								: projectForMapping
-								? projectForMapping[0]?.name
-								: "Select a project"}
-						</Text>
-					</View>
-				</Pressable>
-				<View style={{ flexDirection: "row", width: "28%" }}>
-					<TouchableOpacity
+			{userInfo?.user?.leadTypeId === "LabourContractor" ? (
+				<View style={styles.graph}>
+					<Pressable
 						onPress={() => {
-							dispatch(getProjectsForLabour(token, selectedProject.projectId))
-							setTimeout(() => {
-								dispatch(getAllProjectsAction(token));
-							}, 1000)
+							setOpenSearchModal(true);
 						}}
 						style={{
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 3,
-							paddingHorizontal: 9,
-							paddingVertical: 7,
-							//   height: 35,
-							  width: "80%",
-							justifyContent: "center",
+							flexDirection: "row",
+							// justifyContent: "space-between",
 							alignItems: "center",
+							width: "70%",
 						}}
 					>
-						<Text style={styles.smallButton}>Submit</Text>
-					</TouchableOpacity>
-					{/* <TouchableOpacity
+						<View
+							style={{
+								backgroundColor: "#F7F8F9",
+								borderRadius: 50,
+								width: 40,
+								height: 40,
+								justifyContent: "center",
+								alignItems: "center",
+							}}
+						>
+							<Building size={20} color={Colors.LightGray} />
+						</View>
+						<View>
+							<Text style={styles.selectText}>Select a Project</Text>
+							<Text
+								style={[
+									styles.selectText,
+									{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
+								]}
+							>
+								{selectedProject
+									? selectedProject?.name
+									: projectForMapping
+									? projectForMapping[0]?.name
+									: "Select a project"}
+							</Text>
+						</View>
+					</Pressable>
+					<View style={{ flexDirection: "row", width: "28%" }}>
+						<TouchableOpacity
+							onPress={() => {
+								dispatch(
+									getProjectsForLabour(token, selectedProject.projectId)
+								);
+								setTimeout(() => {
+									dispatch(getAllProjectsAction(token));
+								}, 1000);
+							}}
+							style={{
+								backgroundColor: "#ECE5FC",
+								padding: 5,
+								margin: 5,
+								borderRadius: 3,
+								paddingHorizontal: 9,
+								paddingVertical: 7,
+								//   height: 35,
+								width: "80%",
+								justifyContent: "center",
+								alignItems: "center",
+							}}
+						>
+							<Text style={styles.smallButton}>Submit</Text>
+						</TouchableOpacity>
+						{/* <TouchableOpacity
 						style={{
 							justifyContent: "center",
 							alignItems: "center",
@@ -280,83 +281,82 @@ const Projects = ({ navigation }) => {
 					>
 						<Search size={13} color={Colors.Secondary} />
 					</TouchableOpacity> */}
+					</View>
 				</View>
-			</View>
 			) : (
-			<View style={styles.graph}>
-				<Pressable
-					onPress={() => {
-						setOpenSearchModal(true);
-					}}
-					style={{
-						flexDirection: "row",
-						// justifyContent: "space-between",
-						alignItems: "center",
-						width: "70%",
-					}}
-				>
-					<View
+				<View style={styles.graph}>
+					<Pressable
+						onPress={() => {
+							setOpenSearchModal(true);
+						}}
 						style={{
-							backgroundColor: "#F7F8F9",
-							borderRadius: 50,
-							width: 40,
-							height: 40,
-							justifyContent: "center",
+							flexDirection: "row",
+							// justifyContent: "space-between",
 							alignItems: "center",
+							width: "70%",
 						}}
 					>
-						<Building size={20} color={Colors.LightGray} />
-					</View>
-					<View>
-						<Text style={styles.selectText}>Select a Project</Text>
-						<Text
-							style={[
-								styles.selectText,
-								{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
-							]}
+						<View
+							style={{
+								backgroundColor: "#F7F8F9",
+								borderRadius: 50,
+								width: 40,
+								height: 40,
+								justifyContent: "center",
+								alignItems: "center",
+							}}
 						>
-							{selectedProject
-								? selectedProject?.name
-								: projectsListSimple
-								? projectsListSimple[0]?.name
-								: "Select a project"}
-						</Text>
+							<Building size={20} color={Colors.LightGray} />
+						</View>
+						<View>
+							<Text style={styles.selectText}>Select a Project</Text>
+							<Text
+								style={[
+									styles.selectText,
+									{ fontFamily: "Lexend-SemiBold", color: Colors.Black },
+								]}
+							>
+								{selectedProject
+									? selectedProject?.name
+									: projectsListSimple
+									? projectsListSimple[0]?.name
+									: "Select a project"}
+							</Text>
+						</View>
+					</Pressable>
+					<View style={{ flexDirection: "row", width: "28%" }}>
+						<TouchableOpacity
+							style={{
+								backgroundColor: "#ECE5FC",
+								padding: 5,
+								margin: 5,
+								borderRadius: 3,
+								paddingHorizontal: 9,
+								paddingVertical: 7,
+								//   height: 35,
+								//   width: "80%",
+								justifyContent: "center",
+								alignItems: "center",
+							}}
+						>
+							<Text style={styles.smallButton}>Filter</Text>
+						</TouchableOpacity>
+						<TouchableOpacity
+							style={{
+								justifyContent: "center",
+								alignItems: "center",
+								backgroundColor: "#ECE5FC",
+								padding: 5,
+								margin: 5,
+								borderRadius: 3,
+								paddingHorizontal: 7,
+							}}
+						>
+							<Search size={13} color={Colors.Secondary} />
+						</TouchableOpacity>
 					</View>
-				</Pressable>
-				<View style={{ flexDirection: "row", width: "28%" }}>
-					<TouchableOpacity
-						style={{
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 3,
-							paddingHorizontal: 9,
-							paddingVertical: 7,
-							//   height: 35,
-							//   width: "80%",
-							justifyContent: "center",
-							alignItems: "center",
-						}}
-					>
-						<Text style={styles.smallButton}>Filter</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={{
-							justifyContent: "center",
-							alignItems: "center",
-							backgroundColor: "#ECE5FC",
-							padding: 5,
-							margin: 5,
-							borderRadius: 3,
-							paddingHorizontal: 7,
-						}}
-					>
-						<Search size={13} color={Colors.Secondary} />
-					</TouchableOpacity>
 				</View>
-			</View>
-
-			)} 
+			)}
 			<Text style={styles.linkText}>
 				Please type a Project Name here to link*
 			</Text>
@@ -507,6 +507,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		// height: "10%",
 		backgroundColor: Colors.White,
+		opacity: 0.9,
 		marginTop: -170,
 		padding: 10,
 		margin: 15,

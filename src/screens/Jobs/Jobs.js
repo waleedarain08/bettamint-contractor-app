@@ -774,6 +774,7 @@ const styles = StyleSheet.create({
 		alignItems: "center",
 		// height: "10%",
 		backgroundColor: Colors.White,
+		opacity: 0.9,
 		marginTop: -170,
 		padding: 10,
 		margin: 15,

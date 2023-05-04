@@ -108,6 +108,7 @@ const AttendanceMusterCard = ({ navigation, route }) => {
 				// Alert.alert("Modal has been closed.");
 				setOpenApproveModal(!openApproveModal);
 			}}
+			presentationStyle="pageSheet"
 		>
 			<View
 				style={{
