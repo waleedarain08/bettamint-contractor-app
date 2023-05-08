@@ -179,6 +179,8 @@ const CreateNewProject = ({ navigation }) => {
         uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
       });
       formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
+      formData.append("Latitude", geoFancingArray[0].latitude);
+      formData.append("Longitude", geoFancingArray[0].longitude);
       const response = await dispatch(updateProjectAction(token, formData));
       console.log("Create response", response);
       if (response.status === 200) {

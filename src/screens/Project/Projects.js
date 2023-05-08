@@ -57,7 +57,7 @@ const Projects = ({ navigation }) => {
 	const isLoading = useSelector(loadingProject);
 	const userInfo = useSelector(userData);
 	// console.log('USER INFO', userInfo?.user?.leadTypeId)
-
+	// console.log('Project', projectsList[1])
 	//! LIFE CYCLE
 	useEffect(() => {
 		dispatch(getAllProjectsAction(token));

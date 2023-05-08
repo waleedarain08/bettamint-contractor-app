@@ -79,7 +79,7 @@ import {
 } from "../redux/slices/workerSlice";
 import { authToken } from "../redux/slices/authSlice";
 import { navigationRef } from "./NavigationRef";
-import { selectedProjectReducer } from "../redux/slices/projectSlice";
+import { selectProjectAction, selectedProjectReducer } from "../redux/slices/projectSlice";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -770,6 +770,7 @@ const WorkersNavigator = ({ navigation }) => {
 
 const ProjectNavigator = ({ navigation }) => {
   const project = useSelector(selectedProjectReducer)
+  const dispatch = useDispatch()
   return (
     <ProjectStack.Navigator
       screenOptions={{
@@ -815,6 +816,7 @@ const ProjectNavigator = ({ navigation }) => {
               <Pressable
                 onPress={() => {
                   navigation.navigate("CreateNewProject");
+                  dispatch(selectProjectAction(null));
                 }}
                 style={{
                   backgroundColor: Colors.Purple,
