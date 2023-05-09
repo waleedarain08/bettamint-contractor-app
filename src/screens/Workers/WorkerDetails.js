@@ -162,7 +162,7 @@ const WorkerDetails = ({ navigation, route }) => {
 										{worker?.phoneNumber}
 									</Text>
 								</View>
-								<View
+								{/* <View
 									style={{
 										borderBottomWidth: 1,
 										borderBottomColor: Colors.WhiteGray,
@@ -176,7 +176,7 @@ const WorkerDetails = ({ navigation, route }) => {
 									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
 										{worker?.address}
 									</Text>
-								</View>
+								</View> */}
 								<View
 									style={{
 										borderBottomWidth: 1,

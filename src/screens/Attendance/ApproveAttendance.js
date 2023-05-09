@@ -741,7 +741,7 @@ const styles = StyleSheet.create({
   },
   smallButton: {
     fontFamily: "Lexend-SemiBold",
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.Secondary,
   },
   linkText: {

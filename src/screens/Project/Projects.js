@@ -132,7 +132,7 @@ const Projects = ({ navigation }) => {
 						</Text>
 					</ImageBackground>
 				</View>
-				<Spacer left={10} />
+				<Spacer left={15} />
 				<View style={{ width: "65%" }}>
 					<Text style={styles.title}>{item.name}</Text>
 					{/* <Spacer bottom={10} /> */}

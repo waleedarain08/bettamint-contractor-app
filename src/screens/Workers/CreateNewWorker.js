@@ -69,7 +69,7 @@ const CreateNewWorker = ({ navigation }) => {
   const skillsList = useSelector(skillsListReducer);
   const jobsList = useSelector(jobsListReducer);
   const token = useSelector(authToken);
-  console.log(jobsList);
+  // console.log(jobsList);
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
     // dispatch(getAllJobsAction(token, 0));
@@ -114,14 +114,14 @@ const CreateNewWorker = ({ navigation }) => {
   const submitHandler = async () => {
     const formData = new FormData();
     const workerId = worker ? worker?.workerId : 0;
-    const status = worker ? worker?.status : 'Init'
+    const status = worker ? worker?.status : "Init";
     formData.append("SkillId", parseInt(skillValue, 10));
     formData.append("SkillTypeId", skillLevelValue);
     formData.append("WorkerId", parseInt(workerId, 10));
     formData.append("JobId", parseInt(selectedJob, 10));
     formData.append("ProjectId", parseInt(selectedProject, 10));
     formData.append("FullName", fullName);
-    formData.append("PhoneNumber", phoneNumber);
+    formData.append("PhoneNumber", `91${phoneNumber}`);
     formData.append("Status", status);
     formData.append("BankName", bankName);
     formData.append("BankAccountNumber", bankAccountNumber);
@@ -129,7 +129,7 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("HealthCard", true);
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
-    console.log('Form data', formData)
+    // console.log('Form data', formData)
     const response = await dispatch(
       updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
     );
@@ -138,7 +138,9 @@ const CreateNewWorker = ({ navigation }) => {
       Toast.show({
         type: "info",
         text1: worker ? "Worker Updated" : "Worker Created",
-        text2: worker ? "Worker is updated successfully." : "Worker is created successfully.",
+        text2: worker
+          ? "Worker is updated successfully."
+          : "Worker is created successfully.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
@@ -241,12 +243,15 @@ const CreateNewWorker = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                // data={data}
+                autoScroll={false}
+                search
+                searchPlaceholder="Search Skill"
+                inputSearchStyle={{color: Colors.Black}}
                 data={skillsList?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
                 }))}
-                maxHeight={300}
+                maxHeight={500}
                 labelField="label"
                 valueField="value"
                 placeholder={"Select Skill"}
@@ -255,6 +260,10 @@ const CreateNewWorker = ({ navigation }) => {
                 // onBlur={() => setIsFocus(false)}
                 onChange={(item) => {
                   setSkillValue(item.value);
+                  setFilterJob([])
+                  setSkillLevelValue(null)
+                  setSelectedProject(null)
+                  setSelectedJob(null)
                   // setIsFocus(false);
                 }}
               />
@@ -394,8 +403,12 @@ const CreateNewWorker = ({ navigation }) => {
               iconStyle={styles.iconStyle}
               data={projectsList.map((ele) => ({
                 label: ele.name,
-                value: ele.projectId
+                value: ele.projectId,
               }))}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search project"
+              inputSearchStyle={{color: Colors.Black}}
               maxHeight={300}
               labelField="label"
               valueField="value"
@@ -403,11 +416,19 @@ const CreateNewWorker = ({ navigation }) => {
               value={selectedProject}
               onChange={(item) => {
                 setSelectedProject(item.value);
-                setFilterJob(
-                  jobsList?.filter(
-                    (ele) => ele?.projectId === item?.value
-                  )
+
+                // console.log("JOBS", filterJobs[0]);
+                const filterBySkill = jobsList?.filter(
+                  (ele) => ele?.skillId === skillValue
                 );
+                const filterBySkillLevel = filterBySkill?.filter(
+                  (ele) => ele?.skillTypeId === skillLevelValue
+                );
+                const filterByProject = filterBySkillLevel?.filter(
+                  (ele) => ele?.projectId === item?.value
+                );
+                setFilterJob(filterByProject);
+                console.log(filterByProject);
               }}
             />
           </View>
@@ -432,9 +453,13 @@ const CreateNewWorker = ({ navigation }) => {
               }}
               iconStyle={styles.iconStyle}
               data={filterJobs?.map((ele) => ({
-                label: ele.jobName,
-                value: ele.jobId
+                label: `${ele.jobName} - ${ele.description}`,
+                value: ele.jobId,
               }))}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search Job"
+              inputSearchStyle={{color: Colors.Black}}
               // data={[]}
               maxHeight={300}
               labelField="label"
@@ -455,25 +480,66 @@ const CreateNewWorker = ({ navigation }) => {
           }}
         >
           <Text style={styles.title}>Contact Number</Text>
-          <TextInput
+          <View
             style={{
-              fontFamily: "Lexend-Regular",
               borderWidth: 1,
               borderColor: Colors.FormBorder,
               marginTop: 7,
               borderRadius: 4,
               paddingHorizontal: 7,
-              fontSize: 12,
+              // fontSize: 12,
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
-              color: Colors.Black,
+              flexDirection: "row",
+              alignItems: "center",
+              // color: Colors.Black,
             }}
-            onChangeText={(e) => setPhoneNumber(e)}
-            value={phoneNumber}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Contact Number"
-          />
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: '7%'
+              }}
+            >
+              +91
+            </Text>
+            <TextInput
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: '93%'
+              }}
+              keyboardType="number-pad"
+              onChangeText={(e) => {
+                if (e?.length <= 10) {
+                setPhoneNumber(e);
+                }
+              }}
+              value={phoneNumber}
+              placeholderTextColor={Colors.FormText}
+              placeholder="Enter Contact Number"
+            />
+          </View>
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
           <Text style={styles.title}>Bank Name</Text>

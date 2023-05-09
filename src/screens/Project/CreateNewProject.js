@@ -19,6 +19,7 @@ import {
   Modal,
   Animated,
   ActivityIndicator,
+  PermissionsAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -41,6 +42,7 @@ import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
+import Geolocation from 'react-native-geolocation-service';
 // const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 // import Geolocation from "@react-native-community/geolocation";
 // import { PermissionsAndroid } from "react-native";
@@ -65,6 +67,8 @@ const CreateNewProject = ({ navigation }) => {
   const [projectNameClick, setProjectNameClick] = useState(false);
   const [loader, setLoader] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(null);
+
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
@@ -83,6 +87,41 @@ const CreateNewProject = ({ navigation }) => {
       longitude: 68.94873866672839,
     },
   ];
+  useEffect(() => {
+    getLocationPermission()
+  }, [])
+  const getLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location permission required',
+          message: 'Bettamint needs to access your location',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+        getCurrentLocation();
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        setCurrentPosition(position);
+      },
+      error => {
+        console.log(error.code, error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
   useEffect(() => {
     if (project) {
       console.log(project);
@@ -243,6 +282,7 @@ const CreateNewProject = ({ navigation }) => {
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
+          geolocationEnabled={true}
           onLoad={() => setLoader(false)}
         />
         {loader && (
@@ -261,11 +301,12 @@ const CreateNewProject = ({ navigation }) => {
       </Modal>
     );
   };
+  console.log(currentPosition)
   setTimeout(() => {
     mapRef?.current?.animateToRegion(
       {
-        latitude: geoFancingArray[0]?.latitude || 20.5937,
-        longitude: geoFancingArray[0]?.longitude || 78.9629,
+        latitude: geoFancingArray[0]?.latitude || currentPosition?.coords?.latitude,
+        longitude: geoFancingArray[0]?.longitude || currentPosition?.coords?.longitude,
         latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
         longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
       },
@@ -393,6 +434,8 @@ const CreateNewProject = ({ navigation }) => {
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={styles.map}
             ref={mapRef}
+            showsUserLocation
+            showsMyLocationButton
             mapType="standard"
             loadingEnabled={true}
           >

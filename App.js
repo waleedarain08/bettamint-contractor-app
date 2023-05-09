@@ -1,4 +1,4 @@
-import { View, Text, StatusBar, SafeAreaView, ScrollView } from "react-native";
+import { View, Text, StatusBar, SafeAreaView, ScrollView, BackHandler, Linking, Alert } from "react-native";
 import React, { useEffect } from "react";
 import MainNavigation from "./src/navigation/MainNavigation";
 import { Colors } from "./src/utils/Colors";

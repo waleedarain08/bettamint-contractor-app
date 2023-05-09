@@ -304,7 +304,7 @@ const styles = StyleSheet.create({
     color: Colors.Black,
   },
   graphBottomTextBold: {
-    fontSize: 32,
+    fontSize: 27,
     fontFamily: "Lexend-Bold",
     color: Colors.Secondary,
     paddingLeft: 10,

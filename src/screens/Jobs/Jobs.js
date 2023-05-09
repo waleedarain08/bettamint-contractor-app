@@ -400,7 +400,7 @@ const Jobs = ({ navigation }) => {
 				}}
 			>
 				<View style={{ width: "30%" }}>
-					<Text style={styles.flatlistHeading}>{item?.jobName}</Text>
+					<Text style={[styles.flatlistHeading]}>{item?.jobName}</Text>
 				</View>
 				<View
 					style={{
@@ -859,7 +859,7 @@ const styles = StyleSheet.create({
 	},
 	flatlistHeading: {
 		fontFamily: "Lexend-Medium",
-		fontSize: 14,
+		fontSize: 13,
 		textTransform: "uppercase",
 		color: Colors.Black,
 	},
