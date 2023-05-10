@@ -816,7 +816,10 @@ const Payments = ({ navigation }) => {
 					bottom: 10,
 				}}
 			>
-				<TouchableOpacity style={styles.button}>
+				<TouchableOpacity
+					style={styles.button}
+					onPress={() => navigation.navigate("PayOnline")}
+				>
 					<Text style={styles.buttonText}>Pay Online</Text>
 				</TouchableOpacity>
 				<TouchableOpacity
