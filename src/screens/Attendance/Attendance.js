@@ -715,6 +715,7 @@ const Attendance = ({ navigation }) => {
                   onRefresh={() => {
                     dispatch(
                       getAllAttendanceAction(
+                        token,
                         selectedProject?.projectId ||
                           attendanceList[0]?.projectId
                       )

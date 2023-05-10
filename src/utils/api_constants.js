@@ -1,8 +1,8 @@
-// export const base_url = "https://api-sandbox.bettamint.com/api";
-// export const assetsUrl = "https://api-sandbox.bettamint.com";
+export const base_url = "https://api-sandbox.bettamint.com/api";
+export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-export const base_url = "https://api-prod.bettamint.com/api";
-export const assetsUrl = 'https://api-prod.bettamint.com';
+// export const base_url = "https://api-prod.bettamint.com/api";
+// export const assetsUrl = 'https://api-prod.bettamint.com';
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";

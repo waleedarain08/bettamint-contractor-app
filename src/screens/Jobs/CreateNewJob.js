@@ -286,7 +286,7 @@ const CreateNewJob = ({ navigation }) => {
 			  autoScroll={false}
               search
               searchPlaceholder="Search Project"
-              inputSearchStyle={{ color: Colors.Purple }}
+              inputSearchStyle={{ color: Colors.Black }}
               maxHeight={300}
               labelField="label"
               valueField="value"
