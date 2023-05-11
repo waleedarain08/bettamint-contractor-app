@@ -1,8 +1,8 @@
-export const base_url = "https://api-sandbox.bettamint.com/api";
-export const assetsUrl = "https://api-sandbox.bettamint.com";
+// export const base_url = "https://api-sandbox.bettamint.com/api";
+// export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-// export const base_url = "https://api-prod.bettamint.com/api";
-// export const assetsUrl = 'https://api-prod.bettamint.com';
+export const base_url = "https://api-prod.bettamint.com/api";
+export const assetsUrl = "https://api-prod.bettamint.com";
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";
@@ -23,6 +23,7 @@ export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
 export const ATTENDANCE_REPORT_URL = "dashboard/Attendance/getbyprojectreport";
 export const JOB_CREATE_URL = "dashboard/Job/createjob";
 export const PAYMENT_GETALL_URL = "dashboard/Payment/history";
+export const PAYMENT_HISTORY_URL = "dashboard/Payment/process";
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
 	if (response && response?.data && response?.status === 200) {
