@@ -54,7 +54,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const attendance = useSelector(attendanceListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const [openDropdown, setOpenDropdown] = useState(false);
-	console.log("PROJECT DATA", projectData)
+	// console.log("PROJECT DATA", projectData)
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
   };

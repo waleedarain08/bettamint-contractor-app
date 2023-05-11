@@ -110,7 +110,7 @@ export const getAllWorkersAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          console.log("WORKERS DATA", data);
+          // console.log("WORKERS DATA", data);
           if (data) {
             dispatch(getWorkersSuccess(data));
           }
