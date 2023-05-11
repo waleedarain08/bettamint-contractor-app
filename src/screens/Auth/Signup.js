@@ -336,13 +336,13 @@ const Signup = ({ navigation }) => {
 					>
 						<Text style={styles.buttonText}>Sign Up Now</Text>
 					</TouchableOpacity>
-					<View style={{ padding: 20 }}>
+					{/* <View style={{ padding: 20 }}>
 						<Text style={[styles.text, { fontSize: 11, textAlign: "center" }]}>
 							No monthly fees, no credit card needed. Create your free account
 							and digitize your frontline construction workforce employment
 							ecosystem*
 						</Text>
-					</View>
+					</View> */}
 				</View>
 			</View>
 			<Pressable
