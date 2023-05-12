@@ -14,6 +14,45 @@ const PayOnline = ({ navigation, route }) => {
 	const error = useSelector(errorPayment);
 	//   console.log(error)
 	const dispatch = useDispatch();
+	function handlePayment() {
+		setTimeout(() => {
+			dispatch(getAllAttendanceAction(token, route?.params?.projectId, 0));
+		}, 1000);
+
+		dispatch(
+			paymentProcess(
+				token,
+				route?.params?.selectedUser?.jobId,
+				route?.params?.selectedUser?.workerId,
+				"Online"
+			)
+		).then((res) => {
+			console.log("response", res.response?.data?.error);
+			if (res.response?.data?.error) {
+				Toast.show({
+					type: "error",
+					text1: "Already Paid",
+					text2: "Payment is already done for this worker",
+					visibilityTime: 4000,
+					autoHide: true,
+					onHide: () => {
+						navigation.goBack();
+					},
+				});
+			} else {
+				Toast.show({
+					type: "success",
+					text1: "Payment Successful",
+					text2: "Payment is successfully done for this worker",
+					visibilityTime: 4000,
+					autoHide: true,
+					onHide: () => {
+						navigation.goBack();
+					},
+				});
+			}
+		});
+	}
 
 	return (
 		<View style={styles.container}>
@@ -87,47 +126,7 @@ const PayOnline = ({ navigation, route }) => {
 				<View style={{ alignItems: "flex-end" }}>
 					<TouchableOpacity
 						style={styles.button}
-						onPress={() => {
-							navigation.goBack();
-							setTimeout(() => {
-								dispatch(
-									getAllAttendanceAction(token, route?.params?.projectId, 0)
-								);
-							}, 1000);
-							dispatch(
-								paymentProcess(
-									token,
-									route?.params?.selectedUser?.jobId,
-									route?.params?.selectedUser?.workerId,
-									"Online"
-								)
-							).then((res) => {
-								console.log("response", res.response?.data?.error);
-								if (res.response?.data?.error) {
-									Toast.show({
-										type: "error",
-										text1: "Already Paid",
-										text2: "Payment is already done for this worker",
-										visibilityTime: 4000,
-										autoHide: true,
-										onHide: () => {
-											navigation.goBack();
-										},
-									});
-								} else {
-									Toast.show({
-										type: "success",
-										text1: "Payment Successful",
-										text2: "Payment is successfully done for this worker",
-										visibilityTime: 4000,
-										autoHide: true,
-										onHide: () => {
-											navigation.goBack();
-										},
-									});
-								}
-							});
-						}}
+						onPress={() => handlePayment()}
 					>
 						<Text style={styles.buttonText}>Process Payment</Text>
 					</TouchableOpacity>
