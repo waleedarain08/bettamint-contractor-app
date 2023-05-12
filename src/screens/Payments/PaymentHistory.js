@@ -78,7 +78,7 @@ const PaymentHistory = ({ navigation }) => {
 	const isDarkMode = colorScheme === "dark";
 
 	const textColor = isDarkMode ? "white" : "black";
-	//   console.log(paymentHistoryList);
+	  console.log(selectedProject);
 	useEffect(() => {
 		dispatch(getAllProjectsSimpleAction(token));
 		// dispatch(getAllJobsAction(token, 0));
@@ -136,7 +136,7 @@ const PaymentHistory = ({ navigation }) => {
 				</View>
 				<TouchableOpacity
 					onPress={() => {
-						navigation.navigate("PaymentInvoice", { amount: item?.amount });
+						navigation.navigate("PaymentInvoice", { amount: item?.amount, selectedProject });
 					}}
 					style={{
 						backgroundColor: "#ECE5FC",
@@ -234,7 +234,7 @@ const PaymentHistory = ({ navigation }) => {
 							placeholder={"Select Project"}
 							value={selectedProject}
 							onChange={(item) => {
-								setSelectedProject(item.value);
+								setSelectedProject(item);
 							}}
 						/>
 					</View>
@@ -329,8 +329,8 @@ const PaymentHistory = ({ navigation }) => {
 							dispatch(
 								getPaymentHistory(
 									token,
-									selectedProject,
-									startDate.toISOString(),
+									selectedProject.value,
+									startDate?.toISOString(),
 									endDate?.toISOString()
 								)
 							);
@@ -347,7 +347,7 @@ const PaymentHistory = ({ navigation }) => {
 								dispatch(
 									getPaymentHistory(
 										token,
-										selectedProject,
+										selectedProject.value,
 										startDate?.toISOString(),
 										endDate?.toISOString()
 									)
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
 	buttonLarge: {
 		width: "97%",
 		backgroundColor: Colors.Secondary,
-		padding: 15,
+		padding: 10,
 		borderRadius: 4,
 		marginTop: 15,
 	},

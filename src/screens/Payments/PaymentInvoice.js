@@ -37,7 +37,7 @@ const PaymentInvoice = ({ navigation, route }) => {
 			<View style={styles.rowStyle}>
 				<View>
 					<Text style={[styles.heading, { color: Colors.Black }]}>
-						{`K2K Infrastructure (I)\nPvt Ldt`}
+						{route?.params?.selectedProject?.label}
 					</Text>
 				</View>
 				<Text style={styles.heading}>INVOICE</Text>
@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
 		// alignItems: "center",
 	},
 	heading: {
-		fontSize: 20,
+		fontSize: 18,
 		fontFamily: "Lexend-Medium",
 		color: Colors.Primary,
 		marginLeft: 10,
