@@ -9,6 +9,7 @@ import {
   Dimensions,
   LogBox,
   Alert,
+  Appearance,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -70,6 +71,9 @@ const CreateNewJob = ({ navigation }) => {
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
   const skillsList = useSelector(skillsListReducer);
+  const colorScheme = Appearance.getColorScheme();
+  const isDarkMode = colorScheme === "dark";
+  const textColor = isDarkMode ? "white" : "black";
 
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
@@ -283,7 +287,7 @@ const CreateNewJob = ({ navigation }) => {
                 value: project?.projectId,
                 ...project,
               }))}
-			  autoScroll={false}
+              autoScroll={false}
               search
               searchPlaceholder="Search Project"
               inputSearchStyle={{ color: Colors.Black }}
@@ -722,7 +726,7 @@ const CreateNewJob = ({ navigation }) => {
         <DatePicker
           modal
           mode="date"
-          textColor={Colors.Black}
+          textColor={textColor}
           open={open}
           date={date}
           onConfirm={(date) => {
@@ -737,7 +741,7 @@ const CreateNewJob = ({ navigation }) => {
         <DatePicker
           modal
           mode="time"
-          textColor={Colors.Black}
+          textColor={textColor}
           open={openTime}
           date={date}
           onConfirm={(date) => {

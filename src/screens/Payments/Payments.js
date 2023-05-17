@@ -30,9 +30,10 @@ import {
   paymentsListReducer,
   getPaymentsAction,
   loadingPayments,
+  getAllPaymentsAction,
+  allPaymentsListReducer,
 } from "../../redux/slices/paymentSlice";
 import {
-  getAllAttendanceAction,
   attendanceListReducer,
   saveProjectDataAction,
   selectAttendanceAction,
@@ -66,14 +67,14 @@ const Payments = ({ navigation }) => {
   const dispatch = useDispatch();
 
   //   const payments = useSelector(paymentsListReducer);
-  const attendanceList = useSelector(attendanceListReducer);
+  const attendanceList = useSelector(allPaymentsListReducer);
   const skillsList = useSelector(skillsListReducer);
   const usersList = useSelector(usersListReducer);
   const isLoading = useSelector(loadingPayments);
-  const isLoadingAttendance = useSelector(loadingAttendance);
+  // const isLoadingAttendance = useSelector(loadingPayments);
   const token = useSelector(authToken);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
-
+// console.log("LOADING", isLoading)
   const status = [
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
@@ -81,7 +82,7 @@ const Payments = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(
-      getAllAttendanceAction(
+      getAllPaymentsAction(
         token,
         selectedProject?.projectId || projectsListSimple[0]?.projectId,
         0
@@ -139,7 +140,7 @@ const Payments = ({ navigation }) => {
   // 	setData(data?.array[i].selected = false)
   // 	// myArray[i].gender = "unknown";
   //   }
-//   console.log("DATA", data);
+  //   console.log("DATA", data);
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
   const renderFilterModal = () => {
@@ -207,7 +208,7 @@ const Payments = ({ navigation }) => {
                     setSelectedSkills(null);
                     setSelectedStatus(null);
                     dispatch(
-                      getAllAttendanceAction(
+                      getAllPaymentsAction(
                         token,
                         selectedProject?.projectId ||
                           projectsListSimple[0]?.projectId,
@@ -333,7 +334,7 @@ const Payments = ({ navigation }) => {
                   setSelectedStatus(null);
                   setSelectedSkills(null);
                   dispatch(
-                    getAllAttendanceAction(
+                    getAllPaymentsAction(
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
@@ -634,8 +635,29 @@ const Payments = ({ navigation }) => {
         }}
       >
         {!attendanceList || attendanceList?.length === 0 ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(
+                    getAllPaymentsAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
+                    )
+                  );
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <Text
               style={{
@@ -646,16 +668,19 @@ const Payments = ({ navigation }) => {
             >
               No Record Found!
             </Text>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoadingAttendance}
+                refreshing={isLoading}
                 onRefresh={() => {
                   dispatch(
-                    getAllAttendanceAction(
-                      selectedProject?.projectId || attendanceList[0]?.projectId
+                    getAllPaymentsAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
                     )
                   );
                 }}
@@ -684,7 +709,12 @@ const Payments = ({ navigation }) => {
       >
         <TouchableOpacity
           style={styles.button}
-          onPress={() => navigation.navigate("PayOnline", {selectedUser, projectId: selectedProject?.projectId})}
+          onPress={() =>
+            navigation.navigate("PayOnline", {
+              selectedUser,
+              projectId: selectedProject?.projectId,
+            })
+          }
         >
           <Text style={styles.buttonText}>Pay Online</Text>
         </TouchableOpacity>

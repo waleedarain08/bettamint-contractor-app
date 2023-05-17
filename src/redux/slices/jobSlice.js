@@ -14,6 +14,7 @@ const initialState = {
   jobsList: null,
   createJobData: null,
   selectedJob: null,
+  completeJobLoading: false,
 };
 
 const api = new APIServiceManager();
@@ -48,6 +49,18 @@ const jobSlice = createSlice({
     selectedJobSuccess: (state, action) => {
       state.selectedJob = action.payload;
     },
+    completingJob: (state, action) => {
+      state.completeJobLoading = true;
+      state.error = null;
+    },
+    completingJobSuccess: (state, action) => {
+      state.completeJobLoading = false;
+      state.error = null;
+    },
+    completingJobFailure: (state, action) => {
+      state.completeJobLoading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -59,12 +72,16 @@ const {
   createJobSuccess,
   createJobFailure,
   selectedJobSuccess,
+  completingJob,
+  completingJobSuccess,
+  completingJobFailure,
 } = jobSlice.actions;
 
 export const jobsListReducer = (state) => state?.jobs?.jobsList;
 export const loadingJobs = (state) => state?.jobs?.loading;
 export const createJobReducer = (state) => state?.jobs?.createJobData;
 export const selectedJobReducer = (state) => state?.jobs?.selectedJob;
+export const loadingCompleteJob = (state) => state?.jobs?.completeJobLoading;
 
 export const selectedJobAction = (data) => async (dispatch) => {
   dispatch(selectedJobSuccess(data));
@@ -124,5 +141,28 @@ export const createJobAction = (token, worker) => async (dispatch) => {
   }
 };
 
-
+export const completeJob = (token, jobId) => async (dispatch) => {
+  dispatch(completingJob());
+  try {
+    const response = await axios.post(
+      `${base_url}/dashboard/Job/complete?jobId=${jobId}`,
+      null,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    console.log("COMPLETE RESPONSE", response?.status);
+    if (response.status === 200) {
+      dispatch(completingJobSuccess(response.data));
+    }
+    return response;
+  } catch (e) {
+    dispatch(
+      completingJobFailure("Something went wrong while completing job!")
+    );
+    return e;
+  }
+};
 export default jobSlice.reducer;

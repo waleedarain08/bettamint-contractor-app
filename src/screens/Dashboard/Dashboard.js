@@ -9,6 +9,7 @@ import {
   Dimensions,
   LogBox,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -19,12 +20,15 @@ import BarChart from "../../assets/images/barchart.png";
 import LineChart from "../../assets/images/linechart.png";
 import { useDrawerProgress } from "@react-navigation/drawer";
 import Animated from "react-native-reanimated";
-import { countsReducer, getCountsData } from "../../redux/slices/userSlice";
+import {
+  countsReducer,
+  getCountsData,
+  loadingUsers,
+} from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { authToken } from "../../redux/slices/authSlice";
 import { getSkillsAction } from "../../redux/slices/workerSlice";
 import { getAllProjectsSimpleAction } from "../../redux/slices/projectSlice";
-
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -83,6 +87,7 @@ const Dashboard = ({ navigation }) => {
   const dispatch = useDispatch();
   const token = useSelector(authToken);
   const counts = useSelector(countsReducer);
+  const isLoading = useSelector(loadingUsers);
   // console.log("COUNTS", counts);
   useEffect(() => {
     dispatch(getSkillsAction(token));
@@ -135,11 +140,11 @@ const Dashboard = ({ navigation }) => {
           />
         </View>
         <View style={styles.graphBottom}>
-          <View style={styles.graphBottomTabs}>
+          <View style={[styles.graphBottomTabs]}>
             <Text style={styles.graphBottomText}>
               Avg Active {"\n"}Workforce{" "}
             </Text>
-            <Text style={styles.graphBottomTextBold}>350</Text>
+            <Text style={[styles.graphBottomTextBold]}>350</Text>
           </View>
           <View style={styles.graphBottomTabs}>
             <Text style={styles.graphBottomText}>Average {"\n"}Workforce</Text>
@@ -151,7 +156,18 @@ const Dashboard = ({ navigation }) => {
           </View>
         </View>
       </View>
-      <ScrollView>
+      <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => {
+              dispatch(getCountsData(token));
+            }}
+            tintColor={Colors.Primary}
+            colors={[Colors.Purple, Colors.Primary]}
+          />
+        }
+      >
         {/* <FlatList
           data={DATA}
           renderItem={({ item }) => <Item item={item} />}
@@ -257,7 +273,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFF",
-    width: '100%'
+    width: "100%",
   },
   header: {
     backgroundColor: Colors.Primary,
@@ -304,7 +320,7 @@ const styles = StyleSheet.create({
     color: Colors.Black,
   },
   graphBottomTextBold: {
-    fontSize: 27,
+    fontSize: 25,
     fontFamily: "Lexend-Bold",
     color: Colors.Secondary,
     paddingLeft: 10,
@@ -320,7 +336,7 @@ const styles = StyleSheet.create({
   },
   item: {
     // flex: 1,
-    width: '43%',
+    width: "43%",
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 15,

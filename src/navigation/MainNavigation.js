@@ -86,6 +86,7 @@ import {
 	selectProjectAction,
 	selectedProjectReducer,
 } from "../redux/slices/projectSlice";
+import { emptyPaymentListAction } from "../redux/slices/paymentSlice";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -141,7 +142,9 @@ const PaymentNavigator = ({ navigation }) => (
 								justifyContent: "center",
 								alignItems: "center",
 							}}
-							onPress={() => navigation.navigate("PaymentHistory")}
+							onPress={() => {
+								navigation.navigate("PaymentHistory");
+							}}
 						>
 							<RestoreIcon size={22} color={Colors.White} />
 						</Pressable>

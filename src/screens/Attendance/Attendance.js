@@ -655,26 +655,46 @@ const Attendance = ({ navigation }) => {
         </Text>
       </View>
       {/* <ScrollView> */}
-      <ScrollView showsHorizontalScrollIndicator={false} style={{ flex: 1 }}>
-        <View
-          style={{
-            backgroundColor: Colors.White,
-            alignItems: "center",
-            margin: 10,
-            borderRadius: 10,
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 2,
-            },
-            shadowOpacity: 0.2,
-            shadowRadius: 5,
-            elevation: 4,
-            width: "93%",
-            flex: 1,
-          }}
-        >
-          {!attendanceList || attendanceList?.length === 0 ? (
+      {/* <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => {
+              dispatch(
+                getAllAttendanceAction(
+                  token,
+                  selectedProject?.projectId ||
+                    projectsListSimple[0]?.projectId,
+                  0
+                )
+              );
+            }}
+            tintColor={Colors.Primary}
+            colors={[Colors.Purple, Colors.Primary]}
+          />
+        }
+        showsHorizontalScrollIndicator={false}
+        style={{ flex: 1 }}
+      > */}
+      <View
+        style={{
+          backgroundColor: Colors.White,
+          alignItems: "center",
+          margin: 10,
+          borderRadius: 10,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 2,
+          },
+          shadowOpacity: 0.2,
+          shadowRadius: 5,
+          elevation: 4,
+          width: "93%",
+          flex: 1,
+        }}
+      >
+        {/* {!attendanceList || attendanceList?.length === 0 ? (
             <ScrollView
               refreshControl={
                 <RefreshControl
@@ -682,8 +702,9 @@ const Attendance = ({ navigation }) => {
                   onRefresh={() => {
                     dispatch(
                       getAllAttendanceAction(
+                        token,
                         selectedProject?.projectId ||
-                          attendanceList[0]?.projectId
+                        projectsListSimple[0]?.projectId, 0
                       )
                     );
                   }}
@@ -707,38 +728,74 @@ const Attendance = ({ navigation }) => {
                 No Record Found!
               </Text>
             </ScrollView>
-          ) : (
-            <FlatList
-              refreshControl={
-                <RefreshControl
-                  refreshing={isLoading}
-                  onRefresh={() => {
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId ||
-                          attendanceList[0]?.projectId
-                      )
-                    );
-                  }}
-                  tintColor={Colors.Primary}
-                  colors={[Colors.Purple, Colors.Primary]}
-                />
-              }
-              data={
-                filteredAttendance ? filteredAttendance : filteredDataAttSource
-              }
-              renderItem={({ item, index }) => (
-                <Item item={item} index={index} />
-              )}
-              keyExtractor={(item) => item.id}
-              ListHeaderComponent={ListHeader}
-              stickyHeaderIndices={[0]}
-              showsVerticalScrollIndicator={false}
-            />
-          )}
-        </View>
-      </ScrollView>
+          ) : ( */}
+        {!attendanceList || attendanceList?.length === 0 ? (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
+                    )
+                  );
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend-Medium",
+                fontSize: 18,
+                color: Colors.Gray,
+              }}
+            >
+              No Record Found!
+            </Text>
+          </ScrollView>
+        ) : (
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
+                    )
+                  );
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            data={
+              filteredAttendance ? filteredAttendance : filteredDataAttSource
+            }
+            renderItem={({ item, index }) => <Item item={item} index={index} />}
+            keyExtractor={(item) => item.id}
+            ListHeaderComponent={ListHeader}
+            stickyHeaderIndices={[0]}
+            showsVerticalScrollIndicator={false}
+          />
+        )}
+        {/* )} */}
+      </View>
+      {/* </ScrollView> */}
       <Modal
         visible={openSearchModal}
         animationType="slide"

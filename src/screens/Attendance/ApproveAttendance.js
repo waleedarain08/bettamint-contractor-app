@@ -282,8 +282,8 @@ const ApproveAttendance = ({ navigation, route }) => {
               <View style={{ marginVertical: 10 }}>
                 <Dropdown
                   style={styles.dropdown}
-                  // placeholderStyle={styles.placeholderStyle}
-                  // selectedTextStyle={styles.selectedTextStyle}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
                   itemTextStyle={{
                     fontFamily: "Lexend-Regular",
                     fontSize: 13,
