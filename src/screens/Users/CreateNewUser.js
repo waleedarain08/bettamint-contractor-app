@@ -29,8 +29,12 @@ import {
 } from "../../redux/slices/userSlice";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
+import {
+  getAllProjectsSimpleAction,
+  projectsListSimpleReducer,
+} from "../../redux/slices/projectSlice";
 import Toast from "react-native-toast-message";
+import { useFocusEffect } from "@react-navigation/native";
 
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
@@ -52,14 +56,21 @@ const CreateNewUser = ({ navigation, route }) => {
   const projectsList = useSelector(projectsListSimpleReducer);
 
   const userInfo = route?.params?.userInfo;
-  console.log(userInfo);
+  // console.log(userInfo);
   const token = useSelector(authToken);
   const roles = useSelector(rolesReducer);
   // console.log("ROLES", roles);
   const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getRoles(token));
-  }, []);
+  // useEffect(() => {}, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // setTimeout(() => {
+        dispatch(getRoles(token));
+        dispatch(getAllProjectsSimpleAction(token));
+      // }, 1000);
+      return () => {};
+    }, [dispatch, token])
+  );
   useEffect(() => {
     setFullName(userInfo?.fullName);
     setEmail(userInfo?.emailAddress);
@@ -209,16 +220,23 @@ const CreateNewUser = ({ navigation, route }) => {
               // search
               // searchPlaceholder="Search Skill"
               inputSearchStyle={{ color: Colors.Black }}
-              data={projectsList?.map((ele) => ({
-                label: ele?.name,
-                value: ele.projectId,
-              }))}
+              data={
+                projectsList?.length
+                  ? projectsList?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele.projectId,
+                    }))
+                  : []
+              }
               maxHeight={500}
               labelField="label"
               valueField="value"
               placeholder={"Select Project"}
               value={project}
-              // onFocus={() => setIsFocus(true)}
+              // onFocus={() => {
+              //   // setIsFocus(true);
+              //   dispatch(getAllProjectsSimpleAction(token));
+              // }}
               // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
                 setProject(item?.value);
@@ -245,16 +263,23 @@ const CreateNewUser = ({ navigation, route }) => {
               // search
               // searchPlaceholder="Search Skill"
               inputSearchStyle={{ color: Colors.Black }}
-              data={roles?.map((ele) => ({
-                label: ele?.name,
-                value: ele?.roleId,
-              }))}
+              data={
+                roles?.length
+                  ? roles?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele?.roleId,
+                    }))
+                  : []
+              }
               maxHeight={500}
               labelField="label"
               valueField="value"
               placeholder={"Select Role"}
               value={userRole}
-              // onFocus={() => setIsFocus(true)}
+              // onFocus={() => {
+              //   // setIsFocus(true);
+              //   dispatch(getRoles(token));
+              // }}
               // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
                 setUseRole(item?.value);

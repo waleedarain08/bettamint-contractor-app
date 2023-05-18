@@ -355,7 +355,7 @@ const Users = ({ navigation }) => {
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
-            width: "15%",
+            width: "20%",
           }}
         >
           <TouchableOpacity

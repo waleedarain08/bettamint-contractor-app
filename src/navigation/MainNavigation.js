@@ -1192,7 +1192,7 @@ const UserNavigator = ({ navigation }) => (
 							color: Colors.White,
 						}}
 					>
-						Create New User
+						Update User
 					</Text>
 				),
 			}}

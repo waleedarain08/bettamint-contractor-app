@@ -446,17 +446,17 @@ const Jobs = ({ navigation }) => {
             style={{
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: "#8F8DA6",
+              backgroundColor: item?.isCompleted ? "#C2C1CD" : "#8F8DA6",
               padding: 5,
               margin: 5,
               borderRadius: 3,
-              paddingHorizontal: 8,
-              width: 65,
+              paddingHorizontal: 10,
+              // width: 6,
               height: 30,
             }}
           >
             <Text style={[styles.smallButton, { color: "white" }]}>
-              {item?.isCompleted ? "Complete" : "End"}
+              {item?.isCompleted ? "Completed" : "End"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity

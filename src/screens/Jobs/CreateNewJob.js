@@ -10,6 +10,7 @@ import {
   LogBox,
   Alert,
   Appearance,
+  Pressable,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -339,6 +340,7 @@ const CreateNewJob = ({ navigation }) => {
                   fontSize: 12,
                   width: "80%",
                 }}
+                onPressIn={() => setOpen(true)}
                 placeholderTextColor={Colors.FormText}
                 placeholder="mm/dd/yyyy"
                 value={date ? moment(date).format("MM/DD/YYYY") : "mm/dd/yyyy"}
@@ -450,7 +452,7 @@ const CreateNewJob = ({ navigation }) => {
         >
           <View style={{ padding: 10, width: "50%" }}>
             <Text style={styles.title}>REPORTING TIME</Text>
-            <View
+            <Pressable
               style={[
                 styles.inputField,
                 {
@@ -459,6 +461,7 @@ const CreateNewJob = ({ navigation }) => {
                   justifyContent: "space-between",
                 },
               ]}
+              // onPress={() => setOpenTime(true)}
             >
               <TextInput
                 style={{
@@ -467,6 +470,7 @@ const CreateNewJob = ({ navigation }) => {
                   fontSize: 12,
                   width: "80%",
                 }}
+                onPressIn={() => setOpenTime(true)}
                 placeholderTextColor={Colors.FormText}
                 placeholder="----"
                 value={time ? moment(time).format("hh:mm A") : "----"}
@@ -476,7 +480,7 @@ const CreateNewJob = ({ navigation }) => {
                 color={Colors.FormBorder}
                 size={20}
               />
-            </View>
+            </Pressable>
           </View>
           <View style={{ padding: 10, width: "50%" }}>
             <Text style={styles.title}>DAILY WAGE</Text>
