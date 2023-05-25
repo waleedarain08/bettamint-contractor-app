@@ -176,10 +176,10 @@ export const createUserAction = (token, user) => async (dispatch) => {
       return { message: "User already exists" };
     }
   } catch (e) {
-    console.log("e", e);
+    console.log("e", e?.response?.data);
 
     dispatch(creatingUserFailure("Something went wrong while getting users!"));
-    return e.message;
+    return e;
   }
 };
 export default userSlice.reducer;

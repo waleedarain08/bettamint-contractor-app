@@ -28,7 +28,7 @@ import {
   rolesReducer,
 } from "../../redux/slices/userSlice";
 import { authToken } from "../../redux/slices/authSlice";
-import { Dropdown } from "react-native-element-dropdown";
+import { Dropdown, MultiSelect } from "react-native-element-dropdown";
 import {
   getAllProjectsSimpleAction,
   projectsListSimpleReducer,
@@ -43,10 +43,8 @@ const CreateNewUser = ({ navigation, route }) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [userName, setUsername] = useState("");
-  const [password, setPassword] = useState("");
   const [userRole, setUseRole] = useState(null);
-  const [project, setProject] = useState(null);
+  const [project, setProject] = useState([]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
@@ -54,7 +52,18 @@ const CreateNewUser = ({ navigation, route }) => {
     // { label: "Banana", value: "banana" },
   ]);
   const projectsList = useSelector(projectsListSimpleReducer);
+  function generatePassword(length) {
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = "";
 
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+
+    return password;
+  }
   const userInfo = route?.params?.userInfo;
   // console.log(userInfo);
   const token = useSelector(authToken);
@@ -65,19 +74,14 @@ const CreateNewUser = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       // setTimeout(() => {
-        dispatch(getRoles(token));
-        dispatch(getAllProjectsSimpleAction(token));
+      dispatch(getRoles(token));
+      dispatch(getAllProjectsSimpleAction(token));
       // }, 1000);
       return () => {};
     }, [dispatch, token])
   );
-  useEffect(() => {
-    setFullName(userInfo?.fullName);
-    setEmail(userInfo?.emailAddress);
-    setUsername(userInfo?.username);
-    setUseRole(userInfo?.roleId);
-    setProject(userInfo?.userProjects[0]?.projectId);
-  }, [userInfo]);
+
+  // console.log('PROJECT', project)
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -147,66 +151,9 @@ const CreateNewUser = ({ navigation, route }) => {
           </View>
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
-          <Text style={styles.title}>User Name</Text>
-          <View
-            style={[
-              styles.inputField,
-              {
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-            ]}
-          >
-            <TextInput
-              style={{
-                fontFamily: "Lexend-Medium",
-                color: Colors.Black,
-                fontSize: 12,
-                width: "80%",
-              }}
-              placeholderTextColor={Colors.FormText}
-              placeholder="Enter User Name"
-              value={userName}
-              onChangeText={(e) => setUsername(e)}
-              // value="₹ 56,000"
-            />
-            <User color={Colors.FormBorder} size={30} />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
-          <Text style={styles.title}>Password</Text>
-          <View
-            style={[
-              styles.inputField,
-              {
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-            ]}
-          >
-            <TextInput
-              style={{
-                fontFamily: "Lexend-Medium",
-                color: Colors.Black,
-                fontSize: 12,
-                width: "80%",
-              }}
-              placeholderTextColor={Colors.FormText}
-              placeholder="*********"
-              value={password}
-              onChangeText={(e) => setPassword(e)}
-
-              // value="₹ 56,000"
-            />
-            <LockIcon color={Colors.FormBorder} size={25} />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
           <Text style={styles.title}>Project</Text>
           <View style={{ marginTop: 7 }}>
-            <Dropdown
+            <MultiSelect
               style={styles.dropdown}
               placeholderStyle={styles.placeholderStyle}
               selectedTextStyle={styles.selectedTextStyle}
@@ -239,7 +186,7 @@ const CreateNewUser = ({ navigation, route }) => {
               // }}
               // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
-                setProject(item?.value);
+                setProject(item);
 
                 // setIsFocus(false);
               }}
@@ -747,52 +694,81 @@ const CreateNewUser = ({ navigation, route }) => {
         <TouchableOpacity
           style={[styles.button, { width: "60%" }]}
           onPress={async () => {
-            if (!password) {
+            const password = generatePassword(8);
+            if (!fullName) {
               Toast.show({
                 type: "error",
                 text1: "Error",
-                text2: "Please enter Password.",
+                text2: "Please enter full name.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (!email) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please enter email.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (project?.length === 0) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please select projects.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (!userRole) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please select user role.",
                 topOffset: 10,
                 position: "top",
                 visibilityTime: 4000,
               });
             } else {
               const user = {
-                userId: userInfo?.userId,
-                username: userName,
+                userId: 0,
+                username: email,
                 fullName: fullName,
                 password: password,
                 emailAddress: email,
-                // userTypeId: "SuperAdmin",
+                userTypeId: 0,
                 roleId: userRole,
-                projectIds: [project],
+                projectIds: project,
               };
-              const response = await dispatch(createUserAction(token, user));
-              if (response?.status === 200) {
-                navigation.goBack();
-                Toast.show({
-                  type: "success",
-                  text1: "User Updated",
-                  text2: "User is updated successfully.",
-                  topOffset: 10,
-                  position: "top",
-                  visibilityTime: 4000,
-                });
-              } else {
-                Toast.show({
-                  type: "error",
-                  text1: "Error",
-                  text2: "Something went wrong!",
-                  topOffset: 10,
-                  position: "top",
-                  visibilityTime: 4000,
-                });
-              }
-              console.log("USER HIT", response);
+              // console.log(user);
+                const response = await dispatch(createUserAction(token, user));
+                if (response?.status === 200) {
+                  navigation.goBack();
+                  Toast.show({
+                    type: "success",
+                    text1: "User Created",
+                    text2: "User Created successfully.",
+                    topOffset: 10,
+                    position: "top",
+                    visibilityTime: 4000,
+                  });
+                } else {
+                  Toast.show({
+                    type: "error",
+                    text1: "Error",
+                    text2: "Something went wrong!",
+                    topOffset: 10,
+                    position: "top",
+                    visibilityTime: 4000,
+                  });
+                }
+                // console.log("USER HIT", response);
             }
           }}
         >
-          <Text style={styles.buttonText}>Update User</Text>
+          <Text style={styles.buttonText}>Create User</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[

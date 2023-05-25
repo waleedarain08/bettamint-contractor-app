@@ -27,7 +27,7 @@ const PayOnline = ({ navigation, route }) => {
 				"Online"
 			)
 		).then((res) => {
-			console.log("response", res.response?.data?.error);
+			// console.log("response", res.response?.data?.error);
 			if (res.response?.data?.error) {
 				Toast.show({
 					type: "error",

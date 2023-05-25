@@ -360,7 +360,7 @@ const Users = ({ navigation }) => {
         >
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate("CreateNewUser", { userInfo: item });
+              navigation.navigate("EditUser", { userInfo: item });
             }}
             style={{
               justifyContent: "center",
