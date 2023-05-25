@@ -15,13 +15,8 @@ import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 import { Switch } from "react-native-paper";
 import Toast from "react-native-toast-message";
-const Login = ({ navigation }) => {
-	const [contactType, setContactType] = useState("email");
-	const [username, setUsername] = useState("");
-
-	//   const handleToggleSwitch = () => {
-	//     setContactType(contactType === "email" ? "phone" : "email");
-	//   };
+const ForgotPassword = ({ navigation }) => {
+	const [email, setEmail] = useState("");
 	const handleButtonPress = () => {
 		if (username.trim() === "") {
 			Toast.show({
@@ -34,18 +29,13 @@ const Login = ({ navigation }) => {
 			});
 			return;
 		}
-		navigation.navigate("Password", { username: username });
 	};
 	return (
 		<View style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
-					<Text style={styles.headingText}>Get Started</Text>
+					<Text style={styles.headingText}>Forgot Password?</Text>
 					<Text style={styles.text}>Enter you Email Address</Text>
-					{/* <Switch
-            value={contactType === "phone"}
-            onValueChange={handleToggleSwitch}
-          /> */}
 					<View style={styles.inputField}>
 						<Image source={Profile} style={{ paddingRight: 15 }} />
 						<TextInput
@@ -58,48 +48,28 @@ const Login = ({ navigation }) => {
 							placeholder={"Email"}
 							placeholderTextColor={Colors.Gray}
 							mode="outlined"
-							value={username}
-							onChangeText={(e) => setUsername(e)}
+							value={email}
+							onChangeText={(e) => setEmail(e)}
 							keyboardType={"email-address"}
 						/>
-						{/* <TextInput
-              style={{
-                flex: 1,
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.Black,
-              }}
-              placeholder={contactType === "email" ? "Email" : "Phone"}
-              placeholderTextColor={Colors.Gray}
-              mode="outlined"
-              keyboardType={
-                contactType === "email" ? "email-address" : "phone-pad"
-              }
-            /> */}
 					</View>
 
 					<TouchableOpacity
 						style={styles.button}
-						// disabled={!username}
 						onPress={() => {
-							handleButtonPress();
+							// handleButtonPress();
+							navigation.navigate("ChangePassword");
 						}}
 					>
-						<Text style={styles.buttonText}>Next</Text>
+						<Text style={styles.buttonText}>Submit</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
-			<Pressable
-				style={styles.bottomView}
-				onPress={() => navigation.navigate("ForgotPassword")}
-			>
-				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
-			</Pressable>
 		</View>
 	);
 };
 
-export default Login;
+export default ForgotPassword;
 
 const styles = StyleSheet.create({
 	container: {
