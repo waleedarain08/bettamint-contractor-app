@@ -40,13 +40,14 @@ import {
   loadingAttendance,
 } from "../../redux/slices/attendanceSlice";
 import CheckBox from "@react-native-community/checkbox";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import {
   getSkillsAction,
   skillsListReducer,
 } from "../../redux/slices/workerSlice";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
+import RestrictedScreen from "../../components/RestrictedScreen";
 LogBox.ignoreAllLogs();
 const Payments = ({ navigation }) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
@@ -74,7 +75,15 @@ const Payments = ({ navigation }) => {
   // const isLoadingAttendance = useSelector(loadingPayments);
   const token = useSelector(authToken);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
-// console.log("LOADING", isLoading)
+
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isPaymentListPresent = roles.some(
+    (item) => item.featureSet.name === "Payment List"
+  );
+
+  // console.log("LOADING", isLoading)
   const status = [
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
@@ -267,7 +276,7 @@ const Payments = ({ navigation }) => {
                 <Text
                   style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
                 >
-                  By skills
+                  By Skills
                 </Text>
               </View>
               <Dropdown
@@ -520,52 +529,54 @@ const Payments = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <Pressable
-        onPress={() => {
-          // setOpenSearchModal(true);
-        }}
-        style={styles.graph}
-      >
-        <Pressable
-          onPress={() => {
-            setOpenSearchModal(true);
-          }}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
+      {isPaymentListPresent ? (
+        <>
+          <Pressable
+            onPress={() => {
+              // setOpenSearchModal(true);
             }}
+            style={styles.graph}
           >
-            <Building size={20} color={Colors.LightGray} />
-          </View>
-          <View>
-            <Text style={styles.selectText}>Select a Project</Text>
-            <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
+            <Pressable
+              onPress={() => {
+                setOpenSearchModal(true);
+              }}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
-                : "Select a project"}
-            </Text>
-          </View>
-        </Pressable>
-        <View style={{ flexDirection: "row" }}>
-          {/* <TouchableOpacity
+              <View
+                style={{
+                  backgroundColor: "#F7F8F9",
+                  borderRadius: 50,
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Building size={20} color={Colors.LightGray} />
+              </View>
+              <View>
+                <Text style={styles.selectText}>Select a Project</Text>
+                <Text
+                  style={[
+                    styles.selectText,
+                    { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+                  ]}
+                >
+                  {selectedProject
+                    ? selectedProject?.name
+                    : projectsListSimple
+                    ? projectsListSimple[0]?.name
+                    : "Select a project"}
+                </Text>
+              </View>
+            </Pressable>
+            <View style={{ flexDirection: "row" }}>
+              {/* <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -577,244 +588,256 @@ const Payments = ({ navigation }) => {
           >
             <Text style={styles.smallButton}>Sort By</Text>
           </TouchableOpacity> */}
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </Pressable>
-          <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
-      </Pressable>
-      <View style={{ alignItems: "flex-end", width: "100%", paddingRight: 20 }}>
-        <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
-          Attendance is validated via two-factor authentication*{"\n"} i.e.
-          worker Check-In & Geolocation Tracking during work hours.
-        </Text>
-      </View>
-      {/* <ScrollView> */}
-      <View
-        style={{
-          backgroundColor: Colors.White,
-          alignItems: "center",
-          margin: 10,
-          //   paddingHorizontal: 8,
-          borderRadius: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 4,
-          width: "93%",
-          flex: 1,
-          // marginBottom: 10
-        }}
-      >
-        {!attendanceList || attendanceList?.length === 0 ? (
-          <ScrollView
-            refreshControl={
-              <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() => {
-                  dispatch(
-                    getAllPaymentsAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0
-                    )
-                  );
-                }}
-                tintColor={Colors.Primary}
-                colors={[Colors.Purple, Colors.Primary]}
-              />
-            }
-            contentContainerStyle={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lexend-Medium",
-                fontSize: 18,
-                color: Colors.Gray,
-              }}
-            >
-              No Record Found!
-            </Text>
-          </ScrollView>
-        ) : (
-          <FlatList
-            refreshControl={
-              <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() => {
-                  dispatch(
-                    getAllPaymentsAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0
-                    )
-                  );
-                }}
-                tintColor={Colors.Primary}
-                colors={[Colors.Purple, Colors.Primary]}
-              />
-            }
-            data={filteredAttendance ? filteredAttendance : paymentsList}
-            renderItem={({ item, index }) => <Item item={item} index={index} />}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={ListHeader}
-            stickyHeaderIndices={[0]}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
-      <Spacer bottom={50} />
-      <View
-        style={{
-          width: "93%",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          position: "absolute",
-          bottom: 10,
-        }}
-      >
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            navigation.navigate("PayOnline", {
-              selectedUser,
-              projectId: selectedProject?.projectId,
-            })
-          }
-        >
-          <Text style={styles.buttonText}>Pay Online</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: Colors.Secondary }]}
-        >
-          <Text style={styles.buttonText}>Pay Offline</Text>
-        </TouchableOpacity>
-      </View>
-      <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
-      >
-        <View style={{ width: "100%" }}>
-          <View
-            style={{
-              width: "100%",
-              padding: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <View style={{ width: "12%" }}>
-              <BackIcon
+              <Pressable
                 onPress={() => {
-                  setOpenSearchModal(false);
+                  setOpenFilterModal(true);
                 }}
-                size={30}
-                color={Colors.Black}
-              />
-            </View>
-            <View style={{ width: "88%" }}>
-              <Text
                 style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Black,
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
                 }}
               >
-                Search
-              </Text>
+                <Text style={styles.smallButton}>Filter</Text>
+              </Pressable>
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 7,
+                }}
+              >
+                <Search size={13} color={Colors.Secondary} />
+              </TouchableOpacity>
             </View>
+          </Pressable>
+          <View
+            style={{ alignItems: "flex-end", width: "100%", paddingRight: 20 }}
+          >
+            <Text
+              style={{ fontSize: 10, textAlign: "right", color: Colors.White }}
+            >
+              Attendance is validated via two-factor authentication*{"\n"} i.e.
+              worker Check-In & Geolocation Tracking during work hours.
+            </Text>
           </View>
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Searchbar
-              style={{
-                backgroundColor: "#F1F5F8",
-                borderRadius: 5,
-                width: "90%",
-              }}
-              placeholder="Search Project"
-              placeholderTextColor={Colors.FormText}
-              mode="bar"
-              icon={() => <Search size={20} color={Colors.Black} />}
-              clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-              onChangeText={(text) => searchFilterFunction(text)}
-              value={search}
-            />
-          </View>
-          <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
-            <FlatList
-              data={filteredDataSource}
-              renderItem={({ item }) => (
-                <Pressable
+          {/* <ScrollView> */}
+          <View
+            style={{
+              backgroundColor: Colors.White,
+              alignItems: "center",
+              margin: 10,
+              //   paddingHorizontal: 8,
+              borderRadius: 10,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.2,
+              shadowRadius: 5,
+              elevation: 4,
+              width: "93%",
+              flex: 1,
+              // marginBottom: 10
+            }}
+          >
+            {!attendanceList || attendanceList?.length === 0 ? (
+              <ScrollView
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={() => {
+                      dispatch(
+                        getAllPaymentsAction(
+                          token,
+                          selectedProject?.projectId ||
+                            projectsListSimple[0]?.projectId,
+                          0
+                        )
+                      );
+                    }}
+                    tintColor={Colors.Primary}
+                    colors={[Colors.Purple, Colors.Primary]}
+                  />
+                }
+                contentContainerStyle={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
                   style={{
-                    width: "88%",
-                    borderWidth: 1,
-                    marginBottom: 5,
-                    alignSelf: "center",
-                    padding: 10,
-                    borderRadius: 7,
-                    borderColor: Colors.FormBorder,
-                  }}
-                  onPress={() => {
-                    setSelectedProject(item);
-                    setOpenSearchModal(false);
-                    setData();
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 18,
+                    color: Colors.Gray,
                   }}
                 >
+                  No Record Found!
+                </Text>
+              </ScrollView>
+            ) : (
+              <FlatList
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={() => {
+                      dispatch(
+                        getAllPaymentsAction(
+                          token,
+                          selectedProject?.projectId ||
+                            projectsListSimple[0]?.projectId,
+                          0
+                        )
+                      );
+                    }}
+                    tintColor={Colors.Primary}
+                    colors={[Colors.Purple, Colors.Primary]}
+                  />
+                }
+                data={filteredAttendance ? filteredAttendance : paymentsList}
+                renderItem={({ item, index }) => (
+                  <Item item={item} index={index} />
+                )}
+                keyExtractor={(item) => item.id}
+                ListHeaderComponent={ListHeader}
+                stickyHeaderIndices={[0]}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </View>
+          <Spacer bottom={50} />
+          <View
+            style={{
+              width: "93%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              position: "absolute",
+              bottom: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("PayOnline", {
+                  selectedUser,
+                  projectId: selectedProject?.projectId,
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Pay Online</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: Colors.Secondary }]}
+            >
+              <Text style={styles.buttonText}>Pay Offline</Text>
+            </TouchableOpacity>
+          </View>
+          <Modal
+            visible={openSearchModal}
+            animationType="slide"
+            onRequestClose={() => {
+              setOpenSearchModal(false);
+            }}
+            presentationStyle="pageSheet"
+          >
+            <View style={{ width: "100%" }}>
+              <View
+                style={{
+                  width: "100%",
+                  padding: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                <View style={{ width: "12%" }}>
+                  <BackIcon
+                    onPress={() => {
+                      setOpenSearchModal(false);
+                    }}
+                    size={30}
+                    color={Colors.Black}
+                  />
+                </View>
+                <View style={{ width: "88%" }}>
                   <Text
                     style={{
-                      fontSize: 14,
-                      fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 18,
+                      color: Colors.Black,
                     }}
                   >
-                    {item.name}
+                    Search
                   </Text>
-                </Pressable>
-              )}
-              keyExtractor={(item) => item.projectId}
-            />
-          </View>
-        </View>
-      </Modal>
+                </View>
+              </View>
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <Searchbar
+                  style={{
+                    backgroundColor: "#F1F5F8",
+                    borderRadius: 5,
+                    width: "90%",
+                  }}
+                  placeholder="Search Project"
+                  placeholderTextColor={Colors.FormText}
+                  mode="bar"
+                  icon={() => <Search size={20} color={Colors.Black} />}
+                  clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                  onChangeText={(text) => searchFilterFunction(text)}
+                  value={search}
+                />
+              </View>
+              <View
+                style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}
+              >
+                <FlatList
+                  data={filteredDataSource}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={{
+                        width: "88%",
+                        borderWidth: 1,
+                        marginBottom: 5,
+                        alignSelf: "center",
+                        padding: 10,
+                        borderRadius: 7,
+                        borderColor: Colors.FormBorder,
+                      }}
+                      onPress={() => {
+                        setSelectedProject(item);
+                        setOpenSearchModal(false);
+                        setData();
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.FormText,
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.projectId}
+                />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <RestrictedScreen />
+      )}
       {renderFilterModal()}
     </View>
   );

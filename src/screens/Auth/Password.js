@@ -24,9 +24,11 @@ import {
 } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
 import messaging from "@react-native-firebase/messaging";
+import { EyeIcon, EyeOffIcon } from "../../icons";
 
 const Password = ({ navigation, route }) => {
   const [password, setPassword] = useState("");
+  const [secureText, setSecureText] = useState(true);
   const loadingState = useSelector(loading);
   const dispatch = useDispatch();
 
@@ -92,20 +94,44 @@ const Password = ({ navigation, route }) => {
           <Text style={styles.headingText}>Password</Text>
           <Text style={styles.text}>Enter your Password to login</Text>
           <View style={styles.inputField}>
-            <Image source={Lock} style={{ paddingRight: 15 }} />
-            <TextInput
+            <View
               style={{
-                flex: 1,
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.Black,
+                width: "100%",
+                flexDirection: "row",
+                alignItems: "center",
               }}
-              placeholder="Password"
-              placeholderTextColor={Colors.Gray}
-              value={password}
-              onChangeText={(e) => setPassword(e)}
-              secureTextEntry={true}
-            />
+            >
+              <Image source={Lock} style={{ paddingRight: 15, width: "5%" }} />
+              <TextInput
+                style={{
+                  flex: 1,
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.Black,
+                  width: "85%",
+                }}
+                placeholder="Password"
+                placeholderTextColor={Colors.Gray}
+                value={password}
+                onChangeText={(e) => setPassword(e)}
+                secureTextEntry={secureText}
+              />
+              <View style={{ width: "10%" }}>
+                {!secureText ? (
+                  <EyeOffIcon
+                    onPress={() => setSecureText(true)}
+                    color={Colors.Gray}
+                    size={16}
+                  />
+                ) : (
+                  <EyeIcon
+                    onPress={() => setSecureText(false)}
+                    color={Colors.Gray}
+                    size={16}
+                  />
+                )}
+              </View>
+            </View>
           </View>
           {/* <Text style={styles.forgotText}>Forgotten password?</Text> */}
           <TouchableOpacity

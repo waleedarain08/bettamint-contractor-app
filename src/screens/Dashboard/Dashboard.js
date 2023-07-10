@@ -26,9 +26,10 @@ import {
   loadingUsers,
 } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import { getSkillsAction } from "../../redux/slices/workerSlice";
 import { getAllProjectsSimpleAction } from "../../redux/slices/projectSlice";
+import RestrictedScreen from "../../components/RestrictedScreen";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -89,6 +90,12 @@ const Dashboard = ({ navigation }) => {
   const counts = useSelector(countsReducer);
   const isLoading = useSelector(loadingUsers);
   // console.log("COUNTS", counts);
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isDashboardPresent = roles.some(
+    (item) => item.featureSet.name === "Dashboard"
+  );
   useEffect(() => {
     dispatch(getSkillsAction(token));
     dispatch(getAllProjectsSimpleAction(token));
@@ -119,151 +126,162 @@ const Dashboard = ({ navigation }) => {
       }}
     >
       <View style={styles.header} />
-      <View style={styles.graph}>
-        <View
-          style={{
-            width: "100%",
-            alignItems: "center",
-            marginTop: 15,
-            justifyContent: "center",
-          }}
-        >
-          <Image
-            source={BarChart}
-            style={{
-              height: 190,
-              width: "100%",
-              resizeMode: "contain",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          />
-        </View>
-        <View style={styles.graphBottom}>
-          <View style={[styles.graphBottomTabs]}>
-            <Text style={styles.graphBottomText}>
-              Avg Active {"\n"}Workforce{" "}
-            </Text>
-            <Text style={[styles.graphBottomTextBold]}>350</Text>
-          </View>
-          <View style={styles.graphBottomTabs}>
-            <Text style={styles.graphBottomText}>Average {"\n"}Workforce</Text>
-            <Text
-              style={[styles.graphBottomTextBold, { color: Colors.Primary }]}
+      {isDashboardPresent ? (
+        <>
+          <View style={styles.graph}>
+            <View
+              style={{
+                width: "100%",
+                alignItems: "center",
+                marginTop: 15,
+                justifyContent: "center",
+              }}
             >
-              350
-            </Text>
+              <Image
+                source={BarChart}
+                style={{
+                  height: 190,
+                  width: "100%",
+                  resizeMode: "contain",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              />
+            </View>
+            <View style={styles.graphBottom}>
+              <View style={[styles.graphBottomTabs]}>
+                <Text style={styles.graphBottomText}>
+                  Avg Active {"\n"}Workforce{" "}
+                </Text>
+                <Text style={[styles.graphBottomTextBold]}>350</Text>
+              </View>
+              <View style={styles.graphBottomTabs}>
+                <Text style={styles.graphBottomText}>
+                  Average {"\n"}Workforce
+                </Text>
+                <Text
+                  style={[
+                    styles.graphBottomTextBold,
+                    { color: Colors.Primary },
+                  ]}
+                >
+                  350
+                </Text>
+              </View>
+            </View>
           </View>
-        </View>
-      </View>
-      <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              dispatch(getCountsData(token));
-            }}
-            tintColor={Colors.Primary}
-            colors={[Colors.Purple, Colors.Primary]}
-          />
-        }
-      >
-        {/* <FlatList
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(getCountsData(token));
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+          >
+            {/* <FlatList
           data={DATA}
           renderItem={({ item }) => <Item item={item} />}
           keyExtractor={(item) => item.id}
           numColumns={2}
         /> */}
-        <View
-          style={{
-            width: "96%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={styles.item}>
-            <Text style={styles.title}>{"Total Project"}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/totalprojects.png")}
-                style={{
-                  width: 25,
-                  height: 25,
-                  resizeMode: "contain",
-                }}
-              />
-              <Spacer right={10} />
-              <Text style={styles.num}>{counts?.totalProjects}</Text>
+            <View
+              style={{
+                width: "96%",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={styles.item}>
+                <Text style={styles.title}>{"Total Project"}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/totalprojects.png")}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      resizeMode: "contain",
+                    }}
+                  />
+                  <Spacer right={10} />
+                  <Text style={styles.num}>{counts?.totalProjects}</Text>
+                </View>
+                {/* <Text style={styles.stat}>{item.stat}</Text> */}
+              </View>
+              <View style={styles.item}>
+                <Text style={styles.title}>{"Active Project"}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/totalprojects.png")}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      resizeMode: "contain",
+                    }}
+                  />
+                  <Spacer right={10} />
+                  <Text style={styles.num}>{counts?.activeProjects}</Text>
+                </View>
+                {/* <Text style={styles.stat}>{item.stat}</Text> */}
+              </View>
             </View>
-            {/* <Text style={styles.stat}>{item.stat}</Text> */}
-          </View>
-          <View style={styles.item}>
-            <Text style={styles.title}>{"Active Project"}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/totalprojects.png")}
-                style={{
-                  width: 25,
-                  height: 25,
-                  resizeMode: "contain",
-                }}
-              />
-              <Spacer right={10} />
-              <Text style={styles.num}>{counts?.activeProjects}</Text>
+            <View
+              style={{
+                width: "96%",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View style={styles.item}>
+                <Text style={styles.title}>{"Total Workers"}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/totalprojects.png")}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      resizeMode: "contain",
+                    }}
+                  />
+                  <Spacer right={10} />
+                  <Text style={styles.num}>{counts?.totalWorkers}</Text>
+                </View>
+                {/* <Text style={styles.stat}>{item.stat}</Text> */}
+              </View>
+              <View style={styles.item}>
+                <Text style={styles.title}>{"Active Workers"}</Text>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <Image
+                    source={require("../../assets/images/totalprojects.png")}
+                    style={{
+                      width: 25,
+                      height: 25,
+                      resizeMode: "contain",
+                    }}
+                  />
+                  <Spacer right={10} />
+                  <Text style={styles.num}>{counts?.activeWorkers}</Text>
+                </View>
+                {/* <Text style={styles.stat}>{item.stat}</Text> */}
+              </View>
             </View>
-            {/* <Text style={styles.stat}>{item.stat}</Text> */}
-          </View>
-        </View>
-        <View
-          style={{
-            width: "96%",
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={styles.item}>
-            <Text style={styles.title}>{"Total Workers"}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Spacer bottom={10} />
+            <View style={styles.scrollGraph}>
               <Image
-                source={require("../../assets/images/totalprojects.png")}
-                style={{
-                  width: 25,
-                  height: 25,
-                  resizeMode: "contain",
-                }}
+                source={LineChart}
+                style={{ height: 190, width: 340, resizeMode: "contain" }}
               />
-              <Spacer right={10} />
-              <Text style={styles.num}>{counts?.totalWorkers}</Text>
             </View>
-            {/* <Text style={styles.stat}>{item.stat}</Text> */}
-          </View>
-          <View style={styles.item}>
-            <Text style={styles.title}>{"Active Workers"}</Text>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <Image
-                source={require("../../assets/images/totalprojects.png")}
-                style={{
-                  width: 25,
-                  height: 25,
-                  resizeMode: "contain",
-                }}
-              />
-              <Spacer right={10} />
-              <Text style={styles.num}>{counts?.activeWorkers}</Text>
-            </View>
-            {/* <Text style={styles.stat}>{item.stat}</Text> */}
-          </View>
-        </View>
-        <Spacer bottom={10} />
-        <View style={styles.scrollGraph}>
-          <Image
-            source={LineChart}
-            style={{ height: 190, width: 340, resizeMode: "contain" }}
-          />
-        </View>
-      </ScrollView>
+          </ScrollView>
+        </>
+      ) : (
+        <RestrictedScreen />
+      )}
     </View>
   );
 };

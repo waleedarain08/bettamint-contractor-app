@@ -80,7 +80,7 @@ import {
   selectWorkerAction,
   selectedWorkerReducer,
 } from "../redux/slices/workerSlice";
-import { authToken } from "../redux/slices/authSlice";
+import { authToken, userData } from "../redux/slices/authSlice";
 import { navigationRef } from "./NavigationRef";
 import {
   selectProjectAction,
@@ -100,302 +100,322 @@ const UserStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 LogBox.ignoreAllLogs();
 
-const PaymentNavigator = ({ navigation }) => (
-  <PaymentStack.Navigator
-    screenOptions={{
-      headerBackTitleVisible: false,
-      headerShadowVisible: false,
-      headerTintColor: Colors.White,
-      headerStyle: {
-        backgroundColor: Colors.Primary,
-      },
-    }}
-  >
-    <PaymentStack.Screen
-      name="PaymentStack"
-      component={Payments}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-              marginHorizontal: 13,
-            }}
-          >
-            Payment
-          </Text>
-        ),
-        headerLeft: () => (
-          <Pressable onPress={() => navigation.openDrawer()}>
-            <MenuIcon size={30} color={Colors.White} />
-          </Pressable>
-        ),
-        headerRight: () => (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Pressable
-              style={{
-                height: 30,
-                width: 30,
-                backgroundColor: Colors.Purple,
-                borderRadius: 15,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              onPress={() => {
-                navigation.navigate("PaymentHistory");
-              }}
-            >
-              <RestoreIcon size={22} color={Colors.White} />
-            </Pressable>
-            <Pressable
-              style={{ marginLeft: 8 }}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 8 }}
-              />
-            </Pressable>
-            <Pressable
-              style={{
-                marginLeft: 0,
-                height: 30,
-                width: 30,
-                backgroundColor: Colors.Purple,
-                borderRadius: 15,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <NotificationIcon size={22} color={Colors.White} />
-            </Pressable>
-          </View>
-        ),
-      }}
-    />
-    <PaymentStack.Screen
-      name="PaymentMusterCard"
-      component={PaymentMusterCard}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Muster Roll
-          </Text>
-        ),
-        headerRight: () => (
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Pressable
-              style={{ marginLeft: 8 }}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 8 }}
-              />
-            </Pressable>
-          </View>
-        ),
-      }}
-    />
-    <PaymentStack.Screen
-      name="PayOnline"
-      component={PayOnline}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Pay Online
-          </Text>
-        ),
-      }}
-    />
-    <PaymentStack.Screen
-      name="PaymentHistory"
-      component={PaymentHistory}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Payment History
-          </Text>
-        ),
-      }}
-    />
-    <PaymentStack.Screen
-      name="PaymentInvoice"
-      component={PaymentInvoice}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Payment Invoice
-          </Text>
-        ),
-      }}
-    />
-  </PaymentStack.Navigator>
-);
+const PaymentNavigator = ({ navigation }) => {
+  const userInfo = useSelector(userData);
 
-const JobsNavigator = ({ navigation }) => (
-  <JobStack.Navigator
-    screenOptions={{
-      headerBackTitleVisible: false,
-      headerShadowVisible: false,
-      headerTintColor: Colors.White,
-      headerStyle: {
-        backgroundColor: Colors.Primary,
-      },
-    }}
-  >
-    <JobStack.Screen
-      name="JobStack"
-      component={Jobs}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-              marginHorizontal: 13,
-            }}
-          >
-            Jobs
-          </Text>
-        ),
-        headerLeft: () => (
-          <Pressable onPress={() => navigation.openDrawer()}>
-            <MenuIcon size={30} color={Colors.White} />
-          </Pressable>
-        ),
-        headerRight: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Pressable
-              onPress={() => {
-                navigation.navigate("CreateNewJob");
-              }}
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isPaymentListPresent = roles.some(
+    (item) => item.featureSet.name === "Payment List"
+  );
+
+  return (
+    <PaymentStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerShadowVisible: false,
+        headerTintColor: Colors.White,
+        headerStyle: {
+          backgroundColor: Colors.Primary,
+        },
+      }}
+    >
+      <PaymentStack.Screen
+        name="PaymentStack"
+        component={Payments}
+        options={{
+          headerTitle: () => (
+            <Text
               style={{
-                backgroundColor: Colors.Purple,
-                padding: 5,
-                borderRadius: 15,
-                paddingHorizontal: 10,
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                marginHorizontal: 13,
               }}
             >
-              <View
+              Payment
+            </Text>
+          ),
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              {isPaymentListPresent && (
+                <Pressable
+                  style={{
+                    height: 30,
+                    width: 30,
+                    backgroundColor: Colors.Purple,
+                    borderRadius: 15,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                  onPress={() => {
+                    navigation.navigate("PaymentHistory");
+                  }}
+                >
+                  <RestoreIcon size={22} color={Colors.White} />
+                </Pressable>
+              )}
+              <Pressable
+                style={{ marginLeft: 8 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
                   alignItems: "center",
                 }}
               >
-                <PlusIcon size={20} color={Colors.White} />
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 11,
-                    color: Colors.White,
-                  }}
-                >
-                  New Job
-                </Text>
-              </View>
-            </Pressable>
-            <Pressable
-              style={{ marginLeft: 8 }}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 8 }}
-              />
-            </Pressable>
-            <Pressable
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <PaymentStack.Screen
+        name="PaymentMusterCard"
+        component={PaymentMusterCard}
+        options={{
+          headerTitle: () => (
+            <Text
               style={{
-                marginLeft: 0,
-                height: 30,
-                width: 30,
-                backgroundColor: Colors.Purple,
-                borderRadius: 15,
-                justifyContent: "center",
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Muster Roll
+            </Text>
+          ),
+          headerRight: () => (
+            <View style={{ flexDirection: "row", alignItems: "center" }}>
+              <Pressable
+                style={{ marginLeft: 8 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <PaymentStack.Screen
+        name="PayOnline"
+        component={PayOnline}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Pay Online
+            </Text>
+          ),
+        }}
+      />
+      <PaymentStack.Screen
+        name="PaymentHistory"
+        component={PaymentHistory}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Payment History
+            </Text>
+          ),
+        }}
+      />
+      <PaymentStack.Screen
+        name="PaymentInvoice"
+        component={PaymentInvoice}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Payment Invoice
+            </Text>
+          ),
+        }}
+      />
+    </PaymentStack.Navigator>
+  );
+};
+
+const JobsNavigator = ({ navigation }) => {
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isJobsListPresent = roles.some(
+    (item) => item.featureSet.name === "Jobs List"
+  );
+  return (
+    <JobStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerShadowVisible: false,
+        headerTintColor: Colors.White,
+        headerStyle: {
+          backgroundColor: Colors.Primary,
+        },
+      }}
+    >
+      <JobStack.Screen
+        name="JobStack"
+        component={Jobs}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                marginHorizontal: 13,
+              }}
+            >
+              Jobs
+            </Text>
+          ),
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
                 alignItems: "center",
               }}
             >
-              <NotificationIcon size={22} color={Colors.White} />
-            </Pressable>
-          </View>
-        ),
-      }}
-    />
-    <JobStack.Screen
-      name="CreateNewJob"
-      component={CreateNewJob}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Create New Job
-          </Text>
-        ),
-      }}
-    />
-    <JobStack.Screen
-      name="JobDetails"
-      component={JobDetails}
-      options={{
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-            }}
-          >
-            Job Details
-          </Text>
-        ),
-        headerRight: () => (
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            {/* <Pressable
+              {isJobsListPresent && (
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate("CreateNewJob");
+                  }}
+                  style={{
+                    backgroundColor: Colors.Purple,
+                    padding: 5,
+                    borderRadius: 15,
+                    paddingHorizontal: 10,
+                  }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                    }}
+                  >
+                    <PlusIcon size={20} color={Colors.White} />
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        fontSize: 11,
+                        color: Colors.White,
+                      }}
+                    >
+                      New Job
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
+              <Pressable
+                style={{ marginLeft: 8 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <JobStack.Screen
+        name="CreateNewJob"
+        component={CreateNewJob}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Create New Job
+            </Text>
+          ),
+        }}
+      />
+      <JobStack.Screen
+        name="JobDetails"
+        component={JobDetails}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+              }}
+            >
+              Job Details
+            </Text>
+          ),
+          headerRight: () => (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              {/* <Pressable
               onPress={() => {
                 navigation.navigate("CreateNewJob");
               }}
@@ -426,23 +446,30 @@ const JobsNavigator = ({ navigation }) => (
                 </Text>
               </View>
             </Pressable> */}
-            <Pressable
-              style={{ marginLeft: 10 }}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 16 }}
-              />
-            </Pressable>
-          </View>
-        ),
-      }}
-    />
-  </JobStack.Navigator>
-);
+              <Pressable
+                style={{ marginLeft: 10 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 16 }}
+                />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+    </JobStack.Navigator>
+  );
+};
 
 const AttendanceNavigator = ({ navigation }) => {
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isAttendanceListPresent = roles.some(
+    (item) => item.featureSet.name === "Attendance List"
+  );
   return (
     <AttendanceStack.Navigator
       screenOptions={{
@@ -484,95 +511,45 @@ const AttendanceNavigator = ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              <Pressable
-                onPress={() => {
-                  navigation.navigate("ApproveAttendance");
-                }}
-                style={{
-                  backgroundColor: Colors.Purple,
-                  paddingVertical: 8,
-                  borderRadius: 14,
-                  paddingHorizontal: 7,
-                }}
-              >
-                <View
-                  style={{
-                    // flexDirection: "row",
-                    // justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <Text
+              {isAttendanceListPresent && (
+                <>
+                  <Pressable
+                    onPress={() => {
+                      navigation.navigate("ApproveAttendance");
+                    }}
                     style={{
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 10,
-                      color: Colors.White,
+                      backgroundColor: Colors.Purple,
+                      paddingVertical: 8,
+                      borderRadius: 14,
+                      paddingHorizontal: 7,
                     }}
                   >
-                    Today's Muster Roll
-                  </Text>
-                </View>
-              </Pressable>
-              {/* <Pressable
-								style={{
-									backgroundColor: Colors.Purple,
-									paddingVertical: 8,
-									borderRadius: 14,
-									paddingHorizontal: 7,
-									marginLeft: 5
-								}}
-							>
-								<View
-									style={{
-										// flexDirection: "row",
-										// justifyContent: "space-between",
-										alignItems: "center",
-									}}
-								>
-									<Text
-										style={{
-											fontFamily: "Lexend-Medium",
-											fontSize: 10,
-											color: Colors.White,
-										}}
-									>
-										DAR
-									</Text>
-								</View>
-							</Pressable>
-							<Pressable
-								style={{
-									backgroundColor: Colors.Purple,
-									paddingVertical: 8,
-									borderRadius: 14,
-									paddingHorizontal: 7,
-									marginLeft: 5
-								}}
-							>
-								<View
-									style={{
-										// flexDirection: "row",
-										// justifyContent: "space-between",
-										alignItems: "center",
-									}}
-								>
-									<Text
-										style={{
-											fontFamily: "Lexend-Medium",
-											fontSize: 10,
-											color: Colors.White,
-										}}
-									>
-										DLR
-									</Text>
-								</View>
-							</Pressable> */}
-              <Pressable style={{ marginLeft: 5 }}>
-                <Image
-                  source={require("../assets/icons/download.png")}
-                  style={{ height: 30, width: 30, marginRight: 0 }}
-                />
-              </Pressable>
+                    <View
+                      style={{
+                        // flexDirection: "row",
+                        // justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: "Lexend-Medium",
+                          fontSize: 10,
+                          color: Colors.White,
+                        }}
+                      >
+                        Today's Muster Roll
+                      </Text>
+                    </View>
+                  </Pressable>
+                  <Pressable style={{ marginLeft: 5 }}>
+                    <Image
+                      source={require("../assets/icons/download.png")}
+                      style={{ height: 30, width: 30, marginRight: 0 }}
+                    />
+                  </Pressable>
+                </>
+              )}
               <Pressable
                 style={{ marginLeft: 5 }}
                 onPress={() => navigation.navigate("Profile")}
@@ -832,6 +809,12 @@ const WorkersNavigator = ({ navigation }) => {
 
 const ProjectNavigator = ({ navigation }) => {
   const project = useSelector(selectedProjectReducer);
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isProjectListPresent = roles.some(
+    (item) => item.featureSet.name === "Project List"
+  );
   const dispatch = useDispatch();
   return (
     <ProjectStack.Navigator
@@ -875,37 +858,39 @@ const ProjectNavigator = ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              <Pressable
-                onPress={() => {
-                  navigation.navigate("CreateNewProject");
-                  dispatch(selectProjectAction(null));
-                }}
-                style={{
-                  backgroundColor: Colors.Purple,
-                  padding: 5,
-                  borderRadius: 12,
-                  paddingHorizontal: 10,
-                }}
-              >
-                <View
+              {isProjectListPresent && (
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate("CreateNewProject");
+                    dispatch(selectProjectAction(null));
+                  }}
                   style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+                    backgroundColor: Colors.Purple,
+                    padding: 5,
+                    borderRadius: 12,
+                    paddingHorizontal: 10,
                   }}
                 >
-                  <PlusIcon size={20} color={Colors.White} />
-                  <Text
+                  <View
                     style={{
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 11,
-                      color: Colors.White,
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
                     }}
                   >
-                    New Project
-                  </Text>
-                </View>
-              </Pressable>
+                    <PlusIcon size={20} color={Colors.White} />
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        fontSize: 11,
+                        color: Colors.White,
+                      }}
+                    >
+                      New Project
+                    </Text>
+                  </View>
+                </Pressable>
+              )}
               <Pressable
                 style={{ marginLeft: 8 }}
                 onPress={() => navigation.navigate("Profile")}
