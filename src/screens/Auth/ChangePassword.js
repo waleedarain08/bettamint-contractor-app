@@ -10,18 +10,13 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import Vector from "../../assets/images/bgvector.png";
-import Profile from "../../assets/icons/Profile.png";
+import Lock from "../../assets/icons/Lock.png";
 import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
 import { Switch } from "react-native-paper";
 import Toast from "react-native-toast-message";
-const Login = ({ navigation }) => {
-	const [contactType, setContactType] = useState("email");
-	const [username, setUsername] = useState("");
-
-	//   const handleToggleSwitch = () => {
-	//     setContactType(contactType === "email" ? "phone" : "email");
-	//   };
+const ChangePassword = ({ navigation }) => {
+	const [password, setPassword] = useState("");
 	const handleButtonPress = () => {
 		if (username.trim() === "") {
 			Toast.show({
@@ -34,20 +29,15 @@ const Login = ({ navigation }) => {
 			});
 			return;
 		}
-		navigation.navigate("Password", { username: username });
 	};
 	return (
 		<View style={styles.container}>
 			<View style={{ padding: 40 }}>
 				<View>
-					<Text style={styles.headingText}>Get Started</Text>
-					<Text style={styles.text}>Enter you Email Address</Text>
-					{/* <Switch
-            value={contactType === "phone"}
-            onValueChange={handleToggleSwitch}
-          /> */}
+					<Text style={styles.headingText}>Change Password</Text>
+					<Text style={[styles.text, { paddingTop: 10 }]}>Old Password</Text>
 					<View style={styles.inputField}>
-						<Image source={Profile} style={{ paddingRight: 15 }} />
+						<Image source={Lock} style={{ paddingRight: 15 }} />
 						<TextInput
 							style={{
 								flex: 1,
@@ -55,51 +45,63 @@ const Login = ({ navigation }) => {
 								fontSize: 13,
 								color: Colors.Black,
 							}}
-							placeholder={"Email"}
+							placeholder="Old Password"
+							placeholderTextColor={Colors.Gray}
+							value={password}
+							onChangeText={(e) => setPassword(e)}
+							secureTextEntry={true}
+						/>
+					</View>
+					<Text style={[styles.text, { paddingTop: 10 }]}>New Password</Text>
+					<View style={styles.inputField}>
+						<Image source={Lock} style={{ paddingRight: 15 }} />
+						<TextInput
+							style={{
+								flex: 1,
+								fontFamily: "Lexend-Regular",
+								fontSize: 13,
+								color: Colors.Black,
+							}}
+							placeholder={"New Password"}
 							placeholderTextColor={Colors.Gray}
 							mode="outlined"
-							value={username}
-							onChangeText={(e) => setUsername(e)}
-							keyboardType={"email-address"}
+							secureTextEntry={true}
 						/>
-						{/* <TextInput
-              style={{
-                flex: 1,
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.Black,
-              }}
-              placeholder={contactType === "email" ? "Email" : "Phone"}
-              placeholderTextColor={Colors.Gray}
-              mode="outlined"
-              keyboardType={
-                contactType === "email" ? "email-address" : "phone-pad"
-              }
-            /> */}
 					</View>
-
+					<Text style={[styles.text, { paddingTop: 10 }]}>
+						Confirm Password
+					</Text>
+					<View style={styles.inputField}>
+						<Image source={Lock} style={{ paddingRight: 15 }} />
+						<TextInput
+							style={{
+								flex: 1,
+								fontFamily: "Lexend-Regular",
+								fontSize: 13,
+								color: Colors.Black,
+							}}
+							placeholder={"Confirm Password"}
+							placeholderTextColor={Colors.Gray}
+							mode="outlined"
+							secureTextEntry={true}
+						/>
+					</View>
 					<TouchableOpacity
 						style={styles.button}
-						// disabled={!username}
 						onPress={() => {
-							handleButtonPress();
+							// handleButtonPress();
+							navigation.navigate("ChangePassword");
 						}}
 					>
-						<Text style={styles.buttonText}>Next</Text>
+						<Text style={styles.buttonText}>Submit</Text>
 					</TouchableOpacity>
 				</View>
 			</View>
-			<Pressable
-				style={styles.bottomView}
-				onPress={() => navigation.navigate("ForgotPassword")}
-			>
-				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
-			</Pressable>
 		</View>
 	);
 };
 
-export default Login;
+export default ChangePassword;
 
 const styles = StyleSheet.create({
 	container: {
@@ -128,7 +130,7 @@ const styles = StyleSheet.create({
 		borderColor: "#C4C4C4",
 		borderWidth: 1,
 		borderRadius: 4,
-		marginTop: 15,
+		marginTop: 10,
 		backgroundColor: Colors.White,
 		paddingLeft: 10,
 	},
