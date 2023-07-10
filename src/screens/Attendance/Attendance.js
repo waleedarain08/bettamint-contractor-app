@@ -9,10 +9,11 @@ import {
   Dimensions,
   LogBox,
   Pressable,
-  Modal,
+  //Modal,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import Modal  from "react-native-modal";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
@@ -155,27 +156,33 @@ const Attendance = ({ navigation }) => {
   const renderSearchModal = () => {
     return (
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={openSearchUserModal}
-        onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
-          setOpenSearchUserModal(!openSearchUserModal);
-        }}
+        // animationType="slide"
+        // transparent={true}
+        // visible={openSearchUserModal}
+        // onRequestClose={() => {
+        //   // Alert.alert("Modal has been closed.");
+        //   setOpenSearchUserModal(!openSearchUserModal);
+        // }}
+        isVisible={openSearchUserModal}
+         useNativeDriver={true}
+         backdropColor={Colors.DarkGray}
+         backdropOpacity={0.6}
+         backdropTransitionInTiming={200}
+         onBackdropPress={() => setOpenSearchModal(!openSearchUserModal)}
       >
         <View
           style={{
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.2)",
+           // backgroundColor: "rgba(0,0,0,0.2)",
             //   width: '90%',
             //   height: 200
           }}
         >
           <View
             style={{
-              width: "80%",
+              width: "88%",
               backgroundColor: Colors.White,
               // height: 200,
               borderRadius: 10,
@@ -251,14 +258,18 @@ const Attendance = ({ navigation }) => {
   const renderFilterModal = () => {
     return (
       <Modal
-        animationType="slide"
-        // transparent={true}
-        visible={openFilterModal}
-        onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
-          setOpenFilterModal(openFilterModal);
-        }}
-        presentationStyle="pageSheet"
+      isVisible={openFilterModal}
+      useNativeDriver={true}
+      backdropColor={Colors.DarkGray}
+      backdropOpacity={0.6}
+      backdropTransitionInTiming={200}
+      onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
+        // animationType="slide"
+        // visible={openFilterModal}
+        // onRequestClose={() => {
+        //   setOpenFilterModal(openFilterModal);
+        // }}
+        // presentationStyle="pageSheet"
       >
         <View
           style={{
@@ -275,7 +286,7 @@ const Attendance = ({ navigation }) => {
             style={{
               width: "100%",
               backgroundColor: Colors.White,
-              // height: 200,
+              height: "90%",
               borderRadius: 10,
               padding: 15,
             }}
@@ -334,9 +345,9 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
-                  By status
+                  By Status
                 </Text>
               </View>
               <Dropdown
@@ -370,9 +381,9 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
-                  By skills
+                  By Skills
                 </Text>
               </View>
               <Dropdown
@@ -409,7 +420,7 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
                   By Contractor
                 </Text>
@@ -461,14 +472,14 @@ const Attendance = ({ navigation }) => {
   };
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}>
+    <View style={[styles.item]}   key={item.key} >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
-          backgroundColor: rowColors[index % rowColors?.length],
+          backgroundColor: "#ffffff",
           paddingHorizontal: 8,
           paddingVertical: 4,
         }}
@@ -788,6 +799,7 @@ const Attendance = ({ navigation }) => {
             }
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
+            initialNumToRender={0}
             ListHeaderComponent={ListHeader}
             stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
@@ -797,14 +809,19 @@ const Attendance = ({ navigation }) => {
       </View>
       {/* </ScrollView> */}
       <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
+        isVisible={openSearchModal}
+       // animationType="none"
+        useNativeDriver={true}
+        backdropColor={Colors.WhiteGray}
+        backdropOpacity={1}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenSearchModal(false)}
+        // onRequestClose={() => {
+        //   setOpenSearchModal(false);
+        // }}
+        // presentationStyle="fullScreen"
       >
-        <View style={{ width: "100%" }}>
+        <View style={{ width: "100%",flex:1 }}>
           <View
             style={{
               width: "100%",
@@ -869,14 +886,13 @@ const Attendance = ({ navigation }) => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
                     dispatch(saveProjectDataAction(item));
-                    // console.log("selected project", item);
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 14,
                       fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      color: Colors.Black,
                     }}
                   >
                     {item.name}

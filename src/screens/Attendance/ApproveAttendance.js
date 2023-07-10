@@ -331,14 +331,15 @@ const ApproveAttendance = ({ navigation, route }) => {
   );
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}>
+    <View style={[styles.item]}  key={item.key}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
-          backgroundColor: rowColors[index % rowColors?.length],
+         // backgroundColor: rowColors[index % rowColors?.length],
+          backgroundColor: "#ffffff",
           paddingHorizontal: 8,
           paddingVertical: 4,
         }}
