@@ -51,7 +51,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
-  const [currentFilterState, setCurrentFilterState] = useState("");
+  const [currentFilterState, setCurrentFilterState] = useState("Present");
   const token = useSelector(authToken);
   const isLoading = useSelector(loadingAttendance);
   const dispatch = useDispatch();
@@ -467,14 +467,14 @@ const ApproveAttendance = ({ navigation, route }) => {
   );
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}  key={item.key}>
+    <View style={[styles.item]} key={item.key}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
-         // backgroundColor: rowColors[index % rowColors?.length],
+          // backgroundColor: rowColors[index % rowColors?.length],
           backgroundColor: "#ffffff",
           paddingHorizontal: 8,
           paddingVertical: 4,
@@ -569,79 +569,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Online"
-                )
-              );
-              setCurrentFilterState("Online");
-            }}
-            style={{
-              backgroundColor:
-                currentFilterState === "Online" ? "#A179F2" : "#ECE5FC",
-              padding: 5,
-              width: "25%",
-              marginLeft: 8,
-              borderTopLeftRadius: 5,
-              borderBottomLeftRadius: 5,
-              // margin: 5,
-              // borderRadius: 5,
-            }}
-          >
-            <Text
-              style={[
-                styles.smallButton,
-                {
-                  color:
-                    currentFilterState === "Online"
-                      ? Colors.White
-                      : Colors.Secondary,
-                  textAlign: "center",
-                },
-              ]}
-            >{`Online-${
-              filteredDataAttSource?.filter(
-                (ele) => ele.workerTypeId === "Online"
-              )?.length
-            }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Offline"
-                )
-              );
-              setCurrentFilterState("Offline");
-            }}
-            style={{
-              backgroundColor:
-                currentFilterState === "Offline" ? "#A179F2" : "#ECE5FC",
-              padding: 5,
-              width: "25%",
-              // margin: 5,
-              // borderRadius: 5,
-            }}
-          >
-            <Text
-              style={[
-                styles.smallButton,
-                {
-                  color:
-                    currentFilterState === "Offline"
-                      ? Colors.White
-                      : Colors.Secondary,
-                  textAlign: "center",
-                },
-              ]}
-            >{`Offline-${
-              filteredDataAttSource?.filter(
-                (ele) => ele.workerTypeId === "Offline"
-              )?.length
-            }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
                 filteredDataAttSource?.filter((ele) => ele.isOnline === true)
               );
               setCurrentFilterState("Present");
@@ -649,9 +576,11 @@ const ApproveAttendance = ({ navigation, route }) => {
             style={{
               backgroundColor:
                 currentFilterState === "Present" ? "#A179F2" : "#ECE5FC",
-
               padding: 5,
-              width: "20%",
+              width: "25%",
+              marginLeft: 8,
+              borderTopLeftRadius: 5,
+              borderBottomLeftRadius: 5,
               // margin: 5,
               // borderRadius: 5,
             }}
@@ -667,10 +596,12 @@ const ApproveAttendance = ({ navigation, route }) => {
                   textAlign: "center",
                 },
               ]}
-            >{`Present-${
-              filteredDataAttSource?.filter((ele) => ele.isOnline === true)
-                ?.length
-            }`}</Text>
+            >
+              {`Present-${
+                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
+                  ?.length
+              }`}
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
@@ -684,9 +615,6 @@ const ApproveAttendance = ({ navigation, route }) => {
                 currentFilterState === "Absent" ? "#A179F2" : "#ECE5FC",
               padding: 5,
               width: "25%",
-              marginRight: 8,
-              borderTopRightRadius: 5,
-              borderBottomRightRadius: 5,
               // margin: 5,
               // borderRadius: 5,
             }}
@@ -702,10 +630,90 @@ const ApproveAttendance = ({ navigation, route }) => {
                   textAlign: "center",
                 },
               ]}
-            >{`Absent-${
-              filteredDataAttSource?.filter((ele) => ele.isOnline === false)
-                ?.length
-            }`}</Text>
+            >
+              {`Absent-${
+                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
+                  ?.length
+              }`}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Online"
+                )
+              );
+              setCurrentFilterState("Online");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Online" ? "#A179F2" : "#ECE5FC",
+
+              padding: 5,
+              width: "20%",
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Online"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >
+              {`Online-${
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Online"
+                )?.length
+              }`}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Offline"
+                )
+              );
+              setCurrentFilterState("Offline");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Offline" ? "#A179F2" : "#ECE5FC",
+              padding: 5,
+              width: "25%",
+              marginRight: 8,
+              borderTopRightRadius: 5,
+              borderBottomRightRadius: 5,
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Offline"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >
+              {`Offline-${
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Offline"
+                )?.length
+              }`}
+            </Text>
           </TouchableOpacity>
         </View>
 
