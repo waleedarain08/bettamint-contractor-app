@@ -36,6 +36,7 @@ import moment from "moment";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { Searchbar } from "react-native-paper";
+import { usersListReducer } from "../../redux/slices/userSlice";
 LogBox.ignoreAllLogs();
 const ApproveAttendance = ({ navigation, route }) => {
   const [selectedAttendance, setSelectedAttendance] = useState(null);
@@ -46,32 +47,53 @@ const ApproveAttendance = ({ navigation, route }) => {
   const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
   const [masterDataAttSource, setMasterDataAttSource] = useState([]);
   const [searchAttendance, setSearchAttendance] = useState("");
-
+  const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [filteredAttendance, setFilteredAttendance] = useState(null);
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [labourContractors, setLabourContractors] = useState(null);
+  const [currentFilterState, setCurrentFilterState] = useState("");
   const token = useSelector(authToken);
   const isLoading = useSelector(loadingAttendance);
   const dispatch = useDispatch();
   const projectData = useSelector(projectDataReducer);
   const attendance = useSelector(attendanceListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
+  const usersList = useSelector(usersListReducer);
+
   const [openDropdown, setOpenDropdown] = useState(false);
-	// console.log("PROJECT DATA", projectData)
+  // console.log("PROJECT DATA", projectData)
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
   };
-
+  useEffect(() => {
+    setLabourContractors(
+      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
+    );
+  }, [usersList]);
   const handleDropdownClose = () => {
     setOpenDropdown(false);
   };
 
   const modalHeight = openDropdown ? "60%" : "20%";
-  //   console.log(attendance);
+  // console.log('------ATTENDANCE',  attendance[0]);
   useEffect(() => {
     dispatch(
-      getAllAttendanceAction(token,
+      getAllAttendanceAction(
+        token,
         projectData?.projectId || projectsListSimple[0]?.projectId
       )
     );
   }, [projectData]);
+
+  // Convert UTC time to Indian Standard Time
+  const convertTimeToIST = (time) => {
+    let indianTime;
+    if (time) {
+      const utcTime = moment.utc(time);
+      indianTime = utcTime.utcOffset("+05:30").format("MMM DD YYYY, hh:mm A");
+    }
+    return indianTime;
+  };
 
   const attendanceOptions = [
     { label: "P", value: 8 },
@@ -115,6 +137,119 @@ const ApproveAttendance = ({ navigation, route }) => {
       setSearchAttendance(text);
     }
   };
+
+  const renderFilterModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        // transparent={true}
+        visible={openFilterModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenFilterModal(openFilterModal);
+        }}
+        presentationStyle="pageSheet"
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            // justifyContent: "center",
+            // backgroundColor: "rgba(0,0,0)",
+            //   width: '90%',
+            //   height: 200
+            marginTop: 30,
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Filter
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenFilterModal(!openFilterModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+
+            <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                >
+                  By Contractor
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={labourContractors?.map((ele) => ({
+                  label: ele?.fullName,
+                  value: ele?.userId,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={selectedContractor}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedContractor(item);
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      projectData?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      item?.value
+                    )
+                  );
+                  setFilteredAttendance(
+                    attendance?.filter((ele) => ele.sKillName === item?.value)
+                  );
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const renderSearchModal = () => {
     return (
       <Modal
@@ -313,7 +448,8 @@ const ApproveAttendance = ({ navigation, route }) => {
                     );
                     setTimeout(() => {
                       dispatch(
-                        getAllAttendanceAction(token,
+                        getAllAttendanceAction(
+                          token,
                           projectData?.projectId ||
                             projectsListSimple[0]?.projectId
                         )
@@ -382,16 +518,18 @@ const ApproveAttendance = ({ navigation, route }) => {
         </View>
         <View style={{ width: "18%" }}>
           <Text style={styles.flatListText}>
-            {item?.todayCheckIn
+            {item?.todayCheckIn ? convertTimeToIST(item?.todayCheckIn) : "--"}
+            {/* {item?.todayCheckIn
               ? moment(item?.todayCheckIn).format("MMM DD YYYY, hh:mm A")
-              : "--"}
+            : "--"} */}
           </Text>
         </View>
         <View style={{ width: "18%" }}>
           <Text style={styles.flatListText}>
-            {item?.todayCheckOut
+            {item?.todayCheckOut ? convertTimeToIST(item?.todayCheckOut) : "--"}
+            {/* {item?.todayCheckOut
               ? moment(item?.todayCheckOut).format("MMM DD YYYY, hh:mm A")
-              : "--"}
+              : "--"} */}
           </Text>
         </View>
         <View style={{ width: "18%" }}>
@@ -421,6 +559,157 @@ const ApproveAttendance = ({ navigation, route }) => {
       <View style={[styles.item]}>
         <View
           style={{
+            width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 8,
+          }}
+        >
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Online"
+                )
+              );
+              setCurrentFilterState("Online");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Online" ? "#A179F2" : "#ECE5FC",
+              padding: 5,
+              width: "25%",
+              marginLeft: 8,
+              borderTopLeftRadius: 5,
+              borderBottomLeftRadius: 5,
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Online"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >{`Online-${
+              filteredDataAttSource?.filter(
+                (ele) => ele.workerTypeId === "Online"
+              )?.length
+            }`}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Offline"
+                )
+              );
+              setCurrentFilterState("Offline");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Offline" ? "#A179F2" : "#ECE5FC",
+              padding: 5,
+              width: "25%",
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Offline"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >{`Offline-${
+              filteredDataAttSource?.filter(
+                (ele) => ele.workerTypeId === "Offline"
+              )?.length
+            }`}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
+              );
+              setCurrentFilterState("Present");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Present" ? "#A179F2" : "#ECE5FC",
+
+              padding: 5,
+              width: "20%",
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Present"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >{`Present-${
+              filteredDataAttSource?.filter((ele) => ele.isOnline === true)
+                ?.length
+            }`}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              setFilterAttendance(
+                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
+              );
+              setCurrentFilterState("Absent");
+            }}
+            style={{
+              backgroundColor:
+                currentFilterState === "Absent" ? "#A179F2" : "#ECE5FC",
+              padding: 5,
+              width: "25%",
+              marginRight: 8,
+              borderTopRightRadius: 5,
+              borderBottomRightRadius: 5,
+              // margin: 5,
+              // borderRadius: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.smallButton,
+                {
+                  color:
+                    currentFilterState === "Absent"
+                      ? Colors.White
+                      : Colors.Secondary,
+                  textAlign: "center",
+                },
+              ]}
+            >{`Absent-${
+              filteredDataAttSource?.filter((ele) => ele.isOnline === false)
+                ?.length
+            }`}</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View
+          style={{
             flexDirection: "row",
             alignItems: "center",
             width: "100%",
@@ -428,7 +717,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             // paddingVertical: 15,
             paddingHorizontal: 8,
             backgroundColor: Colors.White,
-            height: 50,
+            height: 30,
             // borderRadius: 10
             borderTopLeftRadius: 10,
             borderTopRightRadius: 25,
@@ -458,15 +747,23 @@ const ApproveAttendance = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <View style={styles.graph}>
-        <View
+      <Pressable
+        // onPress={() => {
+        //   setOpenSearchModal(true);
+        // }}
+        style={styles.graph}
+      >
+        <Pressable
+          onPress={() => {
+            setOpenSearchModal(true);
+          }}
           style={{
             flexDirection: "row",
             justifyContent: "space-between",
             alignItems: "center",
           }}
         >
-          {/* <View
+          <View
             style={{
               backgroundColor: "#F7F8F9",
               borderRadius: 50,
@@ -478,7 +775,78 @@ const ApproveAttendance = ({ navigation, route }) => {
           >
             <Building size={20} color={Colors.LightGray} />
           </View>
-          <Text style={styles.selectText}>Select Project</Text> */}
+          <View>
+            <Text style={styles.selectText}>Contractor Name</Text>
+            <Text
+              style={[
+                styles.selectText,
+                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+              ]}
+            >
+              {selectedContractor
+                ? selectedContractor.label
+                : "Select a Contractor"}
+              {/* {selectedProject
+                ? selectedProject?.name
+                : projectsListSimple
+                ? projectsListSimple[0]?.name
+                : "Select a project"} */}
+            </Text>
+          </View>
+        </Pressable>
+        <View style={{ flexDirection: "row" }}>
+          {/* <TouchableOpacity
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
+            }}
+          >
+            <Text style={styles.smallButton}>Sort By</Text>
+          </TouchableOpacity> */}
+          <Pressable
+            onPress={() => {
+              setOpenFilterModal(true);
+            }}
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 3,
+              paddingHorizontal: 9,
+              paddingVertical: 7,
+            }}
+          >
+            <Text style={styles.smallButton}>Filter</Text>
+          </Pressable>
+          <TouchableOpacity
+            onPress={() => setOpenSearchUserModal(true)}
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              margin: 5,
+              borderRadius: 3,
+              paddingHorizontal: 7,
+            }}
+          >
+            <Search size={13} color={Colors.Secondary} />
+          </TouchableOpacity>
+        </View>
+      </Pressable>
+      {/* <View style={styles.graph}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+          }}
+        >
+          
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
@@ -573,7 +941,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             <Search size={15} color={Colors.Secondary} />
           </TouchableOpacity>
         </View>
-      </View>
+      </View> */}
       <View
         style={{ alignItems: "flex-end", marginHorizontal: 0, width: "93%" }}
       >
@@ -623,6 +991,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       {/* </ScrollView> */}
       {renderApproveModal()}
       {renderSearchModal()}
+      {renderFilterModal()}
     </View>
   );
 };
