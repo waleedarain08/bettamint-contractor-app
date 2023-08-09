@@ -30,13 +30,18 @@ import {
   attendanceListReducer,
   getAttendanceApproveAction,
   loadingAttendance,
+  markAttendance,
 } from "../../redux/slices/attendanceSlice";
 import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { Searchbar } from "react-native-paper";
-import { usersListReducer } from "../../redux/slices/userSlice";
+import {
+  getLabourContactorAction,
+  labourContractorReducer,
+  usersListReducer,
+} from "../../redux/slices/userSlice";
 LogBox.ignoreAllLogs();
 const ApproveAttendance = ({ navigation, route }) => {
   const [selectedAttendance, setSelectedAttendance] = useState(null);
@@ -59,23 +64,24 @@ const ApproveAttendance = ({ navigation, route }) => {
   const attendance = useSelector(attendanceListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const usersList = useSelector(usersListReducer);
-
+  const labourContractorList = useSelector(labourContractorReducer);
   const [openDropdown, setOpenDropdown] = useState(false);
-  // console.log("PROJECT DATA", projectData)
+
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
   };
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
-    );
-  }, [usersList]);
+
   const handleDropdownClose = () => {
     setOpenDropdown(false);
   };
 
   const modalHeight = openDropdown ? "60%" : "20%";
-  // console.log('------ATTENDANCE',  attendance[0]);
+
+  // console.log(
+  //   "LIST>>>",
+  //   attendance?.filter((ele) => ele.workerName === "Ranjan Haldar")
+  // );
+
   useEffect(() => {
     dispatch(
       getAllAttendanceAction(
@@ -110,9 +116,46 @@ const ApproveAttendance = ({ navigation, route }) => {
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
   useEffect(() => {
+    if (currentFilterState === "Present") {
+      setFilterAttendance(attendance?.filter((ele) => ele.isOnline === true));
+    } else if (currentFilterState === "Offline") {
+      setFilterAttendance(
+        attendance?.filter((ele) => ele.workerTypeId === "Offline")
+      );
+    } else if (currentFilterState === "Online") {
+      setFilterAttendance(
+        attendance?.filter((ele) => ele.workerTypeId === "Online")
+      );
+    }
     setFilteredDataAttSource(attendance);
     setMasterDataAttSource(attendance);
   }, [attendance]);
+
+  const handleOfflineWorkerAttendance = async (
+    workerId,
+    jobId,
+    attendanceType
+  ) => {
+    console.log("DATA", workerId, jobId, attendanceType);
+    let resp = await dispatch(
+      markAttendance(token, workerId, jobId, attendanceType)
+    );
+    if (resp?.status === 200) {
+      let key = attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
+      let updatedArray = filterAttendance.map((item) =>
+        item.workerId === workerId
+          ? {
+              ...item,
+              [key]: moment.utc(),
+            }
+          : item
+      );
+      setFilterAttendance(updatedArray);
+    } else {
+      console.log("ERROR");
+    }
+  };
+
   const searchFilterAttendanceFunction = (text) => {
     // Check if searched text is not blank
     console.log("TEXT", text);
@@ -218,10 +261,14 @@ const ApproveAttendance = ({ navigation, route }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
-                  label: ele?.fullName,
-                  value: ele?.userId,
-                }))}
+                data={
+                  labourContractorList?.length
+                    ? labourContractorList?.map((ele) => ({
+                        label: ele?.fullName,
+                        value: ele?.userId,
+                      }))
+                    : []
+                }
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
@@ -238,9 +285,9 @@ const ApproveAttendance = ({ navigation, route }) => {
                       item?.value
                     )
                   );
-                  setFilteredAttendance(
-                    attendance?.filter((ele) => ele.sKillName === item?.value)
-                  );
+                  // setFilteredAttendance(
+                  //   attendance?.filter((ele) => ele.sKillName === item?.value)
+                  // );
                 }}
               />
             </View>
@@ -490,7 +537,7 @@ const ApproveAttendance = ({ navigation, route }) => {
               styles.flatListText,
               {
                 textAlign: "left",
-                textTransform: "uppercase",
+                // textTransform: "uppercase",
                 fontSize: 10,
                 color: Colors.ListItemText,
               },
@@ -517,40 +564,132 @@ const ApproveAttendance = ({ navigation, route }) => {
             {item?.workerTypeId}
           </Text>
         </View>
-        <View style={{ width: "18%" }}>
-          <Text style={styles.flatListText}>
-            {item?.todayCheckIn ? convertTimeToIST(item?.todayCheckIn) : "--"}
-            {/* {item?.todayCheckIn
-              ? moment(item?.todayCheckIn).format("MMM DD YYYY, hh:mm A")
-            : "--"} */}
-          </Text>
+        <View style={{ width: "18%", alignItems: "center" }}>
+          {currentFilterState === "Offline" ||
+          currentFilterState === "Online" ? (
+            <View>
+              {item?.todayCheckIn ? (
+                <Text style={styles.flatListText}>
+                  {convertTimeToIST(item?.todayCheckIn)}
+                </Text>
+              ) : (
+                <TouchableOpacity
+                  style={{
+                    width: "90%",
+                    backgroundColor: Colors.Primary,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 3,
+                    borderRadius: 3,
+                    paddingVertical: 5,
+                  }}
+                  onPress={() => {
+                    console.log(item?.todayCheckIn);
+                    handleOfflineWorkerAttendance(
+                      item?.workerId,
+                      item?.jobId,
+                      "CheckIn"
+                    );
+                  }}
+                >
+                  <View>
+                    <Text
+                      style={{
+                        fontSize: 9,
+                        fontFamily: "Lexend-Medium",
+                        color: Colors.White,
+                      }}
+                    >
+                      Check-In
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            </View>
+          ) : (
+            <Text style={styles.flatListText}>
+              {item?.todayCheckIn ? convertTimeToIST(item?.todayCheckIn) : "--"}
+            </Text>
+          )}
         </View>
-        <View style={{ width: "18%" }}>
+        <View style={{ width: "18%", alignItems: "center" }}>
+          {currentFilterState === "Offline" ||
+          currentFilterState === "Online" ? (
+            <View>
+              {item?.todayCheckOut ? (
+                <Text style={styles.flatListText}>
+                  {convertTimeToIST(item?.todayCheckIn)}
+                </Text>
+              ) : item?.todayCheckIn ? (
+                <TouchableOpacity
+                  style={{
+                    width: "90%",
+                    backgroundColor: Colors.PurpleOpacity,
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 3,
+                    borderRadius: 3,
+                    paddingVertical: 5,
+                  }}
+                  onPress={() => {
+                    handleOfflineWorkerAttendance(
+                      item?.workerId,
+                      item?.jobId,
+                      "CheckOut"
+                    );
+                  }}
+                >
+                  <View>
+                    <Text
+                      style={{
+                        fontSize: 9,
+                        fontFamily: "Lexend-Medium",
+                        color: Colors.Purple,
+                      }}
+                    >
+                      Check-Out
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.flatListText}>-</Text>
+              )}
+            </View>
+          ) : (
+            <Text style={styles.flatListText}>
+              {item?.todayCheckOut
+                ? convertTimeToIST(item?.todayCheckOut)
+                : "--"}
+            </Text>
+          )}
+        </View>
+        {/* <View style={{ width: "18%" }}>
           <Text style={styles.flatListText}>
             {item?.todayCheckOut ? convertTimeToIST(item?.todayCheckOut) : "--"}
-            {/* {item?.todayCheckOut
-              ? moment(item?.todayCheckOut).format("MMM DD YYYY, hh:mm A")
-              : "--"} */}
           </Text>
-        </View>
+        </View> */}
         <View style={{ width: "18%" }}>
-          <TouchableOpacity
-            onPress={() => {
-              setOpenApproveModal(true);
-              setSelectedAttendance(item);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              width: "90%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={[styles.smallButton]}>Approve</Text>
-          </TouchableOpacity>
+          {item?.todayCheckOut && item?.todayCheckIn ? (
+            <TouchableOpacity
+              onPress={() => {
+                setOpenApproveModal(true);
+                setSelectedAttendance(item);
+              }}
+              style={{
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 3,
+                width: "90%",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text style={[styles.smallButton]}>Approve</Text>
+            </TouchableOpacity>
+          ) : (
+            <Text style={styles.flatListText}>-</Text>
+          )}
         </View>
       </View>
     </View>
@@ -756,15 +895,11 @@ const ApproveAttendance = ({ navigation, route }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <Pressable
-        // onPress={() => {
-        //   setOpenSearchModal(true);
-        // }}
-        style={styles.graph}
-      >
+      <Pressable style={styles.graph}>
         <Pressable
           onPress={() => {
-            setOpenSearchModal(true);
+            setOpenFilterModal(true);
+            dispatch(getLabourContactorAction(token));
           }}
           style={{
             flexDirection: "row",
@@ -795,42 +930,10 @@ const ApproveAttendance = ({ navigation, route }) => {
               {selectedContractor
                 ? selectedContractor.label
                 : "Select a Contractor"}
-              {/* {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
-                : "Select a project"} */}
             </Text>
           </View>
         </Pressable>
         <View style={{ flexDirection: "row" }}>
-          {/* <TouchableOpacity
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Sort By</Text>
-          </TouchableOpacity> */}
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </Pressable>
           <TouchableOpacity
             onPress={() => setOpenSearchUserModal(true)}
             style={{
@@ -847,110 +950,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           </TouchableOpacity>
         </View>
       </Pressable>
-      {/* <View style={styles.graph}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Online"
-                )
-              );
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>{`Online-${
-              filteredDataAttSource?.filter(
-                (ele) => ele.workerTypeId === "Online"
-              )?.length
-            }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Offline"
-                )
-              );
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>{`Offline-${
-              filteredDataAttSource?.filter(
-                (ele) => ele.workerTypeId === "Offline"
-              )?.length
-            }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
-                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
-              );
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>{`Present-${
-              filteredDataAttSource?.filter((ele) => ele.isOnline === true)
-                ?.length
-            }`}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              setFilterAttendance(
-                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
-              );
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Text style={styles.smallButton}>{`Absent-${
-              filteredDataAttSource?.filter((ele) => ele.isOnline === false)
-                ?.length
-            }`}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-          <TouchableOpacity
-            onPress={() => setOpenSearchUserModal(true)}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 5,
-            }}
-          >
-            <Search size={15} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
-      </View> */}
       <View
         style={{ alignItems: "flex-end", marginHorizontal: 0, width: "93%" }}
       >
@@ -959,7 +958,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           worker Check-In & Geolocation Tracking during work hours.
         </Text>
       </View>
-      {/* <ScrollView> */}
       <View
         style={{
           backgroundColor: Colors.White,
@@ -983,7 +981,12 @@ const ApproveAttendance = ({ navigation, route }) => {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={() => {
-                dispatch(getAllAttendanceAction(token, projectData?.projectId));
+                dispatch(
+                  getAllAttendanceAction(
+                    token,
+                    projectData?.projectId || projectsListSimple[0]?.projectId
+                  )
+                );
               }}
               tintColor={Colors.Primary}
               colors={[Colors.Purple, Colors.Primary]}
@@ -997,7 +1000,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           showsVerticalScrollIndicator={false}
         />
       </View>
-      {/* </ScrollView> */}
       {renderApproveModal()}
       {renderSearchModal()}
       {renderFilterModal()}

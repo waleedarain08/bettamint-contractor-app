@@ -1,3 +1,4 @@
+
 import { createSlice } from "@reduxjs/toolkit";
 import {
   ATTENDANCE_MUSTER_URL,
@@ -80,6 +81,15 @@ const attendanceSlice = createSlice({
     setAttendance: (state, action) => {
       state.selectedAttendance = action.payload;
     },
+    markingAttendance(state, action) {
+      state.loading = true;
+    },
+    markingAttendanceSuccess(state, action) {
+      state.loading = false;
+    },
+    markingAttendanceFailure(state, action) {
+      state.loading = false;
+    },
   },
 });
 
@@ -98,6 +108,9 @@ const {
   getAttendanceReportFailure,
   saveProjectData,
   setAttendance,
+  markingAttendance,
+  markingAttendanceSuccess,
+  markingAttendanceFailure,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
@@ -131,7 +144,8 @@ export const getAllAttendanceAction =
 
         .request(
           "GET",
-          ATTENDANCE_GETALL_URL + `?projectId=${projectId}&createdBy=${contractorId || 0}`,
+          ATTENDANCE_GETALL_URL +
+            `?projectId=${projectId}&createdBy=${contractorId || 0}`,
           null,
           {
             Authorization: token,
@@ -153,7 +167,7 @@ export const getAllAttendanceAction =
     }
   };
 export const getAttendanceMusterAction =
-  (token,workerId, jobId) => async (dispatch) => {
+  (token, workerId, jobId) => async (dispatch) => {
     try {
       dispatch(getAttendanceMusterRequest());
       await api
@@ -213,28 +227,67 @@ export const getAttendanceApproveAction =
     }
   };
 
-export const getAttendanceReportAction = (token,projectId) => async (dispatch) => {
-  try {
-    dispatch(getAttendanceReportRequest());
-    await api
+export const getAttendanceReportAction =
+  (token, projectId) => async (dispatch) => {
+    try {
+      dispatch(getAttendanceReportRequest());
+      await api
 
-      .request("GET", ATTENDANCE_REPORT_URL + `?projectId=${projectId}`, null, {
-        Authorization: token,
-      })
-      .then((res) => {
-        const data = responseHandler(res);
-        // console.log("ATTENDANCE REPORT", data);
-        if (data) {
-          dispatch(getAttendanceReportSuccess(data));
+        .request(
+          "GET",
+          ATTENDANCE_REPORT_URL + `?projectId=${projectId}`,
+          null,
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          const data = responseHandler(res);
+          // console.log("ATTENDANCE REPORT", data);
+          if (data) {
+            dispatch(getAttendanceReportSuccess(data));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE REPORT ERROR", error);
+          dispatch(getAttendanceReportFailure());
+        });
+    } catch (error) {
+      dispatch(getAttendanceReportFailure());
+    }
+  };
+
+export const markAttendance =
+  (token, workerId, jobId, attendanceType) => async (dispatch) => {
+    dispatch(markingAttendance());
+    try {
+      // if (projectId) {
+
+      const response = await axios.post(
+        `${base_url}/dashboard/Attendance/markattendance?workerId=${workerId}&jobId=${jobId}&attendanceType=${attendanceType}`,
+        null,
+        {
+          headers: {
+            Authorization: token,
+          },
         }
-      })
-      .catch((error) => {
-        console.log("ATTENDANCE REPORT ERROR", error);
-        dispatch(getAttendanceReportFailure());
-      });
-  } catch (error) {
-    dispatch(getAttendanceReportFailure());
-  }
-};
+      );
+      console.log("MARK ATTENDANCE RESPONSE>>>", response);
+      if (response?.status === 200) {
+        dispatch(markingAttendanceSuccess());
+      }
+      if (response?.data?.error) {
+        dispatch(markingAttendanceFailure(response?.data?.error));
+      }
 
+      return response;
+    } catch (e) {
+      dispatch(
+        markingAttendanceFailure(
+          "Something went wrong while marking attendance!"
+        )
+      );
+      return e;
+    }
+  };
 export default attendanceSlice.reducer;
