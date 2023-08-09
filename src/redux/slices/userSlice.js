@@ -9,6 +9,7 @@ const initialState = {
   selectedUser: null,
   counts: null,
   rolesList: null,
+  labourContractorList: null,
 };
 
 const userSlice = createSlice({
@@ -60,6 +61,20 @@ const userSlice = createSlice({
       state.error = action.payload;
       state.rolesList = [];
     },
+    gettingLabourContractor(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    gettingLabourContractorSuccess(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.labourContractorList = action.payload;
+    },
+    gettingLabourContractorFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+      state.rolesList = [];
+    },
     creatingUser(state, action) {
       state.loading = true;
       state.error = null;
@@ -88,12 +103,17 @@ const {
   creatingUser,
   creatingUserSuccess,
   creatingUserFailure,
+  gettingLabourContractor,
+  gettingLabourContractorSuccess,
+  gettingLabourContractorFailure,
 } = userSlice.actions;
 
 export const usersListReducer = (state) => state.users.usersList;
 export const countsReducer = (state) => state.users.counts;
 export const loadingUsers = (state) => state.users.loading;
 export const rolesReducer = (state) => state.users.rolesList;
+export const labourContractorReducer = (state) =>
+  state.users.labourContractorList;
 
 export const getUsersAction = (token) => async (dispatch) => {
   dispatch(gettingUsers());
@@ -110,6 +130,30 @@ export const getUsersAction = (token) => async (dispatch) => {
     return response;
   } catch (e) {
     dispatch(gettingUsersFailure("Something went wrong while getting users!"));
+  }
+};
+
+export const getLabourContactorAction = (token) => async (dispatch) => {
+  dispatch(gettingLabourContractor());
+  try {
+    const response = await axios.get(
+      `${base_url}/dashboard/User/labourcontractor`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.data) {
+      dispatch(gettingLabourContractorSuccess(response.data));
+    }
+    return response;
+  } catch (e) {
+    dispatch(
+      gettingLabourContractorFailure(
+        "Something went wrong while getting labour contractor!"
+      )
+    );
   }
 };
 
