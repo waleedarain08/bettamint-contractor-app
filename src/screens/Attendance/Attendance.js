@@ -900,6 +900,7 @@ const Attendance = ({ navigation }) => {
                 </Pressable>
               )}
               keyExtractor={(item) => item.projectId}
+              extraData={filteredDataAttSource}
             />
           </View>
         </View>

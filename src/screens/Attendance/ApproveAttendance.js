@@ -23,8 +23,6 @@ import { Building, Cross, Search } from "../../icons";
 import { OptionsButton } from "react-native-options-button";
 import { useSelector, useDispatch } from "react-redux";
 import {
-  getAttendanceReportAction,
-  attendanceReportReducer,
   projectDataReducer,
   getAllAttendanceAction,
   attendanceListReducer,
@@ -42,7 +40,11 @@ import {
   labourContractorReducer,
   usersListReducer,
 } from "../../redux/slices/userSlice";
+import { useFocusEffect } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
+
 LogBox.ignoreAllLogs();
+
 const ApproveAttendance = ({ navigation, route }) => {
   const [selectedAttendance, setSelectedAttendance] = useState(null);
   const [openApproveModal, setOpenApproveModal] = useState(false);
@@ -53,9 +55,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const [masterDataAttSource, setMasterDataAttSource] = useState([]);
   const [searchAttendance, setSearchAttendance] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
   const [currentFilterState, setCurrentFilterState] = useState("Present");
   const token = useSelector(authToken);
   const isLoading = useSelector(loadingAttendance);
@@ -66,7 +66,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const usersList = useSelector(usersListReducer);
   const labourContractorList = useSelector(labourContractorReducer);
   const [openDropdown, setOpenDropdown] = useState(false);
-
+  const [currMarkedAtt, setCurrMarkedAtt] = useState(null);
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
   };
@@ -75,22 +75,27 @@ const ApproveAttendance = ({ navigation, route }) => {
     setOpenDropdown(false);
   };
 
-  const modalHeight = openDropdown ? "60%" : "20%";
+  // useEffect(() => {
+  //   dispatch(
+  //     getAllAttendanceAction(
+  //       token,
+  //       projectData?.projectId || projectsListSimple[0]?.projectId
+  //     )
+  //   );
+  // }, [projectData]);
 
-  // console.log(
-  //   "LIST>>>",
-  //   attendance?.filter((ele) => ele.workerName === "Ranjan Haldar")
-  // );
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(
+        getAllAttendanceAction(
+          token,
+          projectData?.projectId || projectsListSimple[0]?.projectId
+        )
+      );
 
-  useEffect(() => {
-    dispatch(
-      getAllAttendanceAction(
-        token,
-        projectData?.projectId || projectsListSimple[0]?.projectId
-      )
-    );
-  }, [projectData]);
-
+      return () => {};
+    }, [projectData, approveStatus])
+  );
   // Convert UTC time to Indian Standard Time
   const convertTimeToIST = (time) => {
     let indianTime;
@@ -136,11 +141,13 @@ const ApproveAttendance = ({ navigation, route }) => {
     jobId,
     attendanceType
   ) => {
-    console.log("DATA", workerId, jobId, attendanceType);
+    // console.log("BEFORE", moment(new Date()).format("hh:mm:ss"));
     let resp = await dispatch(
       markAttendance(token, workerId, jobId, attendanceType)
     );
     if (resp?.status === 200) {
+      // console.log("SUCCESS");
+      // console.log("AFTER", moment(new Date()).format("hh:mm:ss"));
       let key = attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
       let updatedArray = filterAttendance.map((item) =>
         item.workerId === workerId
@@ -153,12 +160,19 @@ const ApproveAttendance = ({ navigation, route }) => {
       setFilterAttendance(updatedArray);
     } else {
       console.log("ERROR");
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Something want wrong!",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
     }
   };
 
   const searchFilterAttendanceFunction = (text) => {
     // Check if searched text is not blank
-    console.log("TEXT", text);
     if (text) {
       // Inserted text is not blank
       // Filter the masterDataSource and update FilteredDataSource
@@ -167,7 +181,6 @@ const ApproveAttendance = ({ navigation, route }) => {
         const itemData = item.workerName
           ? item.workerName.toUpperCase()
           : "".toUpperCase();
-        console.log(itemData);
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
@@ -185,52 +198,17 @@ const ApproveAttendance = ({ navigation, route }) => {
     return (
       <Modal
         animationType="slide"
-        // transparent={true}
         visible={openFilterModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenFilterModal(openFilterModal);
         }}
         presentationStyle="pageSheet"
       >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            // justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0)",
-            //   width: '90%',
-            //   height: 200
-            marginTop: 30,
-          }}
-        >
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: Colors.White,
-              // height: 200,
-              borderRadius: 10,
-              padding: 15,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
+        <View style={styles.filterContainer}>
+          <View style={styles.filterInnerContainer}>
+            <View style={styles.filterHeaderCon}>
               <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    color: Colors.Black,
-                    fontSize: 16,
-                    // marginBottom: 10,
-                  }}
-                >
-                  Filter
-                </Text>
+                <Text style={styles.filterText}>Filter</Text>
               </View>
               <View style={{ alignItems: "flex-end" }}>
                 <Cross
@@ -245,21 +223,13 @@ const ApproveAttendance = ({ navigation, route }) => {
 
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
-                >
-                  By Contractor
-                </Text>
+                <Text style={styles.contactorText}>By Contractor</Text>
               </View>
               <Dropdown
                 style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
+                itemTextStyle={styles.dropdownItemText}
                 iconStyle={styles.iconStyle}
                 data={
                   labourContractorList?.length
@@ -285,9 +255,6 @@ const ApproveAttendance = ({ navigation, route }) => {
                       item?.value
                     )
                   );
-                  // setFilteredAttendance(
-                  //   attendance?.filter((ele) => ele.sKillName === item?.value)
-                  // );
                 }}
               />
             </View>
@@ -304,47 +271,14 @@ const ApproveAttendance = ({ navigation, route }) => {
         transparent={true}
         visible={openSearchUserModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenSearchUserModal(!openSearchUserModal);
         }}
       >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
-          }}
-        >
-          <View
-            style={{
-              width: "80%",
-              backgroundColor: Colors.White,
-              // height: 200,
-              borderRadius: 10,
-              padding: 15,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
+        <View style={styles.searchModalContainer}>
+          <View style={styles.searchInnerContainer}>
+            <View style={styles.searchHeaderCon}>
               <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    color: Colors.Black,
-                    fontSize: 16,
-                    // marginBottom: 10,
-                  }}
-                >
-                  Find by name
-                </Text>
+                <Text style={styles.findByText}>Find by name</Text>
               </View>
               <View style={{ alignItems: "flex-end" }}>
                 <Cross
@@ -354,31 +288,11 @@ const ApproveAttendance = ({ navigation, route }) => {
                   size={22}
                   color={Colors.Black}
                 />
-                {/* <Pressable
-                  onPress={() => {
-                    setSelectedContractor(null);
-                    setOpenFilterModal(false);
-                    setUserFilter(null);
-                  }}
-                  style={{ marginTop: 3 }}
-                >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
-                    Clear Filter
-                  </Text>
-                </Pressable> */}
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
               <Searchbar
-                style={{
-                  backgroundColor: Colors.WhiteGray,
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  width: "100%",
-                  // height: 50,
-                  marginTop: 10,
-                  borderColor: Colors.LightGray,
-                }}
+                style={styles.searchBar}
                 placeholder="Search"
                 placeholderTextColor={Colors.FormText}
                 mode="bar"
@@ -393,119 +307,73 @@ const ApproveAttendance = ({ navigation, route }) => {
       </Modal>
     );
   };
+
   const renderApproveModal = () => (
     <Modal
       animationType="slide"
-      // transparent={true}
       visible={openApproveModal}
       onRequestClose={() => {
-        // Alert.alert("Modal has been closed.");
         setOpenApproveModal(!openApproveModal);
       }}
       presentationStyle="pageSheet"
     >
-      <View style={{ width: "100%" }}>
-        <View
-          style={{
-            width: "100%",
-            padding: 15,
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 10,
-          }}
-        >
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "rgba(0,0,0)",
-            }}
-          >
-            <View
-              style={{
-                width: "100%",
-                backgroundColor: "white",
-                // height: modalHeight,
-                borderRadius: 10,
-                padding: 15,
-              }}
-            >
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <View>
-                  <Text
-                    style={{
-                      fontFamily: "Lexend-Medium",
-                      color: "black",
-                      fontSize: 16,
-                      marginBottom: 10,
-                    }}
-                  >
-                    Approve Attendance
-                  </Text>
-                </View>
-                <View>
-                  <Cross
-                    onPress={() => {
-                      setOpenApproveModal(!openApproveModal);
-                    }}
-                    size={22}
-                    color="black"
-                    style={{ marginBottom: 8 }}
-                  />
-                </View>
+      <View style={styles.approveModalContainer}>
+        <View style={styles.approveInnerContainer}>
+          <View style={styles.approveModal}>
+            <View style={styles.approveHeader}>
+              <View>
+                <Text style={styles.approveText}>Approve Attendance</Text>
               </View>
-              <View style={{ marginVertical: 10 }}>
-                <Dropdown
-                  style={styles.dropdown}
-                  placeholderStyle={styles.placeholderStyle}
-                  selectedTextStyle={styles.selectedTextStyle}
-                  itemTextStyle={{
-                    fontFamily: "Lexend-Regular",
-                    fontSize: 13,
-                    color: Colors.FormText,
+              <View>
+                <Cross
+                  onPress={() => {
+                    setOpenApproveModal(!openApproveModal);
                   }}
-                  iconStyle={styles.iconStyle}
-                  data={attendanceOptions}
-                  maxHeight={600}
-                  labelField="label"
-                  valueField="value"
-                  placeholder={"Approve"}
-                  value={approveStatus}
-                  onFocus={handleDropdownOpen}
-                  onBlur={handleDropdownClose}
-                  onChange={(item) => {
-                    setOpenApproveModal(false);
-                    setApproveStatus(item);
-                    // console.log(item);
-                    dispatch(
-                      getAttendanceApproveAction(
-                        token,
-                        selectedAttendance?.jobId,
-                        selectedAttendance?.workerId,
-                        new Date().toISOString(),
-                        item?.value
-                      )
-                    );
-                    setTimeout(() => {
-                      dispatch(
-                        getAllAttendanceAction(
-                          token,
-                          projectData?.projectId ||
-                            projectsListSimple[0]?.projectId
-                        )
-                      );
-                      setApproveStatus(null);
-                    }, 2000);
-                  }}
+                  size={22}
+                  color="black"
+                  style={{ marginBottom: 8 }}
                 />
               </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={styles.approveDropdownItem}
+                iconStyle={styles.iconStyle}
+                data={attendanceOptions}
+                maxHeight={600}
+                labelField="label"
+                valueField="value"
+                placeholder={"Approve"}
+                value={approveStatus}
+                onFocus={handleDropdownOpen}
+                onBlur={handleDropdownClose}
+                onChange={(item) => {
+                  setOpenApproveModal(false);
+                  setApproveStatus(item);
+                  dispatch(
+                    getAttendanceApproveAction(
+                      token,
+                      selectedAttendance?.jobId,
+                      selectedAttendance?.workerId,
+                      new Date().toISOString(),
+                      item?.value
+                    )
+                  );
+                  setTimeout(() => {
+                    dispatch(
+                      getAllAttendanceAction(
+                        token,
+                        projectData?.projectId ||
+                          projectsListSimple[0]?.projectId
+                      )
+                    );
+                    setApproveStatus(null);
+                  }, 2000);
+                }}
+              />
             </View>
           </View>
         </View>
@@ -515,18 +383,7 @@ const ApproveAttendance = ({ navigation, route }) => {
 
   const Item = ({ item, index }) => (
     <View style={[styles.item]} key={item.key}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          width: "100%",
-          justifyContent: "space-between",
-          // backgroundColor: rowColors[index % rowColors?.length],
-          backgroundColor: "#ffffff",
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        }}
-      >
+      <View style={styles.listItemCon}>
         <View
           style={{
             width: "30%",
@@ -537,7 +394,6 @@ const ApproveAttendance = ({ navigation, route }) => {
               styles.flatListText,
               {
                 textAlign: "left",
-                // textTransform: "uppercase",
                 fontSize: 10,
                 color: Colors.ListItemText,
               },
@@ -574,17 +430,8 @@ const ApproveAttendance = ({ navigation, route }) => {
                 </Text>
               ) : (
                 <TouchableOpacity
-                  style={{
-                    width: "90%",
-                    backgroundColor: Colors.Primary,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 3,
-                    borderRadius: 3,
-                    paddingVertical: 5,
-                  }}
+                  style={styles.checkInButton}
                   onPress={() => {
-                    console.log(item?.todayCheckIn);
                     handleOfflineWorkerAttendance(
                       item?.workerId,
                       item?.jobId,
@@ -593,15 +440,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   }}
                 >
                   <View>
-                    <Text
-                      style={{
-                        fontSize: 9,
-                        fontFamily: "Lexend-Medium",
-                        color: Colors.White,
-                      }}
-                    >
-                      Check-In
-                    </Text>
+                    <Text style={styles.checkInText}>Check-In</Text>
                   </View>
                 </TouchableOpacity>
               )}
@@ -622,15 +461,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 </Text>
               ) : item?.todayCheckIn ? (
                 <TouchableOpacity
-                  style={{
-                    width: "90%",
-                    backgroundColor: Colors.PurpleOpacity,
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: 3,
-                    borderRadius: 3,
-                    paddingVertical: 5,
-                  }}
+                  style={styles.checkOutButton}
                   onPress={() => {
                     handleOfflineWorkerAttendance(
                       item?.workerId,
@@ -640,15 +471,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   }}
                 >
                   <View>
-                    <Text
-                      style={{
-                        fontSize: 9,
-                        fontFamily: "Lexend-Medium",
-                        color: Colors.Purple,
-                      }}
-                    >
-                      Check-Out
-                    </Text>
+                    <Text style={styles.checkOutText}>Check-Out</Text>
                   </View>
                 </TouchableOpacity>
               ) : (
@@ -663,11 +486,6 @@ const ApproveAttendance = ({ navigation, route }) => {
             </Text>
           )}
         </View>
-        {/* <View style={{ width: "18%" }}>
-          <Text style={styles.flatListText}>
-            {item?.todayCheckOut ? convertTimeToIST(item?.todayCheckOut) : "--"}
-          </Text>
-        </View> */}
         <View style={{ width: "18%" }}>
           {item?.todayCheckOut && item?.todayCheckIn ? (
             <TouchableOpacity
@@ -675,15 +493,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 setOpenApproveModal(true);
                 setSelectedAttendance(item);
               }}
-              style={{
-                backgroundColor: "#ECE5FC",
-                padding: 5,
-                margin: 5,
-                borderRadius: 3,
-                width: "90%",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+              style={styles.approveButton}
             >
               <Text style={[styles.smallButton]}>Approve</Text>
             </TouchableOpacity>
@@ -694,17 +504,11 @@ const ApproveAttendance = ({ navigation, route }) => {
       </View>
     </View>
   );
+
   const ListHeader = () => {
     return (
       <View style={[styles.item]}>
-        <View
-          style={{
-            width: "100%",
-            flexDirection: "row",
-            alignItems: "center",
-            marginTop: 8,
-          }}
-        >
+        <View style={styles.listHeaderCon}>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
@@ -720,8 +524,6 @@ const ApproveAttendance = ({ navigation, route }) => {
               marginLeft: 8,
               borderTopLeftRadius: 5,
               borderBottomLeftRadius: 5,
-              // margin: 5,
-              // borderRadius: 5,
             }}
           >
             <Text
@@ -754,8 +556,6 @@ const ApproveAttendance = ({ navigation, route }) => {
                 currentFilterState === "Absent" ? "#A179F2" : "#ECE5FC",
               padding: 5,
               width: "25%",
-              // margin: 5,
-              // borderRadius: 5,
             }}
           >
             <Text
@@ -788,11 +588,8 @@ const ApproveAttendance = ({ navigation, route }) => {
             style={{
               backgroundColor:
                 currentFilterState === "Online" ? "#A179F2" : "#ECE5FC",
-
               padding: 5,
               width: "20%",
-              // margin: 5,
-              // borderRadius: 5,
             }}
           >
             <Text
@@ -831,8 +628,6 @@ const ApproveAttendance = ({ navigation, route }) => {
               marginRight: 8,
               borderTopRightRadius: 5,
               borderBottomRightRadius: 5,
-              // margin: 5,
-              // borderRadius: 5,
             }}
           >
             <Text
@@ -855,22 +650,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-            justifyContent: "space-between",
-            // paddingVertical: 15,
-            paddingHorizontal: 8,
-            backgroundColor: Colors.White,
-            height: 30,
-            // borderRadius: 10
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 25,
-          }}
-        >
+        <View style={styles.listHeadings}>
           <View style={{ width: "30%" }}>
             <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
               Name & Skill Set
@@ -892,6 +672,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       </View>
     );
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -901,22 +682,9 @@ const ApproveAttendance = ({ navigation, route }) => {
             setOpenFilterModal(true);
             dispatch(getLabourContactorAction(token));
           }}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+          style={styles.contractorButton}
         >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View style={styles.buildingIcon}>
             <Building size={20} color={Colors.LightGray} />
           </View>
           <View>
@@ -936,46 +704,19 @@ const ApproveAttendance = ({ navigation, route }) => {
         <View style={{ flexDirection: "row" }}>
           <TouchableOpacity
             onPress={() => setOpenSearchUserModal(true)}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
+            style={styles.searchIcon}
           >
             <Search size={13} color={Colors.Secondary} />
           </TouchableOpacity>
         </View>
       </Pressable>
-      <View
-        style={{ alignItems: "flex-end", marginHorizontal: 0, width: "93%" }}
-      >
-        <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
+      <View style={styles.descriptionTextCon}>
+        <Text style={styles.descriptionText}>
           Attendance is validated via two-factor authentication*{"\n"} i.e.
           worker Check-In & Geolocation Tracking during work hours.
         </Text>
       </View>
-      <View
-        style={{
-          backgroundColor: Colors.White,
-          alignItems: "center",
-          margin: 10,
-          borderRadius: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 4,
-          width: "93%",
-          flex: 1,
-        }}
-      >
+      <View style={styles.flatListContainer}>
         <FlatList
           refreshControl={
             <RefreshControl
@@ -992,6 +733,7 @@ const ApproveAttendance = ({ navigation, route }) => {
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
+          extraData={filterAttendance}
           data={!filterAttendance ? filteredDataAttSource : filterAttendance}
           renderItem={({ item, index }) => <Item item={item} index={index} />}
           keyExtractor={(item) => item.id}
@@ -1194,5 +936,204 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     elevation: 4,
     backgroundColor: Colors.White,
+  },
+  filterContainer: {
+    flex: 1,
+    alignItems: "center",
+    marginTop: 30,
+  },
+  filterInnerContainer: {
+    width: "100%",
+    backgroundColor: Colors.White,
+    borderRadius: 10,
+    padding: 15,
+  },
+  filterHeaderCon: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  filterText: {
+    fontFamily: "Lexend-Medium",
+    color: Colors.Black,
+    fontSize: 16,
+  },
+  contactorText: { fontFamily: "Lexend-Medium", color: Colors.Gray },
+  dropdownItemText: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 13,
+    color: Colors.FormText,
+  },
+  searchModalContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0,0.2)",
+  },
+  searchInnerContainer: {
+    width: "80%",
+    backgroundColor: Colors.White,
+    borderRadius: 10,
+    padding: 15,
+  },
+  searchHeaderCon: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  findByText: {
+    fontFamily: "Lexend-Medium",
+    color: Colors.Black,
+    fontSize: 16,
+  },
+  searchBar: {
+    backgroundColor: Colors.WhiteGray,
+    borderRadius: 4,
+    borderWidth: 1,
+    width: "100%",
+    marginTop: 10,
+    borderColor: Colors.LightGray,
+  },
+  approveModalContainer: {
+    width: "100%",
+    padding: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  approveInnerContainer: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(0,0,0)",
+  },
+  approveModal: {
+    width: "100%",
+    backgroundColor: "white",
+    borderRadius: 10,
+    padding: 15,
+  },
+  approveHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  approveText: {
+    fontFamily: "Lexend-Medium",
+    color: "black",
+    fontSize: 16,
+    marginBottom: 10,
+  },
+  approveDropdownItem: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 13,
+    color: Colors.FormText,
+  },
+  listItemCon: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "space-between",
+    backgroundColor: "#ffffff",
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  checkInButton: {
+    width: "90%",
+    backgroundColor: Colors.Primary,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 3,
+    borderRadius: 3,
+    paddingVertical: 5,
+  },
+  checkInText: {
+    fontSize: 9,
+    fontFamily: "Lexend-Medium",
+    color: Colors.White,
+  },
+  checkOutButton: {
+    width: "90%",
+    backgroundColor: Colors.PurpleOpacity,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 3,
+    borderRadius: 3,
+    paddingVertical: 5,
+  },
+  checkOutText: {
+    fontSize: 9,
+    fontFamily: "Lexend-Medium",
+    color: Colors.Purple,
+  },
+  listHeaderCon: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 8,
+  },
+  approveButton: {
+    backgroundColor: "#ECE5FC",
+    padding: 5,
+    margin: 5,
+    borderRadius: 3,
+    width: "90%",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  listHeadings: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+    justifyContent: "space-between",
+    paddingHorizontal: 8,
+    backgroundColor: Colors.White,
+    height: 30,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 25,
+  },
+  contractorButton: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  buildingIcon: {
+    backgroundColor: "#F7F8F9",
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  searchIcon: {
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ECE5FC",
+    padding: 5,
+    margin: 5,
+    borderRadius: 3,
+    paddingHorizontal: 7,
+  },
+  descriptionTextCon: {
+    alignItems: "flex-end",
+    marginHorizontal: 0,
+    width: "93%",
+  },
+  descriptionText: { fontSize: 10, textAlign: "right", color: Colors.White },
+  flatListContainer: {
+    backgroundColor: Colors.White,
+    alignItems: "center",
+    margin: 10,
+    borderRadius: 10,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.2,
+    shadowRadius: 5,
+    elevation: 4,
+    width: "93%",
+    flex: 1,
   },
 });

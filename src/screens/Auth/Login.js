@@ -91,7 +91,7 @@ const Login = ({ navigation }) => {
 			</View>
 			<Pressable
 				style={styles.bottomView}
-				onPress={() => navigation.navigate("ForgotPassword")}
+				onPress={() => navigation.navigate("Signup")}
 			>
 				<Text style={styles.forgotText}>Not a member? Sign Up Now</Text>
 			</Pressable>

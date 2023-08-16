@@ -123,7 +123,7 @@ export const userSignupAction = (data) => async (dispatch) => {
     return response;
   } catch (error) {
     dispatch(userLoginFailure("Something went wrong!"));
-    console.log("ERROR", error.status);
+    console.log("ERROR", error.response.data);
     // if (error.status === 400) {
     //   throw new Error("Incorrect username or password");
     // }

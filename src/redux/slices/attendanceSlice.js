@@ -272,7 +272,7 @@ export const markAttendance =
           },
         }
       );
-      console.log("MARK ATTENDANCE RESPONSE>>>", response);
+      // console.log("MARK ATTENDANCE RESPONSE>>>", response);
       if (response?.status === 200) {
         dispatch(markingAttendanceSuccess());
       }
