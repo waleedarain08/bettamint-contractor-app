@@ -31,6 +31,7 @@ import {
 import { Searchbar } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
 import { RefreshControl } from "react-native-gesture-handler";
+import { useFocusEffect } from "@react-navigation/native";
 LogBox.ignoreAllLogs();
 const DATA = [
   {
@@ -88,6 +89,13 @@ const Users = ({ navigation }) => {
   useEffect(() => {
     dispatch(getUsersAction(token));
   }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getUsersAction(token));
+
+      return () => {};
+    }, [])
+  );
   useEffect(() => {
     setFilteredDataSource(usersList);
     setMasterDataSource(usersList);
@@ -119,7 +127,8 @@ const Users = ({ navigation }) => {
     return (
       <Modal
         animationType="slide"
-        transparent={true}
+        // transparent={true}
+        presentationStyle="pageSheet"
         visible={openFilterModal}
         onRequestClose={() => {
           // Alert.alert("Modal has been closed.");
@@ -130,15 +139,16 @@ const Users = ({ navigation }) => {
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.2)",
+            marginTop: 20,
+            // justifyContent: "center",
+            // backgroundColor: "rgba(0,0,0,0.2)",
             //   width: '90%',
             //   height: 200
           }}
         >
           <View
             style={{
-              width: "80%",
+              width: "100%",
               backgroundColor: Colors.White,
               // height: 200,
               borderRadius: 10,
@@ -207,7 +217,7 @@ const Users = ({ navigation }) => {
                 data={[
                   { label: "Labour Contractor", value: "LabourContractor" },
                 ]}
-                maxHeight={300}
+                maxHeight={800}
                 labelField="label"
                 valueField="value"
                 placeholder={"Select Contractor"}
@@ -338,11 +348,20 @@ const Users = ({ navigation }) => {
           width: "100%",
         }}
       >
-        <View>
+        <View style={{ width: "60%" }}>
           <Text style={styles.flatlistHeading}>{item.fullName}</Text>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "20%",
+          }}
+        >
           <TouchableOpacity
+            onPress={() => {
+              navigation.navigate("EditUser", { userInfo: item });
+            }}
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -350,11 +369,12 @@ const Users = ({ navigation }) => {
               padding: 5,
               margin: 5,
               borderRadius: 3,
+              paddingHorizontal: 8,
             }}
           >
-            <Text style={styles.smallButton}>Manage</Text>
+            <Text style={styles.smallButton}>Edit</Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -367,12 +387,12 @@ const Users = ({ navigation }) => {
             <Text style={[styles.smallButton, { color: "#81B737" }]}>
               History
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
       <Spacer bottom={13} />
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View style={{ alignItems: "center" }}>
+      <View style={{ flexDirection: "row", justifyContent: "space-between", width: '100%' }}>
+        <View style={{ alignItems: "center", width: '15%' }}>
           <Text style={styles.flatlistSubHeading}>User Id</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -380,7 +400,7 @@ const Users = ({ navigation }) => {
             {item.userId}
           </Text>
         </View>
-        <View style={{ alignItems: "center" }}>
+        <View style={{ alignItems: "center", width: '60%' }}>
           <Text style={styles.flatlistSubHeading}>Email Address</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -388,7 +408,7 @@ const Users = ({ navigation }) => {
             {item.emailAddress}
           </Text>
         </View>
-        <View style={{ alignItems: "center" }}>
+        <View style={{ alignItems: "center", width: '20%' }}>
           <Text style={styles.flatlistSubHeading}>Role</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -648,6 +668,7 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend-Bold",
     fontSize: 10,
     color: Colors.Black,
+	// paddingHorizontal: 10
   },
   modalView: {
     paddingTop: Platform.OS === "android" ? 0 : 50,

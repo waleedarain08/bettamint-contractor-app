@@ -18,6 +18,8 @@ import {
   Pressable,
   Modal,
   Animated,
+  ActivityIndicator,
+  PermissionsAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -28,17 +30,22 @@ import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
 import { useSelector, useDispatch } from "react-redux";
-import { updateProjectAction } from "../../redux/slices/projectSlice";
+import {
+  selectedProjectReducer,
+  updateProjectAction,
+} from "../../redux/slices/projectSlice";
 import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps"; // remove PROVIDER_GOOGLE import if not using Google Maps
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { GOOGLE_API_KEY, mapUrl } from "../../utils/api_constants";
+import { GOOGLE_API_KEY, assetsUrl, mapUrl } from "../../utils/api_constants";
 import MapViewGestures from "@dev-event/react-native-maps-draw";
 import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
+import Geolocation from 'react-native-geolocation-service';
 // const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
-
+// import Geolocation from "@react-native-community/geolocation";
+// import { PermissionsAndroid } from "react-native";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 LogBox.ignoreAllLogs();
@@ -57,10 +64,15 @@ const CreateNewProject = ({ navigation }) => {
   const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
+  const [projectNameClick, setProjectNameClick] = useState(false);
+  const [loader, setLoader] = useState(true);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(null);
+
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
-
+  const project = useSelector(selectedProjectReducer);
   const geoArray = [
     {
       latitude: 26.04198067508024,
@@ -75,19 +87,90 @@ const CreateNewProject = ({ navigation }) => {
       longitude: 68.94873866672839,
     },
   ];
+  useEffect(() => {
+    getLocationPermission()
+  }, [])
+  const getLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Location permission required',
+          message: 'Bettamint needs to access your location',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use the camera');
+        getCurrentLocation();
+      } else {
+        console.log('Camera permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
 
-  mapRef?.current?.animateToRegion(
-    {
-      latitude: geoFancingArray[0]?.latitude || 20.5937,
-      longitude: geoFancingArray[0]?.longitude || 78.9629,
-      latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
-      longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
-    },
-    1000
-  );
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      position => {
+        setCurrentPosition(position);
+      },
+      error => {
+        console.log(error.code, error.message);
+      },
+      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+    );
+  };
+  useEffect(() => {
+    if (project) {
+      console.log(project);
+      setProjectImageUri(assetsUrl + project?.url);
+      setProjectName(project?.name);
+      setValue(project?.projectTypeId);
+      setGeoFancingArray(project?.geofencingArray);
+    }
+  }, [project]);
+  //   const requestLocationPermission = async () => {
+  //     try {
+  //       const granted = await PermissionsAndroid.request(
+  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+  //         {
+  //           title: "Location Permission",
+  //           message: "This app needs to access your location.",
+  //           buttonNeutral: "Ask Me Later",
+  //           buttonNegative: "Cancel",
+  //           buttonPositive: "OK",
+  //         }
+  //       );
+  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //         console.log("Location permission granted");
+  //       } else {
+  //         console.log("Location permission denied");
+  //       }
+  //     } catch (err) {
+  //       console.warn(err);
+  //     }
+  //   };
+
+  //   useEffect(() => {
+  //     requestLocationPermission();
+  //   }, []);
+
+  // useEffect(() => {
+  // 	Geolocation.getCurrentPosition(
+  // 		(position) => {
+  // 			const { latitude, longitude } = position.coords;
+  // 			setCurrentLocation({ latitude, longitude });
+  // 		},
+  // 		(error) => console.log(error),
+  // 		{ enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
+  // 	);
+  // }, []);
 
   const submitHandler = async () => {
     const formData = new FormData();
+    const projectId = project ? project?.projectId : 0;
     if (!value) {
       Toast.show({
         type: "error",
@@ -128,13 +211,15 @@ const CreateNewProject = ({ navigation }) => {
       formData.append("Name", projectName);
       formData.append("ProjectTypeId", value);
       formData.append("DeveloperId", 0);
-      formData.append("ProjectId", 0);
+      formData.append("ProjectId", projectId);
       formData.append("Image", {
         name: projectImage?.assets[0]?.fileName,
         type: projectImage?.assets[0]?.type,
         uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
       });
       formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
+      formData.append("Latitude", geoFancingArray[0].latitude);
+      formData.append("Longitude", geoFancingArray[0].longitude);
       const response = await dispatch(updateProjectAction(token, formData));
       console.log("Create response", response);
       if (response.status === 200) {
@@ -197,11 +282,37 @@ const CreateNewProject = ({ navigation }) => {
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
+          geolocationEnabled={true}
+          onLoad={() => setLoader(false)}
         />
+        {loader && (
+          <ActivityIndicator
+            style={{
+              position: "absolute",
+              left: 0,
+              right: 0,
+              bottom: 0,
+              top: 0,
+            }}
+            size="large"
+            color={Colors.Primary}
+          />
+        )}
       </Modal>
     );
   };
-
+  console.log(currentPosition)
+  setTimeout(() => {
+    mapRef?.current?.animateToRegion(
+      {
+        latitude: geoFancingArray[0]?.latitude || currentPosition?.coords?.latitude,
+        longitude: geoFancingArray[0]?.longitude || currentPosition?.coords?.longitude,
+        latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
+        longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
+      },
+      2000
+    );
+  }, 1000);
   return (
     <View style={styles.container}>
       {/* <Toast /> */}
@@ -284,6 +395,11 @@ const CreateNewProject = ({ navigation }) => {
           }}
         >
           <Text style={styles.title}>Project Name</Text>
+          {/* <Pressable
+            onPress={() => {
+              setProjectNameClick(!projectNameClick);
+            }}
+          > */}
           <TextInput
             style={{
               fontFamily: "Lexend-Regular",
@@ -296,17 +412,17 @@ const CreateNewProject = ({ navigation }) => {
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
+              color: "black",
             }}
             onChangeText={(e) => setProjectName(e)}
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Project Name"
+            value={projectName}
           />
+          {/* </Pressable> */}
         </View>
-        <Pressable
-          onPress={() => {
-            // console.log("test");
-            setOpenMapModal(true);
-          }}
+        {/* <View style={{position: 'absolute'}}> */}
+        <View
           style={{
             flex: 1,
             justifyContent: "center",
@@ -314,21 +430,14 @@ const CreateNewProject = ({ navigation }) => {
             height: 280,
           }}
         >
-          {/* <Pressable style={{ backgroundColor: "red" }}>
-            <Text>BUTTON</Text>
-          </Pressable> */}
           <MapView
             provider={PROVIDER_GOOGLE} // remove if not using Google Maps
             style={styles.map}
             ref={mapRef}
+            showsUserLocation
+            showsMyLocationButton
             mapType="standard"
             loadingEnabled={true}
-            // region={{
-            //   latitude: geoFancingArray[0]?.latitude || 20.5937,
-            //   longitude: geoFancingArray[0]?.longitude || 78.9629,
-            //   latitudeDelta: selectedPosition?.lat ? 0.2 : 100,
-            //   longitudeDelta: selectedPosition?.lng ? 0.08 : 100,
-            // }}
           >
             {geoFancingArray?.length !== 0 && (
               <Polygon
@@ -338,9 +447,49 @@ const CreateNewProject = ({ navigation }) => {
               />
             )}
           </MapView>
-        </Pressable>
+          <View
+            style={{
+              flex: 1,
+              // flexDirection: "row",
+              position: "absolute",
+              top: 10,
+              left: 20,
+              alignSelf: "center",
+              // justifyContent: "space-between",
+              backgroundColor: "transparent",
+              borderWidth: 0.5,
+              borderRadius: 20,
+            }}
+          >
+            <Pressable
+              onPress={() => {
+                setOpenMapModal(true);
+              }}
+              style={{
+                backgroundColor: Colors.Black,
+                padding: 5,
+                paddingHorizontal: 10,
+                borderRadius: 10,
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    color: Colors.White,
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 14,
+                    textAlign: "center",
+                  }}
+                >
+                  Draw Boundaries
+                </Text>
+              </View>
+            </Pressable>
+          </View>
+        </View>
       </View>
-      <Spacer top={-20} />
+      {/* </View> */}
+      <Spacer top={-35} />
       <View
         style={{
           flexDirection: "row",

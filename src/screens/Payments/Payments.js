@@ -30,22 +30,24 @@ import {
   paymentsListReducer,
   getPaymentsAction,
   loadingPayments,
+  getAllPaymentsAction,
+  allPaymentsListReducer,
 } from "../../redux/slices/paymentSlice";
 import {
-  getAllAttendanceAction,
   attendanceListReducer,
   saveProjectDataAction,
   selectAttendanceAction,
   loadingAttendance,
 } from "../../redux/slices/attendanceSlice";
 import CheckBox from "@react-native-community/checkbox";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import {
   getSkillsAction,
   skillsListReducer,
 } from "../../redux/slices/workerSlice";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
+import RestrictedScreen from "../../components/RestrictedScreen";
 LogBox.ignoreAllLogs();
 const Payments = ({ navigation }) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
@@ -61,18 +63,27 @@ const Payments = ({ navigation }) => {
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
-
+  const [paymentsList, setPaymentsList] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
   const dispatch = useDispatch();
 
-  const payments = useSelector(paymentsListReducer);
-  const attendanceList = useSelector(attendanceListReducer);
+  //   const payments = useSelector(paymentsListReducer);
+  const attendanceList = useSelector(allPaymentsListReducer);
   const skillsList = useSelector(skillsListReducer);
   const usersList = useSelector(usersListReducer);
   const isLoading = useSelector(loadingPayments);
-  const isLoadingAttendance = useSelector(loadingAttendance);
+  // const isLoadingAttendance = useSelector(loadingPayments);
   const token = useSelector(authToken);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
 
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isPaymentListPresent = roles.some(
+    (item) => item.featureSet.name === "Payment List"
+  );
+
+  // console.log("LOADING", isLoading)
   const status = [
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
@@ -80,13 +91,16 @@ const Payments = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(
-      getAllAttendanceAction(
+      getAllPaymentsAction(
         token,
         selectedProject?.projectId || projectsListSimple[0]?.projectId,
         0
       )
     );
-  }, [selectedProject]);
+    if (attendanceList?.length) {
+      setPaymentsList(attendanceList);
+    }
+  }, [selectedProject, attendanceList?.length]);
 
   useEffect(() => {
     dispatch(getSkillsAction(token));
@@ -129,170 +143,21 @@ const Payments = ({ navigation }) => {
     }
   };
   const [data, setData] = useState({
-    array: [
-      {
-        id: 1,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 2,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 3,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 4,
-        name: "Arvind Chauhan",
-        status: "Offline",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 5,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 6,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 7,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 8,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 9,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 10,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-
-      {
-        id: 11,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 12,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 13,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 14,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 15,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 16,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 17,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 18,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-      {
-        id: 19,
-        name: "Arvind Chauhan",
-        status: "Online",
-        due: "₹ 10,350",
-        issued: "₹ 8,650",
-        selected: false,
-      },
-    ],
+    array: attendanceList,
   });
-
+  //   for (let i = 0; i < data?.array?.length; i++) {
+  // 	setData(data?.array[i].selected = false)
+  // 	// myArray[i].gender = "unknown";
+  //   }
+  //   console.log("DATA", data);
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
   const renderFilterModal = () => {
     return (
       <Modal
         animationType="slide"
-        transparent={true}
+        // transparent={true}
+        presentationStyle="pageSheet"
         visible={openFilterModal}
         onRequestClose={() => {
           // Alert.alert("Modal has been closed.");
@@ -303,15 +168,16 @@ const Payments = ({ navigation }) => {
           style={{
             flex: 1,
             alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.2)",
+            // justifyContent: "center",
+            marginTop: 20,
+            // backgroundColor: "rgba(0,0,0)",
             //   width: '90%',
             //   height: 200
           }}
         >
           <View
             style={{
-              width: "80%",
+              width: "100%",
               backgroundColor: Colors.White,
               // height: 200,
               borderRadius: 10,
@@ -351,7 +217,7 @@ const Payments = ({ navigation }) => {
                     setSelectedSkills(null);
                     setSelectedStatus(null);
                     dispatch(
-                      getAllAttendanceAction(
+                      getAllPaymentsAction(
                         token,
                         selectedProject?.projectId ||
                           projectsListSimple[0]?.projectId,
@@ -410,7 +276,7 @@ const Payments = ({ navigation }) => {
                 <Text
                   style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
                 >
-                  By skills
+                  By Skills
                 </Text>
               </View>
               <Dropdown
@@ -477,7 +343,7 @@ const Payments = ({ navigation }) => {
                   setSelectedStatus(null);
                   setSelectedSkills(null);
                   dispatch(
-                    getAllAttendanceAction(
+                    getAllPaymentsAction(
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
@@ -492,7 +358,33 @@ const Payments = ({ navigation }) => {
       </Modal>
     );
   };
-
+  const handleCheckbox = (workerId, jobId, isChecked) => {
+    if (filteredAttendance?.length) {
+      let data = filteredAttendance.map((item) => {
+        if (item.workerId === workerId && item.jobId === jobId) {
+          return {
+            ...item,
+            isChecked,
+          };
+        }
+        return item;
+      });
+      setPaymentsList([...data]);
+      return;
+    }
+    // if (!isChecked) {
+    let data = attendanceList.map((item) => {
+      if (item.workerId === workerId && item.jobId === jobId) {
+        return {
+          ...item,
+          isChecked,
+        };
+      }
+      return item;
+    });
+    console.log(workerId, jobId, isChecked);
+    setPaymentsList([...data]);
+  };
   const Item = ({ item, index }) => (
     <View style={[styles.item]}>
       <View
@@ -508,41 +400,52 @@ const Payments = ({ navigation }) => {
       >
         <View
           style={{
-            width: "35%",
+            width: "30%",
             flexDirection: "row",
             alignItems: "center",
           }}
         >
           <CheckBox
             disabled={false}
-            value={toggleCheckBox ? toggleCheckBox : item.selected}
-            // style={{width: 30, height: 20}}
+            value={item?.isChecked}
             onValueChange={(newValue) => {
-              const newData = data?.array?.map((newItem) => {
-                if (newItem.id == item.id) {
-                  return {
-                    ...newItem,
-                    selected: newValue,
-                  };
-                }
-                return newItem;
-              });
-              const updated = { array: newData };
-              setData(updated);
+              //   console.log(newValue);
+              //   setToggleCheckBox(!toggleCheckBox);
+              handleCheckbox(item?.workerId, item?.jobId, newValue);
+              setSelectedUser(item);
+              //   const updatedArray = data.array.map((newItem) => {
+              //     if (newItem.id === item.id) {
+              //       return {
+              //         ...newItem,
+              //         selected: newValue,
+              //       };
+              //     }
+              //     return newItem;
+              //   });
+              //   const updatedData = { array: updatedArray };
+              //   setData(updatedData);
+              //   console.log(attendanceList[0]);
             }}
             tintColors={{ true: Colors.Primary, false: Colors.FormBorder }}
+            // key={`${item.id}-${item.selected}`}
           />
           <Text
             style={[
               styles.flatListText,
-              { textAlign: "left", textTransform: "uppercase", fontSize: 10 },
+              {
+                textAlign: "left",
+                textTransform: "uppercase",
+                fontSize: 10,
+              },
             ]}
           >
             {item?.workerName}
           </Text>
         </View>
-        <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>{item?.workerTypeId}</Text>
+        <View style={{ width: "20%" }}>
+          <Text style={[styles.flatListText, { left: 15 }]}>
+            {item?.workerTypeId}
+          </Text>
         </View>
         <View style={{ width: "15%" }}>
           <Text style={styles.flatListText}>{item?.dueAmount}</Text>
@@ -590,7 +493,7 @@ const Payments = ({ navigation }) => {
         >
           <View
             style={{
-              width: "35%",
+              width: "30%",
               flexDirection: "row",
               alignItems: "center",
             }}
@@ -605,8 +508,10 @@ const Payments = ({ navigation }) => {
               Name
             </Text>
           </View>
-          <View style={{ width: "15%", alignItems: "center" }}>
-            <Text style={styles.flatListTextHeader}>Status</Text>
+          <View style={{ width: "20%", alignItems: "center" }}>
+            <Text style={[styles.flatListTextHeader, { left: 15 }]}>
+              Status
+            </Text>
           </View>
           <View style={{ width: "15%", alignItems: "center" }}>
             <Text style={styles.flatListTextHeader}>Due Amount</Text>
@@ -624,52 +529,54 @@ const Payments = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <Pressable
-        onPress={() => {
-          // setOpenSearchModal(true);
-        }}
-        style={styles.graph}
-      >
-        <Pressable
-          onPress={() => {
-            setOpenSearchModal(true);
-          }}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
+      {isPaymentListPresent ? (
+        <>
+          <Pressable
+            onPress={() => {
+              // setOpenSearchModal(true);
             }}
+            style={styles.graph}
           >
-            <Building size={20} color={Colors.LightGray} />
-          </View>
-          <View>
-            <Text style={styles.selectText}>Link a Project</Text>
-            <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
+            <Pressable
+              onPress={() => {
+                setOpenSearchModal(true);
+              }}
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
-                : "Select a project"}
-            </Text>
-          </View>
-        </Pressable>
-        <View style={{ flexDirection: "row" }}>
-          {/* <TouchableOpacity
+              <View
+                style={{
+                  backgroundColor: "#F7F8F9",
+                  borderRadius: 50,
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Building size={20} color={Colors.LightGray} />
+              </View>
+              <View>
+                <Text style={styles.selectText}>Select a Project</Text>
+                <Text
+                  style={[
+                    styles.selectText,
+                    { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+                  ]}
+                >
+                  {selectedProject
+                    ? selectedProject?.name
+                    : projectsListSimple
+                    ? projectsListSimple[0]?.name
+                    : "Select a project"}
+                </Text>
+              </View>
+            </Pressable>
+            <View style={{ flexDirection: "row" }}>
+              {/* <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -681,211 +588,256 @@ const Payments = ({ navigation }) => {
           >
             <Text style={styles.smallButton}>Sort By</Text>
           </TouchableOpacity> */}
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </Pressable>
-          <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
-      </Pressable>
-      <View style={{ alignItems: "flex-end", width: "100%", paddingRight: 20 }}>
-        <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
-          Attendance is validated via two-factor authentication*{"\n"} i.e.
-          worker Check-In & Geolocation Tracking during work hours.
-        </Text>
-      </View>
-      {/* <ScrollView> */}
-      <View
-        style={{
-          backgroundColor: Colors.White,
-          alignItems: "center",
-          margin: 10,
-          //   paddingHorizontal: 8,
-          borderRadius: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 4,
-          width: "93%",
-          flex: 1,
-          // marginBottom: 10
-        }}
-      >
-        {!attendanceList || attendanceList?.length === 0 ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-          >
-            <Text
-              style={{
-                fontFamily: "Lexend-Medium",
-                fontSize: 18,
-                color: Colors.Gray,
-              }}
-            >
-              No Record Found!
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            refreshControl={
-              <RefreshControl
-                refreshing={isLoadingAttendance}
-                onRefresh={() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      selectedProject?.projectId || attendanceList[0]?.projectId
-                    )
-                  );
-                }}
-                tintColor={Colors.Primary}
-                colors={[Colors.Purple, Colors.Primary]}
-              />
-            }
-            data={filteredAttendance ? filteredAttendance : attendanceList}
-            renderItem={({ item, index }) => <Item item={item} index={index} />}
-            keyExtractor={(item) => item.id}
-            ListHeaderComponent={ListHeader}
-            stickyHeaderIndices={[0]}
-            showsVerticalScrollIndicator={false}
-          />
-        )}
-      </View>
-      <Spacer bottom={50} />
-      <View
-        style={{
-          width: "93%",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          position: "absolute",
-          bottom: 10,
-        }}
-      >
-        <TouchableOpacity style={styles.button}>
-          <Text style={styles.buttonText}>Pay Online</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.button, { backgroundColor: Colors.Secondary }]}
-        >
-          <Text style={styles.buttonText}>Pay Offline</Text>
-        </TouchableOpacity>
-      </View>
-      <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
-      >
-        <View style={{ width: "100%" }}>
-          <View
-            style={{
-              width: "100%",
-              padding: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <View style={{ width: "12%" }}>
-              <BackIcon
+              <Pressable
                 onPress={() => {
-                  setOpenSearchModal(false);
+                  setOpenFilterModal(true);
                 }}
-                size={30}
-                color={Colors.Black}
-              />
-            </View>
-            <View style={{ width: "88%" }}>
-              <Text
                 style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Black,
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
                 }}
               >
-                Search
-              </Text>
+                <Text style={styles.smallButton}>Filter</Text>
+              </Pressable>
+              <TouchableOpacity
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 7,
+                }}
+              >
+                <Search size={13} color={Colors.Secondary} />
+              </TouchableOpacity>
             </View>
+          </Pressable>
+          <View
+            style={{ alignItems: "flex-end", width: "100%", paddingRight: 20 }}
+          >
+            <Text
+              style={{ fontSize: 10, textAlign: "right", color: Colors.White }}
+            >
+              Attendance is validated via two-factor authentication*{"\n"} i.e.
+              worker Check-In & Geolocation Tracking during work hours.
+            </Text>
           </View>
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Searchbar
-              style={{
-                backgroundColor: "#F1F5F8",
-                borderRadius: 5,
-                width: "90%",
-              }}
-              placeholder="Search Project"
-              placeholderTextColor={Colors.FormText}
-              mode="bar"
-              icon={() => <Search size={20} color={Colors.Black} />}
-              clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-              onChangeText={(text) => searchFilterFunction(text)}
-              value={search}
-            />
-          </View>
-          <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
-            <FlatList
-              data={filteredDataSource}
-              renderItem={({ item }) => (
-                <Pressable
+          {/* <ScrollView> */}
+          <View
+            style={{
+              backgroundColor: Colors.White,
+              alignItems: "center",
+              margin: 10,
+              //   paddingHorizontal: 8,
+              borderRadius: 10,
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 2,
+              },
+              shadowOpacity: 0.2,
+              shadowRadius: 5,
+              elevation: 4,
+              width: "93%",
+              flex: 1,
+              // marginBottom: 10
+            }}
+          >
+            {!attendanceList || attendanceList?.length === 0 ? (
+              <ScrollView
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={() => {
+                      dispatch(
+                        getAllPaymentsAction(
+                          token,
+                          selectedProject?.projectId ||
+                            projectsListSimple[0]?.projectId,
+                          0
+                        )
+                      );
+                    }}
+                    tintColor={Colors.Primary}
+                    colors={[Colors.Purple, Colors.Primary]}
+                  />
+                }
+                contentContainerStyle={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
                   style={{
-                    width: "88%",
-                    borderWidth: 1,
-                    marginBottom: 5,
-                    alignSelf: "center",
-                    padding: 10,
-                    borderRadius: 7,
-                    borderColor: Colors.FormBorder,
-                  }}
-                  onPress={() => {
-                    setSelectedProject(item);
-                    setOpenSearchModal(false);
+                    fontFamily: "Lexend-Medium",
+                    fontSize: 18,
+                    color: Colors.Gray,
                   }}
                 >
+                  No Record Found!
+                </Text>
+              </ScrollView>
+            ) : (
+              <FlatList
+                refreshControl={
+                  <RefreshControl
+                    refreshing={isLoading}
+                    onRefresh={() => {
+                      dispatch(
+                        getAllPaymentsAction(
+                          token,
+                          selectedProject?.projectId ||
+                            projectsListSimple[0]?.projectId,
+                          0
+                        )
+                      );
+                    }}
+                    tintColor={Colors.Primary}
+                    colors={[Colors.Purple, Colors.Primary]}
+                  />
+                }
+                data={filteredAttendance ? filteredAttendance : paymentsList}
+                renderItem={({ item, index }) => (
+                  <Item item={item} index={index} />
+                )}
+                keyExtractor={(item) => item.id}
+                ListHeaderComponent={ListHeader}
+                stickyHeaderIndices={[0]}
+                showsVerticalScrollIndicator={false}
+              />
+            )}
+          </View>
+          <Spacer bottom={50} />
+          <View
+            style={{
+              width: "93%",
+              flexDirection: "row",
+              justifyContent: "space-between",
+              position: "absolute",
+              bottom: 10,
+            }}
+          >
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() =>
+                navigation.navigate("PayOnline", {
+                  selectedUser,
+                  projectId: selectedProject?.projectId,
+                })
+              }
+            >
+              <Text style={styles.buttonText}>Pay Online</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, { backgroundColor: Colors.Secondary }]}
+            >
+              <Text style={styles.buttonText}>Pay Offline</Text>
+            </TouchableOpacity>
+          </View>
+          <Modal
+            visible={openSearchModal}
+            animationType="slide"
+            onRequestClose={() => {
+              setOpenSearchModal(false);
+            }}
+            presentationStyle="pageSheet"
+          >
+            <View style={{ width: "100%" }}>
+              <View
+                style={{
+                  width: "100%",
+                  padding: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                <View style={{ width: "12%" }}>
+                  <BackIcon
+                    onPress={() => {
+                      setOpenSearchModal(false);
+                    }}
+                    size={30}
+                    color={Colors.Black}
+                  />
+                </View>
+                <View style={{ width: "88%" }}>
                   <Text
                     style={{
-                      fontSize: 14,
-                      fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 18,
+                      color: Colors.Black,
                     }}
                   >
-                    {item.name}
+                    Search
                   </Text>
-                </Pressable>
-              )}
-              keyExtractor={(item) => item.projectId}
-            />
-          </View>
-        </View>
-      </Modal>
+                </View>
+              </View>
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <Searchbar
+                  style={{
+                    backgroundColor: "#F1F5F8",
+                    borderRadius: 5,
+                    width: "90%",
+                  }}
+                  placeholder="Search Project"
+                  placeholderTextColor={Colors.FormText}
+                  mode="bar"
+                  icon={() => <Search size={20} color={Colors.Black} />}
+                  clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                  onChangeText={(text) => searchFilterFunction(text)}
+                  value={search}
+                />
+              </View>
+              <View
+                style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}
+              >
+                <FlatList
+                  data={filteredDataSource}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={{
+                        width: "88%",
+                        borderWidth: 1,
+                        marginBottom: 5,
+                        alignSelf: "center",
+                        padding: 10,
+                        borderRadius: 7,
+                        borderColor: Colors.FormBorder,
+                      }}
+                      onPress={() => {
+                        setSelectedProject(item);
+                        setOpenSearchModal(false);
+                        setData();
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.FormText,
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.projectId}
+                />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <RestrictedScreen />
+      )}
       {renderFilterModal()}
     </View>
   );
@@ -941,6 +893,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // height: "10%",
     backgroundColor: Colors.White,
+    opacity: 0.9,
     marginTop: -170,
     padding: 10,
     margin: 15,

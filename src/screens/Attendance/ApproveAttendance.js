@@ -35,22 +35,39 @@ import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
+import { Searchbar } from "react-native-paper";
 LogBox.ignoreAllLogs();
 const ApproveAttendance = ({ navigation, route }) => {
   const [selectedAttendance, setSelectedAttendance] = useState(null);
   const [openApproveModal, setOpenApproveModal] = useState(false);
   const [approveStatus, setApproveStatus] = useState(null);
   const [filterAttendance, setFilterAttendance] = useState(null);
+  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
+  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
+  const [searchAttendance, setSearchAttendance] = useState("");
+
   const token = useSelector(authToken);
   const isLoading = useSelector(loadingAttendance);
   const dispatch = useDispatch();
   const projectData = useSelector(projectDataReducer);
   const attendance = useSelector(attendanceListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
+  const [openDropdown, setOpenDropdown] = useState(false);
+	// console.log("PROJECT DATA", projectData)
+  const handleDropdownOpen = () => {
+    setOpenDropdown(true);
+  };
+
+  const handleDropdownClose = () => {
+    setOpenDropdown(false);
+  };
+
+  const modalHeight = openDropdown ? "60%" : "20%";
   //   console.log(attendance);
   useEffect(() => {
     dispatch(
-      getAllAttendanceAction(
+      getAllAttendanceAction(token,
         projectData?.projectId || projectsListSimple[0]?.projectId
       )
     );
@@ -70,109 +87,243 @@ const ApproveAttendance = ({ navigation, route }) => {
   ];
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
-
+  useEffect(() => {
+    setFilteredDataAttSource(attendance);
+    setMasterDataAttSource(attendance);
+  }, [attendance]);
+  const searchFilterAttendanceFunction = (text) => {
+    // Check if searched text is not blank
+    console.log("TEXT", text);
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataAttSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.workerName
+          ? item.workerName.toUpperCase()
+          : "".toUpperCase();
+        console.log(itemData);
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataAttSource(newData);
+      setSearchAttendance(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataAttSource(masterDataAttSource);
+      setSearchAttendance(text);
+    }
+  };
+  const renderSearchModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={openSearchUserModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenSearchUserModal(!openSearchUserModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Find by name
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchUserModal(!openSearchUserModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterAttendanceFunction(text)}
+                value={searchAttendance}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
   const renderApproveModal = () => (
     <Modal
       animationType="slide"
-      transparent={true}
+      // transparent={true}
       visible={openApproveModal}
       onRequestClose={() => {
         // Alert.alert("Modal has been closed.");
         setOpenApproveModal(!openApproveModal);
       }}
+      presentationStyle="pageSheet"
     >
-      <View
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "rgba(0,0,0,0.2)",
-          //   width: '90%',
-          //   height: 200
-        }}
-      >
+      <View style={{ width: "100%" }}>
         <View
           style={{
-            width: "60%",
-            backgroundColor: Colors.White,
-            // height: 200,
-            borderRadius: 10,
+            width: "100%",
             padding: 15,
+            flexDirection: "row",
+            alignItems: "center",
+            marginTop: 10,
           }}
         >
           <View
             style={{
-              flexDirection: "row",
+              flex: 1,
               alignItems: "center",
-              justifyContent: "space-between",
+              justifyContent: "center",
+              backgroundColor: "rgba(0,0,0)",
             }}
           >
-            <View>
-              <Text
+            <View
+              style={{
+                width: "100%",
+                backgroundColor: "white",
+                // height: modalHeight,
+                borderRadius: 10,
+                padding: 15,
+              }}
+            >
+              <View
                 style={{
-                  fontFamily: "Lexend-Medium",
-                  color: Colors.Black,
-                  fontSize: 16,
-                  marginBottom: 10,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
                 }}
               >
-                Approve Attendance
-              </Text>
+                <View>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      color: "black",
+                      fontSize: 16,
+                      marginBottom: 10,
+                    }}
+                  >
+                    Approve Attendance
+                  </Text>
+                </View>
+                <View>
+                  <Cross
+                    onPress={() => {
+                      setOpenApproveModal(!openApproveModal);
+                    }}
+                    size={22}
+                    color="black"
+                    style={{ marginBottom: 8 }}
+                  />
+                </View>
+              </View>
+              <View style={{ marginVertical: 10 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  data={attendanceOptions}
+                  maxHeight={600}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Approve"}
+                  value={approveStatus}
+                  onFocus={handleDropdownOpen}
+                  onBlur={handleDropdownClose}
+                  onChange={(item) => {
+                    setOpenApproveModal(false);
+                    setApproveStatus(item);
+                    // console.log(item);
+                    dispatch(
+                      getAttendanceApproveAction(
+                        token,
+                        selectedAttendance?.jobId,
+                        selectedAttendance?.workerId,
+                        new Date().toISOString(),
+                        item?.value
+                      )
+                    );
+                    setTimeout(() => {
+                      dispatch(
+                        getAllAttendanceAction(token,
+                          projectData?.projectId ||
+                            projectsListSimple[0]?.projectId
+                        )
+                      );
+                      setApproveStatus(null);
+                    }, 2000);
+                  }}
+                />
+              </View>
             </View>
-            <View>
-              <Cross
-                onPress={() => {
-                  setOpenApproveModal(!openApproveModal);
-                }}
-                size={22}
-                color={Colors.Black}
-                style={{ marginBottom: 8 }}
-              />
-            </View>
-          </View>
-          <View style={{ marginVertical: 10 }}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              // data={data}
-              data={attendanceOptions}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Approve"}
-              value={approveStatus}
-              // onFocus={() => setIsFocus(true)}
-              // onBlur={() => setIsFocus(false)}
-              onChange={(item) => {
-                setOpenApproveModal(false);
-                setApproveStatus(item);
-                // console.log(item);
-                dispatch(
-                  getAttendanceApproveAction(
-                    token,
-                    selectedAttendance?.jobId,
-                    selectedAttendance?.workerId,
-                    new Date().toISOString(),
-                    item?.value
-                  )
-                );
-                setTimeout(() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      projectData?.projectId || projectsListSimple[0]?.projectId
-                    )
-                  );
-                  setApproveStatus(null);
-                }, 2000);
-              }}
-            />
           </View>
         </View>
       </View>
@@ -180,14 +331,15 @@ const ApproveAttendance = ({ navigation, route }) => {
   );
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}>
+    <View style={[styles.item]}  key={item.key}>
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
-          backgroundColor: rowColors[index % rowColors?.length],
+         // backgroundColor: rowColors[index % rowColors?.length],
+          backgroundColor: "#ffffff",
           paddingHorizontal: 8,
           paddingVertical: 4,
         }}
@@ -331,7 +483,9 @@ const ApproveAttendance = ({ navigation, route }) => {
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.workerTypeId === "Online")
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Online"
+                )
               );
             }}
             style={{
@@ -342,13 +496,17 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Online-${
-              attendance?.filter((ele) => ele.workerTypeId === "Online")?.length
+              filteredDataAttSource?.filter(
+                (ele) => ele.workerTypeId === "Online"
+              )?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.workerTypeId === "Offline")
+                filteredDataAttSource?.filter(
+                  (ele) => ele.workerTypeId === "Offline"
+                )
               );
             }}
             style={{
@@ -359,14 +517,15 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Offline-${
-              attendance?.filter((ele) => ele.workerTypeId === "Offline")
-                ?.length
+              filteredDataAttSource?.filter(
+                (ele) => ele.workerTypeId === "Offline"
+              )?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.isOnline === true)
+                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
               );
             }}
             style={{
@@ -377,13 +536,14 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Present-${
-              attendance?.filter((ele) => ele.isOnline === true)?.length
+              filteredDataAttSource?.filter((ele) => ele.isOnline === true)
+                ?.length
             }`}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
               setFilterAttendance(
-                attendance?.filter((ele) => ele.isOnline === false)
+                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
               );
             }}
             style={{
@@ -394,12 +554,14 @@ const ApproveAttendance = ({ navigation, route }) => {
             }}
           >
             <Text style={styles.smallButton}>{`Absent-${
-              attendance?.filter((ele) => ele.isOnline === false)?.length
+              filteredDataAttSource?.filter((ele) => ele.isOnline === false)
+                ?.length
             }`}</Text>
           </TouchableOpacity>
         </View>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <TouchableOpacity
+            onPress={() => setOpenSearchUserModal(true)}
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -427,7 +589,6 @@ const ApproveAttendance = ({ navigation, route }) => {
           backgroundColor: Colors.White,
           alignItems: "center",
           margin: 10,
-          //   paddingHorizontal: 8,
           borderRadius: 10,
           shadowColor: "#000",
           shadowOffset: {
@@ -438,6 +599,7 @@ const ApproveAttendance = ({ navigation, route }) => {
           shadowRadius: 5,
           elevation: 4,
           width: "93%",
+          flex: 1,
         }}
       >
         <FlatList
@@ -445,13 +607,13 @@ const ApproveAttendance = ({ navigation, route }) => {
             <RefreshControl
               refreshing={isLoading}
               onRefresh={() => {
-                dispatch(getAllAttendanceAction(projectData?.projectId));
+                dispatch(getAllAttendanceAction(token, projectData?.projectId));
               }}
               tintColor={Colors.Primary}
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
-          data={!filterAttendance ? attendance : filterAttendance}
+          data={!filterAttendance ? filteredDataAttSource : filterAttendance}
           renderItem={({ item, index }) => <Item item={item} index={index} />}
           keyExtractor={(item) => item.id}
           ListHeaderComponent={ListHeader}
@@ -461,6 +623,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       </View>
       {/* </ScrollView> */}
       {renderApproveModal()}
+      {renderSearchModal()}
     </View>
   );
 };
@@ -579,7 +742,7 @@ const styles = StyleSheet.create({
   },
   smallButton: {
     fontFamily: "Lexend-SemiBold",
-    fontSize: 10,
+    fontSize: 9,
     color: Colors.Secondary,
   },
   linkText: {
@@ -645,7 +808,7 @@ const styles = StyleSheet.create({
     height: 20,
   },
   dropdown: {
-    height: 40,
+    height: 50,
     borderColor: "gray",
     borderWidth: 0.5,
     borderRadius: 5,

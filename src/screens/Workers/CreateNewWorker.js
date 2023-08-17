@@ -35,6 +35,7 @@ import {
 import { assetsUrl } from "../../utils/api_constants";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
+import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
@@ -60,13 +61,20 @@ const CreateNewWorker = ({ navigation }) => {
   const [workerId, setWorkerId] = useState(null);
   const [uploadType, setUploadType] = useState(null);
   const [initialFetch, setInitialFetch] = useState(true);
+  const [filterJobs, setFilterJob] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedJob, setSelectedJob] = useState(null);
+
   const projectsList = useSelector(projectsListSimpleReducer);
   const skillsList = useSelector(skillsListReducer);
-  const token = useSelector(authToken)
-  // console.log(skillsList);
+  const jobsList = useSelector(jobsListReducer);
+  const token = useSelector(authToken);
+  // console.log(jobsList);
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
+    // dispatch(getAllJobsAction(token, 0));
   }, []);
+
   // useEffect(() => {
   //   dispatch(getSkillsAction());
   // }, []);
@@ -89,6 +97,7 @@ const CreateNewWorker = ({ navigation }) => {
   );
   useEffect(() => {
     if (worker) {
+      // console.log("WORKER", worker);
       setFullName(worker?.fullName);
       setGenderValue(worker?.gender);
       setSkillLevelValue(worker?.workerSkills[0]?.skillTypeId);
@@ -98,37 +107,46 @@ const CreateNewWorker = ({ navigation }) => {
       setBankAccountNumber(worker?.bankAccountNumber);
       setProfilePic(assetsUrl + selectedProfilePic[0]?.url);
       setAadharCard(assetsUrl + selectedAadharCard[0]?.url);
+      setIfscCode(worker?.ifscCode);
     }
   }, [worker]);
-  // console.log(typ skillValue)
+  // console.log(skillLevelValue)
   const submitHandler = async () => {
     const formData = new FormData();
+    const workerId = worker ? worker?.workerId : 0;
+    const status = worker ? worker?.status : "Init";
     formData.append("SkillId", parseInt(skillValue, 10));
     formData.append("SkillTypeId", skillLevelValue);
-    formData.append("WorkerId", 0);
+    formData.append("WorkerId", parseInt(workerId, 10));
+    formData.append("JobId", parseInt(selectedJob, 10));
+    formData.append("ProjectId", parseInt(selectedProject, 10));
     formData.append("FullName", fullName);
-    formData.append("PhoneNumber", phoneNumber);
-    formData.append("Status", "Init");
+    formData.append("PhoneNumber", `91${phoneNumber}`);
+    formData.append("Status", status);
     formData.append("BankName", bankName);
     formData.append("BankAccountNumber", bankAccountNumber);
     formData.append("IFSCCode", ifscCode);
     formData.append("HealthCard", true);
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
-
-    const response = await dispatch(updateWorkerAction(token,formData, aadharCardForm, profilePicForm));
+    // console.log('Form data', formData)
+    const response = await dispatch(
+      updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
+    );
     if (response.status === 200) {
       navigation.goBack();
       Toast.show({
         type: "info",
-        text1: "Worker Created",
-        text2: "Worker is created successfully.",
+        text1: worker ? "Worker Updated" : "Worker Created",
+        text2: worker
+          ? "Worker is updated successfully."
+          : "Worker is created successfully.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
       });
     }
-    console.log('worker res',response)
+    // console.log("worker res", response);
   };
 
   const handleImagePicker = async () => {
@@ -225,12 +243,15 @@ const CreateNewWorker = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                // data={data}
+                autoScroll={false}
+                search
+                searchPlaceholder="Search Skill"
+                inputSearchStyle={{color: Colors.Black}}
                 data={skillsList?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
                 }))}
-                maxHeight={300}
+                maxHeight={500}
                 labelField="label"
                 valueField="value"
                 placeholder={"Select Skill"}
@@ -239,6 +260,10 @@ const CreateNewWorker = ({ navigation }) => {
                 // onBlur={() => setIsFocus(false)}
                 onChange={(item) => {
                   setSkillValue(item.value);
+                  setFilterJob([])
+                  setSkillLevelValue(null)
+                  setSelectedProject(null)
+                  setSelectedJob(null)
                   // setIsFocus(false);
                 }}
               />
@@ -361,29 +386,160 @@ const CreateNewWorker = ({ navigation }) => {
           style={{
             paddingHorizontal: 15,
             paddingBottom: 15,
+            // marginTop: openProject ? 30 : 0,
+          }}
+        >
+          <Text style={styles.title}>Select Project</Text>
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={projectsList.map((ele) => ({
+                label: ele.name,
+                value: ele.projectId,
+              }))}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search project"
+              inputSearchStyle={{color: Colors.Black}}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Project"}
+              value={selectedProject}
+              onChange={(item) => {
+                setSelectedProject(item.value);
+
+                // console.log("JOBS", filterJobs[0]);
+                const filterBySkill = jobsList?.filter(
+                  (ele) => ele?.skillId === skillValue
+                );
+                const filterBySkillLevel = filterBySkill?.filter(
+                  (ele) => ele?.skillTypeId === skillLevelValue
+                );
+                const filterByProject = filterBySkillLevel?.filter(
+                  (ele) => ele?.projectId === item?.value
+                );
+                setFilterJob(filterByProject);
+                console.log(filterByProject);
+              }}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingBottom: 15,
+            // marginTop: openProject ? 30 : 0,
+          }}
+        >
+          <Text style={styles.title}>Select Job</Text>
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={filterJobs?.map((ele) => ({
+                label: `${ele.jobName} - ${ele.description}`,
+                value: ele.jobId,
+              }))}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search Job"
+              inputSearchStyle={{color: Colors.Black}}
+              // data={[]}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Job"}
+              value={selectedJob}
+              onChange={(item) => {
+                setSelectedJob(item.value);
+              }}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 15,
+            paddingBottom: 15,
             // marginTop: openJob ? 30 : 0,
           }}
         >
           <Text style={styles.title}>Contact Number</Text>
-          <TextInput
+          <View
             style={{
-              fontFamily: "Lexend-Regular",
               borderWidth: 1,
               borderColor: Colors.FormBorder,
               marginTop: 7,
               borderRadius: 4,
               paddingHorizontal: 7,
-              fontSize: 12,
+              // fontSize: 12,
               height: 50,
               backgroundColor: Colors.White,
               elevation: 3,
-              color: Colors.Black,
+              flexDirection: "row",
+              alignItems: "center",
+              // color: Colors.Black,
             }}
-            onChangeText={(e) => setPhoneNumber(e)}
-            value={phoneNumber}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Contact Number"
-          />
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: '7%'
+              }}
+            >
+              +91
+            </Text>
+            <TextInput
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: '93%'
+              }}
+              keyboardType="number-pad"
+              onChangeText={(e) => {
+                if (e?.length <= 10) {
+                setPhoneNumber(e);
+                }
+              }}
+              value={phoneNumber}
+              placeholderTextColor={Colors.FormText}
+              placeholder="Enter Contact Number"
+            />
+          </View>
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
           <Text style={styles.title}>Bank Name</Text>

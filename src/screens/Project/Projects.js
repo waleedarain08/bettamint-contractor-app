@@ -28,9 +28,14 @@ import {
   getAllProjectsSimpleAction,
   loadingProject,
   selectProjectAction,
+  getProjectsForMapping,
+  projectsForMappingReducer,
+  projectsForLabourReducer,
+  getProjectsForLabour,
 } from "../../redux/slices/projectSlice";
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
 import { authToken, userData } from "../../redux/slices/authSlice";
+import RestrictedScreen from "../../components/RestrictedScreen";
 LogBox.ignoreAllLogs();
 
 const Projects = ({ navigation }) => {
@@ -48,7 +53,10 @@ const Projects = ({ navigation }) => {
   //! SELECTORS
   const projectsList = useSelector(projectsListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
+  const projectForMapping = useSelector(projectsForMappingReducer);
+  const projectForLabour = useSelector(projectsForLabourReducer);
   const isLoading = useSelector(loadingProject);
+  const userInfo = useSelector(userData);
 
   //! LIFE CYCLE
   useEffect(() => {
@@ -57,15 +65,27 @@ const Projects = ({ navigation }) => {
 
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
-  }, []);
+    if (userInfo?.user?.leadTypeId === "LabourContractor") {
+      dispatch(getProjectsForMapping(token));
+    } else {
+      dispatch(getAllProjectsSimpleAction(token));
+    }
+  }, [userInfo]);
 
+  // console.log(selectedProject)
   const onValueChange = (value) => {
     setSelectedProject(value);
   };
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+    setFilteredDataSource(projectForMapping);
+    setMasterDataSource(projectForMapping);
+  }, [projectForMapping]);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isProjectListPresent = roles.some(
+    (item) => item.featureSet.name === "Project List"
+  );
+
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -119,7 +139,7 @@ const Projects = ({ navigation }) => {
             </Text>
           </ImageBackground>
         </View>
-        <Spacer left={10} />
+        <Spacer left={15} />
         <View style={{ width: "65%" }}>
           <Text style={styles.title}>{item.name}</Text>
           {/* <Spacer bottom={10} /> */}
@@ -186,193 +206,283 @@ const Projects = ({ navigation }) => {
       </View>
     </Pressable>
   );
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <View
-        style={styles.graph}
-		>
-        <Pressable
-		  onPress={() => {
-			setOpenSearchModal(true);
-		  }}
-          style={{
-            flexDirection: "row",
-            // justifyContent: "space-between",
-            alignItems: "center",
-			width: '70%'
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Building size={20} color={Colors.LightGray} />
-          </View>
-          <View>
-            <Text style={styles.selectText}>Link a Project</Text>
-            <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
-            >
-              {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
-                : "Select a project"}
-            </Text>
-          </View>
-        </Pressable>
-        <View style={{ flexDirection: "row", width: "28%" }}>
-          <TouchableOpacity
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            //   height: 35,
-            //   width: "80%",
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-      <Text style={styles.linkText}>
-        Please type a Project Name here to link*
-      </Text>
-      {/* <ScrollView> */}
-      <FlatList
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              dispatch(getAllProjectsAction(token));
-            }}
-            tintColor={Colors.Primary}
-            colors={[Colors.Purple, Colors.Primary]}
-          />
-        }
-        data={projectsList}
-        renderItem={({ item }) => <Item item={item} />}
-        keyExtractor={(item) => item.id}
-      />
-      {/* </ScrollView> */}
-      <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
-      >
-        <View style={{ width: "100%" }}>
-          <View
-            style={{
-              width: "100%",
-              padding: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <View style={{ width: "12%" }}>
-              <BackIcon
+      {isProjectListPresent ? (
+        <>
+          {userInfo?.user?.leadTypeId === "LabourContractor" ? (
+            <View style={styles.graph}>
+              <Pressable
                 onPress={() => {
-                  setOpenSearchModal(false);
+                  setOpenSearchModal(true);
                 }}
-                size={30}
-                color={Colors.Black}
-              />
-            </View>
-            <View style={{ width: "88%" }}>
-              <Text
                 style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Black,
+                  flexDirection: "row",
+                  // justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "70%",
                 }}
               >
-                Search
-              </Text>
-            </View>
-          </View>
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Searchbar
-              style={{
-                backgroundColor: "#F1F5F8",
-                borderRadius: 5,
-                width: "90%",
-              }}
-              placeholder="Search Project"
-              placeholderTextColor={Colors.FormText}
-              mode="bar"
-              icon={() => <Search size={20} color={Colors.Black} />}
-              clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-              onChangeText={(text) => searchFilterFunction(text)}
-              value={search}
-            />
-          </View>
-          <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
-            <FlatList
-              data={filteredDataSource}
-              renderItem={({ item }) => (
-                <Pressable
+                <View
                   style={{
-                    width: "88%",
-                    borderWidth: 1,
-                    marginBottom: 5,
-                    alignSelf: "center",
-                    padding: 10,
-                    borderRadius: 7,
-                    borderColor: Colors.FormBorder,
-                  }}
-                  onPress={() => {
-                    setSelectedProject(item);
-                    setOpenSearchModal(false);
+                    backgroundColor: "#F7F8F9",
+                    borderRadius: 50,
+                    width: 40,
+                    height: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                 >
+                  <Building size={20} color={Colors.LightGray} />
+                </View>
+                <View>
+                  <Text style={styles.selectText}>Select a Project</Text>
+                  <Text
+                    style={[
+                      styles.selectText,
+                      { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+                    ]}
+                  >
+                    {selectedProject
+                      ? selectedProject?.name
+                      : projectForMapping
+                      ? projectForMapping[0]?.name
+                      : "Select a project"}
+                  </Text>
+                </View>
+              </Pressable>
+              <View style={{ flexDirection: "row", width: "28%" }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    dispatch(
+                      getProjectsForLabour(token, selectedProject.projectId)
+                    );
+                    setTimeout(() => {
+                      dispatch(getAllProjectsAction(token));
+                    }, 1000);
+                  }}
+                  style={{
+                    backgroundColor: "#ECE5FC",
+                    padding: 5,
+                    margin: 5,
+                    borderRadius: 3,
+                    paddingHorizontal: 9,
+                    paddingVertical: 7,
+                    //   height: 35,
+                    width: "80%",
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={styles.smallButton}>Submit</Text>
+                </TouchableOpacity>
+                {/* <TouchableOpacity
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							backgroundColor: "#ECE5FC",
+							padding: 5,
+							margin: 5,
+							borderRadius: 3,
+							paddingHorizontal: 7,
+						}}
+					>
+						<Search size={13} color={Colors.Secondary} />
+					</TouchableOpacity> */}
+              </View>
+            </View>
+          ) : (
+            <View style={styles.graph}>
+              <Pressable
+                onPress={() => {
+                  setOpenSearchModal(true);
+                }}
+                style={{
+                  flexDirection: "row",
+                  // justifyContent: "space-between",
+                  alignItems: "center",
+                  width: "70%",
+                }}
+              >
+                <View
+                  style={{
+                    backgroundColor: "#F7F8F9",
+                    borderRadius: 50,
+                    width: 40,
+                    height: 40,
+                    justifyContent: "center",
+                    alignItems: "center",
+                  }}
+                >
+                  <Building size={20} color={Colors.LightGray} />
+                </View>
+                <View>
+                  <Text style={styles.selectText}>Select a Project</Text>
+                  <Text
+                    style={[
+                      styles.selectText,
+                      { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+                    ]}
+                  >
+                    {selectedProject
+                      ? selectedProject?.name
+                      : projectsListSimple
+                      ? projectsListSimple[0]?.name
+                      : "Select a project"}
+                  </Text>
+                </View>
+              </Pressable>
+              <View style={{ flexDirection: "row", width: "15%" }}>
+                {/* <TouchableOpacity
+							style={{
+								backgroundColor: "#ECE5FC",
+								padding: 5,
+								margin: 5,
+								borderRadius: 3,
+								paddingHorizontal: 9,
+								paddingVertical: 7,
+								//   height: 35,
+								//   width: "80%",
+								justifyContent: "center",
+								alignItems: "center",
+							}}
+						>
+							<Text style={styles.smallButton}>Filter</Text>
+						</TouchableOpacity> */}
+                <TouchableOpacity
+                  style={{
+                    justifyContent: "center",
+                    alignItems: "center",
+                    backgroundColor: "#ECE5FC",
+                    padding: 5,
+                    margin: 5,
+                    borderRadius: 3,
+                    paddingHorizontal: 7,
+                  }}
+                >
+                  <Search size={13} color={Colors.Secondary} />
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
+          <Text style={styles.linkText}>
+            Please type a Project Name here to link*
+          </Text>
+          {/* <ScrollView> */}
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(getAllProjectsAction(token));
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            data={projectsList}
+            renderItem={({ item }) => <Item item={item} />}
+            keyExtractor={(item) => item.id}
+          />
+          {/* </ScrollView> */}
+          <Modal
+            visible={openSearchModal}
+            animationType="slide"
+            onRequestClose={() => {
+              setOpenSearchModal(false);
+            }}
+            presentationStyle="pageSheet"
+          >
+            <View style={{ width: "100%" }}>
+              <View
+                style={{
+                  width: "100%",
+                  padding: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                <View style={{ width: "12%" }}>
+                  <BackIcon
+                    onPress={() => {
+                      setOpenSearchModal(false);
+                    }}
+                    size={30}
+                    color={Colors.Black}
+                  />
+                </View>
+                <View style={{ width: "88%" }}>
                   <Text
                     style={{
-                      fontSize: 14,
-                      fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 18,
+                      color: Colors.Black,
                     }}
                   >
-                    {item.name}
+                    Search
                   </Text>
-                </Pressable>
-              )}
-              keyExtractor={(item) => item.projectId}
-            />
-          </View>
-        </View>
-      </Modal>
+                </View>
+              </View>
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <Searchbar
+                  style={{
+                    backgroundColor: "#F1F5F8",
+                    borderRadius: 5,
+                    width: "90%",
+                  }}
+                  placeholder="Search Project"
+                  placeholderTextColor={Colors.FormText}
+                  mode="bar"
+                  icon={() => <Search size={20} color={Colors.Black} />}
+                  clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                  onChangeText={(text) => searchFilterFunction(text)}
+                  value={search}
+                />
+              </View>
+              <View
+                style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}
+              >
+                <FlatList
+                  data={filteredDataSource}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={{
+                        width: "88%",
+                        borderWidth: 1,
+                        marginBottom: 5,
+                        alignSelf: "center",
+                        padding: 10,
+                        borderRadius: 7,
+                        borderColor: Colors.FormBorder,
+                      }}
+                      onPress={() => {
+                        setSelectedProject(item);
+                        setOpenSearchModal(false);
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.FormText,
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.projectId}
+                />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <RestrictedScreen />
+      )}
     </View>
   );
 };
@@ -413,6 +523,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // height: "10%",
     backgroundColor: Colors.White,
+    opacity: 0.9,
     marginTop: -170,
     padding: 10,
     margin: 15,

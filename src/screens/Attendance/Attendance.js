@@ -9,10 +9,11 @@ import {
   Dimensions,
   LogBox,
   Pressable,
-  Modal,
+  //Modal,
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
+import Modal  from "react-native-modal";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
@@ -25,6 +26,7 @@ import {
   saveProjectDataAction,
   selectAttendanceAction,
   loadingAttendance,
+  removeMusterData,
 } from "../../redux/slices/attendanceSlice";
 import {
   projectsListSimpleReducer,
@@ -48,12 +50,16 @@ const Attendance = ({ navigation }) => {
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
   const [search, setSearch] = useState("");
+  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
+  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
+  const [searchAttendance, setSearchAttendance] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
+  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -82,6 +88,8 @@ const Attendance = ({ navigation }) => {
     dispatch(getSkillsAction(token));
     dispatch(getUsersAction(token));
     dispatch(getAllProjectsSimpleAction(token));
+    dispatch(selectAttendanceAction(null));
+    dispatch(removeMusterData());
   }, []);
 
   useEffect(() => {
@@ -95,6 +103,34 @@ const Attendance = ({ navigation }) => {
     setMasterDataSource(projectsListSimple);
   }, [projectsListSimple]);
 
+  useEffect(() => {
+    setFilteredDataAttSource(attendanceList);
+    setMasterDataAttSource(attendanceList);
+  }, [attendanceList]);
+  const searchFilterAttendanceFunction = (text) => {
+    // Check if searched text is not blank
+    console.log("TEXT", text);
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataAttSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.workerName
+          ? item.workerName.toUpperCase()
+          : "".toUpperCase();
+        console.log(itemData);
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataAttSource(newData);
+      setSearchAttendance(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataAttSource(masterDataAttSource);
+      setSearchAttendance(text);
+    }
+  };
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -117,32 +153,140 @@ const Attendance = ({ navigation }) => {
   };
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
-  const renderFilterModal = () => {
+  const renderSearchModal = () => {
     return (
       <Modal
-        animationType="slide"
-        transparent={true}
-        visible={openFilterModal}
-        onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
-          setOpenFilterModal(!openFilterModal);
-        }}
+        // animationType="slide"
+        // transparent={true}
+        // visible={openSearchUserModal}
+        // onRequestClose={() => {
+        //   // Alert.alert("Modal has been closed.");
+        //   setOpenSearchUserModal(!openSearchUserModal);
+        // }}
+        isVisible={openSearchUserModal}
+         useNativeDriver={true}
+         backdropColor={Colors.DarkGray}
+         backdropOpacity={0.6}
+         backdropTransitionInTiming={200}
+         onBackdropPress={() => setOpenSearchModal(!openSearchUserModal)}
       >
         <View
           style={{
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.2)",
+           // backgroundColor: "rgba(0,0,0,0.2)",
             //   width: '90%',
             //   height: 200
           }}
         >
           <View
             style={{
-              width: "80%",
+              width: "88%",
               backgroundColor: Colors.White,
               // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Find by name
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchUserModal(!openSearchUserModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterAttendanceFunction(text)}
+                value={searchAttendance}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderFilterModal = () => {
+    return (
+      <Modal
+      isVisible={openFilterModal}
+      useNativeDriver={true}
+      backdropColor={Colors.DarkGray}
+      backdropOpacity={0.6}
+      backdropTransitionInTiming={200}
+      onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
+        // animationType="slide"
+        // visible={openFilterModal}
+        // onRequestClose={() => {
+        //   setOpenFilterModal(openFilterModal);
+        // }}
+        // presentationStyle="pageSheet"
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            // justifyContent: "center",
+            // backgroundColor: "rgba(0,0,0)",
+            //   width: '90%',
+            //   height: 200
+            marginTop: 30,
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
+              backgroundColor: Colors.White,
+              height: "90%",
               borderRadius: 10,
               padding: 15,
             }}
@@ -188,7 +332,7 @@ const Attendance = ({ navigation }) => {
                       )
                     );
                     setOpenFilterModal(false);
-                    setFilteredAttendance(null)
+                    setFilteredAttendance(null);
                   }}
                   style={{ marginTop: 3 }}
                 >
@@ -201,9 +345,9 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
-                  By status
+                  By Status
                 </Text>
               </View>
               <Dropdown
@@ -237,9 +381,9 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
-                  By skills
+                  By Skills
                 </Text>
               </View>
               <Dropdown
@@ -276,7 +420,7 @@ const Attendance = ({ navigation }) => {
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
                   By Contractor
                 </Text>
@@ -328,14 +472,14 @@ const Attendance = ({ navigation }) => {
   };
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}>
+    <View style={[styles.item]}   key={item.key} >
       <View
         style={{
           flexDirection: "row",
           alignItems: "center",
           width: "100%",
           justifyContent: "space-between",
-          backgroundColor: rowColors[index % rowColors?.length],
+          backgroundColor: "#ffffff",
           paddingHorizontal: 8,
           paddingVertical: 4,
         }}
@@ -363,10 +507,12 @@ const Attendance = ({ navigation }) => {
         <View style={{ width: "13%" }}>
           <Text style={styles.flatListText}>{item?.absentDays.length}</Text>
         </View>
-        <TouchableOpacity
+        <Pressable
           onPress={() => {
             navigation.navigate("AttendanceMusterCard");
+            // setTimeout(() => {
             dispatch(selectAttendanceAction(item));
+            // }, 0);
           }}
           style={{
             backgroundColor: "#ECE5FC",
@@ -379,7 +525,7 @@ const Attendance = ({ navigation }) => {
           }}
         >
           <Text style={styles.smallButton}>View</Text>
-        </TouchableOpacity>
+        </Pressable>
       </View>
     </View>
   );
@@ -454,7 +600,7 @@ const Attendance = ({ navigation }) => {
             <Building size={20} color={Colors.LightGray} />
           </View>
           <View>
-            <Text style={styles.selectText}>Link a Project</Text>
+            <Text style={styles.selectText}>Select a Project</Text>
             <Text
               style={[
                 styles.selectText,
@@ -498,6 +644,7 @@ const Attendance = ({ navigation }) => {
             <Text style={styles.smallButton}>Filter</Text>
           </Pressable>
           <TouchableOpacity
+            onPress={() => setOpenSearchUserModal(true)}
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -519,6 +666,27 @@ const Attendance = ({ navigation }) => {
         </Text>
       </View>
       {/* <ScrollView> */}
+      {/* <ScrollView
+        refreshControl={
+          <RefreshControl
+            refreshing={isLoading}
+            onRefresh={() => {
+              dispatch(
+                getAllAttendanceAction(
+                  token,
+                  selectedProject?.projectId ||
+                    projectsListSimple[0]?.projectId,
+                  0
+                )
+              );
+            }}
+            tintColor={Colors.Primary}
+            colors={[Colors.Purple, Colors.Primary]}
+          />
+        }
+        showsHorizontalScrollIndicator={false}
+        style={{ flex: 1 }}
+      > */}
       <View
         style={{
           backgroundColor: Colors.White,
@@ -537,9 +705,65 @@ const Attendance = ({ navigation }) => {
           flex: 1,
         }}
       >
+        {/* {!attendanceList || attendanceList?.length === 0 ? (
+            <ScrollView
+              refreshControl={
+                <RefreshControl
+                  refreshing={isLoading}
+                  onRefresh={() => {
+                    dispatch(
+                      getAllAttendanceAction(
+                        token,
+                        selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId, 0
+                      )
+                    );
+                  }}
+                  tintColor={Colors.Primary}
+                  colors={[Colors.Purple, Colors.Primary]}
+                />
+              }
+              contentContainerStyle={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: "Lexend-Medium",
+                  fontSize: 18,
+                  color: Colors.Gray,
+                }}
+              >
+                No Record Found!
+              </Text>
+            </ScrollView>
+          ) : ( */}
         {!attendanceList || attendanceList?.length === 0 ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
+                    )
+                  );
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <Text
               style={{
@@ -550,7 +774,7 @@ const Attendance = ({ navigation }) => {
             >
               No Record Found!
             </Text>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             refreshControl={
@@ -559,7 +783,10 @@ const Attendance = ({ navigation }) => {
                 onRefresh={() => {
                   dispatch(
                     getAllAttendanceAction(
-                      selectedProject?.projectId || attendanceList[0]?.projectId
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0
                     )
                   );
                 }}
@@ -567,24 +794,34 @@ const Attendance = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={filteredAttendance ? filteredAttendance : attendanceList}
+            data={
+              filteredAttendance ? filteredAttendance : filteredDataAttSource
+            }
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
+            initialNumToRender={0}
             ListHeaderComponent={ListHeader}
             stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
           />
         )}
+        {/* )} */}
       </View>
+      {/* </ScrollView> */}
       <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
+        isVisible={openSearchModal}
+       // animationType="none"
+        useNativeDriver={true}
+        backdropColor={Colors.WhiteGray}
+        backdropOpacity={1}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenSearchModal(false)}
+        // onRequestClose={() => {
+        //   setOpenSearchModal(false);
+        // }}
+        // presentationStyle="fullScreen"
       >
-        <View style={{ width: "100%" }}>
+        <View style={{ width: "100%",flex:1 }}>
           <View
             style={{
               width: "100%",
@@ -649,14 +886,13 @@ const Attendance = ({ navigation }) => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
                     dispatch(saveProjectDataAction(item));
-                    // console.log("selected project", item);
                   }}
                 >
                   <Text
                     style={{
                       fontSize: 14,
                       fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      color: Colors.Black,
                     }}
                   >
                     {item.name}
@@ -669,6 +905,7 @@ const Attendance = ({ navigation }) => {
         </View>
       </Modal>
       {renderFilterModal()}
+      {renderSearchModal()}
     </View>
   );
 };
@@ -709,6 +946,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // height: "10%",
     backgroundColor: Colors.White,
+    opacity: 0.9,
     marginTop: -170,
     padding: 10,
     margin: 15,

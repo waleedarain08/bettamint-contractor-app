@@ -9,6 +9,8 @@ import {
   Dimensions,
   LogBox,
   Alert,
+  Appearance,
+  Pressable,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -55,12 +57,14 @@ const CreateNewJob = ({ navigation }) => {
   const [jobLocation, setJobLocation] = useState(null);
   const [manDay, setManDay] = useState(null);
   const [number, setNumber] = useState(null);
+  const [supervisorName, setSupervisorName] = useState(null);
   const [date, setDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(null);
   const [openTime, setOpenTime] = useState(false);
   const [skillValue, setSkillValue] = useState(null);
+  const [skillLevelValue, setSkillLevelValue] = useState(null);
   const [projectData, setProjectData] = useState(null);
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   const [toggleCheckBox2, setToggleCheckBox2] = useState(false);
@@ -68,10 +72,19 @@ const CreateNewJob = ({ navigation }) => {
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
   const skillsList = useSelector(skillsListReducer);
+  const colorScheme = Appearance.getColorScheme();
+  const isDarkMode = colorScheme === "dark";
+  const textColor = isDarkMode ? "white" : "black";
 
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
   }, [selectedProject]);
+
+  const skillLevel = [
+    { label: "Supervisor", value: "Supervisor" },
+    { label: "Skilled", value: "Skilled" },
+    { label: "Helper", value: "Helper" },
+  ];
 
   useEffect(() => {
     dispatch(getSkillsAction(token));
@@ -108,7 +121,7 @@ const CreateNewJob = ({ navigation }) => {
       Toast.show({
         type: "error",
         text1: "Error",
-        text2: "Please selected the project.",
+        text2: "Please select the project.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
@@ -118,15 +131,6 @@ const CreateNewJob = ({ navigation }) => {
         type: "error",
         text1: "Error",
         text2: "Please enter required workers.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
-    } else if (!selectedDate) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select the start date.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
@@ -145,6 +149,15 @@ const CreateNewJob = ({ navigation }) => {
         type: "error",
         text1: "Error",
         text2: "Please select skill.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
+    } else if (!skillLevelValue) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select skill level.",
         topOffset: 10,
         position: "top",
         visibilityTime: 4000,
@@ -201,11 +214,11 @@ const CreateNewJob = ({ navigation }) => {
       formData.append("video", "");
       formData.append("projectId", parseInt(selectedProject, 10));
       formData.append("description", jobDescription);
-      formData.append("contactNumber", number);
+      formData.append("contactNumber", `91${number}`);
       formData.append("manDays", manDay);
       formData.append("isFood", toggleCheckBox);
       formData.append("isAccomodation", toggleCheckBox2);
-      formData.append("skillTypeId", "Skilled");
+      formData.append("skillTypeId", skillLevelValue);
       formData.append("cityName", jobLocation);
 
       const response = await dispatch(createJobAction(token, formData));
@@ -275,6 +288,10 @@ const CreateNewJob = ({ navigation }) => {
                 value: project?.projectId,
                 ...project,
               }))}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search Project"
+              inputSearchStyle={{ color: Colors.Black }}
               maxHeight={300}
               labelField="label"
               valueField="value"
@@ -323,6 +340,7 @@ const CreateNewJob = ({ navigation }) => {
                   fontSize: 12,
                   width: "80%",
                 }}
+                onPressIn={() => setOpen(true)}
                 placeholderTextColor={Colors.FormText}
                 placeholder="mm/dd/yyyy"
                 value={date ? moment(date).format("MM/DD/YYYY") : "mm/dd/yyyy"}
@@ -372,6 +390,10 @@ const CreateNewJob = ({ navigation }) => {
                 value: ele?.skillId,
               }))}
               maxHeight={300}
+              autoScroll={false}
+              search
+              searchPlaceholder="Search Skill"
+              inputSearchStyle={{ color: Colors.Black }}
               labelField="label"
               valueField="value"
               placeholder={"Select Skill"}
@@ -380,6 +402,41 @@ const CreateNewJob = ({ navigation }) => {
               // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
                 setSkillValue(item.value);
+                // setIsFocus(false);
+              }}
+            />
+          </View>
+        </View>
+        <View style={{ padding: 10 }}>
+          <Text style={styles.title}>Skill Level</Text>
+          {/* <View style={styles.inputField}>
+            <TextInput
+              style={styles.placeholderText}
+              placeholder="Select skill set"
+              editable={false}
+            />
+          </View> */}
+          <View style={{ marginTop: 7 }}>
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
+              }}
+              iconStyle={styles.iconStyle}
+              data={skillLevel}
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Level"}
+              value={skillLevelValue}
+              // onFocus={() => setIsFocus(true)}
+              // onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setSkillLevelValue(item.value);
                 // setIsFocus(false);
               }}
             />
@@ -395,7 +452,7 @@ const CreateNewJob = ({ navigation }) => {
         >
           <View style={{ padding: 10, width: "50%" }}>
             <Text style={styles.title}>REPORTING TIME</Text>
-            <View
+            <Pressable
               style={[
                 styles.inputField,
                 {
@@ -404,6 +461,7 @@ const CreateNewJob = ({ navigation }) => {
                   justifyContent: "space-between",
                 },
               ]}
+              // onPress={() => setOpenTime(true)}
             >
               <TextInput
                 style={{
@@ -412,16 +470,17 @@ const CreateNewJob = ({ navigation }) => {
                   fontSize: 12,
                   width: "80%",
                 }}
+                onPressIn={() => setOpenTime(true)}
                 placeholderTextColor={Colors.FormText}
                 placeholder="----"
                 value={time ? moment(time).format("hh:mm A") : "----"}
               />
               <ClockIcon
                 onPress={() => setOpenTime(true)}
-                color={Colors.FormText}
-                size={25}
+                color={Colors.FormBorder}
+                size={20}
               />
-            </View>
+            </Pressable>
           </View>
           <View style={{ padding: 10, width: "50%" }}>
             <Text style={styles.title}>DAILY WAGE</Text>
@@ -484,19 +543,90 @@ const CreateNewJob = ({ navigation }) => {
               placeholder="Location"
               value={jobLocation || "Location"}
               //   onChangeText={(text) => setJobLocation(text)}
+              editable={false}
             />
             <LocationIcon color={Colors.FormBorder} size={25} />
           </View>
         </View>
         <View style={{ padding: 10 }}>
-          <Text style={styles.title}>Contact Number</Text>
+          <Text style={styles.title}>Supervisor Name</Text>
           <TextInput
             style={styles.inputField}
-            placeholder="Enter Contact Number"
+            placeholder="Enter Supervisor Name"
             placeholderTextColor={Colors.FormText}
-            value={number}
-            onChangeText={(text) => setNumber(text)}
+            value={supervisorName}
+            onChangeText={(text) => setSupervisorName(text)}
           />
+        </View>
+        <View style={{ padding: 10 }}>
+          <Text style={styles.title}>Contact Number</Text>
+          {/* <TextInput
+						style={styles.inputField}
+						placeholder="Enter Contact Number"
+						placeholderTextColor={Colors.FormText}
+						value={number}
+						onChangeText={(text) => setNumber(text)}
+					/> */}
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: Colors.FormBorder,
+              marginTop: 7,
+              borderRadius: 4,
+              paddingHorizontal: 7,
+              // fontSize: 12,
+              height: 50,
+              backgroundColor: Colors.White,
+              elevation: 3,
+              flexDirection: "row",
+              alignItems: "center",
+              // color: Colors.Black,
+            }}
+          >
+            <Text
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: "7%",
+              }}
+            >
+              +91
+            </Text>
+            <TextInput
+              style={{
+                fontFamily: "Lexend-Regular",
+                // borderWidth: 1,
+                // borderColor: Colors.FormBorder,
+                // marginTop: 7,
+                // borderRadius: 4,
+                // paddingHorizontal: 7,
+                fontSize: 12,
+                // height: 50,
+                // backgroundColor: Colors.White,
+                // elevation: 3,
+                color: Colors.Black,
+                width: "93%",
+              }}
+              keyboardType="number-pad"
+              onChangeText={(e) => {
+                if (e?.length <= 10) {
+                  setNumber(e);
+                }
+              }}
+              value={number}
+              placeholderTextColor={Colors.FormText}
+              placeholder="Enter Contact Number"
+            />
+          </View>
         </View>
         <View
           style={{
@@ -544,65 +674,63 @@ const CreateNewJob = ({ navigation }) => {
             </Text>
           </View>
         </View>
-        <Text
-          style={{
-            paddingLeft: 14,
-            fontFamily: "Lexend-Medium",
-            color: Colors.Black,
-            fontSize: 14,
-            textTransform: "uppercase",
-          }}
-        >
-          Job Instructions
-        </Text>
-        <View style={styles.uploadBox}>
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              borderColor: Colors.LightGray,
-              borderStyle: "dashed",
-              borderWidth: 0.6,
-              borderRadius: 5,
-              width: "48%",
-              height: 150,
-              backgroundColor: Colors.White,
-              elevation: 4,
-            }}
-          >
-            {/* <Picture size={40} color={Colors.LightGray} /> */}
-            <Image
-              source={require("../../assets/icons/video.png")}
-              style={{ width: 50, height: 44, marginVertical: 5 }}
-            />
-            <Text style={styles.imgText}>Upload Video File</Text>
-          </View>
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              borderColor: Colors.LightGray,
-              borderStyle: "dashed",
-              borderWidth: 0.6,
-              borderRadius: 5,
-              width: "48%",
-              height: 150,
-              backgroundColor: Colors.White,
-              elevation: 4,
-            }}
-          >
-            {/* <Picture size={40} color={Colors.LightGray} /> */}
-            <Image
-              source={require("../../assets/icons/audio.png")}
-              style={{ width: 50, height: 44, marginVertical: 5 }}
-            />
-            <Text style={styles.imgText}>Upload Audio File</Text>
-          </View>
-        </View>
+        {/* <Text
+					style={{
+						paddingLeft: 14,
+						fontFamily: "Lexend-Medium",
+						color: Colors.Black,
+						fontSize: 14,
+						textTransform: "uppercase",
+					}}
+				>
+					Job Instructions
+				</Text> */}
+        {/* <View style={styles.uploadBox}>
+					<View
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							borderColor: Colors.LightGray,
+							borderStyle: "dashed",
+							borderWidth: 0.6,
+							borderRadius: 5,
+							width: "48%",
+							height: 150,
+							backgroundColor: Colors.White,
+							elevation: 4,
+						}}
+					>
+						<Image
+							source={require("../../assets/icons/video.png")}
+							style={{ width: 50, height: 44, marginVertical: 5 }}
+						/>
+						<Text style={styles.imgText}>Upload Video File</Text>
+					</View>
+					<View
+						style={{
+							justifyContent: "center",
+							alignItems: "center",
+							borderColor: Colors.LightGray,
+							borderStyle: "dashed",
+							borderWidth: 0.6,
+							borderRadius: 5,
+							width: "48%",
+							height: 150,
+							backgroundColor: Colors.White,
+							elevation: 4,
+						}}
+					>
+						<Image
+							source={require("../../assets/icons/audio.png")}
+							style={{ width: 50, height: 44, marginVertical: 5 }}
+						/>
+						<Text style={styles.imgText}>Upload Audio File</Text>
+					</View>
+				</View> */}
         <DatePicker
           modal
           mode="date"
-          textColor={Colors.Black}
+          textColor={textColor}
           open={open}
           date={date}
           onConfirm={(date) => {
@@ -617,7 +745,7 @@ const CreateNewJob = ({ navigation }) => {
         <DatePicker
           modal
           mode="time"
-          textColor={Colors.Black}
+          textColor={textColor}
           open={openTime}
           date={date}
           onConfirm={(date) => {

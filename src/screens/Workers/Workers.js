@@ -9,6 +9,7 @@ import {
   Pressable,
   ActivityIndicator,
   RefreshControl,
+  ScrollView,
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
@@ -30,6 +31,7 @@ import {
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { authToken } from "../../redux/slices/authSlice";
+import { getAllJobsAction } from "../../redux/slices/jobSlice";
 
 LogBox.ignoreAllLogs();
 const Workers = ({ navigation }) => {
@@ -41,6 +43,10 @@ const Workers = ({ navigation }) => {
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
+  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
+  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
+  const [searchAttendance, setSearchAttendance] = useState("");
 
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
@@ -52,8 +58,9 @@ const Workers = ({ navigation }) => {
   // console.log("------project", projectsListSimple)
   // console.log('worker list', workersList)
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction());
+    dispatch(getAllProjectsSimpleAction(token));
     dispatch(getUsersAction(token));
+    dispatch(getAllJobsAction(token, 0));
   }, []);
   useEffect(() => {
     setLabourContractors(
@@ -100,15 +107,43 @@ const Workers = ({ navigation }) => {
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
-  const renderFilterModal = () => {
+  useEffect(() => {
+    setFilteredDataAttSource(workersList);
+    setMasterDataAttSource(workersList);
+  }, [workersList]);
+  const searchFilterAttendanceFunction = (text) => {
+    // Check if searched text is not blank
+    console.log("TEXT", text);
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataAttSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.fullName
+          ? item.fullName.toUpperCase()
+          : "".toUpperCase();
+        console.log(itemData);
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataAttSource(newData);
+      setSearchAttendance(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataAttSource(masterDataAttSource);
+      setSearchAttendance(text);
+    }
+  };
+  const renderSearchModal = () => {
     return (
       <Modal
         animationType="slide"
         transparent={true}
-        visible={openFilterModal}
+        visible={openSearchUserModal}
         onRequestClose={() => {
           // Alert.alert("Modal has been closed.");
-          setOpenFilterModal(!openFilterModal);
+          setOpenSearchUserModal(!openSearchUserModal);
         }}
       >
         <View
@@ -124,6 +159,104 @@ const Workers = ({ navigation }) => {
           <View
             style={{
               width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Find by name
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchUserModal(!openSearchUserModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+                  onPress={() => {
+                    setSelectedContractor(null);
+                    setOpenFilterModal(false);
+                    setUserFilter(null);
+                  }}
+                  style={{ marginTop: 3 }}
+                >
+                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                    Clear Filter
+                  </Text>
+                </Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterAttendanceFunction(text)}
+                value={searchAttendance}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderFilterModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        // transparent={true}
+        presentationStyle="pageSheet"
+        visible={openFilterModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenFilterModal(!openFilterModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            marginTop: 20
+            // justifyContent: "center",
+            // backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
               backgroundColor: Colors.White,
               // height: 200,
               borderRadius: 10,
@@ -375,7 +508,7 @@ const Workers = ({ navigation }) => {
             <Building size={20} color={Colors.LightGray} />
           </View>
           <View>
-            <Text style={styles.selectText}>Link a Project</Text>
+            <Text style={styles.selectText}>Select a Project</Text>
             <Text
               style={[
                 styles.selectText,
@@ -417,6 +550,7 @@ const Workers = ({ navigation }) => {
             <Text style={styles.smallButton}>Filter</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={() => setOpenSearchUserModal(true)}
             style={{
               justifyContent: "center",
               alignItems: "center",
@@ -449,9 +583,25 @@ const Workers = ({ navigation }) => {
           flex: 1,
         }}
       >
-        {workersList.length === 0 || !workersList ? (
-          <View
-            style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
+        {workersList?.length === 0 || !workersList ? (
+          <ScrollView
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() =>
+                  dispatch(
+                    getAllWorkersAction(token, selectedProject?.projectId, 0)
+                  )
+                }
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            contentContainerStyle={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
           >
             <Text
               style={{
@@ -462,7 +612,7 @@ const Workers = ({ navigation }) => {
             >
               No Record Found!
             </Text>
-          </View>
+          </ScrollView>
         ) : (
           <FlatList
             refreshControl={
@@ -477,7 +627,11 @@ const Workers = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={workersList}
+            data={
+              filteredDataAttSource?.length !== 0
+                ? filteredDataAttSource
+                : workersList
+            }
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
             ListHeaderComponent={ListHeader}
@@ -577,6 +731,7 @@ const Workers = ({ navigation }) => {
         </View>
       </Modal>
       {renderFilterModal()}
+      {renderSearchModal()}
     </View>
   );
 };

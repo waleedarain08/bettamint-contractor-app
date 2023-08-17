@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -21,21 +21,71 @@ export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import CheckBox from "@react-native-community/checkbox";
 import DropDownPicker from "react-native-dropdown-picker";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  createUserAction,
+  getRoles,
+  rolesReducer,
+} from "../../redux/slices/userSlice";
+import { authToken } from "../../redux/slices/authSlice";
+import { Dropdown, MultiSelect } from "react-native-element-dropdown";
+import {
+  getAllProjectsSimpleAction,
+  projectsListSimpleReducer,
+} from "../../redux/slices/projectSlice";
+import Toast from "react-native-toast-message";
+import { useFocusEffect } from "@react-navigation/native";
+
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
-const CreateNewUser = ({ navigation }) => {
+const CreateNewUser = ({ navigation, route }) => {
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
+  const [userRole, setUseRole] = useState(null);
+  const [project, setProject] = useState([]);
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
     { label: "Apple", value: "apple" },
     // { label: "Banana", value: "banana" },
   ]);
+  const projectsList = useSelector(projectsListSimpleReducer);
+  function generatePassword(length) {
+    const charset =
+      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let password = "";
 
+    for (let i = 0; i < length; i++) {
+      const randomIndex = Math.floor(Math.random() * charset.length);
+      password += charset[randomIndex];
+    }
+
+    return password;
+  }
+  const userInfo = route?.params?.userInfo;
+  // console.log(userInfo);
+  const token = useSelector(authToken);
+  const roles = useSelector(rolesReducer);
+  // console.log("ROLES", roles);
+  const dispatch = useDispatch();
+  // useEffect(() => {}, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      // setTimeout(() => {
+      dispatch(getRoles(token));
+      dispatch(getAllProjectsSimpleAction(token));
+      // }, 1000);
+      return () => {};
+    }, [dispatch, token])
+  );
+
+  // console.log('PROJECT', project)
   return (
     <View style={styles.container}>
       <View style={styles.header} />
+      {/* <Toast /> */}
       <ScrollView style={styles.graph}>
         <View
           style={{ paddingHorizontal: 15, paddingBottom: 13, marginTop: 20 }}
@@ -60,6 +110,8 @@ const CreateNewUser = ({ navigation }) => {
               }}
               placeholderTextColor={Colors.FormText}
               placeholder="Enter Name"
+              value={fullName}
+              onChangeText={(e) => setFullName(e)}
               // value="₹ 56,000"
             />
             <User color={Colors.FormBorder} size={30} />
@@ -86,6 +138,9 @@ const CreateNewUser = ({ navigation }) => {
               }}
               placeholderTextColor={Colors.FormText}
               placeholder="Enter Email"
+              value={email}
+              onChangeText={(e) => setEmail(e)}
+
               // value="₹ 56,000"
             />
             <Email
@@ -96,94 +151,92 @@ const CreateNewUser = ({ navigation }) => {
           </View>
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
-          <Text style={styles.title}>User Name</Text>
-          <View
-            style={[
-              styles.inputField,
-              {
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-            ]}
-          >
-            <TextInput
-              style={{
-                fontFamily: "Lexend-Medium",
-                color: Colors.Black,
-                fontSize: 12,
-                width: "80%",
+          <Text style={styles.title}>Project</Text>
+          <View style={{ marginTop: 7 }}>
+            <MultiSelect
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
               }}
-              placeholderTextColor={Colors.FormText}
-              placeholder="Enter User Name"
-              // value="₹ 56,000"
-            />
-            <User color={Colors.FormBorder} size={30} />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
-          <Text style={styles.title}>Password</Text>
-          <View
-            style={[
-              styles.inputField,
-              {
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-            ]}
-          >
-            <TextInput
-              style={{
-                fontFamily: "Lexend-Medium",
-                color: Colors.Black,
-                fontSize: 12,
-                width: "80%",
+              iconStyle={styles.iconStyle}
+              autoScroll={false}
+              // search
+              // searchPlaceholder="Search Skill"
+              inputSearchStyle={{ color: Colors.Black }}
+              data={
+                projectsList?.length
+                  ? projectsList?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele.projectId,
+                    }))
+                  : []
+              }
+              maxHeight={500}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Project"}
+              value={project}
+              // onFocus={() => {
+              //   // setIsFocus(true);
+              //   dispatch(getAllProjectsSimpleAction(token));
+              // }}
+              // onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setProject(item);
+
+                // setIsFocus(false);
               }}
-              placeholderTextColor={Colors.FormText}
-              placeholder="*********"
-              // value="₹ 56,000"
             />
-            <LockIcon color={Colors.FormBorder} size={25} />
           </View>
         </View>
         <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
           <Text style={styles.title}>User Role</Text>
-          {/* <View style={styles.inputField}></View> */}
           <View style={{ marginTop: 7 }}>
-            <DropDownPicker
-              open={open}
-              value={value}
-              items={items}
-              setOpen={setOpen}
-              setValue={setValue}
-              setItems={setItems}
-              placeholder="Select User Roles"
-              placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
-              listItemContainerStyle={{ borderColor: Colors.FormBorder }}
-              dropDownContainerStyle={{
-                backgroundColor: "#dfdfdf",
-                borderColor: Colors.FormBorder,
+            <Dropdown
+              style={styles.dropdown}
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.FormText,
               }}
-              // itemSeparatorStyle={{
-              //   backgroundColor: "red",
+              iconStyle={styles.iconStyle}
+              autoScroll={false}
+              // search
+              // searchPlaceholder="Search Skill"
+              inputSearchStyle={{ color: Colors.Black }}
+              data={
+                roles?.length
+                  ? roles?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele?.roleId,
+                    }))
+                  : []
+              }
+              maxHeight={500}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select Role"}
+              value={userRole}
+              // onFocus={() => {
+              //   // setIsFocus(true);
+              //   dispatch(getRoles(token));
               // }}
-              // selectedItemContainerStyle={{fo}}
-              selectedItemLabelStyle={{
-                fontWeight: "bold",
+              // onBlur={() => setIsFocus(false)}
+              onChange={(item) => {
+                setUseRole(item?.value);
+
+                // setIsFocus(false);
               }}
-              style={{
-                borderColor: Colors.FormBorder,
-                borderRadius: 4,
-                height: 50,
-                backgroundColor: Colors.White,
-                elevation: 3,
-              }}
-              arrowIconStyle={{ height: 20, width: 10 }}
             />
           </View>
         </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
+        {/* <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
           <Text style={styles.title}>OR Enter New Role</Text>
           <View
             style={[
@@ -206,7 +259,6 @@ const CreateNewUser = ({ navigation }) => {
               placeholder="Enter new role name here"
               // value="₹ 56,000"
             />
-            {/* <LockIcon color={Colors.FormBorder} size={25} /> */}
             <Pressable
               style={{
                 width: "15%",
@@ -229,8 +281,8 @@ const CreateNewUser = ({ navigation }) => {
               </View>
             </Pressable>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
+        </View> */}
+        {/* <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
           <Text
             style={{
               fontFamily: "Lexend-Medium",
@@ -241,8 +293,8 @@ const CreateNewUser = ({ navigation }) => {
           >
             Select features to assign to this new role*
           </Text>
-        </View>
-        <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
+        </View> */}
+        {/* <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
           <View
             style={{
               flexDirection: "row",
@@ -622,7 +674,7 @@ const CreateNewUser = ({ navigation }) => {
               </Text>
             </View>
           </View>
-        </View>
+        </View> */}
         {/* <Spacer top={20} /> */}
         {/* <View>
 					<Text style={styles.heading}>
@@ -641,7 +693,80 @@ const CreateNewUser = ({ navigation }) => {
       >
         <TouchableOpacity
           style={[styles.button, { width: "60%" }]}
-          onPress={() => alert("User Created")}
+          onPress={async () => {
+            const password = generatePassword(8);
+            if (!fullName) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please enter full name.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (!email) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please enter email.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (project?.length === 0) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please select projects.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else if (!userRole) {
+              Toast.show({
+                type: "error",
+                text1: "Error",
+                text2: "Please select user role.",
+                topOffset: 10,
+                position: "top",
+                visibilityTime: 4000,
+              });
+            } else {
+              const user = {
+                userId: 0,
+                username: email,
+                fullName: fullName,
+                password: password,
+                emailAddress: email,
+                userTypeId: 0,
+                roleId: userRole,
+                projectIds: project,
+              };
+              // console.log(user);
+                const response = await dispatch(createUserAction(token, user));
+                if (response?.status === 200) {
+                  navigation.goBack();
+                  Toast.show({
+                    type: "success",
+                    text1: "User Created",
+                    text2: "User Created successfully.",
+                    topOffset: 10,
+                    position: "top",
+                    visibilityTime: 4000,
+                  });
+                } else {
+                  Toast.show({
+                    type: "error",
+                    text1: "Error",
+                    text2: "Something went wrong!",
+                    topOffset: 10,
+                    position: "top",
+                    visibilityTime: 4000,
+                  });
+                }
+                // console.log("USER HIT", response);
+            }
+          }}
         >
           <Text style={styles.buttonText}>Create User</Text>
         </TouchableOpacity>
@@ -816,5 +941,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     textAlign: "center",
     color: "white",
+  },
+  dropdown: {
+    height: 50,
+    borderColor: "gray",
+    borderWidth: 0.5,
+    borderRadius: 5,
+    paddingHorizontal: 8,
+    elevation: 4,
+    backgroundColor: Colors.White,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: "absolute",
+    backgroundColor: "white",
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+  },
+  placeholderStyle: {
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+    color: Colors.FormText,
+  },
+  selectedTextStyle: {
+    fontSize: 12,
+    fontFamily: "Lexend-Regular",
+    color: Colors.Black,
   },
 });

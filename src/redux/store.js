@@ -9,6 +9,7 @@ import attendanceSlice from "./slices/attendanceSlice";
 import workerSlice from "./slices/workerSlice";
 import authSlice from "./slices/authSlice";
 import userSlide from "./slices/userSlice";
+import paymentSlice from "./slices/paymentSlice";
 
 const persistConfig = {
   key: "root",
@@ -28,6 +29,7 @@ const reducers = combineReducers({
   attendance: attendanceSlice,
   workers: workerSlice,
   users: userSlide,
+  payment: paymentSlice,
 });
 const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({

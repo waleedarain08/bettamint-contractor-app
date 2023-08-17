@@ -8,6 +8,7 @@ const initialState = {
   error: null,
   userData: null,
   token: null,
+  signupData: null,
 };
 
 const authSlice = createSlice({
@@ -23,6 +24,18 @@ const authSlice = createSlice({
       state.loading = false;
     },
     userLoginFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    userSignUpRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    userSignUpSuccess: (state, action) => {
+      state.signupData = action.payload;
+      state.loading = false;
+    },
+    userSignUpFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
@@ -42,6 +55,9 @@ const {
   userLoginRequest,
   userLoginSuccess,
   userLoginFailure,
+  userSignUpRequest,
+  userSignUpSuccess,
+  userSignUpFailure,
   isUserLoginDone,
   resetState,
 } = authSlice.actions;
@@ -69,6 +85,38 @@ export const userLoginAction = (username, password) => async (dispatch) => {
       dispatch(userLoginSuccess(response.data));
       console.log("Auth Response", response.data);
       dispatch(isUserLoginDone(response?.data?.token));
+    } else {
+      dispatch(userLoginFailure("Something went wrong!"));
+    }
+    return response;
+  } catch (error) {
+    dispatch(userLoginFailure("Something went wrong!"));
+    console.log("ERROR", error.status);
+    // if (error.status === 400) {
+    //   throw new Error("Incorrect username or password");
+    // }
+    // throw new Error("Unable to login, Please try again later");
+    return error;
+  }
+};
+
+export const userSignupAction = (data) => async (dispatch) => {
+  const url = `${base_url}/dashboard/User/Login`;
+
+  dispatch(userLoginRequest());
+  try {
+    let response = await axios.post(
+      `${base_url}/dashboard/Lead`, data, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "text/plain",
+        }
+      }
+    );
+    if (response.status === 200) {
+      dispatch(userLoginSuccess(response.data));
+      console.log("Signup Response", response.data);
+      // dispatch(isUserLoginDone(response?.data?.token));
     } else {
       dispatch(userLoginFailure("Something went wrong!"));
     }

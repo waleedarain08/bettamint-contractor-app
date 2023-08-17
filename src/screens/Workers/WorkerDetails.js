@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	View,
 	Text,
@@ -24,18 +24,27 @@ const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 import { Building, Search, LocationIcon, User, AccountType } from "../../icons";
 import { assetsUrl } from "../../utils/api_constants";
-import { useSelector } from "react-redux";
-import { selectedWorkerReducer } from "../../redux/slices/workerSlice";
+import { useSelector, useDispatch } from "react-redux";
+import {
+	selectedWorkerReducer,
+	selectWorkerAction,
+} from "../../redux/slices/workerSlice";
 
 const WorkerDetails = ({ navigation, route }) => {
 	const worker = useSelector(selectedWorkerReducer);
 	console.log("Worker", worker);
+	const dispatch = useDispatch();
 	const profilePic = worker?.workerDocuments?.filter(
 		(ele) => ele?.documentId === "ProfilePicture"
 	);
 	const aadharCard = worker?.workerDocuments?.filter(
 		(ele) => ele?.documentId === "IdentityCard"
 	);
+	useEffect(() => {
+		setTimeout(() => {
+			dispatch(selectWorkerAction(worker));
+		}, 500);
+	}, [worker]);
 
 	return (
 		<View style={styles.container}>
@@ -122,7 +131,21 @@ const WorkerDetails = ({ navigation, route }) => {
 										Skill Level
 									</Text>
 									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
-										-----
+										{worker?.workerSkills[0]?.skillTypeId}
+									</Text>
+								</View>
+								<View
+									style={{
+										borderBottomWidth: 1,
+										borderBottomColor: Colors.WhiteGray,
+										padding: 10,
+									}}
+								>
+									<Text style={[styles.modalText, { color: Colors.Gray }]}>
+										Skill Set
+									</Text>
+									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
+										{worker?.workerSkills[0]?.skill?.name}
 									</Text>
 								</View>
 								<View
@@ -139,7 +162,7 @@ const WorkerDetails = ({ navigation, route }) => {
 										{worker?.phoneNumber}
 									</Text>
 								</View>
-								<View
+								{/* <View
 									style={{
 										borderBottomWidth: 1,
 										borderBottomColor: Colors.WhiteGray,
@@ -153,7 +176,7 @@ const WorkerDetails = ({ navigation, route }) => {
 									<Text style={[styles.modalHeading, { color: Colors.Black }]}>
 										{worker?.address}
 									</Text>
-								</View>
+								</View> */}
 								<View
 									style={{
 										borderBottomWidth: 1,

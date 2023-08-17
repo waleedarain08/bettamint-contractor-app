@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "982563545002",
+    "project_id": "bettamint-contractor",
+    "storage_bucket": "bettamint-contractor.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982563545002:android:009058bfe6cfe5581dd5d3",
+        "android_client_info": {
+          "package_name": "com.bettamintcontractor"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "982563545002-8d11knipi8mtbu93blsu14lkgkkbp4vg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFrct1x4ZOUoXcdVtW3u9CAqEfDKJ8Pk4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982563545002-8d11knipi8mtbu93blsu14lkgkkbp4vg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

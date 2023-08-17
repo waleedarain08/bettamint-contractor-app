@@ -58,7 +58,15 @@ export const VectorIcon = ({ name, color, size, type, style, onPress }) => {
         />
       );
     case "Feather":
-      return <Feather name={name} color={color} size={size} style={style} />;
+      return (
+        <Feather
+          name={name}
+          color={color}
+          size={size}
+          style={style}
+          onPress={onPress}
+        />
+      );
     case "Fontisto":
       return <Fontisto name={name} color={color} size={size} style={style} />;
     case "MaterialIcons":
@@ -356,10 +364,10 @@ export const DateIcon = ({ color, size, style, onPress }) => (
 );
 export const ClockIcon = ({ color, size, style, onPress }) => (
   <VectorIcon
-    name="clock"
+    name="clock-o"
     color={color}
     size={size}
-    type="EvilIcons"
+    type="FontAwesome"
     style={style}
     onPress={onPress}
   />
@@ -417,6 +425,49 @@ export const BackCircleIcon = ({ color, size, style, onPress }) => (
     color={color}
     size={size}
     type="Ionicons"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const PackageIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="box"
+    color={color}
+    size={size}
+    type="Feather"
+    style={style}
+    onPress={onPress}
+  />
+);
+
+export const EyeIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="eye"
+    color={color}
+    size={size}
+    type="Feather"
+    style={style}
+    onPress={onPress}
+  />
+);
+
+export const EyeOffIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="eye-off"
+    color={color}
+    size={size}
+    type="Feather"
+    style={style}
+    onPress={onPress}
+  />
+);
+
+export const RestrictedIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="do-not-disturb-alt"
+    color={color}
+    size={size}
+    type="MaterialIcons"
     style={style}
     onPress={onPress}
   />

@@ -11,6 +11,7 @@ import {
   Modal,
   LogBox,
   RefreshControl,
+  Linking,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 // import Logo from "../assets/images/logo.png";
@@ -27,8 +28,10 @@ import { Building, Whatsapp } from "../../icons";
 import { useSelector, useDispatch } from "react-redux";
 import { Searchbar } from "react-native-paper";
 import {
+  completeJob,
   getAllJobsAction,
   jobsListReducer,
+  loadingCompleteJob,
   loadingJobs,
   selectedJobAction,
 } from "../../redux/slices/jobSlice";
@@ -37,12 +40,14 @@ import {
   getAllProjectsSimpleAction,
   projectsListSimpleReducer,
 } from "../../redux/slices/projectSlice";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import moment from "moment";
 import { Dropdown } from "react-native-element-dropdown";
 import { skillsListReducer } from "../../redux/slices/workerSlice";
 import { getSkillsAction } from "../../redux/slices/workerSlice";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
+import { useFocusEffect } from "@react-navigation/native";
+import RestrictedScreen from "../../components/RestrictedScreen";
 LogBox.ignoreAllLogs();
 
 const Jobs = ({ navigation }) => {
@@ -58,6 +63,10 @@ const Jobs = ({ navigation }) => {
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
+  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
+  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
+  const [searchAttendance, setSearchAttendance] = useState("");
 
   const dispatch = useDispatch();
   const skillsList = useSelector(skillsListReducer);
@@ -68,11 +77,50 @@ const Jobs = ({ navigation }) => {
   const isLoading = useSelector(loadingJobs);
   const token = useSelector(authToken);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
+  const isLoadingCompJob = useSelector(loadingCompleteJob);
+  const userInfo = useSelector(userData);
 
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isJobsListPresent = roles.some(
+    (item) => item.featureSet.name === "Jobs List"
+  );
+
+  //   useEffect(() => {}, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getAllJobsAction(token, 0));
+      dispatch(getUsersAction(token));
+
+      return () => {};
+    }, [isLoadingCompJob])
+  );
   useEffect(() => {
-    dispatch(getAllJobsAction(token, 0));
-    dispatch(getUsersAction(token));
-  }, []);
+    setFilteredDataAttSource(jobsList);
+    setMasterDataAttSource(jobsList);
+  }, [jobsList]);
+  const searchFilterAttendanceFunction = (text) => {
+    // Check if searched text is not blank
+    if (text) {
+      // Inserted text is not blank
+      // Filter the masterDataSource and update FilteredDataSource
+      const newData = masterDataAttSource.filter(function (item) {
+        // Applying filter for the inserted text in search bar
+        const itemData = item.jobName
+          ? item.jobName.toUpperCase()
+          : "".toUpperCase();
+        console.log(itemData);
+        const textData = text.toUpperCase();
+        return itemData.indexOf(textData) > -1;
+      });
+      setFilteredDataAttSource(newData);
+      setSearchAttendance(text);
+    } else {
+      // Inserted text is blank
+      // Update FilteredDataSource with masterDataSource
+      setFilteredDataAttSource(masterDataAttSource);
+      setSearchAttendance(text);
+    }
+  };
   useEffect(() => {
     setLabourContractors(
       usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
@@ -106,15 +154,15 @@ const Jobs = ({ navigation }) => {
     }
   };
 
-  const renderFilterModal = () => {
+  const renderSearchModal = () => {
     return (
       <Modal
         animationType="slide"
         transparent={true}
-        visible={openFilterModal}
+        visible={openSearchUserModal}
         onRequestClose={() => {
           // Alert.alert("Modal has been closed.");
-          setOpenFilterModal(!openFilterModal);
+          setOpenSearchUserModal(!openSearchUserModal);
         }}
       >
         <View
@@ -130,6 +178,103 @@ const Jobs = ({ navigation }) => {
           <View
             style={{
               width: "80%",
+              backgroundColor: Colors.White,
+              // height: 200,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Find by name
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenSearchUserModal(!openSearchUserModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+                {/* <Pressable
+					  onPress={() => {
+						setSelectedContractor(null);
+						setOpenFilterModal(false);
+						setUserFilter(null);
+					  }}
+					  style={{ marginTop: 3 }}
+					>
+					  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+						Clear Filter
+					  </Text>
+					</Pressable> */}
+              </View>
+            </View>
+            <View style={{ marginVertical: 10 }}>
+              <Searchbar
+                style={{
+                  backgroundColor: Colors.WhiteGray,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  width: "100%",
+                  // height: 50,
+                  marginTop: 10,
+                  borderColor: Colors.LightGray,
+                }}
+                placeholder="Search"
+                placeholderTextColor={Colors.FormText}
+                mode="bar"
+                icon={() => <Search size={20} color={Colors.Black} />}
+                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                onChangeText={(text) => searchFilterAttendanceFunction(text)}
+                value={searchAttendance}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderFilterModal = () => {
+    return (
+      <Modal
+        animationType="slide"
+        // transparent={true}
+        presentationStyle="pageSheet"
+        visible={openFilterModal}
+        onRequestClose={() => {
+          // Alert.alert("Modal has been closed.");
+          setOpenFilterModal(!openFilterModal);
+        }}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            // justifyContent: "center",
+            // backgroundColor: "rgba(0,0,0,0.2)",
+            //   width: '90%',
+            //   height: 200
+          }}
+        >
+          <View
+            style={{
+              width: "100%",
               backgroundColor: Colors.White,
               // height: 200,
               borderRadius: 10,
@@ -184,7 +329,7 @@ const Jobs = ({ navigation }) => {
                 <Text
                   style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
                 >
-                  By skills
+                  By Skills
                 </Text>
               </View>
               <Dropdown
@@ -263,11 +408,23 @@ const Jobs = ({ navigation }) => {
         // navigation.navigate("JobDetails");
       }}
     >
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-        <View>
-          <Text style={styles.flatlistHeading}>{item?.jobName}</Text>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <View style={{ width: "30%" }}>
+          <Text style={[styles.flatlistHeading]}>{item?.jobName}</Text>
         </View>
-        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <View
+          style={{
+            flexDirection: "row",
+            justifyContent: "space-between",
+            width: "70%",
+          }}
+        >
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("JobDetails");
@@ -281,26 +438,40 @@ const Jobs = ({ navigation }) => {
               margin: 5,
               borderRadius: 3,
               paddingHorizontal: 8,
+              width: 60,
+              height: 30,
             }}
           >
             <Text style={styles.smallButton}>View</Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={() => {
+              //   console.log(item);
+              dispatch(completeJob(token, item?.jobId));
+            }}
+            disabled={item?.isCompleted}
             style={{
               justifyContent: "center",
               alignItems: "center",
-              backgroundColor: "#E4F1D6",
+              backgroundColor: item?.isCompleted ? "#C2C1CD" : "#8F8DA6",
               padding: 5,
               margin: 5,
               borderRadius: 3,
-              paddingHorizontal: 8,
+              paddingHorizontal: 10,
+              // width: 6,
+              height: 30,
             }}
           >
-            <Text style={[styles.smallButton, { color: "#7EB734" }]}>
-              Complete
+            <Text style={[styles.smallButton, { color: "white" }]}>
+              {item?.isCompleted ? "Completed" : "End"}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
+            onPress={() => {
+              Linking.openURL(
+                `https://api.whatsapp.com/send?text=https://www.bettamint.com/jobs/job.php?id=${item?.jobId}`
+              );
+            }}
             style={{
               flexDirection: "row",
               justifyContent: "space-between",
@@ -310,6 +481,8 @@ const Jobs = ({ navigation }) => {
               paddingHorizontal: 7,
               margin: 5,
               borderRadius: 3,
+              width: 60,
+              height: 30,
             }}
           >
             <Whatsapp size={15} color={Colors.White} />
@@ -379,7 +552,7 @@ const Jobs = ({ navigation }) => {
           justifyContent: "space-between",
         }}
       >
-        <View style={{ width: "92%" }}>
+        <View style={{ width: "90%" }}>
           <Text style={styles.flatlistSubHeading}>Location</Text>
           <Text style={styles.flatlistText}>{item.cityName}</Text>
         </View>
@@ -393,44 +566,46 @@ const Jobs = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header}></View>
-      <View style={styles.graph}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Building size={20} color={Colors.LightGray} />
-          </View>
-          <Pressable
-            onPress={() => {
-              setOpenSearchModal(true);
-            }}
-          >
-            <Text style={styles.selectText}>Link a Project</Text>
-            <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
+      {isJobsListPresent ? (
+        <>
+          <View style={styles.graph}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
             >
-              {selectedProject ? selectedProject?.name : "Select a project"}
-            </Text>
-          </Pressable>
-        </View>
-        <View style={{ flexDirection: "row" }}>
-          {/* <TouchableOpacity
+              <View
+                style={{
+                  backgroundColor: "#F7F8F9",
+                  borderRadius: 50,
+                  width: 40,
+                  height: 40,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Building size={20} color={Colors.LightGray} />
+              </View>
+              <Pressable
+                onPress={() => {
+                  setOpenSearchModal(true);
+                }}
+              >
+                <Text style={styles.selectText}>Select a Project</Text>
+                <Text
+                  style={[
+                    styles.selectText,
+                    { fontFamily: "Lexend-SemiBold", color: Colors.Black },
+                  ]}
+                >
+                  {selectedProject ? selectedProject?.name : "Select a project"}
+                </Text>
+              </Pressable>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              {/* <TouchableOpacity
             style={{
               backgroundColor: "#ECE5FC",
               padding: 5,
@@ -442,149 +617,155 @@ const Jobs = ({ navigation }) => {
           >
             <Text style={styles.smallButton}>Submit</Text>
           </TouchableOpacity> */}
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </Pressable>
-          <TouchableOpacity
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
-      </View>
-      {/* <ScrollView> */}
-      <FlatList
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              dispatch(getAllJobsAction(token, 0));
-            }}
-            tintColor={Colors.Primary}
-            colors={[Colors.Purple, Colors.Primary]}
-          />
-        }
-        data={filterJobs ? filterJobs : jobsList}
-        renderItem={({ item }) => <Item item={item} />}
-        keyExtractor={(item) => item.id}
-      />
-      {/* </ScrollView> */}
-      <Modal
-        visible={openSearchModal}
-        animationType="slide"
-        onRequestClose={() => {
-          setOpenSearchModal(false);
-        }}
-        presentationStyle="pageSheet"
-      >
-        <View style={{ width: "100%" }}>
-          <View
-            style={{
-              width: "100%",
-              padding: 15,
-              flexDirection: "row",
-              alignItems: "center",
-              marginTop: 10,
-            }}
-          >
-            <View style={{ width: "12%" }}>
-              <BackIcon
+              <Pressable
                 onPress={() => {
-                  setOpenSearchModal(false);
+                  setOpenFilterModal(true);
                 }}
-                size={30}
-                color={Colors.Black}
-              />
-            </View>
-            <View style={{ width: "88%" }}>
-              <Text
                 style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Black,
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
                 }}
               >
-                Search
-              </Text>
+                <Text style={styles.smallButton}>Filter</Text>
+              </Pressable>
+              <TouchableOpacity
+                onPress={() => setOpenSearchUserModal(true)}
+                style={{
+                  justifyContent: "center",
+                  alignItems: "center",
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 7,
+                }}
+              >
+                <Search size={13} color={Colors.Secondary} />
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={{ width: "100%", alignItems: "center" }}>
-            <Searchbar
-              style={{
-                backgroundColor: "#F1F5F8",
-                borderRadius: 5,
-                width: "90%",
-              }}
-              placeholder="Search Project"
-              placeholderTextColor={Colors.FormText}
-              mode="bar"
-              icon={() => <Search size={20} color={Colors.Black} />}
-              clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-              onChangeText={(text) => searchFilterFunction(text)}
-              value={search}
-            />
-          </View>
-          <View style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}>
-            <FlatList
-              data={filteredDataSource}
-              renderItem={({ item }) => (
-                <Pressable
-                  style={{
-                    width: "88%",
-                    borderWidth: 1,
-                    marginBottom: 5,
-                    alignSelf: "center",
-                    padding: 10,
-                    borderRadius: 7,
-                    borderColor: Colors.FormBorder,
-                  }}
-                  onPress={() => {
-                    setSelectedProject(item);
-                    setFilterJob(
-                      jobsList?.filter(
-                        (ele) => ele?.projectId === item?.projectId
-                      )
-                    );
-                    setOpenSearchModal(false);
-                  }}
-                >
+          <FlatList
+            refreshControl={
+              <RefreshControl
+                refreshing={isLoading}
+                onRefresh={() => {
+                  dispatch(getAllJobsAction(token, 0));
+                }}
+                tintColor={Colors.Primary}
+                colors={[Colors.Purple, Colors.Primary]}
+              />
+            }
+            data={filterJobs ? filterJobs : filteredDataAttSource}
+            renderItem={({ item }) => <Item item={item} />}
+            keyExtractor={(item) => item.id}
+          />
+          <Modal
+            visible={openSearchModal}
+            animationType="slide"
+            onRequestClose={() => {
+              setOpenSearchModal(false);
+            }}
+            presentationStyle="pageSheet"
+          >
+            <View style={{ width: "100%" }}>
+              <View
+                style={{
+                  width: "100%",
+                  padding: 15,
+                  flexDirection: "row",
+                  alignItems: "center",
+                  marginTop: 10,
+                }}
+              >
+                <View style={{ width: "12%" }}>
+                  <BackIcon
+                    onPress={() => {
+                      setOpenSearchModal(false);
+                    }}
+                    size={30}
+                    color={Colors.Black}
+                  />
+                </View>
+                <View style={{ width: "88%" }}>
                   <Text
                     style={{
-                      fontSize: 14,
-                      fontFamily: "Lexend-Regular",
-                      color: Colors.FormText,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 18,
+                      color: Colors.Black,
                     }}
                   >
-                    {item.name}
+                    Search
                   </Text>
-                </Pressable>
-              )}
-              keyExtractor={(item) => item.projectId}
-            />
-          </View>
-        </View>
-      </Modal>
+                </View>
+              </View>
+              <View style={{ width: "100%", alignItems: "center" }}>
+                <Searchbar
+                  style={{
+                    backgroundColor: "#F1F5F8",
+                    borderRadius: 5,
+                    width: "90%",
+                  }}
+                  placeholder="Search Project"
+                  placeholderTextColor={Colors.FormText}
+                  mode="bar"
+                  icon={() => <Search size={20} color={Colors.Black} />}
+                  clearIcon={() => <Cross size={20} color={Colors.FormText} />}
+                  onChangeText={(text) => searchFilterFunction(text)}
+                  value={search}
+                />
+              </View>
+              <View
+                style={{ width: "100%", marginTop: 10, paddingBottom: 280 }}
+              >
+                <FlatList
+                  data={filteredDataSource}
+                  renderItem={({ item }) => (
+                    <Pressable
+                      style={{
+                        width: "88%",
+                        borderWidth: 1,
+                        marginBottom: 5,
+                        alignSelf: "center",
+                        padding: 10,
+                        borderRadius: 7,
+                        borderColor: Colors.FormBorder,
+                      }}
+                      onPress={() => {
+                        setSelectedProject(item);
+                        setFilterJob(
+                          jobsList?.filter(
+                            (ele) => ele?.projectId === item?.projectId
+                          )
+                        );
+                        setOpenSearchModal(false);
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 14,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.FormText,
+                        }}
+                      >
+                        {item.name}
+                      </Text>
+                    </Pressable>
+                  )}
+                  keyExtractor={(item) => item.projectId}
+                />
+              </View>
+            </View>
+          </Modal>
+        </>
+      ) : (
+        <RestrictedScreen />
+      )}
       {renderFilterModal()}
+      {renderSearchModal()}
     </View>
   );
 };
@@ -621,6 +802,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     // height: "10%",
     backgroundColor: Colors.White,
+    opacity: 0.9,
     marginTop: -170,
     padding: 10,
     margin: 15,
@@ -704,7 +886,7 @@ const styles = StyleSheet.create({
   },
   flatlistHeading: {
     fontFamily: "Lexend-Medium",
-    fontSize: 14,
+    fontSize: 13,
     textTransform: "uppercase",
     color: Colors.Black,
   },
