@@ -94,7 +94,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       );
 
       return () => {};
-    }, [projectData, approveStatus])
+    }, [projectData])
   );
   // Convert UTC time to Indian Standard Time
   const convertTimeToIST = (time) => {
@@ -422,7 +422,8 @@ const ApproveAttendance = ({ navigation, route }) => {
         </View>
         <View style={{ width: "18%", alignItems: "center" }}>
           {currentFilterState === "Offline" ||
-          currentFilterState === "Online" ? (
+          currentFilterState === "Online" ||
+          currentFilterState === "Absent" ? (
             <View>
               {item?.todayCheckIn ? (
                 <Text style={styles.flatListText}>
@@ -453,7 +454,8 @@ const ApproveAttendance = ({ navigation, route }) => {
         </View>
         <View style={{ width: "18%", alignItems: "center" }}>
           {currentFilterState === "Offline" ||
-          currentFilterState === "Online" ? (
+          currentFilterState === "Online" ||
+          currentFilterState === "Absent" ? (
             <View>
               {item?.todayCheckOut ? (
                 <Text style={styles.flatListText}>
@@ -540,7 +542,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             >
               {`Present-${
                 filteredDataAttSource?.filter((ele) => ele.isOnline === true)
-                  ?.length
+                  ?.length || 0
               }`}
             </Text>
           </TouchableOpacity>
@@ -572,7 +574,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             >
               {`Absent-${
                 filteredDataAttSource?.filter((ele) => ele.isOnline === false)
-                  ?.length
+                  ?.length || 0
               }`}
             </Text>
           </TouchableOpacity>
@@ -645,7 +647,7 @@ const ApproveAttendance = ({ navigation, route }) => {
               {`Offline-${
                 filteredDataAttSource?.filter(
                   (ele) => ele.workerTypeId === "Offline"
-                )?.length
+                )?.length || 0
               }`}
             </Text>
           </TouchableOpacity>
@@ -1048,12 +1050,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   checkInText: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontFamily: "Lexend-Medium",
     color: Colors.White,
   },
   checkOutButton: {
-    width: "90%",
+    width: "95%",
     backgroundColor: Colors.PurpleOpacity,
     alignItems: "center",
     justifyContent: "center",
@@ -1062,7 +1064,7 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   checkOutText: {
-    fontSize: 9,
+    fontSize: 8.5,
     fontFamily: "Lexend-Medium",
     color: Colors.Purple,
   },

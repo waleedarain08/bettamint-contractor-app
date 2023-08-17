@@ -13,6 +13,7 @@ import axios from "axios";
 
 const initialState = {
   loading: false,
+  loadingMarkAttendance: false,
   error: null,
   attendanceList: null,
   attendanceMuster: null,
@@ -82,13 +83,13 @@ const attendanceSlice = createSlice({
       state.selectedAttendance = action.payload;
     },
     markingAttendance(state, action) {
-      state.loading = true;
+      state.loadingMarkAttendance = true;
     },
     markingAttendanceSuccess(state, action) {
-      state.loading = false;
+      state.loadingMarkAttendance = false;
     },
     markingAttendanceFailure(state, action) {
-      state.loading = false;
+      state.loadingMarkAttendance = false;
     },
   },
 });
@@ -153,7 +154,7 @@ export const getAllAttendanceAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          // console.log("ATTENDANCE", data);
+          console.log("ATTENDANCE", data);
           if (data) {
             dispatch(getAttendanceSuccess(data));
           }
@@ -272,7 +273,7 @@ export const markAttendance =
           },
         }
       );
-      // console.log("MARK ATTENDANCE RESPONSE>>>", response);
+      console.log("MARK ATTENDANCE RESPONSE>>>", response);
       if (response?.status === 200) {
         dispatch(markingAttendanceSuccess());
       }
