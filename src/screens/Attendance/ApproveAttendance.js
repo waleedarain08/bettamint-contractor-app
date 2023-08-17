@@ -429,7 +429,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   {convertTimeToIST(item?.todayCheckIn)}
                 </Text>
               ) : (
-                <TouchableOpacity
+                <Pressable
                   style={styles.checkInButton}
                   onPress={() => {
                     handleOfflineWorkerAttendance(
@@ -442,7 +442,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   <View>
                     <Text style={styles.checkInText}>Check-In</Text>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
               )}
             </View>
           ) : (
@@ -460,7 +460,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   {convertTimeToIST(item?.todayCheckIn)}
                 </Text>
               ) : item?.todayCheckIn ? (
-                <TouchableOpacity
+                <Pressable
                   style={styles.checkOutButton}
                   onPress={() => {
                     handleOfflineWorkerAttendance(
@@ -473,7 +473,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   <View>
                     <Text style={styles.checkOutText}>Check-Out</Text>
                   </View>
-                </TouchableOpacity>
+                </Pressable>
               ) : (
                 <Text style={styles.flatListText}>-</Text>
               )}
