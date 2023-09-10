@@ -13,7 +13,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import Modal  from "react-native-modal";
+import Modal from "react-native-modal";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
@@ -164,18 +164,18 @@ const Attendance = ({ navigation }) => {
         //   setOpenSearchUserModal(!openSearchUserModal);
         // }}
         isVisible={openSearchUserModal}
-         useNativeDriver={true}
-         backdropColor={Colors.DarkGray}
-         backdropOpacity={0.6}
-         backdropTransitionInTiming={200}
-         onBackdropPress={() => setOpenSearchModal(!openSearchUserModal)}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenSearchModal(!openSearchUserModal)}
       >
         <View
           style={{
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-           // backgroundColor: "rgba(0,0,0,0.2)",
+            // backgroundColor: "rgba(0,0,0,0.2)",
             //   width: '90%',
             //   height: 200
           }}
@@ -258,12 +258,12 @@ const Attendance = ({ navigation }) => {
   const renderFilterModal = () => {
     return (
       <Modal
-      isVisible={openFilterModal}
-      useNativeDriver={true}
-      backdropColor={Colors.DarkGray}
-      backdropOpacity={0.6}
-      backdropTransitionInTiming={200}
-      onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
+        isVisible={openFilterModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
         // animationType="slide"
         // visible={openFilterModal}
         // onRequestClose={() => {
@@ -472,7 +472,7 @@ const Attendance = ({ navigation }) => {
   };
 
   const Item = ({ item, index }) => (
-    <View style={[styles.item]}   key={item.key} >
+    <View style={[styles.item]} key={item.key}>
       <View
         style={{
           flexDirection: "row",
@@ -499,13 +499,25 @@ const Attendance = ({ navigation }) => {
           </Text>
         </View>
         <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>{item?.workingDays.length}</Text>
+          <Text style={styles.flatListText}>
+            {item?.workingDays.length
+              ? item?.workingDays.length
+              : item?.workingDays}
+          </Text>
         </View>
         <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>{item?.presentDays.length}</Text>
+          <Text style={styles.flatListText}>
+            {item?.presentDays.length
+              ? item?.presentDays.length
+              : item?.presentDays}
+          </Text>
         </View>
         <View style={{ width: "13%" }}>
-          <Text style={styles.flatListText}>{item?.absentDays.length}</Text>
+          <Text style={styles.flatListText}>
+            {item?.absentDays.length
+              ? item?.absentDays.length
+              : item?.absentDays}
+          </Text>
         </View>
         <Pressable
           onPress={() => {
@@ -810,7 +822,7 @@ const Attendance = ({ navigation }) => {
       {/* </ScrollView> */}
       <Modal
         isVisible={openSearchModal}
-       // animationType="none"
+        // animationType="none"
         useNativeDriver={true}
         backdropColor={Colors.WhiteGray}
         backdropOpacity={1}
@@ -821,7 +833,7 @@ const Attendance = ({ navigation }) => {
         // }}
         // presentationStyle="fullScreen"
       >
-        <View style={{ width: "100%",flex:1 }}>
+        <View style={{ width: "100%", flex: 1 }}>
           <View
             style={{
               width: "100%",
