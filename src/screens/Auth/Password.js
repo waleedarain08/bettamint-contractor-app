@@ -117,15 +117,15 @@ const Password = ({ navigation, route }) => {
                 secureTextEntry={secureText}
               />
               <View style={{ width: "10%" }}>
-                {!secureText ? (
+                {secureText ? (
                   <EyeOffIcon
-                    onPress={() => setSecureText(true)}
+                    onPress={() => setSecureText(false)}
                     color={Colors.Gray}
                     size={16}
                   />
                 ) : (
                   <EyeIcon
-                    onPress={() => setSecureText(false)}
+                    onPress={() => setSecureText(true)}
                     color={Colors.Gray}
                     size={16}
                   />

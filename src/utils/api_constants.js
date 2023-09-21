@@ -33,3 +33,12 @@ export const responseHandler = (response) => {
 
 // GOOGLE API KEY
 export const GOOGLE_API_KEY = "AIzaSyDmPu3_XheAsKf93Ab3pwbLU_ri9nmg5XM";
+
+
+// LC account : 
+// Bbal9644@gmail.com
+// DpdME7Skc5lD0hd
+
+// GC account : 
+// chiranjeevikm@k2kinfra.net
+// HjmPHylNqEWF3VP
