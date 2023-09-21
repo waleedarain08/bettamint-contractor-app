@@ -1,5 +1,8 @@
 apply plugin: "com.android.application"
 apply plugin: "com.facebook.react"
+apply plugin: "com.google.gms.google-services"
+apply plugin: "com.google.firebase.crashlytics"
+
 project.ext.vectoricons = [
     iconFontNames: [ 'MaterialIcons.ttf', 'EvilIcons.ttf', 'AntDesign.ttf', 'Feather.ttf', 'FontAwesome.ttf', 'Foundation.ttf', 'Ionicons.ttf', 'Octicons.ttf', 'Zocial.ttf', 'SimpleLineIcons.ttf', 'Entypo.ttf', 'Fontisto.ttf' ] // Name of the font files you want to copy
 ]
