@@ -130,7 +130,6 @@ const Dashboard = ({ navigation }) => {
     ]);
   };
 
-
   const getAttendanceMaxValue = () => {
     let attendanceMax = 100;
     if (attendanceTrendline) {
@@ -152,12 +151,11 @@ const Dashboard = ({ navigation }) => {
    */
   const paymentGraphData = () => {
     return payments?.map((item) => ({
-      value: item.DueAmount || 0,
-      label: item.Day,
+      value: item?.DueAmount <= 0 ? 0 : item?.DueAmount,
+      label: item?.Day,
       labelTextStyle: { color: Colors.Black, fontSize: 10 },
     }));
   };
-
 
   const getPaymentMaxValue = () => {
     let paymentMax = 2000;
@@ -292,7 +290,7 @@ const Dashboard = ({ navigation }) => {
       dispatch(
         getPayments(
           token,
-          item.projectId,
+          item?.projectId,
           moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
           moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
         )
@@ -301,7 +299,7 @@ const Dashboard = ({ navigation }) => {
       dispatch(
         getContractorsStats(
           token,
-          item.projectId,
+          item?.projectId,
           moment().format("YYYY-MM-DD")
         )
       );
@@ -311,14 +309,14 @@ const Dashboard = ({ navigation }) => {
           token,
           "2022-08-31T19:00:00Z",
           moment().utc().format(),
-          item.projectId
+          item?.projectId
         )
       );
     }
   };
 
   let currentPresent = attendanceTrendline?.filter((item) => {
-    if (moment().format("ddd").toUpperCase() === item.Day) {
+    if (moment().format("ddd").toUpperCase() === item?.Day) {
       return item;
     }
   });
@@ -340,7 +338,7 @@ const Dashboard = ({ navigation }) => {
           token,
           selectedAttendanceProject?.projectId
             ? selectedAttendanceProject?.projectId
-            : projectsListSimple[0].projectId,
+            : projectsListSimple[0]?.projectId,
           startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
           endOfWeek.format("YYYY-MM-DD HH:mm:ss")
         )
@@ -351,7 +349,7 @@ const Dashboard = ({ navigation }) => {
           token,
           selectedAttendanceProject?.projectId
             ? selectedAttendanceProject?.projectId
-            : projectsListSimple[0].projectId,
+            : projectsListSimple[0]?.projectId,
           moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
           moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
         )
@@ -367,7 +365,7 @@ const Dashboard = ({ navigation }) => {
         token,
         selectedPaymentProject?.projectId
           ? selectedPaymentProject?.projectId
-          : projectsListSimple[0].projectId,
+          : projectsListSimple[0]?.projectId,
         startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
         endOfWeek.format("YYYY-MM-DD HH:mm:ss")
       )
@@ -379,9 +377,9 @@ const Dashboard = ({ navigation }) => {
     dispatch(
       getContractorsStats(
         token,
-        selectedContractorProject.projectId
+        selectedContractorProject?.projectId
           ? selectedContractorProject?.projectId
-          : projectsListSimple[0].projectId,
+          : projectsListSimple[0]?.projectId,
         moment(date).format("YYYY-MM-DD")
       )
     );
@@ -498,7 +496,7 @@ const Dashboard = ({ navigation }) => {
                   </Text>
                 </Pressable>
               )}
-              keyExtractor={(item) => item.projectId}
+              keyExtractor={(item) => item?.projectId}
               extraData={filteredDataSource}
             />
           </View>
@@ -703,7 +701,7 @@ const Dashboard = ({ navigation }) => {
               <View style={styles.graphBottom}>
                 <View style={[styles.graphBottomTabs]}>
                   <Text style={styles.graphBottomText}>
-                    Absent{"\n"}Workers Today{" "}
+                    Present{"\n"}Workers Today{" "}
                   </Text>
                   <Text style={[styles.graphBottomTextBold]}>
                     {" "}
@@ -714,12 +712,12 @@ const Dashboard = ({ navigation }) => {
                 </View>
                 <View style={styles.graphBottomTabs}>
                   <Text style={styles.graphBottomText}>
-                    Present{"\n"}Workers Today{" "}
+                    Absent{"\n"}Workers Today{" "}
                   </Text>
                   <Text
                     style={[
                       styles.graphBottomTextBold,
-                      { color: Colors.Primary },
+                      { color: Colors.Purple },
                     ]}
                   >
                     {currentAbsent?.length > 0 ? currentAbsent[0]?.Absent : 0}
@@ -758,9 +756,9 @@ const Dashboard = ({ navigation }) => {
               </View>
             </View>
             <View style={styles.scrollGraph}>
-              <View style={styles.graphsHeader}>
+              <View style={[styles.graphsHeader]}>
                 <Text style={styles.graphHeadingText}>Payment</Text>
-                <View style={[styles.graphSubHeader, { marginBottom: 18 }]}>
+                <View style={[styles.graphSubHeader, {marginBottom: 30}]}>
                   <TouchableOpacity
                     onPress={() => {
                       setOpenSearchModal(true);
@@ -817,7 +815,7 @@ const Dashboard = ({ navigation }) => {
                   </Pressable>
                 </View>
               </View>
-              <View style={styles.paymentBarChart}>
+              <View style={[styles.barChart]}>
                 <BarChart
                   data={paymentGraphData()}
                   barWidth={17}
@@ -1127,7 +1125,7 @@ const Dashboard = ({ navigation }) => {
                   height={180}
                   maxValue={getSkillMaxValue()}
                   barWidth={20}
-                  xAxisLabelTextStyle={{ color: "gray" }}
+                  xAxisLabelTextStyle={{ color: "gray", fontSize: 8 }}
                   yAxisTextStyle={{ color: "gray" }}
                   frontColor={Colors.Black}
                   rotateLabel
@@ -1212,7 +1210,7 @@ const styles = StyleSheet.create({
   graphBottomTextBold: {
     fontSize: 20,
     fontFamily: "Lexend-Bold",
-    color: Colors.Secondary,
+    color: Colors.Primary,
     paddingLeft: 5,
   },
   graphBottomTabs: {
@@ -1265,7 +1263,7 @@ const styles = StyleSheet.create({
     width: "90%",
     paddingBottom: 10,
     alignItems: "center",
-    flex: 1
+    flex: 1,
   },
   selectText: {
     fontFamily: "Lexend-Medium",
@@ -1322,13 +1320,13 @@ const styles = StyleSheet.create({
     width: "70%",
     // paddingHorizontal: 10,
     marginTop: 10,
-    alignItems: 'center'
+    alignItems: "center",
     // padding: 0
   },
   paymentBarChart: {
     width: "80%",
     paddingHorizontal: 10,
-    alignItems: 'center',
+    alignItems: "center",
     marginTop: 15,
     paddingBottom: 10,
     height: 240,
@@ -1352,6 +1350,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginTop: 10,
     paddingBottom: 40,
-    alignItems: 'center'
+    alignItems: "center",
   },
 });

@@ -1507,12 +1507,12 @@ function TabNavigator({ navigation }) {
 									justifyContent: "space-between",
 								}}
 							>
-								<Pressable>
+								{/* <Pressable>
 									<Image
 										source={require("../assets/icons/Search.png")}
 										style={{ height: 30, width: 30, marginRight: 10 }}
 									/>
-								</Pressable>
+								</Pressable> */}
 								<Pressable onPress={() => navigation.navigate("Profile")}>
 									<Image
 										source={require("../assets/icons/ProfileButton.png")}
