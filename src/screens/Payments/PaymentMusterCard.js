@@ -60,10 +60,8 @@ const PaymentMusterCard = ({ navigation, route }) => {
 	const token = useSelector(authToken);
 	const isLoading = useSelector(loadingAttendance);
 	const selectedAttendance = useSelector(selectedAttendanceData);
-	// console.log("attendanceMuster", attendanceMuster);
 
 	const attendance = attendanceMuster?.attendance;
-	// console.log("attendance", attendance);
 	const attendanceOptions = [
 		{ label: "P", value: 8 },
 		{ label: "1/2 P", value: 4 },
@@ -89,13 +87,7 @@ const PaymentMusterCard = ({ navigation, route }) => {
 		}, 500);
 	}, [selectedAttendance]);
 
-	// useEffect(() => {
-	// 	if (attendance) {
-	// 		setSelectedDate(attendance?.date);
-	// 	}
-	// }, [attendance]);
 
-	// console.log("attendance from screen", attendance);
 	const rowColors = ["#F3F4F4", "#FFFFFF"];
 
 	const renderApproveModal = () => (
@@ -170,19 +162,15 @@ const PaymentMusterCard = ({ navigation, route }) => {
 								color: Colors.FormText,
 							}}
 							iconStyle={styles.iconStyle}
-							// data={data}
 							data={attendanceOptions}
 							maxHeight={300}
 							labelField="label"
 							valueField="value"
 							placeholder={"Approve"}
 							value={approveStatus}
-							// onFocus={() => setIsFocus(true)}
-							// onBlur={() => setIsFocus(false)}
 							onChange={(item) => {
 								setOpenApproveModal(false);
 								setApproveStatus(item);
-								// console.log(item);
 								dispatch(
 									getAttendanceApproveAction(
 										token,

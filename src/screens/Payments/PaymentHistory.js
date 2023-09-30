@@ -76,9 +76,8 @@ const PaymentHistory = ({ navigation }) => {
   const isLoading = useSelector(loadingPayments);
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
-  // console.log('PAYMENT HISTORY LIST', paymentHistoryList)
   const textColor = isDarkMode ? "white" : "black";
-  console.log(selectedProject);
+
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
     dispatch(getPaymentHistory(token));

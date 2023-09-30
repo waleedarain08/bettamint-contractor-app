@@ -293,7 +293,6 @@ export const getPayments =
           },
         }
       );
-      console.log('PAYMENT--->>>', response)
       if (response.status === 200) {
         dispatch(gettingPaymentsSuccess(Object.values(response?.data)));
       }

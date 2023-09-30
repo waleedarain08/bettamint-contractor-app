@@ -96,7 +96,6 @@ export const getAllJobsAction = (token, contractorId) => async (dispatch) => {
       })
       .then((res) => {
         const data = responseHandler(res);
-        // console.log("JOB DATA", data);
         if (data) {
           dispatch(getJobSuccess(data));
         }
@@ -123,7 +122,6 @@ export const createJobAction = (token, worker) => async (dispatch) => {
         },
       }
     );
-    console.log("JOB API HIT", response.data);
     if (response.status === 200) {
       dispatch(createJobSuccess(response.data));
     } else {
@@ -153,7 +151,6 @@ export const completeJob = (token, jobId) => async (dispatch) => {
         },
       }
     );
-    console.log("COMPLETE RESPONSE", response?.status);
     if (response.status === 200) {
       dispatch(completingJobSuccess(response.data));
     }

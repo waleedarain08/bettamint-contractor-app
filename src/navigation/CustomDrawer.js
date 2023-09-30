@@ -35,7 +35,12 @@ const CustomDrawer = ({ navigation }) => {
 
   const dispatch = useDispatch();
   const routes = [
-    { name: "Dashboard", route: "Dashboard", id: 1, access: isDashboardPresent },
+    {
+      name: "Dashboard",
+      route: "Dashboard",
+      id: 1,
+      access: isDashboardPresent,
+    },
     { name: "Project", route: "Projects", id: 2, access: isProjectListPresent },
     { name: "Jobs", route: "Jobs", id: 3, access: isJobsListPresent },
     {
@@ -52,9 +57,10 @@ const CustomDrawer = ({ navigation }) => {
       access: isPaymentListPresent,
     },
     { name: "User", route: "Users", id: 7, access: isUsersListPresent },
-    { name: "My Profile", route: "Profile", id: 7, access: true },
+    { name: "Field Notes", route: "FieldNotes", id: 8, access: isUsersListPresent },
+    { name: "My Profile", route: "Profile", id: 9, access: true },
     // { name: "Report", route: "Dashboard", id: 8 },
-    { name: "Share App", route: "Share", id: 9, access: true },
+    { name: "Share App", route: "Share", id: 10, access: true },
   ];
 
   const onShare = async () => {

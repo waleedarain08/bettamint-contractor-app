@@ -83,7 +83,6 @@ const Payments = ({ navigation }) => {
     (item) => item.featureSet.name === "Payment List"
   );
 
-  // console.log("LOADING", isLoading)
   const status = [
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
@@ -145,11 +144,7 @@ const Payments = ({ navigation }) => {
   const [data, setData] = useState({
     array: attendanceList,
   });
-  //   for (let i = 0; i < data?.array?.length; i++) {
-  // 	setData(data?.array[i].selected = false)
-  // 	// myArray[i].gender = "unknown";
-  //   }
-  //   console.log("DATA", data);
+
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
   const renderFilterModal = () => {
@@ -382,7 +377,6 @@ const Payments = ({ navigation }) => {
       }
       return item;
     });
-    console.log(workerId, jobId, isChecked);
     setPaymentsList([...data]);
   };
   const Item = ({ item, index }) => (
@@ -409,25 +403,10 @@ const Payments = ({ navigation }) => {
             disabled={false}
             value={item?.isChecked}
             onValueChange={(newValue) => {
-              //   console.log(newValue);
-              //   setToggleCheckBox(!toggleCheckBox);
               handleCheckbox(item?.workerId, item?.jobId, newValue);
               setSelectedUser(item);
-              //   const updatedArray = data.array.map((newItem) => {
-              //     if (newItem.id === item.id) {
-              //       return {
-              //         ...newItem,
-              //         selected: newValue,
-              //       };
-              //     }
-              //     return newItem;
-              //   });
-              //   const updatedData = { array: updatedArray };
-              //   setData(updatedData);
-              //   console.log(attendanceList[0]);
             }}
             tintColors={{ true: Colors.Primary, false: Colors.FormBorder }}
-            // key={`${item.id}-${item.selected}`}
           />
           <Text
             style={[

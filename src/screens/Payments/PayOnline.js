@@ -9,10 +9,8 @@ import { getAllAttendanceAction } from "../../redux/slices/attendanceSlice";
 import { Toast } from "react-native-toast-message/lib/src/Toast";
 
 const PayOnline = ({ navigation, route }) => {
-	//   console.log(route?.params?.selectedUser);
 	const token = useSelector(authToken);
 	const error = useSelector(errorPayment);
-	//   console.log(error)
 	const dispatch = useDispatch();
 	function handlePayment() {
 		setTimeout(() => {
@@ -27,7 +25,6 @@ const PayOnline = ({ navigation, route }) => {
 				"Online"
 			)
 		).then((res) => {
-			// console.log("response", res.response?.data?.error);
 			if (res.response?.data?.error) {
 				Toast.show({
 					type: "error",

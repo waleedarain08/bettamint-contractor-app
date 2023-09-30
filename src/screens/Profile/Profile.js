@@ -30,9 +30,7 @@ const img =
   "https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
 const Profile = ({ navigation }) => {
   const { user } = useSelector(userData);
-  // console.log("User", user);
   return (
-    // <ImageBackground source={Vector} style={styles.container}>
     <View style={styles.container}>
       <View style={styles.header} />
       <ScrollView style={styles.graph}>

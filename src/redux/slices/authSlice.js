@@ -83,7 +83,6 @@ export const userLoginAction = (username, password) => async (dispatch) => {
     );
     if (response.status === 200) {
       dispatch(userLoginSuccess(response.data));
-      console.log("Auth Response", response.data);
       dispatch(isUserLoginDone(response?.data?.token));
     } else {
       dispatch(userLoginFailure("Something went wrong!"));

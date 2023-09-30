@@ -1,6 +1,5 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
 import thunk from "redux-thunk";
-import rootReducer from "./rootReducer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { persistReducer } from "redux-persist";
 import projectSlice from "./slices/projectSlice";
@@ -11,6 +10,7 @@ import authSlice from "./slices/authSlice";
 import userSlide from "./slices/userSlice";
 import paymentSlice from "./slices/paymentSlice";
 import countsSlice from "./slices/countsSlice";
+import fieldNoteSlice from "./slices/fieldNoteSlice";
 
 const persistConfig = {
   key: "root",
@@ -31,7 +31,8 @@ const reducers = combineReducers({
   workers: workerSlice,
   users: userSlide,
   payment: paymentSlice,
-  count: countsSlice
+  count: countsSlice,
+  fieldNote: fieldNoteSlice,
 });
 const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({

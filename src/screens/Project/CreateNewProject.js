@@ -124,49 +124,12 @@ const CreateNewProject = ({ navigation }) => {
   };
   useEffect(() => {
     if (project) {
-      console.log(project);
       setProjectImageUri(assetsUrl + project?.url);
       setProjectName(project?.name);
       setValue(project?.projectTypeId);
       setGeoFancingArray(project?.geofencingArray);
     }
   }, [project]);
-  //   const requestLocationPermission = async () => {
-  //     try {
-  //       const granted = await PermissionsAndroid.request(
-  //         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
-  //         {
-  //           title: "Location Permission",
-  //           message: "This app needs to access your location.",
-  //           buttonNeutral: "Ask Me Later",
-  //           buttonNegative: "Cancel",
-  //           buttonPositive: "OK",
-  //         }
-  //       );
-  //       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-  //         console.log("Location permission granted");
-  //       } else {
-  //         console.log("Location permission denied");
-  //       }
-  //     } catch (err) {
-  //       console.warn(err);
-  //     }
-  //   };
-
-  //   useEffect(() => {
-  //     requestLocationPermission();
-  //   }, []);
-
-  // useEffect(() => {
-  // 	Geolocation.getCurrentPosition(
-  // 		(position) => {
-  // 			const { latitude, longitude } = position.coords;
-  // 			setCurrentLocation({ latitude, longitude });
-  // 		},
-  // 		(error) => console.log(error),
-  // 		{ enableHighAccuracy: true, timeout: 20000, maximumAge: 1000 }
-  // 	);
-  // }, []);
 
   const submitHandler = async () => {
     const formData = new FormData();
@@ -221,7 +184,6 @@ const CreateNewProject = ({ navigation }) => {
       formData.append("Latitude", geoFancingArray[0].latitude);
       formData.append("Longitude", geoFancingArray[0].longitude);
       const response = await dispatch(updateProjectAction(token, formData));
-      console.log("Create response", response);
       if (response.status === 200) {
         navigation.goBack();
         Toast.show({
@@ -277,7 +239,6 @@ const CreateNewProject = ({ navigation }) => {
           source={{ uri: mapUrl }}
           style={{ flex: 1 }}
           onMessage={(event) => {
-            console.log(JSON.parse(event?.nativeEvent?.data));
             setGeoFancingArray(JSON.parse(event?.nativeEvent?.data));
             setOpenMapModal(false);
           }}
@@ -301,7 +262,7 @@ const CreateNewProject = ({ navigation }) => {
       </Modal>
     );
   };
-  console.log(currentPosition)
+
   setTimeout(() => {
     mapRef?.current?.animateToRegion(
       {

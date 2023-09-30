@@ -55,8 +55,7 @@ const Workers = ({ navigation }) => {
   const usersList = useSelector(usersListReducer);
   const token = useSelector(authToken);
 
-  // console.log("------project", projectsListSimple)
-  // console.log('worker list', workersList)
+
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
     dispatch(getUsersAction(token));
@@ -113,7 +112,6 @@ const Workers = ({ navigation }) => {
   }, [workersList]);
   const searchFilterAttendanceFunction = (text) => {
     // Check if searched text is not blank
-    console.log("TEXT", text);
     if (text) {
       // Inserted text is not blank
       // Filter the masterDataSource and update FilteredDataSource
@@ -122,7 +120,6 @@ const Workers = ({ navigation }) => {
         const itemData = item.fullName
           ? item.fullName.toUpperCase()
           : "".toUpperCase();
-        console.log(itemData);
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });

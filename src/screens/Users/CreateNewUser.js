@@ -65,10 +65,10 @@ const CreateNewUser = ({ navigation, route }) => {
     return password;
   }
   const userInfo = route?.params?.userInfo;
-  // console.log(userInfo);
+
   const token = useSelector(authToken);
   const roles = useSelector(rolesReducer);
-  // console.log("ROLES", roles);
+
   const dispatch = useDispatch();
   // useEffect(() => {}, []);
   useFocusEffect(
@@ -81,7 +81,6 @@ const CreateNewUser = ({ navigation, route }) => {
     }, [dispatch, token])
   );
 
-  // console.log('PROJECT', project)
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -742,7 +741,6 @@ const CreateNewUser = ({ navigation, route }) => {
                 roleId: userRole,
                 projectIds: project,
               };
-              // console.log(user);
                 const response = await dispatch(createUserAction(token, user));
                 if (response?.status === 200) {
                   navigation.goBack();
@@ -764,7 +762,6 @@ const CreateNewUser = ({ navigation, route }) => {
                     visibilityTime: 4000,
                   });
                 }
-                // console.log("USER HIT", response);
             }
           }}
         >

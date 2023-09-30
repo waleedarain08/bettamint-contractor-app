@@ -72,7 +72,7 @@ const CreateNewWorker = ({ navigation }) => {
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
   ];
-  console.log(skillValue);
+
   const submitHandler = async () => {
     const formData = new FormData();
     formData.append("SkillId", parseInt(skillValue, 10));

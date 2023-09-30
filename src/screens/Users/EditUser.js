@@ -51,7 +51,6 @@ const EditUser = ({ navigation, route }) => {
   const projectsList = useSelector(projectsListSimpleReducer);
 
   const userInfo = route?.params?.userInfo;
-  // console.log("user", userInfo)
   const token = useSelector(authToken);
   const roles = useSelector(rolesReducer);
   const dispatch = useDispatch();
@@ -317,13 +316,10 @@ const EditUser = ({ navigation, route }) => {
                 fullName: fullName,
                 password: 'test123',
                 emailAddress: email,
-                // userTypeId: "SuperAdmin",
                 roleId: userRole,
                 projectIds: project,
               };
-              console.log(user)
               const response = await dispatch(createUserAction(token, user));
-              console.log('res', response)
               if (response?.status === 200) {
                 navigation.goBack();
                 Toast.show({
@@ -344,7 +340,6 @@ const EditUser = ({ navigation, route }) => {
                   visibilityTime: 4000,
                 });
               }
-              console.log("USER HIT", response);
             }
           }}
         >

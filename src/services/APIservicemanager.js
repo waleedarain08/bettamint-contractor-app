@@ -107,7 +107,7 @@ export default class APIServiceManager {
           resolve(response);
         })
         .catch((error) => {
-          console.log("error in service", error);
+          // console.log("error in service", error);
           if (error.response) {
             // console.log("error response", error.response?.data.status);
             // console.log("CODE----", error.response?.data.status);

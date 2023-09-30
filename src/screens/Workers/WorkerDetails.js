@@ -32,7 +32,7 @@ import {
 
 const WorkerDetails = ({ navigation, route }) => {
 	const worker = useSelector(selectedWorkerReducer);
-	console.log("Worker", worker);
+
 	const dispatch = useDispatch();
 	const profilePic = worker?.workerDocuments?.filter(
 		(ele) => ele?.documentId === "ProfilePicture"

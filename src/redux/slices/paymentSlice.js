@@ -92,7 +92,6 @@ export const getPaymentHistory =
           },
         }
       );
-      // console.log("PAYMENT RESPONSE HISTORY", response.data);
       if (response?.status === 200) {
         dispatch(getPaymentSuccess(response.data));
       } else {
@@ -117,8 +116,6 @@ export const getPaymentHistory =
 export const paymentProcess =
   (token, jobId, workerId, transactionType) => async (dispatch) => {
     dispatch(paymentProcessRequest());
-    // if (projectId) {
-    console.log(token, jobId, workerId, transactionType);
     try {
       const response = await axios.post(
         `${base_url}/dashboard/Payment/process?jobId=${jobId}&workerId=${workerId}&transactionType=${transactionType}`,
@@ -130,12 +127,11 @@ export const paymentProcess =
           },
         }
       );
-      console.log("PAYMENT Process RESPONSE", response.data);
       if (response?.status === 200) {
         dispatch(paymentProcessSuccess(response.data));
       }
     } catch (e) {
-      console.log("EROR PROCESS", e.response?.data?.error);
+      console.log("ERROR PROCESS", e.response?.data?.error);
       // alert(e.response?.data?.error);
       dispatch(paymentProcessFailure(e.response?.data?.error));
       return e;
@@ -158,7 +154,6 @@ export const getAllPaymentsAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          // console.log("ATTENDANCE", data);
           if (data) {
             dispatch(getPaymentListSuccess(data));
           }

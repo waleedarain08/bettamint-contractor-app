@@ -72,7 +72,6 @@ const Projects = ({ navigation }) => {
     }
   }, [userInfo]);
 
-  // console.log(selectedProject)
   const onValueChange = (value) => {
     setSelectedProject(value);
   };
@@ -111,7 +110,6 @@ const Projects = ({ navigation }) => {
       style={styles.item}
       onPress={() => {
         navigation.navigate("ProjectDetails", { projectId: item?.projectId });
-        // console.log(item);
         dispatch(selectProjectAction(item));
       }}
     >

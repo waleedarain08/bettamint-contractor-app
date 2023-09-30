@@ -154,7 +154,6 @@ export const getAllAttendanceAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          console.log("ATTENDANCE", data);
           if (data) {
             dispatch(getAttendanceSuccess(data));
           }
@@ -184,7 +183,6 @@ export const getAttendanceMusterAction =
 
         .then((res) => {
           const data = responseHandler(res);
-          // console.log("ATTENDANCE MUSTER", data);
           if (data) {
             dispatch(getAttendanceMusterSuccess(data));
           }
@@ -214,7 +212,6 @@ export const getAttendanceApproveAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          console.log("ATTENDANCE APPROVE", data);
           if (data) {
             dispatch(getAttendanceApproveSuccess(data));
           }
@@ -244,7 +241,6 @@ export const getAttendanceReportAction =
         )
         .then((res) => {
           const data = responseHandler(res);
-          // console.log("ATTENDANCE REPORT", data);
           if (data) {
             dispatch(getAttendanceReportSuccess(data));
           }
@@ -273,7 +269,6 @@ export const markAttendance =
           },
         }
       );
-      console.log("MARK ATTENDANCE RESPONSE>>>", response);
       if (response?.status === 200) {
         dispatch(markingAttendanceSuccess());
       }

@@ -41,8 +41,12 @@ import {
 } from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
+import {
+  fieldNoteReducer,
+  getFieldNoteList,
+} from "../../redux/slices/fieldNoteSlice";
 LogBox.ignoreAllLogs();
-const Attendance = ({ navigation }) => {
+const FieldNotes = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -61,6 +65,8 @@ const Attendance = ({ navigation }) => {
 
   const dispatch = useDispatch();
 
+  const { fieldNoteList } = useSelector(fieldNoteReducer);
+//   console.log('')
   const attendanceList = useSelector(attendanceListReducer);
   const skillsList = useSelector(skillsListReducer);
   const usersList = useSelector(usersListReducer);
@@ -88,6 +94,7 @@ const Attendance = ({ navigation }) => {
     dispatch(getAllProjectsSimpleAction(token));
     dispatch(selectAttendanceAction(null));
     dispatch(removeMusterData());
+    dispatch(getFieldNoteList(token));
   }, []);
 
   useEffect(() => {
@@ -548,30 +555,34 @@ const Attendance = ({ navigation }) => {
             alignItems: "center",
             width: "100%",
             justifyContent: "space-between",
-            // paddingVertical: 15,
             paddingHorizontal: 8,
             backgroundColor: Colors.White,
             height: 50,
-            // borderRadius: 10
             borderTopLeftRadius: 10,
             borderTopRightRadius: 25,
           }}
         >
-          <View style={{ width: "35%" }}>
+          <View style={{ width: "15%" }}>
             <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
-              Name
+              Image
             </Text>
           </View>
-          <View style={{ width: "20%" }}>
-            <Text style={styles.flatListTextHeader}>Man-Days</Text>
+          <View style={{ width: "15%" }}>
+            <Text style={styles.flatListTextHeader}>SOW</Text>
           </View>
           <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Present</Text>
+            <Text style={styles.flatListTextHeader}>Description</Text>
           </View>
           <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Absent</Text>
+            <Text style={styles.flatListTextHeader}>Date</Text>
           </View>
           <View style={{ width: "15%" }}>
+            <Text style={styles.flatListTextHeader}>Location</Text>
+          </View>
+          <View style={{ width: "15%" }}>
+            <Text style={styles.flatListTextHeader}>Assign Contractor</Text>
+          </View>
+          <View style={{ width: "10%" }}>
             <Text style={styles.flatListTextHeader}>Action</Text>
           </View>
         </View>
@@ -920,7 +931,8 @@ const Attendance = ({ navigation }) => {
     </View>
   );
 };
-export default Attendance;
+
+export default FieldNotes;
 
 const styles = StyleSheet.create({
   container: {
@@ -1065,7 +1077,7 @@ const styles = StyleSheet.create({
   },
   flatListTextHeader: {
     fontFamily: "Lexend-Medium",
-    fontSize: 11,
+    fontSize: 8,
     color: Colors.ListHeaderText,
     textAlign: "center",
   },

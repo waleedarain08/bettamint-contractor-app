@@ -69,7 +69,7 @@ const CreateNewWorker = ({ navigation }) => {
   const skillsList = useSelector(skillsListReducer);
   const jobsList = useSelector(jobsListReducer);
   const token = useSelector(authToken);
-  // console.log(jobsList);
+
   useEffect(() => {
     dispatch(getAllProjectsSimpleAction(token));
     // dispatch(getAllJobsAction(token, 0));
@@ -79,7 +79,7 @@ const CreateNewWorker = ({ navigation }) => {
   //   dispatch(getSkillsAction());
   // }, []);
   const worker = useSelector(selectedWorkerReducer);
-  // console.log("Worker Data", skillValue);
+
   const data = [
     { label: "Supervisor", value: "Supervisor" },
     { label: "Skilled", value: "Skilled" },
@@ -97,7 +97,6 @@ const CreateNewWorker = ({ navigation }) => {
   );
   useEffect(() => {
     if (worker) {
-      // console.log("WORKER", worker);
       setFullName(worker?.fullName);
       setGenderValue(worker?.gender);
       setSkillLevelValue(worker?.workerSkills[0]?.skillTypeId);
@@ -110,7 +109,7 @@ const CreateNewWorker = ({ navigation }) => {
       setIfscCode(worker?.ifscCode);
     }
   }, [worker]);
-  // console.log(skillLevelValue)
+
   const submitHandler = async () => {
     const formData = new FormData();
     const workerId = worker ? worker?.workerId : 0;
@@ -129,7 +128,7 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("HealthCard", true);
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
-    // console.log('Form data', formData)
+
     const response = await dispatch(
       updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
     );
@@ -146,7 +145,6 @@ const CreateNewWorker = ({ navigation }) => {
         visibilityTime: 4000,
       });
     }
-    // console.log("worker res", response);
   };
 
   const handleImagePicker = async () => {
@@ -416,8 +414,6 @@ const CreateNewWorker = ({ navigation }) => {
               value={selectedProject}
               onChange={(item) => {
                 setSelectedProject(item.value);
-
-                // console.log("JOBS", filterJobs[0]);
                 const filterBySkill = jobsList?.filter(
                   (ele) => ele?.skillId === skillValue
                 );
@@ -428,7 +424,6 @@ const CreateNewWorker = ({ navigation }) => {
                   (ele) => ele?.projectId === item?.value
                 );
                 setFilterJob(filterByProject);
-                console.log(filterByProject);
               }}
             />
           </View>
