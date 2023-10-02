@@ -45,6 +45,9 @@ import {
   fieldNoteReducer,
   getFieldNoteList,
 } from "../../redux/slices/fieldNoteSlice";
+import { Image } from "react-native";
+import { assetsUrl } from "../../utils/api_constants";
+import moment from "moment";
 LogBox.ignoreAllLogs();
 const FieldNotes = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
@@ -66,7 +69,10 @@ const FieldNotes = ({ navigation }) => {
   const dispatch = useDispatch();
 
   const { fieldNoteList } = useSelector(fieldNoteReducer);
-//   console.log('')
+
+  console.log("==================================");
+  console.log("FIELD NOTES", fieldNoteList);
+  console.log("==================================");
   const attendanceList = useSelector(attendanceListReducer);
   const skillsList = useSelector(skillsListReducer);
   const usersList = useSelector(usersListReducer);
@@ -491,40 +497,41 @@ const FieldNotes = ({ navigation }) => {
       >
         <View
           style={{
-            width: "35%",
+            width: "15%",
           }}
         >
-          <Text
-            style={[
-              styles.flatListText,
-              { textAlign: "left", textTransform: "uppercase" },
-            ]}
-          >
-            {item?.workerName}
+          <Image
+            source={{ uri: assetsUrl + item.imageUrl }}
+            style={{ width: 30, height: 30 }}
+          />
+        </View>
+        <View style={{ width: "15%" }}>
+          <Text style={styles.flatListText}>{item?.scopeOfWork || "N/A"}</Text>
+        </View>
+        <View style={{ width: "15%" }}>
+          <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
+        </View>
+        <View style={{ width: "15%" }}>
+          <Text style={styles.flatListText}>
+            {moment(item?.dateTime).format("DD-MM-YYYY") || "N/A"}
           </Text>
         </View>
         <View style={{ width: "15%" }}>
           <Text style={styles.flatListText}>
-            {item?.workingDays.length
-              ? item?.workingDays.length
-              : item?.workingDays}
+            {item?.location || "N/A"}
           </Text>
         </View>
         <View style={{ width: "15%" }}>
           <Text style={styles.flatListText}>
-            {item?.presentDays.length
-              ? item?.presentDays.length
-              : item?.presentDays}
+            {item?.contractor?.fullName || "N/A"}
           </Text>
         </View>
-        <View style={{ width: "13%" }}>
+        <View style={{ width: "10%" }}>
           <Text style={styles.flatListText}>
-            {item?.absentDays.length
-              ? item?.absentDays.length
-              : item?.absentDays}
+            {item?.action || "N/A"}
           </Text>
         </View>
-        <Pressable
+        {/* <Pressable
           onPress={() => {
             navigation.navigate("AttendanceMusterCard");
             // setTimeout(() => {
@@ -542,7 +549,7 @@ const FieldNotes = ({ navigation }) => {
           }}
         >
           <Text style={styles.smallButton}>View</Text>
-        </Pressable>
+        </Pressable> */}
       </View>
     </View>
   );
@@ -680,12 +687,12 @@ const FieldNotes = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </Pressable>
-      <View style={{ alignItems: "flex-end", paddingRight: 20, width: "100%" }}>
+      {/* <View style={{ alignItems: "flex-end", paddingRight: 20, width: "100%" }}>
         <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
           Attendance is validated via two-factor authentication*{"\n"} i.e.
           worker Check-In & Geolocation Tracking during work hours.
         </Text>
-      </View>
+      </View> */}
       {/* <ScrollView> */}
       {/* <ScrollView
         refreshControl={
@@ -801,23 +808,21 @@ const FieldNotes = ({ navigation }) => {
             refreshControl={
               <RefreshControl
                 refreshing={isLoading}
-                onRefresh={() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0
-                    )
-                  );
-                }}
+                // onRefresh={() => {
+                //   dispatch(
+                //     getAllAttendanceAction(
+                //       token,
+                //       selectedProject?.projectId ||
+                //         projectsListSimple[0]?.projectId,
+                //       0
+                //     )
+                //   );
+                // }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={
-              filteredAttendance ? filteredAttendance : filteredDataAttSource
-            }
+            data={fieldNoteList}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
             initialNumToRender={0}
@@ -1010,7 +1015,7 @@ const styles = StyleSheet.create({
     padding: 12,
   },
   item: {
-    // paddingVertical: 5,
+    paddingHorizontal: 5,
     // backgroundColor: Colors.White,
     shadowColor: "#000",
     shadowOffset: {
@@ -1077,7 +1082,7 @@ const styles = StyleSheet.create({
   },
   flatListTextHeader: {
     fontFamily: "Lexend-Medium",
-    fontSize: 8,
+    fontSize: 10,
     color: Colors.ListHeaderText,
     textAlign: "center",
   },

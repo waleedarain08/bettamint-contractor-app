@@ -95,7 +95,7 @@ export const getFieldNoteList =
           },
         }
       );
-      console.log("Response--->>>", response);
+    //   console.log("Response--->>>", response.data);
       if (response.status === 200) {
         dispatch(gettingFieldNoteSuccess(response.data));
       }
