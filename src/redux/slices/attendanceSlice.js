@@ -1,4 +1,3 @@
-
 import { createSlice } from "@reduxjs/toolkit";
 import {
   ATTENDANCE_MUSTER_URL,
@@ -28,6 +27,9 @@ const attendanceSlice = createSlice({
   name: "attendance",
   initialState,
   reducers: {
+    emptyAttendance: (state, action) => {
+      state.attendanceList = null;
+    },
     getAttendanceRequest: (state, action) => {
       state.loading = true;
       state.error = null;
@@ -112,6 +114,7 @@ const {
   markingAttendance,
   markingAttendanceSuccess,
   markingAttendanceFailure,
+  emptyAttendance,
 } = attendanceSlice.actions;
 
 export const attendanceListReducer = (state) =>
@@ -137,6 +140,9 @@ export const removeMusterData = () => async (dispatch) => {
   dispatch(getAttendanceMusterSuccess(null));
 };
 
+export const emptyAttendanceAction = () => async (dispatch) => {
+  dispatch(emptyAttendance());
+};
 export const getAllAttendanceAction =
   (token, projectId, contractorId) => async (dispatch) => {
     try {

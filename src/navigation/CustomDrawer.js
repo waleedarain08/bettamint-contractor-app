@@ -6,6 +6,8 @@ import { Logout, Right } from "../icons";
 import { useDispatch, useSelector } from "react-redux";
 import { logoutAction, userData } from "../redux/slices/authSlice";
 import { getVersion } from "react-native-device-info";
+import { emptyAttendanceAction } from "../redux/slices/attendanceSlice";
+import { emptyAllProjectsSimpleAction } from "../redux/slices/projectSlice";
 
 const CustomDrawer = ({ navigation }) => {
   const userdata = useSelector(userData);
@@ -144,6 +146,8 @@ const CustomDrawer = ({ navigation }) => {
             onPress={() => {
               // navigation.navigate("SelectLanguage");
               dispatch(logoutAction());
+              dispatch(emptyAttendanceAction());
+              dispatch(emptyAllProjectsSimpleAction());
             }}
             style={{
               marginVertical: 35,

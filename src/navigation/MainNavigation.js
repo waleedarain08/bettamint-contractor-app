@@ -91,10 +91,12 @@ import {
 import { emptyPaymentListAction } from "../redux/slices/paymentSlice";
 import EditUser from "../screens/Users/EditUser";
 import FieldNotes from "../screens/FieldNotes/FieldNotes";
+import AttendanceDrawer from "./AttendanceDrawer";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
 const AttendanceStack = createNativeStackNavigator();
+const AttendanceOnlyStack = createNativeStackNavigator();
 const WorkerStack = createNativeStackNavigator();
 const ProjectStack = createNativeStackNavigator();
 const JobStack = createNativeStackNavigator();
@@ -622,6 +624,191 @@ const AttendanceNavigator = ({ navigation }) => {
         }}
       />
     </AttendanceStack.Navigator>
+  );
+};
+const AttendanceOnlyNavigator = ({ navigation }) => {
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const isAttendanceListPresent = roles.some(
+    (item) => item.featureSet.name === "Attendance List"
+  );
+  return (
+    <AttendanceOnlyStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerShadowVisible: false,
+        headerTintColor: Colors.White,
+        headerStyle: {
+          backgroundColor: Colors.Primary,
+        },
+      }}
+    >
+      <AttendanceOnlyStack.Screen
+        name="AttendanceStack"
+        component={Attendance}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                fontWeight: "500",
+                color: Colors.White,
+                marginHorizontal: 13,
+              }}
+            >
+              Attendance
+            </Text>
+          ),
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              {isAttendanceListPresent && (
+                <>
+                  <Pressable
+                    onPress={() => {
+                      navigation.navigate("ApproveAttendance");
+                    }}
+                    style={{
+                      backgroundColor: Colors.Purple,
+                      paddingVertical: 8,
+                      borderRadius: 14,
+                      paddingHorizontal: 7,
+                    }}
+                  >
+                    <View
+                      style={{
+                        // flexDirection: "row",
+                        // justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: "Lexend-Medium",
+                          fontSize: 10,
+                          color: Colors.White,
+                        }}
+                      >
+                        Today's Muster Roll
+                      </Text>
+                    </View>
+                  </Pressable>
+                  {/* <Pressable style={{ marginLeft: 5 }}>
+                    <Image
+                      source={require("../assets/icons/download.png")}
+                      style={{ height: 30, width: 30, marginRight: 0 }}
+                    />
+                  </Pressable> */}
+                </>
+              )}
+              <Pressable
+                style={{ marginLeft: 5 }}
+                onPress={() => navigation.navigate("ProfileAttendance")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 0 }}
+                />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <AttendanceOnlyStack.Screen
+        name="AttendanceMusterCard"
+        component={AttendanceMusterCard}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                // fontWeight: "500",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Muster Roll
+            </Text>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate("Profile")}>
+              <Image
+                source={require("../assets/icons/ProfileButton.png")}
+                style={{ height: 30, width: 30, marginRight: 5 }}
+              />
+            </Pressable>
+          ),
+        }}
+      />
+      <AttendanceOnlyStack.Screen
+        name="ApproveAttendance"
+        component={ApproveAttendance}
+        options={{
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                // fontWeight: "500",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Today's Muster Roll
+            </Text>
+          ),
+          headerRight: () => (
+            <Pressable onPress={() => navigation.navigate("Profile")}>
+              <Image
+                source={require("../assets/icons/ProfileButton.png")}
+                style={{ height: 30, width: 30, marginRight: 5 }}
+              />
+            </Pressable>
+          ),
+        }}
+      />
+      <AttendanceOnlyStack.Screen
+        name="ProfileAttendance"
+        component={ProfileNavigator}
+        options={{
+          headerShown: false,
+          //   headerTitle: () => (
+          //     <Text
+          //       style={{
+          //         fontSize: 18,
+          //         fontFamily: "Lexend-Medium",
+          //         // fontWeight: "500",
+          //         color: Colors.White,
+          //         // marginHorizontal: 13,
+          //       }}
+          //     >
+          //       Today's Muster Roll
+          //     </Text>
+          //   ),
+          //   headerRight: () => (
+          //     <Pressable onPress={() => navigation.navigate("Profile")}>
+          //       <Image
+          //         source={require("../assets/icons/ProfileButton.png")}
+          //         style={{ height: 30, width: 30, marginRight: 5 }}
+          //       />
+          //     </Pressable>
+          //   ),
+        }}
+      />
+    </AttendanceOnlyStack.Navigator>
   );
 };
 
@@ -1336,6 +1523,38 @@ function MainNavigation({}) {
       background: "#fff",
     },
   };
+  const userInfo = useSelector(userData);
+
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+
+  // Array of expected names
+  const expectedNames = [
+    "Attendance List",
+    "Attendance Detail",
+    "Communication ",
+    "Profile",
+  ];
+
+  // Function to check if only the expected names are present
+  function hasOnlyExpectedNames(data) {
+    const actualNames = data.map((item) => item.featureSet.name);
+
+    // Check if all expected names are present
+    const areAllExpectedNamesPresent = expectedNames.every((name) =>
+      actualNames.includes(name)
+    );
+
+    // Check if there are no extra names
+    const hasNoExtraNames = actualNames.every((name) =>
+      expectedNames.includes(name)
+    );
+
+    return areAllExpectedNamesPresent && hasNoExtraNames;
+  }
+
+  // Check if only the expected names are present
+  const result = roles && hasOnlyExpectedNames(roles);
+
 
   return (
     <>
@@ -1352,15 +1571,6 @@ function MainNavigation({}) {
               },
             }}
           >
-            {/* <Stack.Screen
-              name="SelectLanguage"
-              component={SelectLanguage}
-              options={{
-                headerShadowVisible: false,
-                headerShown: false,
-              }}
-            /> */}
-
             <Stack.Screen
               name="Login"
               component={Login}
@@ -1385,14 +1595,6 @@ function MainNavigation({}) {
                 headerShown: true,
               }}
             />
-            {/* <Stack.Screen
-            name="Otp"
-            component={Otp}
-            options={{
-              headerShadowVisible: false,
-              headerShown: false,
-            }}
-          /> */}
             <Stack.Screen
               name="ChangePassword"
               component={ChangePassword}
@@ -1411,51 +1613,73 @@ function MainNavigation({}) {
             />
           </Stack.Navigator>
         ) : (
-          <Stack.Navigator
-            initialRouteName="Main"
-            screenOptions={{
-              headerBackTitleVisible: false,
-              headerTitle: "",
-              headerTintColor: Colors.Primary,
-              headerShown: false,
-            }}
-          >
-            <Stack.Screen
-              name="Main"
-              component={TabDrawer}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="Workers"
-              component={WorkersNavigator}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="Profile"
-              component={ProfileNavigator}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="Users"
-              component={UserNavigator}
-              options={{
-                headerShown: false,
-              }}
-            />
-            <Stack.Screen
-              name="FieldNotes"
-              component={FieldNotesNavigator}
-              options={{
-                headerShown: false,
-              }}
-            />
-          </Stack.Navigator>
+          <>
+            {result ? (
+              <Stack.Navigator
+                initialRouteName="AttendanceNavigator"
+                screenOptions={{
+                  headerBackTitleVisible: false,
+                  headerTitle: "",
+                  headerTintColor: Colors.Primary,
+                  headerShown: false,
+                }}
+              >
+                <Stack.Screen
+                  name="AttendanceNavigator"
+                  component={AttendanceTabDrawer}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack.Navigator>
+            ) : (
+              <Stack.Navigator
+                initialRouteName="Main"
+                screenOptions={{
+                  headerBackTitleVisible: false,
+                  headerTitle: "",
+                  headerTintColor: Colors.Primary,
+                  headerShown: false,
+                }}
+              >
+                <Stack.Screen
+                  name="Main"
+                  component={TabDrawer}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Workers"
+                  component={WorkersNavigator}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Profile"
+                  component={ProfileNavigator}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Users"
+                  component={UserNavigator}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="FieldNotes"
+                  component={FieldNotesNavigator}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+              </Stack.Navigator>
+            )}
+          </>
         )}
       </NavigationContainer>
     </>
@@ -1487,6 +1711,34 @@ function TabDrawer() {
         <Drawer.Screen
           name="DrawerTab"
           component={TabNavigator}
+          options={{ headerShown: false }}
+        />
+      </Drawer.Navigator>
+    </View>
+  );
+}
+function AttendanceTabDrawer() {
+  return (
+    <View style={{ flex: 1, backgroundColor: Colors.Primary }}>
+      <Drawer.Navigator
+        screenOptions={{
+          drawerType: "slide",
+          overlayColor: "transparent",
+          drawerStyle: {
+            flex: 1,
+            width: "65%",
+            backgroundColor: "transparent",
+          },
+          sceneContainerStyle: { backgroundColor: "transparent" },
+          // headerShown: true,
+        }}
+        drawerContent={(props) => {
+          return <AttendanceDrawer {...props} />;
+        }}
+      >
+        <Drawer.Screen
+          name="AttendanceDrawerTab"
+          component={AttendanceOnlyNavigator}
           options={{ headerShown: false }}
         />
       </Drawer.Navigator>

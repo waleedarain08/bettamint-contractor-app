@@ -13,9 +13,7 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Modal from "react-native-modal";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
 import { Searchbar } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -30,9 +28,6 @@ import {
   projectsListSimpleReducer,
   getAllProjectsSimpleAction,
 } from "../../redux/slices/projectSlice";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
 import { Building, Search, BackIcon, Cross } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
@@ -41,7 +36,10 @@ import {
 } from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
+import SearchWorkerModal from "../../components/SearchWorkerModal";
+import { useFocusEffect } from "@react-navigation/native";
 LogBox.ignoreAllLogs();
+
 const Attendance = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -67,29 +65,48 @@ const Attendance = ({ navigation }) => {
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const isLoading = useSelector(loadingAttendance);
   const token = useSelector(authToken);
-  // console.log("ATTENDANCE LIST", usersList?.filter((ele)=> ele?.leadTypeId === 'LabourContractor'));
+
   const status = [
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
   ];
-  useEffect(() => {
-    dispatch(
-      getAllAttendanceAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0
-      )
-    );
-  }, [selectedProject]);
+  // useEffect(() => {
+  //   dispatch(
+  //     getAllAttendanceAction(
+  //       token,
+  //       selectedProject?.projectId || projectsListSimple[0]?.projectId,
+  //       0
+  //     )
+  //   );
+  // }, [selectedProject]);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (projectsListSimple) {
+        dispatch(
+          getAllAttendanceAction(token, projectsListSimple[0]?.projectId, 0)
+        );
+      }
+      return () => {};
+    }, [projectsListSimple && projectsListSimple[0]?.projectId])
+  );
+  // useEffect(() => {
+  //   dispatch(getSkillsAction(token));
+  //   dispatch(getUsersAction(token));
+  //   dispatch(getAllProjectsSimpleAction(token));
+  //   dispatch(selectAttendanceAction(null));
+  //   dispatch(removeMusterData());
+  // }, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getSkillsAction(token));
+      dispatch(getUsersAction(token));
+      dispatch(getAllProjectsSimpleAction(token));
+      dispatch(selectAttendanceAction(null));
+      dispatch(removeMusterData());
 
-  useEffect(() => {
-    dispatch(getSkillsAction(token));
-    dispatch(getUsersAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
-    dispatch(selectAttendanceAction(null));
-    dispatch(removeMusterData());
-  }, []);
-
+      return () => {};
+    }, [])
+  );
   useEffect(() => {
     setLabourContractors(
       usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
@@ -129,13 +146,10 @@ const Attendance = ({ navigation }) => {
       setSearchAttendance(text);
     }
   };
+
   const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
@@ -143,116 +157,11 @@ const Attendance = ({ navigation }) => {
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
     }
   };
-  const rowColors = ["#F3F4F4", "#FFFFFF"];
 
-  const renderSearchModal = () => {
-    return (
-      <Modal
-        // animationType="slide"
-        // transparent={true}
-        // visible={openSearchUserModal}
-        // onRequestClose={() => {
-        //   // Alert.alert("Modal has been closed.");
-        //   setOpenSearchUserModal(!openSearchUserModal);
-        // }}
-        isVisible={openSearchUserModal}
-        useNativeDriver={true}
-        backdropColor={Colors.DarkGray}
-        backdropOpacity={0.6}
-        backdropTransitionInTiming={200}
-        onBackdropPress={() => setOpenSearchModal(!openSearchUserModal)}
-      >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
-          }}
-        >
-          <View
-            style={{
-              width: "88%",
-              backgroundColor: Colors.White,
-              // height: 200,
-              borderRadius: 10,
-              padding: 15,
-            }}
-          >
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Medium",
-                    color: Colors.Black,
-                    fontSize: 16,
-                    // marginBottom: 10,
-                  }}
-                >
-                  Find by name
-                </Text>
-              </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <Cross
-                  onPress={() => {
-                    setOpenSearchUserModal(!openSearchUserModal);
-                  }}
-                  size={22}
-                  color={Colors.Black}
-                />
-                {/* <Pressable
-                  onPress={() => {
-                    setSelectedContractor(null);
-                    setOpenFilterModal(false);
-                    setUserFilter(null);
-                  }}
-                  style={{ marginTop: 3 }}
-                >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
-                    Clear Filter
-                  </Text>
-                </Pressable> */}
-              </View>
-            </View>
-            <View style={{ marginVertical: 10 }}>
-              <Searchbar
-                style={{
-                  backgroundColor: Colors.WhiteGray,
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  width: "100%",
-                  // height: 50,
-                  marginTop: 10,
-                  borderColor: Colors.LightGray,
-                }}
-                placeholder="Search"
-                placeholderTextColor={Colors.FormText}
-                mode="bar"
-                icon={() => <Search size={20} color={Colors.Black} />}
-                clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-                onChangeText={(text) => searchFilterAttendanceFunction(text)}
-                value={searchAttendance}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
   const renderFilterModal = () => {
     return (
       <Modal
@@ -262,33 +171,9 @@ const Attendance = ({ navigation }) => {
         backdropOpacity={0.6}
         backdropTransitionInTiming={200}
         onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
-        // animationType="slide"
-        // visible={openFilterModal}
-        // onRequestClose={() => {
-        //   setOpenFilterModal(openFilterModal);
-        // }}
-        // presentationStyle="pageSheet"
       >
-        <View
-          style={{
-            flex: 1,
-            alignItems: "center",
-            // justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0)",
-            //   width: '90%',
-            //   height: 200
-            marginTop: 30,
-          }}
-        >
-          <View
-            style={{
-              width: "100%",
-              backgroundColor: Colors.White,
-              height: "90%",
-              borderRadius: 10,
-              padding: 15,
-            }}
-          >
+        <View style={styles.filterModalContainer}>
+          <View style={styles.filterInnerCon}>
             <View
               style={{
                 flexDirection: "row",
@@ -334,7 +219,13 @@ const Attendance = ({ navigation }) => {
                   }}
                   style={{ marginTop: 3 }}
                 >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 10,
+                      color: Colors.Black,
+                    }}
+                  >
                     Clear Filter
                   </Text>
                 </Pressable>
@@ -894,6 +785,7 @@ const Attendance = ({ navigation }) => {
                   }}
                   onPress={() => {
                     setSelectedProject(item);
+                    dispatch(getAllAttendanceAction(token, item?.projectId, 0));
                     setOpenSearchModal(false);
                     dispatch(saveProjectDataAction(item));
                   }}
@@ -916,7 +808,13 @@ const Attendance = ({ navigation }) => {
         </View>
       </Modal>
       {renderFilterModal()}
-      {renderSearchModal()}
+      <SearchWorkerModal
+        header={"Find by name"}
+        openModal={openSearchUserModal}
+        setOpenModal={setOpenSearchUserModal}
+        searchFunction={(text) => searchFilterAttendanceFunction(text)}
+        search={searchAttendance}
+      />
     </View>
   );
 };
@@ -1091,5 +989,17 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     elevation: 4,
     backgroundColor: Colors.White,
+  },
+  filterModalContainer: {
+    flex: 1,
+    alignItems: "center",
+    marginTop: 30,
+  },
+  filterInnerCon: {
+    width: "100%",
+    backgroundColor: Colors.White,
+    height: "90%",
+    borderRadius: 10,
+    padding: 15,
   },
 });
