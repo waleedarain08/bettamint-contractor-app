@@ -9,7 +9,7 @@ import { getVersion } from "react-native-device-info";
 import { emptyAttendanceAction } from "../redux/slices/attendanceSlice";
 import { emptyAllProjectsSimpleAction } from "../redux/slices/projectSlice";
 
-const CustomDrawer = ({ navigation }) => {
+const AttendanceDrawer = ({ navigation }) => {
   const userdata = useSelector(userData);
   const roles = userdata?.user?.role?.roleFeatureSets;
 
@@ -38,29 +38,12 @@ const CustomDrawer = ({ navigation }) => {
   const dispatch = useDispatch();
   const routes = [
     {
-      name: "Dashboard",
-      route: "Dashboard",
-      id: 1,
-      access: isDashboardPresent,
-    },
-    { name: "Project", route: "Projects", id: 2, access: isProjectListPresent },
-    { name: "Jobs", route: "Jobs", id: 3, access: isJobsListPresent },
-    {
       name: "Attendance",
-      route: "Attendance",
+      route: "AttendanceStack",
       id: 4,
       access: isAttendanceListPresent,
     },
-    { name: "Workers", route: "Workers", id: 5, access: isWorkerListPresent },
-    {
-      name: "Payments",
-      route: "Payments",
-      id: 6,
-      access: isPaymentListPresent,
-    },
-    { name: "User", route: "Users", id: 7, access: isUsersListPresent },
-    { name: "My Profile", route: "Profile", id: 7, access: true },
-    // { name: "Report", route: "Dashboard", id: 8 },
+    { name: "My Profile", route: "ProfileAttendance", id: 7, access: true },
     { name: "Share App", route: "Share", id: 9, access: true },
   ];
 
@@ -196,4 +179,4 @@ const CustomDrawer = ({ navigation }) => {
   );
 };
 
-export default CustomDrawer;
+export default AttendanceDrawer;
