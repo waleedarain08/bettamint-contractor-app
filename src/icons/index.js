@@ -472,3 +472,13 @@ export const RestrictedIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
+export const DeleteIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="delete-forever"
+    color={color}
+    size={size}
+    type="MaterialIcons"
+    style={style}
+    onPress={onPress}
+  />
+);

@@ -32,82 +32,80 @@ import {
 } from "../../redux/slices/projectSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
-import { Building, Search, BackIcon, Cross } from "../../icons";
+import {
+  Building,
+  Search,
+  BackIcon,
+  Cross,
+  EditIcon,
+  DeleteIcon,
+} from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
   getSkillsAction,
   skillsListReducer,
 } from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import {
+  getLabourContactorAction,
+  getUsersAction,
+  labourContractorReducer,
+  usersListReducer,
+} from "../../redux/slices/userSlice";
+import {
+  assignContractorFieldNote,
+  deleteFieldNote,
+  editFieldNoteAction,
   fieldNoteReducer,
   getFieldNoteList,
+  getScopeList,
+  markFieldNoteAction,
 } from "../../redux/slices/fieldNoteSlice";
 import { Image } from "react-native";
 import { assetsUrl } from "../../utils/api_constants";
 import moment from "moment";
+import { useFocusEffect } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
+
 LogBox.ignoreAllLogs();
+
 const FieldNotes = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
   const [search, setSearch] = useState("");
-  const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
-  const [masterDataAttSource, setMasterDataAttSource] = useState([]);
-  const [searchAttendance, setSearchAttendance] = useState("");
+  const [filteredDataNoteSource, setFilteredDataNoteSource] = useState([]);
+  const [searchNotes, setSearchNotes] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState(null);
-  const [filteredAttendance, setFilteredAttendance] = useState(null);
-  const [selectedSkills, setSelectedSkills] = useState(null);
-  const [selectedContractor, setSelectedContractor] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
+  const [openActionModal, setOpenActionModal] = useState(false);
+  const [openAssignModal, setOpenAssignModal] = useState(false);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [selectedAction, setSelectedAction] = useState(null);
+  const [contractor, setContractor] = useState(null);
+  const [scope, setScope] = useState(null);
+  const [currFieldNote, setCurrFieldNote] = useState(null);
 
   const dispatch = useDispatch();
 
-  const { fieldNoteList } = useSelector(fieldNoteReducer);
-
-  console.log("==================================");
-  console.log("FIELD NOTES", fieldNoteList);
-  console.log("==================================");
-  const attendanceList = useSelector(attendanceListReducer);
-  const skillsList = useSelector(skillsListReducer);
-  const usersList = useSelector(usersListReducer);
+  const { fieldNoteList, loading, scopeList } = useSelector(fieldNoteReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const isLoading = useSelector(loadingAttendance);
   const token = useSelector(authToken);
-  // console.log("ATTENDANCE LIST", usersList?.filter((ele)=> ele?.leadTypeId === 'LabourContractor'));
-  const status = [
-    { label: "Online", value: "Online" },
-    { label: "Offline", value: "Offline" },
-  ];
-  useEffect(() => {
-    dispatch(
-      getAllAttendanceAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0
-      )
-    );
-  }, [selectedProject]);
+  const labourContractorList = useSelector(labourContractorReducer);
 
-  useEffect(() => {
-    dispatch(getSkillsAction(token));
-    dispatch(getUsersAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
-    dispatch(selectAttendanceAction(null));
-    dispatch(removeMusterData());
-    dispatch(getFieldNoteList(token));
-  }, []);
-
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
-    );
-  }, [usersList]);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getSkillsAction(token));
+      dispatch(getUsersAction(token));
+      dispatch(getAllProjectsSimpleAction(token));
+      dispatch(selectAttendanceAction(null));
+      dispatch(removeMusterData());
+      dispatch(getFieldNoteList(token));
+      dispatch(getScopeList(token));
+      dispatch(getLabourContactorAction(token));
+      return () => {};
+    }, [])
+  );
 
   useEffect(() => {
     setFilteredDataSource(projectsListSimple);
@@ -115,33 +113,23 @@ const FieldNotes = ({ navigation }) => {
   }, [projectsListSimple]);
 
   useEffect(() => {
-    setFilteredDataAttSource(attendanceList);
-    setMasterDataAttSource(attendanceList);
-  }, [attendanceList]);
-  const searchFilterAttendanceFunction = (text) => {
+    setFilteredDataNoteSource(fieldNoteList);
+  }, [fieldNoteList]);
+
+  const searchFieldNotesFunction = (text) => {
     // Check if searched text is not blank
-    console.log("TEXT", text);
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
-      const newData = masterDataAttSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
-        const itemData = item.workerName
-          ? item.workerName.toUpperCase()
-          : "".toUpperCase();
-        console.log(itemData);
-        const textData = text.toUpperCase();
-        return itemData.indexOf(textData) > -1;
-      });
-      setFilteredDataAttSource(newData);
-      setSearchAttendance(text);
+      const filteredData = fieldNoteList.filter((item) =>
+        item?.description?.toLowerCase().includes(text)
+      );
+      setFilteredDataNoteSource(filteredData);
+      setSearchNotes(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
-      setFilteredDataAttSource(masterDataAttSource);
-      setSearchAttendance(text);
+      setFilteredDataNoteSource(fieldNoteList);
+      setSearchNotes(text);
     }
   };
+
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -162,18 +150,10 @@ const FieldNotes = ({ navigation }) => {
       setSearch(text);
     }
   };
-  const rowColors = ["#F3F4F4", "#FFFFFF"];
 
   const renderSearchModal = () => {
     return (
       <Modal
-        // animationType="slide"
-        // transparent={true}
-        // visible={openSearchUserModal}
-        // onRequestClose={() => {
-        //   // Alert.alert("Modal has been closed.");
-        //   setOpenSearchUserModal(!openSearchUserModal);
-        // }}
         isVisible={openSearchUserModal}
         useNativeDriver={true}
         backdropColor={Colors.DarkGray}
@@ -186,9 +166,6 @@ const FieldNotes = ({ navigation }) => {
             flex: 1,
             alignItems: "center",
             justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
           }}
         >
           <View
@@ -216,7 +193,7 @@ const FieldNotes = ({ navigation }) => {
                     // marginBottom: 10,
                   }}
                 >
-                  Find by name
+                  Search
                 </Text>
               </View>
               <View style={{ alignItems: "flex-end" }}>
@@ -227,18 +204,6 @@ const FieldNotes = ({ navigation }) => {
                   size={22}
                   color={Colors.Black}
                 />
-                {/* <Pressable
-                  onPress={() => {
-                    setSelectedContractor(null);
-                    setOpenFilterModal(false);
-                    setUserFilter(null);
-                  }}
-                  style={{ marginTop: 3 }}
-                >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
-                    Clear Filter
-                  </Text>
-                </Pressable> */}
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
@@ -248,7 +213,6 @@ const FieldNotes = ({ navigation }) => {
                   borderRadius: 4,
                   borderWidth: 1,
                   width: "100%",
-                  // height: 50,
                   marginTop: 10,
                   borderColor: Colors.LightGray,
                 }}
@@ -257,8 +221,8 @@ const FieldNotes = ({ navigation }) => {
                 mode="bar"
                 icon={() => <Search size={20} color={Colors.Black} />}
                 clearIcon={() => <Cross size={20} color={Colors.FormText} />}
-                onChangeText={(text) => searchFilterAttendanceFunction(text)}
-                value={searchAttendance}
+                onChangeText={(text) => searchFieldNotesFunction(text)}
+                value={searchNotes}
               />
             </View>
           </View>
@@ -266,6 +230,248 @@ const FieldNotes = ({ navigation }) => {
       </Modal>
     );
   };
+  const renderActionModal = () => {
+    return (
+      <Modal
+        isVisible={openActionModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenActionModal(!openActionModal)}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "88%",
+              backgroundColor: Colors.White,
+              height: 400,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Action
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
+                <Pressable
+                  onPress={() => {
+                    let res = dispatch(
+                      deleteFieldNote(token, currFieldNote?.fieldNoteId)
+                    );
+                    setOpenActionModal(false);
+                    setTimeout(() => {
+                      dispatch(getFieldNoteList(token));
+                    }, 1000);
+                  }}
+                >
+                  <DeleteIcon
+                    color={"red"}
+                    size={22}
+                    style={{ marginRight: 5 }}
+                  />
+                </Pressable>
+                <Pressable
+                  onPress={() => {
+                    navigation.navigate("CreateFieldNotes");
+                    dispatch(editFieldNoteAction(currFieldNote));
+                    setOpenActionModal(false);
+                  }}
+                >
+                  <EditIcon
+                    color={Colors.Purple}
+                    size={22}
+                    style={{ marginRight: 5 }}
+                  />
+                </Pressable>
+                <Cross
+                  onPress={() => {
+                    setOpenActionModal(!openActionModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+            <View style={{ marginTop: 15 }}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                autoScroll={false}
+                inputSearchStyle={{ color: Colors.Black }}
+                data={[
+                  { label: "Resolved", value: "MarkAsResolved" },
+                  { label: "Rework", value: "ReworkRequired" },
+                  { label: "Pending", value: "DecisionPending" },
+                ]}
+                maxHeight={500}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Action"}
+                value={selectedAction}
+                onChange={async (item) => {
+                  setSelectedAction(item.value);
+                  let resp = await dispatch(
+                    markFieldNoteAction(
+                      token,
+                      currFieldNote?.fieldNoteId,
+                      item?.value
+                    )
+                  );
+                  if (resp?.status === 200) {
+                    dispatch(getFieldNoteList(token));
+                    setOpenActionModal(false);
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderAssignContractorModal = () => {
+    return (
+      <Modal
+        isVisible={openAssignModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenAssignModal(!openAssignModal)}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "88%",
+              backgroundColor: Colors.White,
+              height: 450,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Assign Contractor
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenAssignModal(!openAssignModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+            <View style={{ marginTop: 15 }}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                autoScroll={false}
+                inputSearchStyle={{ color: Colors.Black }}
+                data={
+                  labourContractorList?.length
+                    ? labourContractorList?.map((ele) => ({
+                        label: ele?.fullName,
+                        value: ele?.userId,
+                      }))
+                    : []
+                }
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={contractor}
+                onChange={async (item) => {
+                  setContractor(item.value);
+                  let resp = await dispatch(
+                    assignContractorFieldNote(
+                      token,
+                      currFieldNote?.fieldNoteId,
+                      item?.value
+                    )
+                  );
+                  if (resp?.status === 200) {
+                    dispatch(getFieldNoteList(token));
+                    setOpenAssignModal(false);
+                    setContractor(null);
+                    setSelectedProject(null);
+                    Toast.show({
+                      type: "info",
+                      text1: "Contractor assigned",
+                      text2: "Contractor assigned successfully.",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const renderFilterModal = () => {
     return (
       <Modal
@@ -275,21 +481,11 @@ const FieldNotes = ({ navigation }) => {
         backdropOpacity={0.6}
         backdropTransitionInTiming={200}
         onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
-        // animationType="slide"
-        // visible={openFilterModal}
-        // onRequestClose={() => {
-        //   setOpenFilterModal(openFilterModal);
-        // }}
-        // presentationStyle="pageSheet"
       >
         <View
           style={{
             flex: 1,
             alignItems: "center",
-            // justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0)",
-            //   width: '90%',
-            //   height: 200
             marginTop: 30,
           }}
         >
@@ -331,23 +527,19 @@ const FieldNotes = ({ navigation }) => {
                 />
                 <Pressable
                   onPress={() => {
-                    setSelectedContractor(null);
-                    setSelectedSkills(null);
-                    setSelectedStatus(null);
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId ||
-                          projectsListSimple[0]?.projectId,
-                        0
-                      )
-                    );
+                    setScope(null);
+                    dispatch(getFieldNoteList(token));
                     setOpenFilterModal(false);
-                    setFilteredAttendance(null);
                   }}
                   style={{ marginTop: 3 }}
                 >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 10,
+                      color: Colors.Gray,
+                    }}
+                  >
                     Clear Filter
                   </Text>
                 </Pressable>
@@ -358,7 +550,7 @@ const FieldNotes = ({ navigation }) => {
                 <Text
                   style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
                 >
-                  By Status
+                  By Scope
                 </Text>
               </View>
               <Dropdown
@@ -371,108 +563,18 @@ const FieldNotes = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={status}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select Status"}
-                value={selectedStatus}
-                onChange={(item) => {
-                  setOpenFilterModal(false);
-                  setSelectedStatus(item);
-                  setSelectedSkills(null);
-                  setFilteredAttendance(
-                    attendanceList?.filter(
-                      (ele) => ele.workerTypeId === item?.value
-                    )
-                  );
-                }}
-              />
-            </View>
-            <View style={{ marginVertical: 10 }}>
-              <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
-                >
-                  By Skills
-                </Text>
-              </View>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
-                iconStyle={styles.iconStyle}
-                data={skillsList?.map((ele) => ({
+                data={scopeList?.map((ele) => ({
                   label: ele?.name,
-                  value: ele?.name,
+                  value: ele?.scopeOfWorkId,
                 }))}
-                maxHeight={300}
+                maxHeight={400}
                 labelField="label"
                 valueField="value"
-                placeholder={"Select Skill"}
-                value={selectedSkills}
+                placeholder={"Select Scope of work"}
+                value={scope}
                 onChange={(item) => {
                   setOpenFilterModal(false);
-                  setSelectedSkills(item);
-                  setSelectedStatus(null);
-                  setFilteredAttendance(
-                    attendanceList?.filter(
-                      (ele) => ele.sKillName === item?.value
-                    )
-                  );
-                }}
-              />
-            </View>
-            <View style={{ marginVertical: 10 }}>
-              <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
-                >
-                  By Contractor
-                </Text>
-              </View>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
-                iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
-                  label: ele?.fullName,
-                  value: ele?.userId,
-                }))}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select Contractor"}
-                value={selectedContractor}
-                onChange={(item) => {
-                  setOpenFilterModal(false);
-                  setSelectedContractor(item);
-                  setSelectedStatus(null);
-                  setSelectedSkills(null);
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      item?.value
-                    )
-                  );
-                  // setFilteredAttendance(
-                  //   attendanceList?.filter(
-                  //     (ele) => ele.sKillName === item?.value
-                  //   )
-                  // );
+                  setScope(item.value);
                 }}
               />
             </View>
@@ -497,39 +599,124 @@ const FieldNotes = ({ navigation }) => {
       >
         <View
           style={{
-            width: "15%",
+            width: "28%",
           }}
         >
-          <Image
-            source={{ uri: assetsUrl + item.imageUrl }}
-            style={{ width: 30, height: 30 }}
-          />
+          <View
+            style={{
+              flexDirection: "row",
+              width: "85%",
+              alignItems: "center",
+            }}
+          >
+            <Image
+              source={{
+                uri: item?.imageUrl
+                  ? assetsUrl + item.imageUrl
+                  : "https://iau.edu.lc/wp-content/uploads/2016/09/dummy-image.jpg",
+              }}
+              style={{
+                width: 30,
+                height: 30,
+                borderRadius: 15,
+                marginRight: 5,
+              }}
+            />
+            <View>
+              <Text
+                numberOfLines={1}
+                style={{
+                  fontFamily: "Lexend-SemiBold",
+                  color: Colors.Black,
+                  fontSize: 11,
+                }}
+              >
+                {item?.description || "N/A"}
+              </Text>
+              <Text
+                style={{
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                  fontSize: 9,
+                }}
+              >
+                {item?.location || "N/A"}
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={{ width: "15%" }}>
+        <View style={{ width: "14%" }}>
           <Text style={styles.flatListText}>{item?.scopeOfWork || "N/A"}</Text>
         </View>
-        <View style={{ width: "15%" }}>
+        {/* <View style={{ width: "15%" }}>
           <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
-        </View>
-        <View style={{ width: "15%" }}>
+        </View> */}
+        <View style={{ width: "14%" }}>
           <Text style={styles.flatListText}>
-            {moment(item?.dateTime).format("DD-MM-YYYY") || "N/A"}
+            {moment(item?.dateTime).format("DD-MM-YY") || "N/A"}
           </Text>
         </View>
-        <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>
-            {item?.location || "N/A"}
-          </Text>
-        </View>
-        <View style={{ width: "15%" }}>
-          <Text style={styles.flatListText}>
+        <View style={{ width: "16%" }}>
+          <Text
+            onPress={() => {
+              setOpenAssignModal(true);
+              setCurrFieldNote(item);
+            }}
+            numberOfLines={1}
+            style={styles.flatListText}
+          >
             {item?.contractor?.fullName || "N/A"}
           </Text>
         </View>
-        <View style={{ width: "10%" }}>
-          <Text style={styles.flatListText}>
-            {item?.action || "N/A"}
-          </Text>
+        <View style={{ width: "14%" }}>
+          <Pressable
+            onPress={() => {
+              console.log(item?.action);
+              setOpenActionModal(true);
+              setCurrFieldNote(item);
+            }}
+            style={{
+              width: "100%",
+              backgroundColor:
+                item?.action === "MarkAsResolved"
+                  ? Colors.PurpleOpacity
+                  : item?.action === "DecisionPending"
+                  ? Colors.Gray
+                  : item?.action === "ReworkRequired"
+                  ? Colors.PrimaryLight
+                  : Colors.White,
+              height: 20,
+              borderRadius: 3,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: item?.action === null ? 0.5 : 0,
+            }}
+          >
+            <Text
+              style={[
+                styles.flatListText,
+                {
+                  fontSize: 9,
+                  color:
+                    item?.action === "MarkAsResolved"
+                      ? Colors.Purple
+                      : item?.action === "DecisionPending"
+                      ? Colors.White
+                      : item?.action === "ReworkRequired"
+                      ? Colors.Primary
+                      : Colors.Black,
+                },
+              ]}
+            >
+              {item?.action === "MarkAsResolved"
+                ? "Resolved"
+                : item?.action === "DecisionPending"
+                ? "Pending"
+                : item?.action === "ReworkRequired"
+                ? "Rework"
+                : "Action"}
+            </Text>
+          </Pressable>
         </View>
         {/* <Pressable
           onPress={() => {
@@ -569,27 +756,21 @@ const FieldNotes = ({ navigation }) => {
             borderTopRightRadius: 25,
           }}
         >
-          <View style={{ width: "15%" }}>
+          <View style={{ width: "28%" }}>
             <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
-              Image
+              Field Notes Detail
             </Text>
           </View>
-          <View style={{ width: "15%" }}>
+          <View style={{ width: "14%" }}>
             <Text style={styles.flatListTextHeader}>SOW</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Description</Text>
-          </View>
-          <View style={{ width: "15%" }}>
+          <View style={{ width: "14%" }}>
             <Text style={styles.flatListTextHeader}>Date</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Location</Text>
+          <View style={{ width: "16%" }}>
+            <Text style={styles.flatListTextHeader}>Assigned</Text>
           </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Assign Contractor</Text>
-          </View>
-          <View style={{ width: "10%" }}>
+          <View style={{ width: "14%" }}>
             <Text style={styles.flatListTextHeader}>Action</Text>
           </View>
         </View>
@@ -635,11 +816,7 @@ const FieldNotes = ({ navigation }) => {
                 { fontFamily: "Lexend-SemiBold", color: Colors.Black },
               ]}
             >
-              {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
-                : "Select a project"}
+              {selectedProject ? selectedProject?.name : "Select a project"}
             </Text>
           </View>
         </Pressable>
@@ -687,34 +864,6 @@ const FieldNotes = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </Pressable>
-      {/* <View style={{ alignItems: "flex-end", paddingRight: 20, width: "100%" }}>
-        <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
-          Attendance is validated via two-factor authentication*{"\n"} i.e.
-          worker Check-In & Geolocation Tracking during work hours.
-        </Text>
-      </View> */}
-      {/* <ScrollView> */}
-      {/* <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              dispatch(
-                getAllAttendanceAction(
-                  token,
-                  selectedProject?.projectId ||
-                    projectsListSimple[0]?.projectId,
-                  0
-                )
-              );
-            }}
-            tintColor={Colors.Primary}
-            colors={[Colors.Purple, Colors.Primary]}
-          />
-        }
-        showsHorizontalScrollIndicator={false}
-        style={{ flex: 1 }}
-      > */}
       <View
         style={{
           backgroundColor: Colors.White,
@@ -733,55 +882,13 @@ const FieldNotes = ({ navigation }) => {
           flex: 1,
         }}
       >
-        {/* {!attendanceList || attendanceList?.length === 0 ? (
-            <ScrollView
-              refreshControl={
-                <RefreshControl
-                  refreshing={isLoading}
-                  onRefresh={() => {
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId, 0
-                      )
-                    );
-                  }}
-                  tintColor={Colors.Primary}
-                  colors={[Colors.Purple, Colors.Primary]}
-                />
-              }
-              contentContainerStyle={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Gray,
-                }}
-              >
-                No Record Found!
-              </Text>
-            </ScrollView>
-          ) : ( */}
-        {!attendanceList || attendanceList?.length === 0 ? (
+        {!fieldNoteList || fieldNoteList?.length === 0 ? (
           <ScrollView
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0
-                    )
-                  );
+                  dispatch(getFieldNoteList(token));
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
@@ -807,45 +914,33 @@ const FieldNotes = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                // onRefresh={() => {
-                //   dispatch(
-                //     getAllAttendanceAction(
-                //       token,
-                //       selectedProject?.projectId ||
-                //         projectsListSimple[0]?.projectId,
-                //       0
-                //     )
-                //   );
-                // }}
+                refreshing={loading}
+                onRefresh={() => {
+                  dispatch(getFieldNoteList(token));
+                  setSelectedProject(null);
+                }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={fieldNoteList}
+            data={filteredDataNoteSource}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
             initialNumToRender={0}
             ListHeaderComponent={ListHeader}
+            extraData={fieldNoteList?.length}
             stickyHeaderIndices={[0]}
             showsVerticalScrollIndicator={false}
           />
         )}
-        {/* )} */}
       </View>
-      {/* </ScrollView> */}
       <Modal
         isVisible={openSearchModal}
-        // animationType="none"
         useNativeDriver={true}
         backdropColor={Colors.WhiteGray}
         backdropOpacity={1}
         backdropTransitionInTiming={200}
         onBackdropPress={() => setOpenSearchModal(false)}
-        // onRequestClose={() => {
-        //   setOpenSearchModal(false);
-        // }}
-        // presentationStyle="fullScreen"
       >
         <View style={{ width: "100%", flex: 1 }}>
           <View
@@ -912,6 +1007,7 @@ const FieldNotes = ({ navigation }) => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
                     dispatch(saveProjectDataAction(item));
+                    dispatch(getFieldNoteList(token, item?.projectId));
                   }}
                 >
                   <Text
@@ -926,13 +1022,15 @@ const FieldNotes = ({ navigation }) => {
                 </Pressable>
               )}
               keyExtractor={(item) => item.projectId}
-              extraData={filteredDataAttSource}
+              extraData={filteredDataSource.length}
             />
           </View>
         </View>
       </Modal>
       {renderFilterModal()}
       {renderSearchModal()}
+      {renderActionModal()}
+      {renderAssignContractorModal()}
     </View>
   );
 };
@@ -1076,7 +1174,7 @@ const styles = StyleSheet.create({
   },
   flatListText: {
     fontFamily: "Lexend-Medium",
-    fontSize: 12,
+    fontSize: 10,
     color: Colors.ListItemText,
     textAlign: "center",
   },

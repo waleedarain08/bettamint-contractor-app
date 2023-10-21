@@ -92,6 +92,11 @@ import { emptyPaymentListAction } from "../redux/slices/paymentSlice";
 import EditUser from "../screens/Users/EditUser";
 import FieldNotes from "../screens/FieldNotes/FieldNotes";
 import AttendanceDrawer from "./AttendanceDrawer";
+import CreateFieldNotes from "../screens/FieldNotes/CreateFieldNotes";
+import {
+  editFieldNoteAction,
+  fieldNoteReducer,
+} from "../redux/slices/fieldNoteSlice";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -1394,119 +1399,124 @@ const UserNavigator = ({ navigation }) => (
   </UserStack.Navigator>
 );
 
-const FieldNotesNavigator = ({ navigation }) => (
-  <FieldNotesStack.Navigator
-    screenOptions={{
-      headerBackTitleVisible: false,
-      headerShadowVisible: false,
-      headerTintColor: Colors.White,
-      headerStyle: {
-        backgroundColor: Colors.Primary,
-      },
-    }}
-  >
-    <FieldNotesStack.Screen
-      name="FieldNotesStack"
-      component={FieldNotes}
-      options={{
-        headerBackVisible: false,
-        headerTitle: () => (
-          <Text
-            style={{
-              fontSize: 18,
-              fontFamily: "Lexend-Medium",
-              color: Colors.White,
-              marginHorizontal: 13,
-            }}
-          >
-            Field Notes
-          </Text>
-        ),
-        headerLeft: () => (
-          <Pressable onPress={() => navigation.goBack()}>
-            <MenuIcon size={30} color={Colors.White} />
-          </Pressable>
-        ),
-        headerRight: () => (
-          <View
-            style={{ flexDirection: "row", justifyContent: "space-evenly" }}
-          >
-            <Pressable
-              onPress={() => {
-                navigation.navigate("CreateNewUser");
-              }}
+const FieldNotesNavigator = ({ navigation }) => {
+  const { selectedNote } = useSelector(fieldNoteReducer);
+  const dispatch = useDispatch();
+  return (
+    <FieldNotesStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerShadowVisible: false,
+        headerTintColor: Colors.White,
+        headerStyle: {
+          backgroundColor: Colors.Primary,
+        },
+      }}
+    >
+      <FieldNotesStack.Screen
+        name="FieldNotesStack"
+        component={FieldNotes}
+        options={{
+          headerBackVisible: false,
+          headerTitle: () => (
+            <Text
               style={{
-                backgroundColor: Colors.Purple,
-                padding: 5,
-                borderRadius: 12,
-                paddingHorizontal: 10,
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                marginHorizontal: 13,
               }}
             >
-              <View
+              Field Notes
+            </Text>
+          ),
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.goBack()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            >
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("CreateFieldNotes");
+                  dispatch(editFieldNoteAction(null));
+                }}
                 style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  alignItems: "center",
+                  backgroundColor: Colors.Purple,
+                  padding: 5,
+                  borderRadius: 12,
+                  paddingHorizontal: 10,
                 }}
               >
-                <PlusIcon size={20} color={Colors.White} />
-                <Text
+                <View
                   style={{
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 11,
-                    color: Colors.White,
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
                   }}
                 >
-                  New Note
-                </Text>
-              </View>
-            </Pressable>
-            <Pressable
-              style={{ marginLeft: 10 }}
-              onPress={() => navigation.navigate("Profile")}
-            >
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 8 }}
-              />
-            </Pressable>
-            <Pressable
+                  <PlusIcon size={20} color={Colors.White} />
+                  <Text
+                    style={{
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 11,
+                      color: Colors.White,
+                    }}
+                  >
+                    New Note
+                  </Text>
+                </View>
+              </Pressable>
+              <Pressable
+                style={{ marginLeft: 10 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                // onPress={() => navigation.navigate("Profile")}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <FieldNotesStack.Screen
+        name="CreateFieldNotes"
+        component={CreateFieldNotes}
+        options={{
+          headerTitle: () => (
+            <Text
               style={{
-                marginLeft: 0,
-                height: 30,
-                width: 30,
-                backgroundColor: Colors.Purple,
-                borderRadius: 15,
-                justifyContent: "center",
-                alignItems: "center",
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
               }}
-              // onPress={() => navigation.navigate("Profile")}
             >
-              <NotificationIcon size={22} color={Colors.White} />
-            </Pressable>
-          </View>
-        ),
-      }}
-    />
-    {/* <UserStack.Screen
-			name="CreateNewUser"
-			component={CreateNewUser}
-			options={{
-				headerTitle: () => (
-					<Text
-						style={{
-							fontSize: 18,
-							fontFamily: "Lexend-Medium",
-							color: Colors.White,
-						}}
-					>
-						Create User
-					</Text>
-				),
-			}}
-		/> */}
-  </FieldNotesStack.Navigator>
-);
+              {selectedNote ? "Update Field Note" : "Create Field Note"}
+            </Text>
+          ),
+        }}
+      />
+    </FieldNotesStack.Navigator>
+  );
+};
 
 function MainNavigation({}) {
   React.useEffect(() => {
@@ -1554,7 +1564,6 @@ function MainNavigation({}) {
 
   // Check if only the expected names are present
   const result = roles && hasOnlyExpectedNames(roles);
-
 
   return (
     <>
