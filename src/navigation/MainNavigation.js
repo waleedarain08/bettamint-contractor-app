@@ -15,6 +15,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import {
   NavigationContainer,
   DefaultTheme,
+  useNavigation,
   // DarkTheme,
 } from "@react-navigation/native";
 import Animated, {
@@ -97,6 +98,7 @@ import {
   editFieldNoteAction,
   fieldNoteReducer,
 } from "../redux/slices/fieldNoteSlice";
+import Productivity from "../screens/Productivity/Productivity";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -108,6 +110,7 @@ const JobStack = createNativeStackNavigator();
 const ProfileStack = createNativeStackNavigator();
 const UserStack = createNativeStackNavigator();
 const FieldNotesStack = createNativeStackNavigator();
+const ProductivityStack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 LogBox.ignoreAllLogs();
 
@@ -1518,7 +1521,76 @@ const FieldNotesNavigator = ({ navigation }) => {
   );
 };
 
-function MainNavigation({}) {
+const ProductivityNavigator = ({ navigation }) => {
+  return (
+    <ProductivityStack.Navigator
+      screenOptions={{
+        headerBackTitleVisible: false,
+        headerShadowVisible: false,
+        headerTintColor: Colors.White,
+        headerStyle: {
+          backgroundColor: Colors.Primary,
+        },
+      }}
+    >
+      <ProductivityStack.Screen
+        name="ProductivityStack"
+        component={Productivity}
+        options={{
+          headerBackVisible: false,
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                marginHorizontal: 13,
+              }}
+            >
+              Productivity
+            </Text>
+          ),
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.goBack()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
+          headerRight: () => (
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            >
+              <Pressable
+                style={{ marginLeft: 10 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                // onPress={() => navigation.navigate("Profile")}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+    </ProductivityStack.Navigator>
+  );
+};
+
+function MainNavigation({ navigation }) {
   React.useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
@@ -1534,7 +1606,7 @@ function MainNavigation({}) {
     },
   };
   const userInfo = useSelector(userData);
-
+  // const navigation = useNavigation();
   const roles = userInfo?.user?.role?.roleFeatureSets;
 
   // Array of expected names
@@ -1682,6 +1754,13 @@ function MainNavigation({}) {
                 <Stack.Screen
                   name="FieldNotes"
                   component={FieldNotesNavigator}
+                  options={{
+                    headerShown: false,
+                  }}
+                />
+                <Stack.Screen
+                  name="Productivity"
+                  component={ProductivityNavigator}
                   options={{
                     headerShown: false,
                   }}

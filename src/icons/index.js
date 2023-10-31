@@ -482,3 +482,53 @@ export const DeleteIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
+export const HomeIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="home"
+    color={color}
+    size={size}
+    type="AntDesign"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const HatIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="aperture"
+    color={color}
+    size={size}
+    type="Feather"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const ChatIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="chatbox-ellipses"
+    color={color}
+    size={size}
+    type="Ionicons"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const PlusSquareIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="plussquare"
+    color={color}
+    size={size}
+    type="AntDesign"
+    style={style}
+    onPress={onPress}
+  />
+);
+export const PlusCircleIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="pluscircleo"
+    color={color}
+    size={size}
+    type="AntDesign"
+    style={style}
+    onPress={onPress}
+  />
+);

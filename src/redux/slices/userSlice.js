@@ -133,29 +133,30 @@ export const getUsersAction = (token) => async (dispatch) => {
   }
 };
 
-export const getLabourContactorAction = (token) => async (dispatch) => {
-  dispatch(gettingLabourContractor());
-  try {
-    const response = await axios.get(
-      `${base_url}/dashboard/User/labourcontractor`,
-      {
+export const getLabourContactorAction =
+  (token, projectId) => async (dispatch) => {
+    dispatch(gettingLabourContractor());
+    try {
+      let url = projectId
+        ? `${base_url}/dashboard/User/labourcontractor?projectId=${projectId}`
+        : `${base_url}/dashboard/User/labourcontractor`;
+      const response = await axios.get(url, {
         headers: {
           Authorization: token,
         },
+      });
+      if (response.data) {
+        dispatch(gettingLabourContractorSuccess(response.data));
       }
-    );
-    if (response.data) {
-      dispatch(gettingLabourContractorSuccess(response.data));
+      return response;
+    } catch (e) {
+      dispatch(
+        gettingLabourContractorFailure(
+          "Something went wrong while getting labour contractor!"
+        )
+      );
     }
-    return response;
-  } catch (e) {
-    dispatch(
-      gettingLabourContractorFailure(
-        "Something went wrong while getting labour contractor!"
-      )
-    );
-  }
-};
+  };
 
 export const getCountsData = (token) => async (dispatch) => {
   dispatch(gettingCountData());

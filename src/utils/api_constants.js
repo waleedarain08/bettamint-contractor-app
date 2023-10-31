@@ -1,8 +1,8 @@
-// export const base_url = "https://api-sandbox.bettamint.com/api";
-// export const assetsUrl = "https://api-sandbox.bettamint.com";
+export const base_url = "https://api-sandbox.bettamint.com/api";
+export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-export const base_url = "https://api-prod.bettamint.com/api";
-export const assetsUrl = "https://api-prod.bettamint.com";
+// export const base_url = "https://api-prod.bettamint.com/api";
+// export const assetsUrl = "https://api-prod.bettamint.com";
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";
@@ -26,19 +26,18 @@ export const PAYMENT_GETALL_URL = "dashboard/Payment/history";
 export const PAYMENT_HISTORY_URL = "dashboard/Payment/process";
 // RESPONSE HANDLER FOR APIs
 export const responseHandler = (response) => {
-	if (response && response?.data && response?.status === 200) {
-		return response.data;
-	}
+  if (response && response?.data && response?.status === 200) {
+    return response.data;
+  }
 };
 
 // GOOGLE API KEY
 export const GOOGLE_API_KEY = "AIzaSyDmPu3_XheAsKf93Ab3pwbLU_ri9nmg5XM";
 
-
-// LC account : 
+// LC account :
 // Bbal9644@gmail.com
 // DpdME7Skc5lD0hd
 
-// GC account : 
+// GC account :
 // chiranjeevikm@k2kinfra.net
 // HjmPHylNqEWF3VP

@@ -59,10 +59,20 @@ const CustomDrawer = ({ navigation }) => {
       access: isPaymentListPresent,
     },
     { name: "User", route: "Users", id: 7, access: isUsersListPresent },
-    { name: "Field Notes", route: "FieldNotes", id: 8, access: isUsersListPresent },
-    { name: "My Profile", route: "Profile", id: 9, access: true },
-    // { name: "Report", route: "Dashboard", id: 8 },
-    { name: "Share App", route: "Share", id: 10, access: true },
+    {
+      name: "Field Notes",
+      route: "FieldNotes",
+      id: 8,
+      access: isUsersListPresent,
+    },
+    {
+      name: "Productivity",
+      route: "Productivity",
+      id: 9,
+      access: isUsersListPresent,
+    },
+    { name: "My Profile", route: "Profile", id: 10, access: true },
+    { name: "Share App", route: "Share", id: 11, access: true },
   ];
 
   const onShare = async () => {
@@ -92,7 +102,7 @@ const CustomDrawer = ({ navigation }) => {
       contentContainerStyle={{ flex: 1 }}
     >
       <View style={{ flex: 1, paddingHorizontal: 30 }}>
-        <View style={{ marginTop: 40, marginBottom: 50 }}>
+        <View style={{ marginTop: 30, marginBottom: 30 }}>
           <Image
             source={require("../assets/images/logo.png")}
             style={{ width: 190, height: 35 }}
@@ -144,13 +154,12 @@ const CustomDrawer = ({ navigation }) => {
         <View>
           <Pressable
             onPress={() => {
-              // navigation.navigate("SelectLanguage");
               dispatch(logoutAction());
               dispatch(emptyAttendanceAction());
               dispatch(emptyAllProjectsSimpleAction());
             }}
             style={{
-              marginVertical: 35,
+              marginVertical: 25,
               width: "100%",
               flexDirection: "row",
               alignItems: "center",
