@@ -145,6 +145,7 @@ const ApproveAttendance = ({ navigation, route }) => {
     let resp = await dispatch(
       markAttendance(token, workerId, jobId, attendanceType)
     );
+    console.log('RESPONSE--->>>', resp)
     if (resp?.status === 200) {
       // console.log("SUCCESS");
       // console.log("AFTER", moment(new Date()).format("hh:mm:ss"));

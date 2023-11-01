@@ -9,6 +9,8 @@ import {
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 import axios from "axios";
+import { logoutAction } from "./authSlice";
+import Toast from "react-native-toast-message";
 
 const initialState = {
   loading: false,
@@ -166,6 +168,18 @@ export const getAllAttendanceAction =
         })
         .catch((error) => {
           console.log("ATTENDANCE ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
           dispatch(getAttendanceFailure());
         });
     } catch (error) {
@@ -195,9 +209,24 @@ export const getAttendanceMusterAction =
         })
         .catch((error) => {
           console.log("ATTENDANCE MUSTER ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
           dispatch(getAttendanceMusterFailure());
         });
     } catch (error) {
+      if (error?.response?.data?.message === "Unauthorized") {
+        dispatch(logoutAction());
+      }
       dispatch(getAttendanceMusterFailure());
     }
   };
@@ -224,9 +253,24 @@ export const getAttendanceApproveAction =
         })
         .catch((error) => {
           console.log("ATTENDANCE APPROVE ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
           dispatch(getAttendanceApproveFailure());
         });
     } catch (error) {
+      if (error?.response?.data?.message === "Unauthorized") {
+        dispatch(logoutAction());
+      }
       dispatch(getAttendanceApproveFailure());
     }
   };
@@ -253,9 +297,24 @@ export const getAttendanceReportAction =
         })
         .catch((error) => {
           console.log("ATTENDANCE REPORT ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
           dispatch(getAttendanceReportFailure());
         });
     } catch (error) {
+      if (error?.response?.data?.message === "Unauthorized") {
+        dispatch(logoutAction());
+      }
       dispatch(getAttendanceReportFailure());
     }
   };
@@ -275,6 +334,7 @@ export const markAttendance =
           },
         }
       );
+      console.log("markAttendance", response);
       if (response?.status === 200) {
         dispatch(markingAttendanceSuccess());
       }
@@ -284,6 +344,9 @@ export const markAttendance =
 
       return response;
     } catch (e) {
+      if (e?.response?.data?.message === "Unauthorized") {
+        dispatch(logoutAction());
+      }
       dispatch(
         markingAttendanceFailure(
           "Something went wrong while marking attendance!"

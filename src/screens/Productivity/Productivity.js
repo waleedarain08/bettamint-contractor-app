@@ -1349,9 +1349,9 @@ const Productivity = ({ navigation }) => {
       let progressValues =
         projectProgressData?.graphData &&
         projectProgressData?.graphData?.map((item) => item?.overallProgress);
-        // Find the maximum value from the array
-        const progressMaxValue = Math?.max(...progressValues);
-        progressMax = roundToNearestMultiple(progressMaxValue, 50);
+      // Find the maximum value from the array
+      const progressMaxValue = Math?.max(...progressValues);
+      progressMax = roundToNearestMultiple(progressMaxValue, 50);
     }
     return progressMax;
   };
@@ -2920,19 +2920,34 @@ const Productivity = ({ navigation }) => {
             paddingHorizontal: 10,
           }}
         >
-          <View
-            style={{
-              width: boqProgress?.result?.totalMeasurement
-                ? boqProgress?.result?.totalMeasurement
-                : 0,
-              height: 33,
-              backgroundColor: Colors.Purple,
-              position: "absolute",
-              borderTopLeftRadius: 25,
-              borderBottomLeftRadius: 25,
-              left: 5,
-            }}
-          ></View>
+          <View>
+            <View
+              style={{
+                width: boqProgress?.result?.totalMeasurement
+                  ? boqProgress?.result?.totalMeasurement
+                  : 0,
+                height: 33,
+                backgroundColor: Colors.Purple,
+                position: "absolute",
+                borderTopLeftRadius: 25,
+                borderBottomLeftRadius: 25,
+                left: 5,
+              }}
+            ></View>
+            <View
+              style={{
+                width: boqProgress?.result?.totalMeasurement
+                  ? boqProgress?.result?.totalMeasurement
+                  : 0,
+                height: 33,
+                backgroundColor: Colors.PrimaryLight,
+                position: "absolute",
+                borderTopLeftRadius: 25,
+                borderBottomLeftRadius: 25,
+                left: 5,
+              }}
+            ></View>
+          </View>
           <Text
             style={{
               fontFamily: "Lexend-Medium",
