@@ -325,7 +325,7 @@ export const addBOQ = (token, listObject) => async (dispatch) => {
       },
     }
   );
-  console.log("STATUS--->>>", response);
+  // console.log("STATUS--->>>", response);
   if (response?.status === 200) {
     dispatch(addingBOQSuccess());
   } else {
@@ -460,7 +460,7 @@ export const getProjectProgressGraph =
         },
       }
     );
-    console.log('RESPONSE--->>>', response)
+    // console.log("RESPONSE--->>>", response);
     if (response?.status === 200) {
       dispatch(gettingBoqProgressBySOWSuccess(response?.data.result));
     } else {
@@ -474,11 +474,16 @@ export const getProjectProgressGraph =
   };
 
 export const getProjectBudget =
-  (projectId = 0) =>
+  (token, projectId = 0) =>
   async (dispatch) => {
     dispatch(gettingBoqProgressBudget());
     const response = await axios.get(
-      `${base_url}/dashboard/Productivity/graph/costdetails?projectId=${projectId}`
+      `${base_url}/dashboard/Productivity/graph/costdetails?projectId=${projectId}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
     );
     if (response?.status === 200) {
       dispatch(gettingBoqProgressBudgetSuccess(response?.data.result));
@@ -493,11 +498,16 @@ export const getProjectBudget =
   };
 
 export const getFinancialProgressData =
-  (projectId = 0) =>
+  (token, projectId = 0) =>
   async (dispatch) => {
     dispatch(gettingFinancialGraphData());
     const response = await axios.get(
-      `${base_url}/dashboard/Productivity/graph/costbymonth?projectId=${projectId}`
+      `${base_url}/dashboard/Productivity/graph/costbymonth?projectId=${projectId}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
     );
     if (response?.status === 200) {
       dispatch(gettingFinancialGraphDataSuccess(response?.data.result));

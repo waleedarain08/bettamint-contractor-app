@@ -49,6 +49,7 @@ import {
   DateIcon,
   ClockIcon,
   ChatIcon,
+  DotIcon,
 } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
@@ -87,6 +88,8 @@ import {
   getBOQProgress,
   getBOQMetrics,
   getProjectProgressGraph,
+  getFinancialProgressData,
+  getProjectBudget,
 } from "../../redux/slices/productivitySlice";
 import DatePicker from "react-native-date-picker";
 import { launchImageLibrary } from "react-native-image-picker";
@@ -257,6 +260,7 @@ const DescriptionRow = ({
           <Dropdown
             style={{
               paddingRight: 10,
+              flex: 1,
             }}
             placeholderStyle={{
               fontSize: 13,
@@ -278,10 +282,10 @@ const DescriptionRow = ({
               label: ele?.name,
               value: ele?.unitId,
             }))}
-            maxHeight={400}
+            maxHeight={200}
             labelField="label"
             valueField="value"
-            placeholder={"Feet"}
+            placeholder={"Unit"}
             value={desc.unitId}
             onChange={(item) => {
               updateTitleDescValue(
@@ -458,12 +462,12 @@ const TitleRow = (props) => {
                 backgroundColor: Colors.White,
               }}
               placeholderStyle={{
-                fontSize: 16,
+                fontSize: 14,
                 fontFamily: "Lexend-Regular",
                 color: Colors.Black,
               }}
               selectedTextStyle={{
-                fontSize: 16,
+                fontSize: 14,
                 fontFamily: "Lexend-Regular",
                 color: Colors.Black,
               }}
@@ -663,7 +667,7 @@ const TitleRow = (props) => {
               color: Colors.Black,
             }}
             selectedTextStyle={{
-              fontSize: 10,
+              fontSize: 13,
               fontFamily: "Lexend-Regular",
               color: Colors.Black,
             }}
@@ -677,10 +681,10 @@ const TitleRow = (props) => {
               label: ele?.name,
               value: ele?.unitId,
             }))}
-            maxHeight={400}
+            maxHeight={200}
             labelField="label"
             valueField="value"
-            placeholder={"Feet"}
+            placeholder={"Unit"}
             value={title.unitId}
             onChange={(item) => {
               updateTitleValue(rowItem.rowId, title.id, "unitId", item.value);
@@ -1186,23 +1190,11 @@ const Row = (props) => {
 
 const Productivity = ({ navigation }) => {
   const [openSearchModal, setOpenSearchModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
-  const [filteredDataSource, setFilteredDataSource] = useState([]);
-  const [masterDataSource, setMasterDataSource] = useState([]);
-  const [search, setSearch] = useState("");
-  const [filteredDataNoteSource, setFilteredDataNoteSource] = useState([]);
-  const [searchNotes, setSearchNotes] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
-  const [openActionModal, setOpenActionModal] = useState(false);
-  const [openAssignModal, setOpenAssignModal] = useState(false);
-  const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
-  const [selectedAction, setSelectedAction] = useState(null);
   const [contractor, setContractor] = useState(null);
-  const [scope, setScope] = useState(null);
   const [project, setProject] = useState(null);
-  const [currFieldNote, setCurrFieldNote] = useState(null);
   const [currentProjectProgress, setCurrentProjectProgress] = useState(null);
   const [LabourContractorProgress, setLabourContractorProgress] = useState(0);
   const [date, setDate] = useState(new Date());
@@ -1216,6 +1208,10 @@ const Productivity = ({ navigation }) => {
   // const [date, setDateNote] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(null);
   // const [open, setOpen] = useState(false);
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [openProjectModal, setOpenProjectModal] = useState(false);
+  const [openContractorModal, setOpenContractorModal] = useState(null);
   const [time, setTime] = useState(null);
   const [openTime, setOpenTime] = useState(false);
   const [fieldPic, setFieldPic] = useState("");
@@ -1232,6 +1228,7 @@ const Productivity = ({ navigation }) => {
   const [currentProjectFinancial, setCurrentProjectFinancial] = useState(null);
   const [currentProjectProgressGraph, setCurrentProjectProgressGraph] =
     useState(null);
+  const [currentProjectBudget, setCurrentProjectBudget] = useState(null);
 
   // const projectsList = useSelector(projectsListSimpleReducer);
   const { selectedNote } = useSelector(fieldNoteReducer);
@@ -1258,7 +1255,99 @@ const Productivity = ({ navigation }) => {
   const token = useSelector(authToken);
   const labourContractorList = useSelector(labourContractorReducer);
   const randomId = Math.floor(100000 + Math.random() * 900000);
-  console.log("BOQ Progress--->>>", projectProgressData);
+  // console.log("BOQ Progress--->>>", projectBudgetData);
+
+  const getFinancialProgressGraphData = () => {
+    const resultArray = [];
+
+    financialGraphData?.forEach((item) => {
+      const month = item.month;
+      const labelToCostMap = {};
+
+      item.costbySOW.forEach((costItem) => {
+        const label = costItem.label;
+        const actualCost = costItem.actualCost;
+
+        if (!labelToCostMap[label]) {
+          labelToCostMap[label] = actualCost;
+        } else {
+          labelToCostMap[label] += actualCost;
+        }
+      });
+
+      const stacks = [];
+
+      for (const label in labelToCostMap) {
+        stacks.push({
+          value: labelToCostMap[label],
+          color: getColorForLabel(label),
+        });
+      }
+
+      resultArray.push({ stacks, label: month });
+    });
+    return resultArray;
+  };
+
+  function getColorForLabel(label) {
+    // Define your color logic based on the label here
+    // You can use a switch or other logic to assign colors
+    // For simplicity, I'm using some example colors
+    const colorMap = {
+      Earthwork: "orange",
+      "Civil Works": "#4ABFF4",
+      Finishes: "green",
+      "Electrical Works - LT": "red",
+      "Electrical Works - HT": "yellow",
+      "Plumbing Works": "blue",
+      "HVAC Works": "pink",
+      Glazing: "purple",
+      "Fixed Millworks": "brown",
+      "Swimming Pools & Water Bodies": "gray",
+      "Mechanical Works": "black",
+      Miscellaneous: "cyan",
+      "General & NMR": "magenta",
+    };
+    return colorMap[label] || "gray"; // Default to gray if no color is defined
+  }
+
+  // Function to find the array with the highest actual cost
+  function findArrayWithHighestCost(data) {
+    const costBySOWMap = new Map();
+
+    // Calculate the total actual cost for each label
+    data.forEach((item) => {
+      item.costbySOW.forEach((costItem) => {
+        const label = costItem.label;
+        const actualCost = costItem.actualCost;
+
+        if (costBySOWMap.has(label)) {
+          costBySOWMap.set(label, costBySOWMap.get(label) + actualCost);
+        } else {
+          costBySOWMap.set(label, actualCost);
+        }
+      });
+    });
+
+    // Find the label with the highest total cost
+    let maxLabel = null;
+    let maxCost = -1;
+
+    costBySOWMap.forEach((cost, label) => {
+      if (cost > maxCost) {
+        maxCost = cost;
+        maxLabel = label;
+      }
+    });
+
+    // Find the array with the label having the highest total cost
+    const result = data.find((item) =>
+      item.costbySOW.some((costItem) => costItem.label === maxLabel)
+    );
+
+    return result;
+  }
+
   const [rowList, setRowList] = useState([
     {
       rowId: 1,
@@ -1318,16 +1407,46 @@ const Productivity = ({ navigation }) => {
       dispatch(
         getProjectProgressGraph(token, projectsListSimple[0]?.projectId)
       );
-      // dispatch(getProjectBudget(projectClassificationList[0]?.projectId));
-      // setCurrentProjectBudget(projectClassificationList[0]);
-      // setCurrentProjectFinancial(projectClassificationList[0]);
-      // dispatch(
-      //   getFinancialProgressData(projectClassificationList[0]?.projectId)
-      // );
+      dispatch(getProjectBudget(token, projectsListSimple[0]?.projectId));
+      setCurrentProjectBudget(projectsListSimple[0]?.projectId);
+      setCurrentProjectFinancial(projectsListSimple[0]?.projectId);
+      dispatch(
+        getFinancialProgressData(token, projectsListSimple[0]?.projectId)
+      );
       // call(projectClassificationList[0]);
     }
   }, [projectsListSimple?.length]);
 
+  const budgetGraphsData = () => {
+    return projectBudgetData?.graphData?.flatMap((item) => [
+      {
+        value: item.budgetedCost || 0,
+        label: item.label,
+        spacing: 2,
+        labelWidth: 30,
+        labelTextStyle: { color: Colors.Black, fontSize: 10 },
+        frontColor: Colors.Primary,
+      },
+      {
+        value: item.actualCost || 0,
+        frontColor: Colors.Purple,
+      },
+    ]);
+  };
+  const getBudgetMaxValue = () => {
+    let maxCost = 100; // Initialize with negative infinity to ensure any value in the array will be greater
+
+    // if (!projectBudgetData?.graphData) {
+    for (const item of projectBudgetData?.graphData || []) {
+      maxCost = Math.max(maxCost, item.actualCost, item.budgetedCost);
+    }
+    // }
+    let attendanceMax = roundToNearestMultiple(maxCost, 100);
+    return attendanceMax;
+  };
+
+  // console.log("Maximum cost:", getBudgetMaxValue());
+  // console.log("Budget Graphs Data--->>>", getBudgetMaxValue());
   const projectProgressGraphsData = () => {
     return projectProgressData?.graphData?.flatMap((item) => [
       {
@@ -1355,10 +1474,10 @@ const Productivity = ({ navigation }) => {
     }
     return progressMax;
   };
-  console.log(
-    "Project Progress Graphs Data--->>>",
-    getProjectProgressMaxValue()
-  );
+  // console.log(
+  //   "Project Progress Graphs Data--->>>",
+  //   getProjectProgressMaxValue()
+  // );
   const pushNewRow = () => {
     setRowList([
       ...rowList,
@@ -1811,7 +1930,7 @@ const Productivity = ({ navigation }) => {
         "DateTime",
         `${moment(date).format("YYYY-MM-DD")} ${moment(time).format("HH:mm")}`
       );
-      console.log("FORMDATA", formData);
+      // console.log("FORMDATA", formData);
       const response = await dispatch(createFieldNoteEntry(token, formData));
       if (response.status === 200) {
         setOpenFieldNote(false);
@@ -1828,6 +1947,7 @@ const Productivity = ({ navigation }) => {
       }
     }
   };
+
   const renderFilterModal = () => {
     return (
       <Modal
@@ -1836,13 +1956,13 @@ const Productivity = ({ navigation }) => {
         backdropColor={Colors.DarkGray}
         backdropOpacity={0.6}
         backdropTransitionInTiming={200}
-        onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
+        onBackdropPress={() => setOpenFilterModal(!openFilterModal)}
       >
         <View
           style={{
             flex: 1,
             alignItems: "center",
-            marginTop: 30,
+            marginTop: 50,
           }}
         >
           <View
@@ -1899,6 +2019,8 @@ const Productivity = ({ navigation }) => {
                       },
                     ]);
                     setProject(null);
+                    setSelectedProject(null);
+                    setSelectedContractor(null);
                     setContractor(null);
                   }}
                   size={22}
@@ -1919,7 +2041,10 @@ const Productivity = ({ navigation }) => {
               }}
             >
               <View style={{ width: "35%" }}>
-                <View style={styles.insertProject}>
+                <Pressable
+                  onPress={() => setOpenProjectModal(true)}
+                  style={styles.insertProject}
+                >
                   <View style={{ width: "30%" }}>
                     <View style={styles.smallBuildingIcon}>
                       <Building size={15} color={Colors.LightGray} />
@@ -1929,10 +2054,26 @@ const Productivity = ({ navigation }) => {
                     <Text style={styles.selectProjectInsert}>
                       Select Project
                     </Text>
-                    <Dropdown
+                    <Text
+                      style={[
+                        {
+                          fontFamily: "Lexend-Medium",
+                          color: Colors.Black,
+                          fontSize: 10,
+                        },
+                      ]}
+                    >
+                      {selectedProject
+                        ? `${selectedProject?.label?.substring(0, 10)}...`
+                        : projectsListSimple
+                        ? `${projectsListSimple[0]?.name?.substring(0, 10)}...`
+                        : "Select a project"}
+                    </Text>
+                    {/* <Dropdown
                       style={{
                         height: 20,
                         backgroundColor: Colors.White,
+                        marginVertical: 2,
                       }}
                       placeholderStyle={{
                         fontSize: 10,
@@ -1953,7 +2094,15 @@ const Productivity = ({ navigation }) => {
                       containerStyle={{ width: 250 }}
                       iconStyle={styles.iconStyle}
                       data={projectsListSimple?.map((ele) => ({
-                        label: ele?.name,
+                        label: `${ele?.name
+                          ?.split(" ")
+                          ?.slice(0, 1)
+                          .join(" ")}...`,
+                        // label: `${ele?.name.split(" ")[0]} ${
+                        //   ele?.name.split(" ")[1] === undefined
+                        //     ? ""
+                        //     : ele?.name.split(" ")[1]
+                        // }${ele?.name.split(" ").length > 2 ? "..." : ""}`,
                         value: ele?.projectId,
                       }))}
                       maxHeight={400}
@@ -1966,12 +2115,15 @@ const Productivity = ({ navigation }) => {
                         setProject(item.value);
                         dispatch(getLabourContactorAction(token, item.value));
                       }}
-                    />
+                    /> */}
                   </View>
-                </View>
+                </Pressable>
               </View>
               <View style={{ width: "30%" }}>
-                <View style={styles.insertProject}>
+                <Pressable
+                  onPress={() => setOpenContractorModal(true)}
+                  style={styles.insertProject}
+                >
                   <View style={{ width: "33%" }}>
                     <View style={styles.smallBuildingIcon}>
                       <Building size={15} color={Colors.LightGray} />
@@ -1979,10 +2131,24 @@ const Productivity = ({ navigation }) => {
                   </View>
                   <View style={{ width: "60%" }}>
                     <Text style={styles.selectProjectInsert}>Contractor</Text>
-                    <Dropdown
+                    <Text
+                      style={[
+                        {
+                          fontFamily: "Lexend-Medium",
+                          color: Colors.Black,
+                          fontSize: 10,
+                        },
+                      ]}
+                    >
+                      {selectedContractor
+                        ? `${selectedContractor?.label?.substring(0, 8)}...`
+                        : "Name"}
+                    </Text>
+                    {/* <Dropdown
                       style={{
                         height: 20,
                         backgroundColor: Colors.White,
+                        marginVertical: 2,
                       }}
                       placeholderStyle={{
                         fontSize: 10,
@@ -2005,7 +2171,10 @@ const Productivity = ({ navigation }) => {
                       data={
                         labourContractorList?.length
                           ? labourContractorList?.map((ele) => ({
-                              label: ele?.fullName,
+                              label: `${ele?.fullName
+                                ?.split(" ")
+                                ?.slice(0, 1)
+                                .join(" ")}...`,
                               value: ele?.userId,
                             }))
                           : []
@@ -2019,9 +2188,9 @@ const Productivity = ({ navigation }) => {
                         // setOpenFilterModal(false);
                         setContractor(item.value);
                       }}
-                    />
+                    /> */}
                   </View>
-                </View>
+                </Pressable>
               </View>
               <View style={{ width: "35%" }}>
                 <View style={styles.insertProject}>
@@ -2132,6 +2301,195 @@ const Productivity = ({ navigation }) => {
                   </Text>
                 </Pressable>
               </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderProjectSelectModal = () => {
+    return (
+      <Modal
+        isVisible={openProjectModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenProjectModal(!openProjectModal)}
+      >
+        <View
+          style={{
+            width: "100%",
+            backgroundColor: Colors.White,
+            height: "60%",
+            borderRadius: 10,
+            padding: 15,
+          }}
+        >
+          <View style={styles.filterInnerContainer}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Bold",
+                    color: Colors.LightGray,
+                    fontSize: 16,
+                  }}
+                >
+                  Project
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenProjectModal(!openProjectModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+
+            <View style={{ marginVertical: 10 }}>
+              {/* <View style={{ marginVertical: 5 }}>
+                <Text style={styles.contactorText}>By Contractor</Text>
+              </View> */}
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                selectedTextStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={projectsListSimple?.map((ele) => ({
+                  label: ele?.name,
+                  value: ele?.projectId,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Project"}
+                value={project}
+                onChange={(item) => {
+                  setOpenProjectModal(false);
+                  setSelectedProject(item);
+                  setProject(item.value);
+                  dispatch(getLabourContactorAction(token, item.value));
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderContractorSelectModal = () => {
+    return (
+      <Modal
+        isVisible={openContractorModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenContractorModal(!openContractorModal)}
+      >
+        <View
+          style={{
+            width: "100%",
+            backgroundColor: Colors.White,
+            height: "60%",
+            borderRadius: 10,
+            padding: 15,
+          }}
+        >
+          <View style={styles.filterInnerContainer}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Bold",
+                    color: Colors.LightGray,
+                    fontSize: 16,
+                  }}
+                >
+                  Contractor
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenContractorModal(!openContractorModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+
+            <View style={{ marginVertical: 10 }}>
+              {/* <View style={{ marginVertical: 5 }}>
+                <Text style={styles.contactorText}>By Contractor</Text>
+              </View> */}
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                selectedTextStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={
+                  labourContractorList?.length
+                    ? labourContractorList?.map((ele) => ({
+                        label: ele?.fullName,
+                        value: ele?.userId,
+                      }))
+                    : []
+                }
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Contractor"}
+                value={contractor}
+                onChange={(item) => {
+                  setOpenContractorModal(false);
+                  setSelectedContractor(item);
+                  setContractor(item.value);
+                }}
+              />
             </View>
           </View>
         </View>
@@ -2685,7 +3043,7 @@ const Productivity = ({ navigation }) => {
       <View style={styles.graph}>
         <Pressable
           onPress={() => {
-            setOpenSearchModal(true);
+            // setOpenSearchModal(true);
           }}
           style={{
             flexDirection: "row",
@@ -2707,18 +3065,9 @@ const Productivity = ({ navigation }) => {
           </View>
           <View>
             <Text style={styles.selectText}>Select a Project</Text>
-            {/* <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
-            >
-              {selectedProject ? selectedProject?.name : "Select a project"}
-            </Text> */}
             <Dropdown
               style={{
                 height: 20,
-                // backgroundColor: Colors.White,
                 marginTop: 3,
                 width: 120,
                 ...styles.selectText,
@@ -2905,7 +3254,6 @@ const Productivity = ({ navigation }) => {
             100%
           </Text>
         </View>
-
         <View
           style={{
             width: "100%",
@@ -2920,34 +3268,19 @@ const Productivity = ({ navigation }) => {
             paddingHorizontal: 10,
           }}
         >
-          <View>
-            <View
-              style={{
-                width: boqProgress?.result?.totalMeasurement
-                  ? boqProgress?.result?.totalMeasurement
-                  : 0,
-                height: 33,
-                backgroundColor: Colors.Purple,
-                position: "absolute",
-                borderTopLeftRadius: 25,
-                borderBottomLeftRadius: 25,
-                left: 5,
-              }}
-            ></View>
-            <View
-              style={{
-                width: boqProgress?.result?.totalMeasurement
-                  ? boqProgress?.result?.totalMeasurement
-                  : 0,
-                height: 33,
-                backgroundColor: Colors.PrimaryLight,
-                position: "absolute",
-                borderTopLeftRadius: 25,
-                borderBottomLeftRadius: 25,
-                left: 5,
-              }}
-            ></View>
-          </View>
+          <View
+            style={{
+              width: boqProgress?.result?.totalMeasurement
+                ? boqProgress?.result?.totalMeasurement
+                : 0,
+              height: 33,
+              backgroundColor: Colors.Purple,
+              position: "absolute",
+              borderTopLeftRadius: 25,
+              borderBottomLeftRadius: 25,
+              left: 5,
+            }}
+          ></View>
           <Text
             style={{
               fontFamily: "Lexend-Medium",
@@ -3185,47 +3518,189 @@ const Productivity = ({ navigation }) => {
                 height={180}
                 width={260}
               />
-              {/* <BarChart
-                frontColor={"#177AD5"}
-                barWidth={22}
-                data={[
-                  { value: 15 },
-                  { value: 30 },
-                  { value: 26 },
-                  { value: 40 },
-                ]}
-              /> */}
             </View>
-            {/* <View
-            style={{
-              width: "90%",
-              alignItems: "flex-end",
-              marginVertical: 10,
-            }}
-          >
-            <Pressable
-              // onPress={() => navigation.navigate("Attendance")}
+          </View>
+          <View style={styles.scrollGraph}>
+            <View style={styles.graphsHeader}>
+              <Text style={styles.graphHeadingText}>Financial Progress</Text>
+              <View style={styles.graphSubHeader}>
+                <View style={styles.selectProjectButton}>
+                  <View style={styles.buildingIconBg}>
+                    <Building size={15} color={Colors.LightGray} />
+                  </View>
+                  <View>
+                    <Text style={styles.selectText}>Select a Project</Text>
+                    <Dropdown
+                      style={{
+                        height: 20,
+                        marginTop: 3,
+                        width: 200,
+                        ...styles.selectText,
+                      }}
+                      placeholderStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      selectedTextStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      containerStyle={{ width: 250 }}
+                      itemTextStyle={{
+                        fontFamily: "Lexend-Regular",
+                        fontSize: 13,
+                        color: Colors.FormText,
+                      }}
+                      iconStyle={styles.iconStyle}
+                      data={projectsListSimple?.map((ele) => ({
+                        label: ele?.name,
+                        value: ele?.projectId,
+                        ...ele,
+                      }))}
+                      maxHeight={400}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={"Project"}
+                      value={currentProjectFinancial}
+                      onChange={(item) => {
+                        if (item) {
+                          setCurrentProjectFinancial(item);
+                          dispatch(
+                            getFinancialProgressData(token, item?.value)
+                          );
+                        } else {
+                          setCurrentProjectFinancial(
+                            projectsListSimple[0]?.projectId
+                          );
+                          dispatch(
+                            getFinancialProgressData(
+                              token,
+                              projectsListSimple[0]?.projectId
+                            )
+                          );
+                        }
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View style={[styles.barChart, { paddingBottom: 60 }]}>
+              <BarChart
+                height={150}
+                // maxValue={getSkillMaxValue()}
+                barWidth={20}
+                xAxisLabelTextStyle={{ color: "gray" }}
+                yAxisTextStyle={{ color: "gray" }}
+                frontColor={Colors.Black}
+                // rotateLabel
+                noOfSections={getFinancialProgressGraphData()?.length || 5}
+                stackData={getFinancialProgressGraphData()}
+                width={250}
+              />
+            </View>
+          </View>
+          <View style={styles.scrollGraph}>
+            <View style={styles.graphsHeader}>
+              <Text style={styles.graphHeadingText}>
+                Budgeted VS Actual Cost
+              </Text>
+              <View style={styles.graphSubHeader}>
+                <View style={styles.selectProjectButton}>
+                  <View style={styles.buildingIconBg}>
+                    <Building size={15} color={Colors.LightGray} />
+                  </View>
+                  <View>
+                    <Text style={styles.selectText}>Select a Project</Text>
+                    <Dropdown
+                      style={{
+                        height: 20,
+                        marginTop: 3,
+                        width: 200,
+                        ...styles.selectText,
+                      }}
+                      placeholderStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      selectedTextStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      containerStyle={{ width: 250 }}
+                      itemTextStyle={{
+                        fontFamily: "Lexend-Regular",
+                        fontSize: 13,
+                        color: Colors.FormText,
+                      }}
+                      iconStyle={styles.iconStyle}
+                      data={projectsListSimple?.map((ele) => ({
+                        label: ele?.name,
+                        value: ele?.projectId,
+                        ...ele,
+                      }))}
+                      maxHeight={400}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={"Project"}
+                      value={currentProjectBudget}
+                      onChange={(item) => {
+                        if (item) {
+                          setCurrentProjectBudget(item);
+                          dispatch(getProjectBudget(token, item?.value));
+                        } else {
+                          setCurrentProjectBudget(
+                            projectsListSimple[0]?.projectId
+                          );
+                          dispatch(
+                            getProjectBudget(
+                              token,
+                              projectsListSimple[0]?.projectId
+                            )
+                          );
+                        }
+                      }}
+                    />
+                  </View>
+                </View>
+              </View>
+            </View>
+            <View
               style={{
-                backgroundColor: Colors.PurpleOpacity,
-                width: "40%",
-                paddingHorizontal: 5,
-                height: 30,
+                flexDirection: "row",
                 alignItems: "center",
-                justifyContent: "center",
-                borderRadius: 5,
               }}
             >
-              <Text
-                style={{
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Purple,
-                  fontSize: 12,
-                }}
-              >
-                View Attendance
-              </Text>
-            </Pressable>
-          </View> */}
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <DotIcon color={Colors.Primary} size={40} />
+                <Text style={styles.attendanceSubText}>Budget Cost</Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <DotIcon color={Colors.Purple} size={40} />
+                <Text style={styles.attendanceSubText}>Actual Cost</Text>
+              </View>
+            </View>
+            <View style={styles.barChart}>
+              <BarChart
+                data={budgetGraphsData()}
+                barWidth={6}
+                spacing={30}
+                roundedTop
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: "gray" }}
+                xAxisTextStyle={{ color: "gray" }}
+                noOfSections={5}
+                maxValue={getBudgetMaxValue()}
+                frontColor={Colors.Black}
+                height={180}
+                width={260}
+              />
+            </View>
           </View>
           <DatePicker
             modal
@@ -3260,6 +3735,8 @@ const Productivity = ({ navigation }) => {
       {renderFilterModal()}
       {renderUpdateProgressModal()}
       {renderFieldNotes()}
+      {renderProjectSelectModal()}
+      {renderContractorSelectModal()}
       {/* {renderSearchModal()} */}
       {/* {renderActionModal()} */}
       {/* {renderAssignContractorModal()} */}
