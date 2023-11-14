@@ -12,6 +12,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Appearance,
+  TouchableHighlight,
 } from "react-native";
 import Modal from "react-native-modal";
 import Menu from "../../assets/icons/Menu.png";
@@ -94,6 +95,7 @@ import {
 import DatePicker from "react-native-date-picker";
 import { launchImageLibrary } from "react-native-image-picker";
 import { BarChart } from "react-native-gifted-charts";
+import Tooltip from "react-native-walkthrough-tooltip";
 
 LogBox.ignoreAllLogs();
 
@@ -859,7 +861,7 @@ const ProgressRow = (props) => {
               backgroundColor: Colors.White,
             }}
           >
-            {rowItem.scopeOfWorkDetailName || "Scope of work"}
+            {rowItem.scopeOfWorkName || "Scope of work"}
           </Text>
         </View>
         <View
@@ -894,7 +896,7 @@ const ProgressRow = (props) => {
                 marginTop: 5,
               }}
             >
-              {rowItem.scopeOfWorkName || "N/A"}
+              {rowItem.title || "N/A"}
             </Text>
           </View>
         </View>
@@ -972,7 +974,7 @@ const ProgressRow = (props) => {
               marginTop: 5,
             }}
           >
-            {rowItem.remainingQuantity || "N/A"}
+            {rowItem.remainingQuantity || "0"}
           </Text>
         </View>
         <View
@@ -1128,15 +1130,19 @@ const ProgressRow = (props) => {
         }}
       >
         <TouchableOpacity
-          onPress={() => addProgressEntery(rowItem.boqId, progressValue)}
+          onPress={() => {
+            addProgressEntery(rowItem.boqId, progressValue);
+          }}
           style={{
             width: "48%",
             height: 40,
             alignItems: "center",
             justifyContent: "center",
-            backgroundColor: Colors.Purple,
+            backgroundColor:
+              rowItem?.remainingQuantity === 0 ? Colors.Gray : Colors.Purple,
             borderRadius: 4,
           }}
+          disabled={rowItem?.remainingQuantity === 0}
         >
           <Text
             style={{
@@ -1189,7 +1195,7 @@ const Row = (props) => {
 };
 
 const Productivity = ({ navigation }) => {
-  const [openSearchModal, setOpenSearchModal] = useState(false);
+  const [openMainProjectModal, setOpenMainProject] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
@@ -1230,6 +1236,8 @@ const Productivity = ({ navigation }) => {
     useState(null);
   const [currentProjectBudget, setCurrentProjectBudget] = useState(null);
 
+  const [purpleTooltip, setPurpleTooltip] = useState(false);
+  const [greenTooltip, setGreenTooltip] = useState(false);
   // const projectsList = useSelector(projectsListSimpleReducer);
   const { selectedNote } = useSelector(fieldNoteReducer);
   // const labourContractorList = useSelector(labourContractorReducer);
@@ -1255,98 +1263,7 @@ const Productivity = ({ navigation }) => {
   const token = useSelector(authToken);
   const labourContractorList = useSelector(labourContractorReducer);
   const randomId = Math.floor(100000 + Math.random() * 900000);
-  // console.log("BOQ Progress--->>>", projectBudgetData);
-
-  const getFinancialProgressGraphData = () => {
-    const resultArray = [];
-
-    financialGraphData?.forEach((item) => {
-      const month = item.month;
-      const labelToCostMap = {};
-
-      item.costbySOW.forEach((costItem) => {
-        const label = costItem.label;
-        const actualCost = costItem.actualCost;
-
-        if (!labelToCostMap[label]) {
-          labelToCostMap[label] = actualCost;
-        } else {
-          labelToCostMap[label] += actualCost;
-        }
-      });
-
-      const stacks = [];
-
-      for (const label in labelToCostMap) {
-        stacks.push({
-          value: labelToCostMap[label],
-          color: getColorForLabel(label),
-        });
-      }
-
-      resultArray.push({ stacks, label: month });
-    });
-    return resultArray;
-  };
-
-  function getColorForLabel(label) {
-    // Define your color logic based on the label here
-    // You can use a switch or other logic to assign colors
-    // For simplicity, I'm using some example colors
-    const colorMap = {
-      Earthwork: "orange",
-      "Civil Works": "#4ABFF4",
-      Finishes: "green",
-      "Electrical Works - LT": "red",
-      "Electrical Works - HT": "yellow",
-      "Plumbing Works": "blue",
-      "HVAC Works": "pink",
-      Glazing: "purple",
-      "Fixed Millworks": "brown",
-      "Swimming Pools & Water Bodies": "gray",
-      "Mechanical Works": "black",
-      Miscellaneous: "cyan",
-      "General & NMR": "magenta",
-    };
-    return colorMap[label] || "gray"; // Default to gray if no color is defined
-  }
-
-  // Function to find the array with the highest actual cost
-  function findArrayWithHighestCost(data) {
-    const costBySOWMap = new Map();
-
-    // Calculate the total actual cost for each label
-    data.forEach((item) => {
-      item.costbySOW.forEach((costItem) => {
-        const label = costItem.label;
-        const actualCost = costItem.actualCost;
-
-        if (costBySOWMap.has(label)) {
-          costBySOWMap.set(label, costBySOWMap.get(label) + actualCost);
-        } else {
-          costBySOWMap.set(label, actualCost);
-        }
-      });
-    });
-
-    // Find the label with the highest total cost
-    let maxLabel = null;
-    let maxCost = -1;
-
-    costBySOWMap.forEach((cost, label) => {
-      if (cost > maxCost) {
-        maxCost = cost;
-        maxLabel = label;
-      }
-    });
-
-    // Find the array with the label having the highest total cost
-    const result = data.find((item) =>
-      item.costbySOW.some((costItem) => costItem.label === maxLabel)
-    );
-
-    return result;
-  }
+  // console.log("BOQ Progress--->>>", financialGraphData);
 
   const [rowList, setRowList] = useState([
     {
@@ -1388,8 +1305,8 @@ const Productivity = ({ navigation }) => {
   );
 
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
+    // setFilteredDataSource(projectsListSimple);
+    // setMasterDataSource(projectsListSimple);
     dispatch(getBOQList(token, projectsListSimple[0]?.projectId));
   }, [projectsListSimple]);
 
@@ -1398,6 +1315,7 @@ const Productivity = ({ navigation }) => {
       setCurrentProjectProgress(projectsListSimple[0]?.projectId);
       setCurrentProjectDetail(projectsListSimple[0]);
       setCurrentProject(projectsListSimple[0]?.projectId);
+      setProject(projectsListSimple[0]?.projectId);
       setCurrentProjectBOQ(projectsListSimple[0]?.projectId);
       dispatch(getBOQProgress(token, projectsListSimple[0]?.projectId));
       // dispatch(getContractors(projectClassificationList[0]?.projectId));
@@ -1417,6 +1335,77 @@ const Productivity = ({ navigation }) => {
     }
   }, [projectsListSimple?.length]);
 
+  const getFinancialProgressGraphData = () => {
+    let resultArray = [];
+    if (financialGraphData.length) {
+      financialGraphData?.forEach((item) => {
+        const month = item.month;
+        const labelToCostMap = {};
+        // console.log("Item--->>>", item);
+        if (Array.isArray(item?.costbySOW)) {
+          if (item?.costbySOW?.length) {
+            item?.costbySOW?.forEach((costItem) => {
+              const label = costItem?.label;
+              const actualCost = costItem?.actualCost;
+              console.log(actualCost);
+              if (!labelToCostMap[label]) {
+                labelToCostMap[label] = actualCost;
+              } else {
+                labelToCostMap[label] += actualCost;
+              }
+            });
+          }
+        }
+
+        const stacks = [];
+
+        for (const label in labelToCostMap) {
+          // console.log("stack", labelToCostMap[label]);
+          stacks.push({
+            value: labelToCostMap[label],
+            color: getColorForLabel(label),
+          });
+        }
+
+        resultArray.push({ stacks, label: month });
+      });
+    }
+    //   const arr = resultArray.map((item) => {
+    //     item.stacks.length === 0&& (
+    //   item.stacks.push({value: 0, color: "gray"
+    // })));
+    const arr = resultArray?.map((item) => {
+      if (item?.stacks?.length === 0) {
+        item?.stacks?.push({ value: 0, color: "white" });
+      }
+      return item;
+    });
+
+    return arr;
+  };
+
+  function getColorForLabel(label) {
+    // Define your color logic based on the label here
+    // You can use a switch or other logic to assign colors
+    // For simplicity, I'm using some example colors
+    const colorMap = {
+      Earthwork: "orange",
+      "Civil Works": "#4ABFF4",
+      Finishes: "green",
+      "Electrical Works - LT": "red",
+      "Electrical Works - HT": "yellow",
+      "Plumbing Works": "blue",
+      "HVAC Works": "pink",
+      Glazing: "purple",
+      "Fixed Millworks": "brown",
+      "Swimming Pools & Water Bodies": "gray",
+      "Mechanical Works": "black",
+      Miscellaneous: "cyan",
+      "General & NMR": "magenta",
+    };
+    return colorMap[label] || "gray"; // Default to gray if no color is defined
+  }
+  // console.log("Financial Graph Data--->>>", getFinancialProgressGraphData());
   const budgetGraphsData = () => {
     return projectBudgetData?.graphData?.flatMap((item) => [
       {
@@ -1684,24 +1673,6 @@ const Productivity = ({ navigation }) => {
         getBOQList(token, currentProjectProgress, LabourContractorProgress)
       );
       if (resp?.status === 200) {
-        // let alteredData = await Promise.all(
-        //   resp.data.map(async (i) => {
-        //     let respData = await dispatch(
-        //       getScopeListDetail(token, i?.scopeOfWorkId)
-        //     );
-        //     if (respData?.data?.length > 0) {
-        //       const updatedItem = respData?.data.find((item) => {
-        //         return item.scopeOfWorkDetailId === i.scopeOfWorkDetailId;
-        //       });
-        //       if (updatedItem) {
-        //         return { ...i, scopeDetailName: updatedItem.name };
-        //       }
-        //     }
-        //     return i;
-        //   })
-        // );
-        // setListForProgressModal(alteredData);
-        // toast.success("Progress marked successfully!");
         Toast.show({
           type: "info",
           text1: "Success",
@@ -2144,51 +2115,6 @@ const Productivity = ({ navigation }) => {
                         ? `${selectedContractor?.label?.substring(0, 8)}...`
                         : "Name"}
                     </Text>
-                    {/* <Dropdown
-                      style={{
-                        height: 20,
-                        backgroundColor: Colors.White,
-                        marginVertical: 2,
-                      }}
-                      placeholderStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      itemContainerStyle={{ width: 180 }}
-                      containerStyle={{ width: 180 }}
-                      itemTextStyle={{
-                        fontFamily: "Lexend-Regular",
-                        fontSize: 13,
-                        color: Colors.FormText,
-                      }}
-                      iconStyle={styles.iconStyle}
-                      data={
-                        labourContractorList?.length
-                          ? labourContractorList?.map((ele) => ({
-                              label: `${ele?.fullName
-                                ?.split(" ")
-                                ?.slice(0, 1)
-                                .join(" ")}...`,
-                              value: ele?.userId,
-                            }))
-                          : []
-                      }
-                      maxHeight={450}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"Name"}
-                      value={contractor}
-                      onChange={(item) => {
-                        // setOpenFilterModal(false);
-                        setContractor(item.value);
-                      }}
-                    /> */}
                   </View>
                 </Pressable>
               </View>
@@ -2400,6 +2326,108 @@ const Productivity = ({ navigation }) => {
       </Modal>
     );
   };
+  const renderMainProjectSelectModal = () => {
+    return (
+      <Modal
+        isVisible={openMainProjectModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenMainProject(!openMainProjectModal)}
+      >
+        <View
+          style={{
+            width: "100%",
+            backgroundColor: Colors.White,
+            height: "60%",
+            borderRadius: 10,
+            padding: 15,
+          }}
+        >
+          <View style={styles.filterInnerContainer}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Bold",
+                    color: Colors.LightGray,
+                    fontSize: 16,
+                  }}
+                >
+                  Project
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenProjectModal(!openProjectModal);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+
+            <View style={{ marginVertical: 10 }}>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                selectedTextStyle={{
+                  fontSize: 14,
+                  fontFamily: "Lexend-Regular",
+                  color: Colors.Black,
+                }}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={projectsListSimple?.map((ele) => ({
+                  label: ele?.name,
+                  value: ele?.projectId,
+                  ...ele,
+                }))}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Project"}
+                value={currentProject}
+                onChange={(item) => {
+                  setOpenMainProject(false);
+                  if (item) {
+                    setCurrentProject(item.value);
+                    setCurrentProjectDetail(item);
+                    dispatch(getBOQProgress(token, item.value));
+                    dispatch(getBOQMetrics(token, item.value));
+                  } else {
+                    dispatch(
+                      getBOQProgress(token, projectsListSimple[0]?.projectId)
+                    );
+                    setCurrentProjectDetail(projectsListSimple[0]);
+                    setCurrentProject(projectsListSimple[0]?.projectId);
+                    dispatch(getBOQMetrics(projectsListSimple[0]?.projectId));
+                  }
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   const renderContractorSelectModal = () => {
     return (
       <Modal
@@ -2625,7 +2653,7 @@ const Productivity = ({ navigation }) => {
                     labelField="label"
                     valueField="value"
                     placeholder={"Project"}
-                    value={project ? project : projectsListSimple[0]?.name}
+                    value={project}
                     onChange={(item) => {
                       // setOpenFilterModal(false);
                       setProject(item.value);
@@ -2699,7 +2727,7 @@ const Productivity = ({ navigation }) => {
       </Modal>
     );
   };
-
+  // console.log("BOQ--->>>", boqProgress);
   const renderFieldNotes = () => {
     return (
       <Modal
@@ -3043,7 +3071,7 @@ const Productivity = ({ navigation }) => {
       <View style={styles.graph}>
         <Pressable
           onPress={() => {
-            // setOpenSearchModal(true);
+            setOpenMainProject(true);
           }}
           style={{
             flexDirection: "row",
@@ -3064,58 +3092,21 @@ const Productivity = ({ navigation }) => {
             <Building size={20} color={Colors.LightGray} />
           </View>
           <View>
-            <Text style={styles.selectText}>Select a Project</Text>
-            <Dropdown
+            <Text style={[styles.selectText, { paddingLeft: 7 }]}>
+              Select a Project
+            </Text>
+            <Text
               style={{
-                height: 20,
-                marginTop: 3,
-                width: 120,
-                ...styles.selectText,
-              }}
-              placeholderStyle={{
                 fontSize: 10,
                 fontFamily: "Lexend-Regular",
                 color: Colors.Black,
+                paddingLeft: 7,
               }}
-              selectedTextStyle={{
-                fontSize: 10,
-                fontFamily: "Lexend-Regular",
-                color: Colors.Black,
-              }}
-              containerStyle={{ width: 250 }}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              data={projectsListSimple?.map((ele) => ({
-                label: ele?.name,
-                value: ele?.projectId,
-                ...ele,
-              }))}
-              maxHeight={400}
-              labelField="label"
-              valueField="value"
-              placeholder={"Project"}
-              value={currentProject}
-              onChange={(item) => {
-                if (item) {
-                  setCurrentProject(item.value);
-                  console.log("ITEM", item);
-                  setCurrentProjectDetail(item);
-                  dispatch(getBOQProgress(token, item.value));
-                  dispatch(getBOQMetrics(token, item.value));
-                } else {
-                  dispatch(
-                    getBOQProgress(token, projectsListSimple[0]?.projectId)
-                  );
-                  setCurrentProjectDetail(projectsListSimple[0]);
-                  setCurrentProject(projectsListSimple[0]?.projectId);
-                  dispatch(getBOQMetrics(projectsListSimple[0]?.projectId));
-                }
-              }}
-            />
+            >
+              {currentProjectDetail
+                ? currentProjectDetail?.name
+                : "Select a Project"}
+            </Text>
           </View>
         </Pressable>
         <View style={{ flexDirection: "row" }}>
@@ -3211,7 +3202,7 @@ const Productivity = ({ navigation }) => {
                     (boqProgress?.result?.completedMeasurement /
                       boqProgress?.result?.totalMeasurement) *
                     100
-                  ).toFixed(1)}%`}
+                  ).toFixed(0)}%`}
             </Text>
             <Text
               style={{
@@ -3254,7 +3245,11 @@ const Productivity = ({ navigation }) => {
             100%
           </Text>
         </View>
-        <View
+        <Pressable
+          onPress={() => {
+            setPurpleTooltip(false);
+            setGreenTooltip(false);
+          }}
           style={{
             width: "100%",
             height: 40,
@@ -3268,10 +3263,17 @@ const Productivity = ({ navigation }) => {
             paddingHorizontal: 10,
           }}
         >
-          <View
+          <Pressable
+            onPress={() => {
+              setPurpleTooltip(!purpleTooltip);
+              setGreenTooltip(false);
+            }}
             style={{
-              width: boqProgress?.result?.totalMeasurement
-                ? boqProgress?.result?.totalMeasurement
+              width: boqProgress?.result?.completedMeasurement
+                ? (boqProgress?.result?.completedMeasurement /
+                    boqProgress?.result?.totalMeasurement) *
+                    100 +
+                  "%"
                 : 0,
               height: 33,
               backgroundColor: Colors.Purple,
@@ -3280,7 +3282,27 @@ const Productivity = ({ navigation }) => {
               borderBottomLeftRadius: 25,
               left: 5,
             }}
-          ></View>
+          ></Pressable>
+          <Pressable
+            onPress={() => {
+              setGreenTooltip(!greenTooltip);
+              setPurpleTooltip(false);
+            }}
+            style={{
+              width: boqProgress?.result?.todaysMeasurement
+                ? (boqProgress?.result?.todaysMeasurement /
+                    boqProgress?.result?.totalMeasurement) *
+                    100 +
+                  "%"
+                : 0,
+              height: 25,
+              position: "absolute",
+              backgroundColor: Colors.PrimaryLight,
+              borderTopLeftRadius: 25,
+              borderBottomLeftRadius: 25,
+              left: 7,
+            }}
+          ></Pressable>
           <Text
             style={{
               fontFamily: "Lexend-Medium",
@@ -3300,6 +3322,162 @@ const Productivity = ({ navigation }) => {
             {boqProgress?.result?.totalMeasurement
               ? boqProgress?.result?.totalMeasurement
               : "-"}
+          </Text>
+        </Pressable>
+        {purpleTooltip && (
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              position: "absolute",
+              bottom: 70,
+              left: 50,
+            }}
+          >
+            <View
+              style={{
+                width: 90,
+                height: 40,
+                backgroundColor: Colors.PurpleOpacity,
+                borderRadius: 5,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.Black,
+                  fontFamily: "Lexend-SemiBold",
+                  fontSize: 10,
+                }}
+              >{`${
+                (
+                  (boqProgress?.result?.completedMeasurement /
+                    boqProgress?.result?.totalMeasurement) *
+                  100
+                ).toFixed(0) + "%"
+              } | ${boqProgress?.result?.completedMeasurement}`}</Text>
+              <Text
+                style={{
+                  color: Colors.Black,
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 9,
+                }}
+              >
+                Total Work Done
+              </Text>
+            </View>
+            <View
+              style={{
+                borderLeftColor: "transparent",
+                borderRightColor: "transparent",
+                width: 0,
+                height: 0,
+                backgroundColor: "transparent",
+                borderStyle: "solid",
+                borderLeftWidth: 10,
+                borderRightWidth: 10,
+                borderBottomWidth: 0,
+                borderTopWidth: 15,
+                borderTopColor: Colors.PurpleOpacity,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            ></View>
+          </View>
+        )}
+        {greenTooltip && (
+          <View
+            style={{
+              justifyContent: "center",
+              alignItems: "center",
+              position: "absolute",
+              bottom: 70,
+              left: 10,
+            }}
+          >
+            <View
+              style={{
+                width: 90,
+                height: 40,
+                backgroundColor: Colors.PrimaryLight,
+                borderRadius: 5,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Text
+                style={{
+                  color: Colors.Black,
+                  fontFamily: "Lexend-SemiBold",
+                  fontSize: 10,
+                }}
+              >{`${
+                (
+                  (boqProgress?.result?.todaysMeasurement /
+                    boqProgress?.result?.totalMeasurement) *
+                  100
+                ).toFixed(0) + "%"
+              } | ${boqProgress?.result?.todaysMeasurement}`}</Text>
+              <Text
+                style={{
+                  color: Colors.Black,
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 9,
+                }}
+              >
+                Today's Update
+              </Text>
+            </View>
+            <View
+              style={{
+                borderLeftColor: "transparent",
+                borderRightColor: "transparent",
+                width: 0,
+                height: 0,
+                backgroundColor: "transparent",
+                borderStyle: "solid",
+                borderLeftWidth: 10,
+                borderRightWidth: 10,
+                borderBottomWidth: 0,
+                borderTopWidth: 15,
+                borderTopColor: Colors.PrimaryLight,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            ></View>
+          </View>
+        )}
+        <View
+          style={{
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+            justifyContent: "space-between",
+            marginBottom: 5,
+          }}
+        >
+          <Text
+            style={{
+              color: Colors.Black,
+              fontSize: 12,
+              fontFamily: "Lexend-Medium",
+            }}
+          >
+            {boqProgress?.result?.startDate
+              ? moment(boqProgress?.result?.startDate).format("DD MMM YYYY")
+              : ""}
+          </Text>
+          <Text
+            style={{
+              color: Colors.Black,
+              fontSize: 12,
+              fontFamily: "Lexend-Medium",
+            }}
+          >
+            {boqProgress?.result?.endDate
+              ? moment(boqProgress?.result?.endDate).format("DD MMM YYYY")
+              : ""}
           </Text>
         </View>
       </View>
@@ -3587,20 +3765,74 @@ const Productivity = ({ navigation }) => {
                 </View>
               </View>
             </View>
-            <View style={[styles.barChart, { paddingBottom: 60 }]}>
+            <ScrollView
+              horizontal={true}
+              nestedScrollEnabled={true}
+              contentContainerStyle={[
+                styles.barChart,
+                {
+                  paddingBottom: 60,
+                  marginTop: 40,
+                  width: 560,
+                },
+              ]}
+            >
               <BarChart
-                height={150}
-                // maxValue={getSkillMaxValue()}
+                height={180}
                 barWidth={20}
                 xAxisLabelTextStyle={{ color: "gray" }}
                 yAxisTextStyle={{ color: "gray" }}
                 frontColor={Colors.Black}
-                // rotateLabel
-                noOfSections={getFinancialProgressGraphData()?.length || 5}
+                noOfSections={4}
+                maxValue={2000}
                 stackData={getFinancialProgressGraphData()}
-                width={250}
+                renderTooltip={(e) => {
+                  // console.log("TOOLTIP", e);
+                  return (
+                    <View>
+                      {e.stacks.map((item) => (
+                        <Text
+                          style={{
+                            color: Colors.Black,
+                            fontFamily: "Lexend-Regular",
+                            fontSize: 12,
+                            marginVertical: 5,
+                            marginLeft: 10,
+                          }}
+                        >
+                          {item.value}
+                        </Text>
+                      ))}
+                    </View>
+                  );
+                }}
+                // stackData={[
+                //   {
+                //     stacks: [
+                //       { value: 10, color: "orange" },
+                //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
+                //     ],
+                //     label: "Jan",
+                //   },
+                //   {
+                //     stacks: [
+                //       { value: 10, color: "#4ABFF4" },
+                //       { value: 11, color: "orange", marginBottom: 2 },
+                //       { value: 15, color: "#28B2B3", marginBottom: 2 },
+                //     ],
+                //     label: "Mar",
+                //   },
+                //   {
+                //     stacks: [
+                //       { value: 14, color: "orange" },
+                //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
+                //     ],
+                //     label: "Feb",
+                //   },
+                // ]}
+                width={800}
               />
-            </View>
+            </ScrollView>
           </View>
           <View style={styles.scrollGraph}>
             <View style={styles.graphsHeader}>
@@ -3698,6 +3930,21 @@ const Productivity = ({ navigation }) => {
                 maxValue={getBudgetMaxValue()}
                 frontColor={Colors.Black}
                 height={180}
+                renderTooltip={(e) => {
+                  return (
+                    <View>
+                      <Text
+                        style={{
+                          color: Colors.Black,
+                          fontFamily: "Lexend-Regular",
+                          fontSize: 12,
+                        }}
+                      >
+                        {e.value}
+                      </Text>
+                    </View>
+                  );
+                }}
                 width={260}
               />
             </View>
@@ -3737,6 +3984,7 @@ const Productivity = ({ navigation }) => {
       {renderFieldNotes()}
       {renderProjectSelectModal()}
       {renderContractorSelectModal()}
+      {renderMainProjectSelectModal()}
       {/* {renderSearchModal()} */}
       {/* {renderActionModal()} */}
       {/* {renderAssignContractorModal()} */}

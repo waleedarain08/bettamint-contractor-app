@@ -381,12 +381,17 @@ export const addProgress = (token, data) => async (dispatch) => {
 };
 
 export const getBOQListGC =
-  (projectId = 0, contractorId = 0, pageNumber = 1, pageSize = 50) =>
+  (token, projectId = 0, contractorId = 0, pageNumber = 1, pageSize = 50) =>
   async (dispatch) => {
     dispatch(gettingBoqListGC());
     // if (projectId) {
     const response = await axios.get(
-      `${base_url}/dashboard/Productivity/getboqlist?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}`
+      `${base_url}/dashboard/Productivity/getboqprogresslist?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
     );
     if (response?.status === 200) {
       dispatch(gettingBoqListGCSuccess(response?.data));
@@ -520,5 +525,29 @@ export const getFinancialProgressData =
     }
     return response;
   };
+
+export const verifyBOQProgress = (token, data) => async (dispatch) => {
+  dispatch(gettingFinancialGraphData());
+  const response = await axios.put(
+    `${base_url}/dashboard/Productivity/verifyprogress`,
+    data,
+    {
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (response?.status === 200) {
+    // dispatch(gettingFinancialGraphDataSuccess(response?.data.result));
+  } else {
+    dispatch(
+      gettingFinancialGraphDataFailure(
+        "Something went wrong while getting BOQ Progress!"
+      )
+    );
+  }
+  return response;
+};
 
 export default productivitySlice.reducer;

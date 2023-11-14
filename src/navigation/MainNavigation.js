@@ -99,6 +99,7 @@ import {
   fieldNoteReducer,
 } from "../redux/slices/fieldNoteSlice";
 import Productivity from "../screens/Productivity/Productivity";
+import GCProductivity from "../screens/Productivity/GCProductivity";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -1522,6 +1523,7 @@ const FieldNotesNavigator = ({ navigation }) => {
 };
 
 const ProductivityNavigator = ({ navigation }) => {
+  const userInfo = useSelector(userData);
   return (
     <ProductivityStack.Navigator
       screenOptions={{
@@ -1535,7 +1537,11 @@ const ProductivityNavigator = ({ navigation }) => {
     >
       <ProductivityStack.Screen
         name="ProductivityStack"
-        component={Productivity}
+        component={
+          userInfo?.user?.leadTypeId === "Contractor"
+            ? GCProductivity
+            : Productivity
+        }
         options={{
           headerBackVisible: false,
           headerTitle: () => (
@@ -1606,6 +1612,7 @@ function MainNavigation({ navigation }) {
     },
   };
   const userInfo = useSelector(userData);
+  // console.log("UserInfo--->>>", userInfo);
   // const navigation = useNavigation();
   const roles = userInfo?.user?.role?.roleFeatureSets;
 
