@@ -66,6 +66,18 @@ const workerSlice = createSlice({
       state.loading = false;
       state.selectedWorker = action.payload;
     },
+    markingWorker(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    markingWorkerSuccess(state, action) {
+      state.loading = false;
+      state.error = null;
+    },
+    markingWorkerFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 
@@ -80,6 +92,9 @@ const {
   getSkillsSuccess,
   getSkillsFailure,
   selectedWorkerSuccess,
+  markingWorker,
+  markingWorkerSuccess,
+  markingWorkerFailure,
 } = workerSlice.actions;
 
 export const workersListReducer = (state) => state?.workers?.workersList;
@@ -266,6 +281,32 @@ export const getSkillsAction = (token) => async (dispatch) => {
       });
   } catch (error) {
     dispatch(getSkillsFailure());
+  }
+};
+
+export const markWorkerJob = (token, data) => async (dispatch) => {
+  dispatch(markingWorker());
+  try {
+    const response = await axios.post(
+      `${base_url}/dashboard/Job/delist`,
+      data,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    console.log("Respinse", response);
+    if (response.status === 200) {
+      dispatch(markingWorkerSuccess());
+    }
+    return response;
+  } catch (e) {
+    console.log("worker error", e.response?.data?.message)
+    dispatch(
+      markingWorkerFailure("Something went wrong while marking worker job!")
+    );
   }
 };
 export default workerSlice.reducer;

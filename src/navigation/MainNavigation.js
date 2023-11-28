@@ -1537,11 +1537,7 @@ const ProductivityNavigator = ({ navigation }) => {
     >
       <ProductivityStack.Screen
         name="ProductivityStack"
-        component={
-          userInfo?.user?.leadTypeId === "Contractor"
-            ? GCProductivity
-            : Productivity
-        }
+        component={Productivity}
         options={{
           headerBackVisible: false,
           headerTitle: () => (
@@ -1561,6 +1557,60 @@ const ProductivityNavigator = ({ navigation }) => {
               <MenuIcon size={30} color={Colors.White} />
             </Pressable>
           ),
+          headerRight: () => (
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            >
+              <Pressable
+                style={{ marginLeft: 10 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                // onPress={() => navigation.navigate("Profile")}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
+      <ProductivityStack.Screen
+        name="VerifyProgress"
+        component={GCProductivity}
+        options={{
+          // headerBackVisible: false,
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Verify Progress
+            </Text>
+          ),
+          headerTitleAlign: "left",
+          // headerLeft: () => (
+          //   <Pressable onPress={() => navigation.goBack()}>
+          //     <MenuIcon size={30} color={Colors.White} />
+          //   </Pressable>
+          // ),
           headerRight: () => (
             <View
               style={{ flexDirection: "row", justifyContent: "space-evenly" }}

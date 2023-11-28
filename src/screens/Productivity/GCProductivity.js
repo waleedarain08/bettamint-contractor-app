@@ -104,7 +104,6 @@ const GCProductivity = ({ navigation }) => {
   const labourContractorList = useSelector(labourContractorReducer);
   const { scopeList, boqListGC, loading } = useSelector(productivityReducer);
   const [scopeFilter, setScopeFilter] = useState([]);
-  // console.log("boqListGC", boqListGC);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -290,7 +289,7 @@ const GCProductivity = ({ navigation }) => {
                     // marginBottom: 10,
                   }}
                 >
-                  Update
+                  Approve Quality
                 </Text>
               </View>
               <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
@@ -330,7 +329,7 @@ const GCProductivity = ({ navigation }) => {
                         marginRight: 10,
                       }}
                     >
-                      Work Done
+                      Approved
                     </Text>
                     <Tick size={25} color={Colors.Primary} />
                   </View>
@@ -390,7 +389,7 @@ const GCProductivity = ({ navigation }) => {
                     }}
                     style={{
                       width: "100%",
-                      backgroundColor: Colors.Purple,
+                      backgroundColor: "#81B733",
                       height: 40,
                       borderRadius: 5,
                       alignItems: "center",
@@ -404,7 +403,7 @@ const GCProductivity = ({ navigation }) => {
                         fontSize: 14,
                       }}
                     >
-                      Work Done
+                      Approve
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -723,6 +722,9 @@ const GCProductivity = ({ navigation }) => {
           paddingVertical: 4,
         }}
       >
+        <View style={{ width: "7%" }}>
+          <Text style={styles.flatListText}>{item?.boqId || "0"}</Text>
+        </View>
         <View
           style={{
             width: "17%",
@@ -761,22 +763,17 @@ const GCProductivity = ({ navigation }) => {
         <View style={{ width: "10%" }}>
           <Text style={styles.flatListText}>{item?.quantity || "N/A"}</Text>
         </View>
-        {/* <View style={{ width: "15%" }}>
-          <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
-        </View> */}
-        <View style={{ width: "10%" }}>
-          <Text style={styles.flatListText}>{item?.unitName || "N/A"}</Text>
-        </View>
-        <View style={{ width: "10%" }}>
-          <Text numberOfLines={1} style={styles.flatListText}>
-            {item?.amount || "N/A"}
-          </Text>
-        </View>
         <View style={{ width: "15%" }}>
           <Text numberOfLines={1} style={styles.flatListText}>
             {item?.description || "N/A"}
           </Text>
         </View>
+        {/* <View style={{ width: "15%" }}>
+          <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
+        </View> */}
+        {/* <View style={{ width: "10%" }}>
+          <Text style={styles.flatListText}>{item?.unitName || "N/A"}</Text>
+        </View> */}
         <View style={{ width: "14%" }}>
           <Pressable
             onPress={() => {
@@ -786,7 +783,8 @@ const GCProductivity = ({ navigation }) => {
             }}
             style={{
               width: "100%",
-              backgroundColor: Colors.PurpleOpacity,
+              backgroundColor:
+                item?.status === "Approved" ? Colors.Gray : "#81B733",
               height: 20,
               borderRadius: 3,
               alignItems: "center",
@@ -799,11 +797,105 @@ const GCProductivity = ({ navigation }) => {
                 styles.flatListText,
                 {
                   fontSize: 9,
-                  color: Colors.Purple,
+                  color: Colors.White,
                 },
               ]}
             >
-              {"Update"}
+              {"Approve"}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setOpenActionModal(true);
+              setCurrBoq(item);
+              setRemarks(item?.remarks);
+            }}
+            style={{
+              width: "100%",
+              backgroundColor: "#FF6247",
+              height: 20,
+              borderRadius: 3,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: item?.action === null ? 0.5 : 0,
+              marginTop: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.flatListText,
+                {
+                  fontSize: 9,
+                  color: Colors.White,
+                },
+              ]}
+            >
+              {"Reject"}
+            </Text>
+          </Pressable>
+        </View>
+        {/* <View style={{ width: "10%" }}>
+          <Text numberOfLines={1} style={styles.flatListText}>
+            {item?.amount || "N/A"}
+          </Text>
+        </View> */}
+
+        <View style={{ width: "14%" }}>
+          <Pressable
+            onPress={() => {
+              // setOpenActionModal(true);
+              // setCurrBoq(item);
+              // setRemarks(item?.remarks);
+            }}
+            style={{
+              width: "100%",
+              backgroundColor: "#81B733",
+              height: 20,
+              borderRadius: 3,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: item?.action === null ? 0.5 : 0,
+            }}
+          >
+            <Text
+              style={[
+                styles.flatListText,
+                {
+                  fontSize: 9,
+                  color: Colors.White,
+                },
+              ]}
+            >
+              {"Approve"}
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setOpenActionModal(true);
+              setCurrBoq(item);
+              setRemarks(item?.remarks);
+            }}
+            style={{
+              width: "100%",
+              backgroundColor: "#FF6247",
+              height: 20,
+              borderRadius: 3,
+              alignItems: "center",
+              justifyContent: "center",
+              borderWidth: item?.action === null ? 0.5 : 0,
+              marginTop: 5,
+            }}
+          >
+            <Text
+              style={[
+                styles.flatListText,
+                {
+                  fontSize: 9,
+                  color: Colors.White,
+                },
+              ]}
+            >
+              {"Reject"}
             </Text>
           </Pressable>
         </View>
@@ -826,25 +918,31 @@ const GCProductivity = ({ navigation }) => {
             borderTopRightRadius: 25,
           }}
         >
+          <View style={{ width: "7%" }}>
+            <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
+              BOQ ID
+            </Text>
+          </View>
           <View style={{ width: "17%" }}>
             <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
-              SOW Detail
+              SOW/Title
             </Text>
           </View>
           <View style={{ width: "10%" }}>
             <Text style={styles.flatListTextHeader}>Measurement</Text>
           </View>
-          <View style={{ width: "10%" }}>
-            <Text style={styles.flatListTextHeader}>Unit</Text>
-          </View>
-          <View style={{ width: "10%" }}>
-            <Text style={styles.flatListTextHeader}>Amount</Text>
-          </View>
           <View style={{ width: "15%" }}>
             <Text style={styles.flatListTextHeader}>Description</Text>
           </View>
+          {/* <View style={{ width: "10%" }}>
+            <Text style={styles.flatListTextHeader}>Amount</Text>
+          </View> */}
+
           <View style={{ width: "14%" }}>
-            <Text style={styles.flatListTextHeader}>Action</Text>
+            <Text style={styles.flatListTextHeader}>Approve Quality</Text>
+          </View>
+          <View style={{ width: "14%" }}>
+            <Text style={styles.flatListTextHeader}>Approve Measurement</Text>
           </View>
         </View>
       </View>
@@ -956,8 +1054,7 @@ const GCProductivity = ({ navigation }) => {
         }}
       >
         {!boqListGC?.result ||
-        boqListGC?.result?.length === 0 &&
-        scopeFilter.length === 0 ? (
+        (boqListGC?.result?.length === 0 && scopeFilter.length === 0) ? (
           <ScrollView
             refreshControl={
               <RefreshControl
@@ -1084,8 +1181,9 @@ const GCProductivity = ({ navigation }) => {
                   onPress={() => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
-                    dispatch(saveProjectDataAction(item));
-                    dispatch(getFieldNoteList(token, item?.projectId));
+                    // dispatch(saveProjectDataAction(item));
+                    // dispatch(getFieldNoteList(token, item?.projectId));
+                    dispatch(getBOQListGC(token, item?.projectId));
                   }}
                 >
                   <Text

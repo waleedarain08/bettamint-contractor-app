@@ -32,12 +32,15 @@ import { Building, Search, BackIcon, Cross } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
   getSkillsAction,
+  markWorkerJob,
   skillsListReducer,
 } from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import SearchWorkerModal from "../../components/SearchWorkerModal";
 import { useFocusEffect } from "@react-navigation/native";
+import Toast from "react-native-toast-message";
+
 LogBox.ignoreAllLogs();
 
 const Attendance = ({ navigation }) => {
@@ -49,11 +52,14 @@ const Attendance = ({ navigation }) => {
   const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
   const [masterDataAttSource, setMasterDataAttSource] = useState([]);
   const [searchAttendance, setSearchAttendance] = useState("");
+  const [openDeListModal, setOpenDeListModal] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
+  const [delistReason, setDelistReason] = useState(null);
+  const [selectedWorker, setSelectedWorker] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
 
@@ -67,8 +73,10 @@ const Attendance = ({ navigation }) => {
   const token = useSelector(authToken);
 
   const status = [
-    { label: "Online", value: "Online" },
-    { label: "Offline", value: "Offline" },
+    { label: "No Show", value: "NoShow" },
+    { label: "Tardiness", value: "Tardiness" },
+    { label: "Misconduct", value: "Misconduct" },
+    { label: "Job Ended", value: "JobEnded" },
   ];
   // useEffect(() => {
   //   dispatch(
@@ -85,6 +93,7 @@ const Attendance = ({ navigation }) => {
         dispatch(
           getAllAttendanceAction(token, projectsListSimple[0]?.projectId, 0)
         );
+        setSelectedProject(projectsListSimple[0]);
       }
       return () => {};
     }, [projectsListSimple && projectsListSimple[0]?.projectId])
@@ -359,6 +368,131 @@ const Attendance = ({ navigation }) => {
       </Modal>
     );
   };
+  const renderDeListingModal = () => {
+    return (
+      <Modal
+        isVisible={openDeListModal}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenDeListModal(!openDeListModal)}
+      >
+        <View
+          style={[styles.filterModalContainer, { justifyContent: "center" }]}
+        >
+          <View style={[styles.filterInnerCon, { height: 370 }]}>
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Remove Worker
+                </Text>
+              </View>
+              <View style={{ alignItems: "flex-end" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenDeListModal(!openDeListModal);
+                    setSelectedWorker(null);
+                    setDelistReason(null);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+            <View style={{ marginVertical: 20 }}>
+              {/* <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
+                >
+                  By Status
+                </Text>
+              </View> */}
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={status}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Remove Worker"}
+                value={delistReason}
+                onChange={async (item) => {
+                  setDelistReason(item);
+                  const obj = {
+                    jobId: selectedWorker?.jobId,
+                    workerId: selectedWorker?.workerId,
+                    reason: item?.value,
+                  };
+                  // console.log("item", obj);
+                  const resp = await dispatch(markWorkerJob(token, obj));
+                  console.log("resp", resp);
+                  if (resp?.status === 200) {
+                    setOpenDeListModal(false);
+                    setDelistReason(null);
+                    Toast.show({
+                      type: "info",
+                      text1: "Success",
+                      text2: "Worker removed successfully!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                    dispatch(
+                      getAllAttendanceAction(
+                        token,
+                        selectedProject?.projectId,
+                        0
+                      )
+                    );
+                  } else {
+                    setOpenDeListModal(false);
+                    setDelistReason(null);
+                    Toast.show({
+                      type: "error",
+                      text1: "Error",
+                      text2: "Some thing went wrong!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                  }
+                  // setOpenFilterModal(false);
+                  // setSelectedStatus(item);
+                  // setSelectedSkills(null);
+                  // setFilteredAttendance(
+                  //   attendanceList?.filter(
+                  //     (ele) => ele.workerTypeId === item?.value
+                  //   )
+                  // );
+                }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   const Item = ({ item, index }) => (
     <View style={[styles.item]} key={item.key}>
@@ -408,25 +542,57 @@ const Attendance = ({ navigation }) => {
               : item?.absentDays}
           </Text>
         </View>
-        <Pressable
-          onPress={() => {
-            navigation.navigate("AttendanceMusterCard");
-            // setTimeout(() => {
-            dispatch(selectAttendanceAction(item));
-            // }, 0);
-          }}
-          style={{
-            backgroundColor: "#ECE5FC",
-            padding: 5,
-            margin: 5,
-            borderRadius: 2,
-            width: "13%",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
-          <Text style={styles.smallButton}>View</Text>
-        </Pressable>
+        <View style={{ width: "13%", margin: 5 }}>
+          <Pressable
+            onPress={() => {
+              navigation.navigate("AttendanceMusterCard");
+              // setTimeout(() => {
+              dispatch(selectAttendanceAction(item));
+              // }, 0);
+            }}
+            style={{
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              // margin: 5,
+              borderRadius: 2,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={styles.smallButton}>View</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              setOpenDeListModal(true);
+              setSelectedWorker(item);
+            }}
+            style={{
+              marginTop: 3,
+              backgroundColor: "#ECE5FC",
+              padding: 5,
+              // margin: 5,
+              borderRadius: 2,
+              width: "100%",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <Text style={[styles.smallButton, { color: "red", fontSize: 8 }]}>
+              Remove
+            </Text>
+          </Pressable>
+          {/* <Text
+            style={{
+              color: "red",
+              fontSize: 10,
+              fontFamily: "Lexend-Regular",
+              textAlign: "center",
+            }}
+          >
+            Remove
+          </Text> */}
+        </View>
       </View>
     </View>
   );
@@ -808,6 +974,7 @@ const Attendance = ({ navigation }) => {
         </View>
       </Modal>
       {renderFilterModal()}
+      {renderDeListingModal()}
       <SearchWorkerModal
         header={"Find by name"}
         openModal={openSearchUserModal}

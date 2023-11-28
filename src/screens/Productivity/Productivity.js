@@ -52,7 +52,7 @@ import {
   ChatIcon,
   DotIcon,
 } from "../../icons";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import {
   getSkillsAction,
   skillsListReducer,
@@ -1241,6 +1241,7 @@ const Productivity = ({ navigation }) => {
   // const projectsList = useSelector(projectsListSimpleReducer);
   const { selectedNote } = useSelector(fieldNoteReducer);
   // const labourContractorList = useSelector(labourContractorReducer);
+  const userInfo = useSelector(userData);
 
   const dispatch = useDispatch();
   const {
@@ -1263,7 +1264,6 @@ const Productivity = ({ navigation }) => {
   const token = useSelector(authToken);
   const labourContractorList = useSelector(labourContractorReducer);
   const randomId = Math.floor(100000 + Math.random() * 900000);
-  // console.log("BOQ Progress--->>>", financialGraphData);
 
   const [rowList, setRowList] = useState([
     {
@@ -1337,17 +1337,15 @@ const Productivity = ({ navigation }) => {
 
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
-    if (financialGraphData.length) {
+    if (financialGraphData && financialGraphData.length) {
       financialGraphData?.forEach((item) => {
         const month = item.month;
         const labelToCostMap = {};
-        // console.log("Item--->>>", item);
         if (Array.isArray(item?.costbySOW)) {
           if (item?.costbySOW?.length) {
             item?.costbySOW?.forEach((costItem) => {
               const label = costItem?.label;
               const actualCost = costItem?.actualCost;
-              console.log(actualCost);
               if (!labelToCostMap[label]) {
                 labelToCostMap[label] = actualCost;
               } else {
@@ -1360,7 +1358,6 @@ const Productivity = ({ navigation }) => {
         const stacks = [];
 
         for (const label in labelToCostMap) {
-          // console.log("stack", labelToCostMap[label]);
           stacks.push({
             value: labelToCostMap[label],
             color: getColorForLabel(label),
@@ -1405,7 +1402,7 @@ const Productivity = ({ navigation }) => {
     };
     return colorMap[label] || "gray"; // Default to gray if no color is defined
   }
-  // console.log("Financial Graph Data--->>>", getFinancialProgressGraphData());
+
   const budgetGraphsData = () => {
     return projectBudgetData?.graphData?.flatMap((item) => [
       {
@@ -1434,8 +1431,6 @@ const Productivity = ({ navigation }) => {
     return attendanceMax;
   };
 
-  // console.log("Maximum cost:", getBudgetMaxValue());
-  // console.log("Budget Graphs Data--->>>", getBudgetMaxValue());
   const projectProgressGraphsData = () => {
     return projectProgressData?.graphData?.flatMap((item) => [
       {
@@ -1463,10 +1458,7 @@ const Productivity = ({ navigation }) => {
     }
     return progressMax;
   };
-  // console.log(
-  //   "Project Progress Graphs Data--->>>",
-  //   getProjectProgressMaxValue()
-  // );
+
   const pushNewRow = () => {
     setRowList([
       ...rowList,
@@ -1743,7 +1735,6 @@ const Productivity = ({ navigation }) => {
       contractorId: contractor,
       endDate: date,
     };
-    // console.log("schemaObject", schemaObject);
 
     let resp = await dispatch(addBOQ(token, schemaObject));
     if (resp?.status === 200) {
@@ -1901,7 +1892,7 @@ const Productivity = ({ navigation }) => {
         "DateTime",
         `${moment(date).format("YYYY-MM-DD")} ${moment(time).format("HH:mm")}`
       );
-      // console.log("FORMDATA", formData);
+
       const response = await dispatch(createFieldNoteEntry(token, formData));
       if (response.status === 200) {
         setOpenFieldNote(false);
@@ -2575,29 +2566,6 @@ const Productivity = ({ navigation }) => {
                 <Cross
                   onPress={() => {
                     setOpenUpdateProgressModal(!openUpdateProgressModal);
-                    // setRowList([
-                    //   {
-                    //     rowId: 1,
-                    //     boqId: 0,
-                    //     scopeOfWorkId: scopeList[0]?.scopeOfWorkId,
-                    //     titles: [
-                    //       {
-                    //         id: randomId,
-                    //         scopeOfWorkDetailId: "",
-                    //         title: "",
-                    //         description: "",
-                    //         unitId: 0,
-                    //         rate: 0,
-                    //         quantity: 0,
-                    //         timeline: 0,
-                    //         scopeListDetail: [],
-                    //         descriptions: [],
-                    //       },
-                    //     ],
-                    //   },
-                    // ]);
-                    // setProject(null);
-                    // setContractor(null);
                   }}
                   size={22}
                   color={Colors.Black}
@@ -2610,7 +2578,6 @@ const Productivity = ({ navigation }) => {
                 marginVertical: 10,
                 flexDirection: "row",
                 alignItems: "center",
-                // justifyContent: "space-between",
                 paddingBottom: 10,
                 borderBottomWidth: 0.4,
                 borderBottomColor: Colors.LightGray,
@@ -2727,7 +2694,7 @@ const Productivity = ({ navigation }) => {
       </Modal>
     );
   };
-  // console.log("BOQ--->>>", boqProgress);
+
   const renderFieldNotes = () => {
     return (
       <Modal
@@ -3042,7 +3009,6 @@ const Productivity = ({ navigation }) => {
               style={[styles.button, { width: "60%" }]}
               onPress={() => {
                 submitHandler();
-                // console.log('CLICK')
               }}
             >
               <Text style={styles.buttonText}>
@@ -3125,21 +3091,39 @@ const Productivity = ({ navigation }) => {
           >
             <Text style={styles.smallButton}>Insert BoQ's</Text>
           </Pressable>
-          <Pressable
-            onPress={() => {
-              setOpenUpdateProgressModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Update Progress</Text>
-          </Pressable>
+          {userInfo?.user?.leadTypeId === "Contractor" ? (
+            <Pressable
+              onPress={() => {
+                navigation.navigate("VerifyProgress");
+              }}
+              style={{
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 3,
+                paddingHorizontal: 9,
+                paddingVertical: 7,
+              }}
+            >
+              <Text style={styles.smallButton}>Verify Progress</Text>
+            </Pressable>
+          ) : (
+            <Pressable
+              onPress={() => {
+                setOpenUpdateProgressModal(true);
+              }}
+              style={{
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 3,
+                paddingHorizontal: 9,
+                paddingVertical: 7,
+              }}
+            >
+              <Text style={styles.smallButton}>Update Progress</Text>
+            </Pressable>
+          )}
         </View>
       </View>
       <View
@@ -3356,7 +3340,7 @@ const Productivity = ({ navigation }) => {
                     boqProgress?.result?.totalMeasurement) *
                   100
                 ).toFixed(0) + "%"
-              } | ${boqProgress?.result?.completedMeasurement}`}</Text>
+              }`}</Text>
               <Text
                 style={{
                   color: Colors.Black,
@@ -3418,7 +3402,7 @@ const Productivity = ({ navigation }) => {
                     boqProgress?.result?.totalMeasurement) *
                   100
                 ).toFixed(0) + "%"
-              } | ${boqProgress?.result?.todaysMeasurement}`}</Text>
+              }`}</Text>
               <Text
                 style={{
                   color: Colors.Black,
@@ -3488,9 +3472,16 @@ const Productivity = ({ navigation }) => {
               width: "100%",
             }}
           >
-            <View style={styles.tiles}>
+            <Pressable
+              onPress={() => {
+                navigation.navigate("VerifyProgress");
+              }}
+              style={styles.tiles}
+            >
               <View>
-                <Text style={styles.tileHeading}>{"Quality Issues Cost"}</Text>
+                <Text style={styles.tileHeading}>
+                  {"Poor Workmanship Issue"}
+                </Text>
                 <Text
                   style={{
                     color: Colors.Black,
@@ -3515,8 +3506,13 @@ const Productivity = ({ navigation }) => {
                   <HomeIcon size={20} color={Colors.White} />
                 </View>
               </View>
-            </View>
-            <View style={styles.tiles}>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                navigation.navigate("VerifyProgress");
+              }}
+              style={styles.tiles}
+            >
               <View>
                 <Text style={styles.tileHeading}>
                   {"Material Defects Cost"}
@@ -3545,8 +3541,13 @@ const Productivity = ({ navigation }) => {
                   <HatIcon size={20} color={Colors.White} />
                 </View>
               </View>
-            </View>
-            <View style={styles.tiles}>
+            </Pressable>
+            <Pressable
+              onPress={() => {
+                navigation.navigate("VerifyProgress");
+              }}
+              style={styles.tiles}
+            >
               <View>
                 <Text style={styles.tileHeading}>{"Variation Cost"}</Text>
                 <Text
@@ -3573,7 +3574,7 @@ const Productivity = ({ navigation }) => {
                   <ChatIcon size={20} color={Colors.White} />
                 </View>
               </View>
-            </View>
+            </Pressable>
           </View>
           <View style={styles.scrollGraph}>
             <View style={styles.graphsHeader}>
@@ -3787,7 +3788,6 @@ const Productivity = ({ navigation }) => {
                 maxValue={2000}
                 stackData={getFinancialProgressGraphData()}
                 renderTooltip={(e) => {
-                  // console.log("TOOLTIP", e);
                   return (
                     <View>
                       {e.stacks.map((item) => (
