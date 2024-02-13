@@ -1,8 +1,8 @@
-// export const base_url = "https://api-sandbox.bettamint.com/api";
-// export const assetsUrl = "https://api-sandbox.bettamint.com";
+export const base_url = "https://api-sandbox.bettamint.com/api";
+export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-export const base_url = "https://api-prod.bettamint.com/api";
-export const assetsUrl = "https://api-prod.bettamint.com";
+// export const base_url = "https://api-prod.bettamint.com/api";
+// export const assetsUrl = "https://api-prod.bettamint.com";
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";
@@ -11,7 +11,7 @@ export const mapUrl = "https://admin.bettamint.com/auth/view";
 export const PROJECT_GETALL_URL = "dashboard/Project/getall";
 export const JOB_GETALL_URL = "dashboard/Job/getall";
 export const UPDATE_PROJECT_URL = "dashboard/Project/addupdateproject";
-export const ATTENDANCE_GETALL_URL = "dashboard/Attendance/getbyproject";
+export const ATTENDANCE_GETALL_URL = "dashboard/Attendance/getbyproject/v2";
 export const PROJECT_GETALL_SIMPLE = "dashboard/Project/getallsimple";
 export const PROJECT_FOR_MAPPING_URL = "dashboard/Project/getformapping";
 export const PROJECT_USER_LIST_URL = "dashboard/User/project";

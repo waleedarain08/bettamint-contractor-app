@@ -757,8 +757,8 @@ const Dashboard = ({ navigation }) => {
             </View>
             <View style={styles.scrollGraph}>
               <View style={[styles.graphsHeader]}>
-                <Text style={styles.graphHeadingText}>Payment</Text>
-                <View style={[styles.graphSubHeader, {marginBottom: 30}]}>
+                <Text style={styles.graphHeadingText}>Financial Progress</Text>
+                <View style={[styles.graphSubHeader, { marginBottom: 30 }]}>
                   <TouchableOpacity
                     onPress={() => {
                       setOpenSearchModal(true);
@@ -831,6 +831,33 @@ const Dashboard = ({ navigation }) => {
                   height={180}
                   width={260}
                 />
+              </View>
+              <View style={styles.graphBottom}>
+                <View style={[styles.graphBottomTabs]}>
+                  <Text style={styles.graphBottomText}>
+                    Required
+                    {"\n"}Production Rate{" "}
+                  </Text>
+                  <Text style={[styles.graphBottomTextBold]}>
+                    {" "}
+                    {currentPresent?.length > 0
+                      ? currentPresent[0]?.Present
+                      : 0}
+                  </Text>
+                </View>
+                <View style={styles.graphBottomTabs}>
+                  <Text style={styles.graphBottomText}>
+                    Actual{"\n"}Production Rate{" "}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.graphBottomTextBold,
+                      { color: Colors.Purple },
+                    ]}
+                  >
+                    {currentAbsent?.length > 0 ? currentAbsent[0]?.Absent : 0}
+                  </Text>
+                </View>
               </View>
               <View
                 style={{

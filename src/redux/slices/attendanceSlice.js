@@ -17,6 +17,7 @@ const initialState = {
   loadingMarkAttendance: false,
   error: null,
   attendanceList: null,
+  todaysAttendanceList: null,
   attendanceMuster: null,
   attendanceApprove: null,
   attendanceReport: null,
@@ -41,6 +42,18 @@ const attendanceSlice = createSlice({
       state.loading = false;
     },
     getAttendanceFailure: (state, action) => {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    getTodaysAttendanceRequest: (state, action) => {
+      state.loading = true;
+      state.error = null;
+    },
+    getTodaysAttendanceSuccess: (state, action) => {
+      state.todaysAttendanceList = action.payload;
+      state.loading = false;
+    },
+    getTodaysAttendanceFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
     },
@@ -102,6 +115,9 @@ const {
   getAttendanceRequest,
   getAttendanceSuccess,
   getAttendanceFailure,
+  getTodaysAttendanceRequest,
+  getTodaysAttendanceSuccess,
+  getTodaysAttendanceFailure,
   getAttendanceMusterRequest,
   getAttendanceMusterSuccess,
   getAttendanceMusterFailure,
@@ -121,6 +137,8 @@ const {
 
 export const attendanceListReducer = (state) =>
   state?.attendance?.attendanceList;
+export const todaysAttendanceListReducer = (state) =>
+  state?.attendance?.todaysAttendanceList;
 export const attendanceMusterReducer = (state) =>
   state?.attendance?.attendanceMuster;
 export const attendanceApproveReducer = (state) =>
@@ -146,7 +164,16 @@ export const emptyAttendanceAction = () => async (dispatch) => {
   dispatch(emptyAttendance());
 };
 export const getAllAttendanceAction =
-  (token, projectId, contractorId) => async (dispatch) => {
+  (
+    token,
+    projectId,
+    contractorId,
+    pageNumber = 1,
+    pageSize = 25,
+    skillId = "",
+    sortOrder = 0
+  ) =>
+  async (dispatch) => {
     try {
       dispatch(getAttendanceRequest());
       await api
@@ -154,16 +181,20 @@ export const getAllAttendanceAction =
         .request(
           "GET",
           ATTENDANCE_GETALL_URL +
-            `?projectId=${projectId}&createdBy=${contractorId || 0}`,
+            `?projectId=${projectId}&createdBy=${
+              contractorId || 0
+            }&pageNumber=${pageNumber}&pageSize=${15}&skillId=${skillId}&sortBy=worker-name&sortOrder=${0}`,
           null,
           {
             Authorization: token,
           }
         )
         .then((res) => {
+          // console.log("ATTENDANCE RESPONSE", res)
           const data = responseHandler(res);
           if (data) {
-            dispatch(getAttendanceSuccess(data));
+            // console.log("ATTENDANCE DATA", data?.result?.attendances);
+            dispatch(getAttendanceSuccess(data?.result));
           }
         })
         .catch((error) => {
@@ -186,6 +217,53 @@ export const getAllAttendanceAction =
       dispatch(getAttendanceFailure());
     }
   };
+export const getTodaysAttendanceAction =
+  (token, projectId, contractorId, pageNumber = 1, pageSize = 25) =>
+  async (dispatch) => {
+    try {
+      dispatch(getTodaysAttendanceRequest());
+      await api
+
+        .request(
+          "GET",
+          ATTENDANCE_GETALL_URL +
+            `?projectId=${projectId}&createdBy=${
+              contractorId || 0
+            }&pageNumber=${pageNumber}&pageSize=${15}`,
+          null,
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          // console.log("ATTENDANCE RESPONSE", res)
+          const data = responseHandler(res);
+          if (data) {
+            console.log("ATTENDANCE DATA", data?.result?.attendances);
+            dispatch(getTodaysAttendanceSuccess(data?.result));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
+          dispatch(getTodaysAttendanceFailure());
+        });
+    } catch (error) {
+      dispatch(getTodaysAttendanceFailure());
+    }
+  };
+
 export const getAttendanceMusterAction =
   (token, workerId, jobId) => async (dispatch) => {
     try {

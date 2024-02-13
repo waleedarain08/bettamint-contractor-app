@@ -39,6 +39,7 @@ import {
   Cross,
   EditIcon,
   DeleteIcon,
+  Picture,
 } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
@@ -60,12 +61,14 @@ import {
   getFieldNoteList,
   getScopeList,
   markFieldNoteAction,
+  verifyFieldNote,
 } from "../../redux/slices/fieldNoteSlice";
 import { Image } from "react-native";
 import { assetsUrl } from "../../utils/api_constants";
 import moment from "moment";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
+import { launchImageLibrary } from "react-native-image-picker";
 
 LogBox.ignoreAllLogs();
 
@@ -85,7 +88,8 @@ const FieldNotes = ({ navigation }) => {
   const [contractor, setContractor] = useState(null);
   const [scope, setScope] = useState(null);
   const [currFieldNote, setCurrFieldNote] = useState(null);
-
+  const [verifyImage, setVerifyImage] = useState(null);
+  const [verifyImageUri, setVerifyImageUri] = useState(null);
   const dispatch = useDispatch();
 
   const { fieldNoteList, loading, scopeList } = useSelector(fieldNoteReducer);
@@ -151,6 +155,17 @@ const FieldNotes = ({ navigation }) => {
     }
   };
 
+  const handleImagePicker = async () => {
+    const result = await launchImageLibrary({
+      mediaType: "photo",
+      quality: 0.5,
+      selectionLimit: 1,
+    });
+    if (result?.assets?.length > 0) {
+      setVerifyImage(result);
+      setVerifyImageUri(result?.assets[0]?.uri);
+    }
+  };
   const renderSearchModal = () => {
     return (
       <Modal
@@ -309,6 +324,9 @@ const FieldNotes = ({ navigation }) => {
                 <Cross
                   onPress={() => {
                     setOpenActionModal(!openActionModal);
+                    setVerifyImage(null);
+                    setVerifyImageUri(null);
+                    setSelectedAction(null);
                   }}
                   size={22}
                   color={Colors.Black}
@@ -340,11 +358,87 @@ const FieldNotes = ({ navigation }) => {
                 value={selectedAction}
                 onChange={async (item) => {
                   setSelectedAction(item.value);
+                  // let resp = await dispatch(
+                  //   markFieldNoteAction(
+                  //     token,
+                  //     currFieldNote?.fieldNoteId,
+                  //     item?.value
+                  //   )
+                  // );
+                  // if (resp?.status === 200) {
+                  //   dispatch(getFieldNoteList(token));
+                  //   setOpenActionModal(false);
+                  // }
+                }}
+              />
+            </View>
+            <View
+              style={{
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "center",
+                marginTop: 50,
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  handleImagePicker();
+                }}
+                style={{
+                  width: "100%",
+                  height: 140,
+                  borderWidth: 1,
+                  borderColor: Colors.FormBorder,
+                  borderStyle: "dashed",
+                  borderRadius: 10,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                {verifyImageUri ? (
+                  <Image
+                    source={{ uri: verifyImageUri }}
+                    style={{ width: "100%", height: 140, borderRadius: 10 }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Picture size={50} color={"#D1E0EE"} />
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        color: Colors.FormText,
+                        fontSize: 12,
+                      }}
+                    >
+                      Upload Picture
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+            </View>
+            <View
+              style={{
+                width: "100%",
+                alignItems: "flex-end",
+                justifyContent: "center",
+                marginTop: 50,
+              }}
+            >
+              <Pressable
+                onPress={async () => {
+                  const formData = new FormData();
+                  formData.append("Action", selectedAction);
+                  formData.append("VerificationImage", verifyImage?.assets[0]);
                   let resp = await dispatch(
                     markFieldNoteAction(
                       token,
                       currFieldNote?.fieldNoteId,
-                      item?.value
+                      formData
                     )
                   );
                   if (resp?.status === 200) {
@@ -352,7 +446,29 @@ const FieldNotes = ({ navigation }) => {
                     setOpenActionModal(false);
                   }
                 }}
-              />
+                disabled={!selectedAction || !verifyImageUri}
+                style={{
+                  width: 100,
+                  height: 40,
+                  backgroundColor:
+                    !selectedAction || !verifyImageUri
+                      ? "#ccc"
+                      : Colors.Secondary,
+                  borderRadius: 5,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.White,
+                    fontSize: 14,
+                  }}
+                >
+                  Mark
+                </Text>
+              </Pressable>
             </View>
           </View>
         </View>
@@ -646,15 +762,32 @@ const FieldNotes = ({ navigation }) => {
           </View>
         </View>
         <View style={{ width: "14%" }}>
-          <Text style={styles.flatListText}>{item?.scopeOfWork || "N/A"}</Text>
+          <Text style={styles.flatListText}>
+            {item?.scopeOfWork?.name || "N/A"}
+          </Text>
         </View>
         {/* <View style={{ width: "15%" }}>
           <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
         </View> */}
-        <View style={{ width: "14%" }}>
-          <Text style={styles.flatListText}>
+        <View
+          style={{
+            width: "14%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {/* <Text style={styles.flatListText}>
             {moment(item?.dateTime).format("DD-MM-YY") || "N/A"}
-          </Text>
+          </Text> */}
+          {item?.verifiedImageUrl ? (
+            <Image
+              source={{ uri: assetsUrl + item?.verifiedImageUrl }}
+              style={{ width: 25, height: 25, borderRadius: 13 }}
+              resizeMode="contain"
+            />
+          ) : (
+            <Text style={styles.flatListText}>N/A</Text>
+          )}
         </View>
         <View style={{ width: "16%" }}>
           <Text
@@ -715,6 +848,35 @@ const FieldNotes = ({ navigation }) => {
                 : item?.action === "ReworkRequired"
                 ? "Rework"
                 : "Action"}
+            </Text>
+          </Pressable>
+          <Pressable
+            style={{
+              width: "100%",
+              backgroundColor: item?.verifiedAction ? "#ccc" : Colors.Primary,
+              paddingVertical: 2,
+              marginTop: 3,
+              borderRadius: 3,
+            }}
+            onPress={async () => {
+              console.log("VERIFY", item?.fieldNoteId);
+              let res = await dispatch(
+                verifyFieldNote(token, item?.fieldNoteId)
+              );
+              console.log("RES", res);
+              if (res?.status === 200) {
+                dispatch(getFieldNoteList(token));
+              }
+            }}
+            disabled={item?.verifiedAction}
+          >
+            <Text
+              style={[
+                styles.flatListText,
+                { color: Colors.White, fontSize: 9 },
+              ]}
+            >
+              Verify
             </Text>
           </Pressable>
         </View>

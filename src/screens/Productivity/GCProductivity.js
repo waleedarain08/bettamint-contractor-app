@@ -11,6 +11,7 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  Appearance,
 } from "react-native";
 import Modal from "react-native-modal";
 import Menu from "../../assets/icons/Menu.png";
@@ -41,6 +42,9 @@ import {
   DeleteIcon,
   TickIcon,
   Tick,
+  Picture,
+  DateIcon,
+  ClockIcon,
 } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
@@ -56,6 +60,7 @@ import {
 } from "../../redux/slices/userSlice";
 import {
   assignContractorFieldNote,
+  createFieldNoteEntry,
   deleteFieldNote,
   editFieldNoteAction,
   fieldNoteReducer,
@@ -69,12 +74,16 @@ import moment from "moment";
 import { useFocusEffect } from "@react-navigation/native";
 // import Toast from "react-native-toast-message";
 import {
+  approveBOQMeasurementReason,
   getBOQListGC,
   getScopeList,
   productivityReducer,
+  rejectBOQProgress,
   verifyBOQProgress,
 } from "../../redux/slices/productivitySlice";
 import Toast from "react-native-toast-message";
+import { launchImageLibrary } from "react-native-image-picker";
+import DatePicker from "react-native-date-picker";
 
 LogBox.ignoreAllLogs();
 
@@ -88,14 +97,34 @@ const GCProductivity = ({ navigation }) => {
   const [searchNotes, setSearchNotes] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openActionModal, setOpenActionModal] = useState(false);
+  const [openActionModal2, setOpenActionModal2] = useState(false);
   const [openAssignModal, setOpenAssignModal] = useState(false);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
   const [selectedAction, setSelectedAction] = useState(null);
   const [contractor, setContractor] = useState(null);
+  const [rejectQuality, setRejectQuality] = useState(null);
+  const [rejectMeasurement, setRejectMeasure] = useState(null);
+  const [approveMeasurement, setApproveMeasurement] = useState(null);
   const [scope, setScope] = useState(null);
   const [currFieldNote, setCurrFieldNote] = useState(null);
   const [currBoq, setCurrBoq] = useState(null);
   const [remarks, setRemarks] = useState(null);
+  const [openFieldNote, setOpenFieldNote] = useState(false);
+  const [fieldPic, setFieldPic] = useState("");
+  const [fieldPicForm, setFieldPicForm] = useState("");
+  const [scopeValue, setScopeValue] = useState(null);
+  const [contractorValue, setContractorValue] = useState(null);
+  const [description, setDescription] = useState("");
+  const [location, setLocation] = useState("");
+  const [selectedProjectNote, setSelectedProjectNote] = useState(null);
+  const [date, setDate] = useState(new Date());
+  const [open, setOpen] = useState(false);
+  const [time, setTime] = useState(null);
+  const [openTime, setOpenTime] = useState(false);
+  const colorScheme = Appearance.getColorScheme();
+  const isDarkMode = colorScheme === "dark";
+  const textColor = isDarkMode ? "white" : "black";
+
   const dispatch = useDispatch();
 
   const { fieldNoteList } = useSelector(fieldNoteReducer);
@@ -146,7 +175,17 @@ const GCProductivity = ({ navigation }) => {
       setSearchNotes(text);
     }
   };
-
+  const handleImagePicker = async () => {
+    const result = await launchImageLibrary({
+      mediaType: "photo",
+      quality: 0.5,
+      selectionLimit: 1,
+    });
+    if (result?.assets?.length > 0) {
+      setFieldPicForm(result);
+      setFieldPic(result?.assets[0]?.uri);
+    }
+  };
   const searchFilterFunction = (text) => {
     // Check if searched text is not blank
     if (text) {
@@ -165,6 +204,120 @@ const GCProductivity = ({ navigation }) => {
       // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
+    }
+  };
+
+  const submitHandler = async () => {
+    const formData = new FormData();
+    if (!fieldPic) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select image.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!scopeValue) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select scope of work.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!description) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter description.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!contractorValue) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select contractor.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!selectedProjectNote) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select project.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!location) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter location.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!date) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select date.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!time) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please select time.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else {
+      formData.append("ScopeOfWorkId", parseInt(scopeValue, 10));
+      formData.append("ContractorId", parseInt(contractorValue, 10));
+      formData.append("ProjectId", parseInt(selectedProjectNote, 10));
+      formData.append("Description", description);
+      formData.append("Location", location);
+      formData.append("Image", {
+        name: fieldPicForm?.assets[0]?.fileName,
+        type: fieldPicForm?.assets[0]?.type,
+        uri: fieldPicForm?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
+      });
+      formData.append(
+        "DateTime",
+        `${moment(date).format("YYYY-MM-DD")} ${moment(time).format("HH:mm")}`
+      );
+
+      const response = await dispatch(createFieldNoteEntry(token, formData));
+      if (response.status === 200) {
+        setOpenFieldNote(false);
+        Toast.show({
+          type: "info",
+          text1: "Field Note Created",
+          text2: "New Field Note is created successfully.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 4000,
+        });
+        setScopeValue(null);
+        setContractorValue(null);
+        setDescription("");
+        setLocation("");
+        setFieldPic("");
+        setFieldPicForm("");
+        setDate(new Date());
+        setTime(null);
+        setSelectedProjectNote(null);
+      }
     }
   };
 
@@ -289,13 +442,14 @@ const GCProductivity = ({ navigation }) => {
                     // marginBottom: 10,
                   }}
                 >
-                  Approve Quality
+                  Quality
                 </Text>
               </View>
               <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
                 <Cross
                   onPress={() => {
                     setOpenActionModal(!openActionModal);
+                    setRejectQuality(null);
                   }}
                   size={22}
                   color={Colors.Black}
@@ -303,7 +457,128 @@ const GCProductivity = ({ navigation }) => {
               </View>
             </View>
             <View style={{ marginTop: 20 }}>
-              <TextInput
+              <TouchableOpacity
+                onPress={async () => {
+                  const obj = {
+                    boqProgressId: currBoq?.contractorBOQProgressId,
+                    boqVerificationType: "Quality",
+                  };
+                  let resp = await dispatch(verifyBOQProgress(token, obj));
+                  if (resp.status === 200) {
+                    dispatch(
+                      getBOQListGC(
+                        token,
+                        selectedProject?.projectId
+                        // LabourContractor?.userId
+                      )
+                    );
+                    setOpenActionModal(false);
+                    Toast.show({
+                      type: "info",
+                      text1: "Success",
+                      text2: "Quantity approved successfully!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                    // toast.success("BOQ marked successfully!");
+                  } else {
+                    Toast.show({
+                      type: "Error",
+                      text1: "Error",
+                      text2: "Something went wrong!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                  }
+                }}
+                disabled={currBoq?.isQualityApproved ? true : false}
+                style={{
+                  width: "100%",
+                  backgroundColor: currBoq?.isQualityApproved
+                    ? Colors.Gray
+                    : "#81B733",
+                  height: 40,
+                  borderRadius: 5,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.White,
+                    fontSize: 14,
+                  }}
+                >
+                  Approve
+                </Text>
+              </TouchableOpacity>
+              <View style={{ marginTop: 10 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  autoScroll={false}
+                  inputSearchStyle={{ color: Colors.Black }}
+                  data={[
+                    { value: "PoorWorkmanship", label: "Poor Workmanship" },
+                    { value: "MaterialDefects", label: "Material Defects" },
+                  ]}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Reject Reason"}
+                  value={rejectQuality}
+                  disable={currBoq?.boqQualityRejectStatus ? true : false}
+                  onChange={async (item) => {
+                    setRejectQuality(item.value);
+                    const obj = {
+                      boqProgressId: currBoq?.contractorBOQProgressId,
+                      boqVerificationType: "Quality",
+                      qualityRejectStatus: item.value,
+                    };
+                    let resp = await dispatch(rejectBOQProgress(token, obj));
+                    if (resp.status === 200) {
+                      dispatch(
+                        getBOQListGC(
+                          token,
+                          selectedProject?.projectId
+                          // LabourContractor?.userId
+                        )
+                      );
+                      setOpenActionModal(false);
+                      setRejectQuality(null);
+                      Toast.show({
+                        type: "info",
+                        text1: "Success",
+                        text2: "Quantity Rejected successfully!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                      // toast.success("BOQ marked successfully!");
+                    } else {
+                      Toast.show({
+                        type: "Error",
+                        text1: "Error",
+                        text2: "Something went wrong!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                    }
+                  }}
+                />
+              </View>
+              {/* <TextInput
                 style={styles.dropdown}
                 placeholder="Remarks"
                 placeholderTextColor={Colors.LightGray}
@@ -311,8 +586,8 @@ const GCProductivity = ({ navigation }) => {
                 value={remarks}
                 onChangeText={(text) => setRemarks(text)}
                 editable={currBoq?.status === "Approved" ? false : true}
-              />
-              <View style={{ marginTop: 20 }}>
+              /> */}
+              {/* <View style={{ marginTop: 20 }}>
                 {currBoq?.status === "Approved" ? (
                   <View
                     style={{
@@ -407,7 +682,375 @@ const GCProductivity = ({ navigation }) => {
                     </Text>
                   </TouchableOpacity>
                 )}
+              </View> */}
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderMeasurementModal = () => {
+    return (
+      <Modal
+        isVisible={openActionModal2}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenActionModal2(!openActionModal2)}
+      >
+        <View
+          style={{
+            flex: 1,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <View
+            style={{
+              width: "88%",
+              backgroundColor: Colors.White,
+              height: 300,
+              borderRadius: 10,
+              padding: 15,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <View>
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.Black,
+                    fontSize: 16,
+                    // marginBottom: 10,
+                  }}
+                >
+                  Measurement
+                </Text>
               </View>
+              <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
+                <Cross
+                  onPress={() => {
+                    setOpenActionModal2(!openActionModal2);
+                    setRejectMeasure(null);
+                  }}
+                  size={22}
+                  color={Colors.Black}
+                />
+              </View>
+            </View>
+            <View style={{ marginTop: 20 }}>
+              {/* <TouchableOpacity
+                onPress={async () => {
+                  const obj = {
+                    boqProgressId: currBoq?.contractorBOQProgressId,
+                    boqVerificationType: "Measurement",
+                  };
+                  let resp = await dispatch(verifyBOQProgress(token, obj));
+                  if (resp.status === 200) {
+                    dispatch(
+                      getBOQListGC(
+                        token,
+                        selectedProject?.projectId
+                        // LabourContractor?.userId
+                      )
+                    );
+                    setOpenActionModal2(false);
+                    Toast.show({
+                      type: "info",
+                      text1: "Success",
+                      text2: "Measurement approved successfully!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                  } else {
+                    Toast.show({
+                      type: "Error",
+                      text1: "Error",
+                      text2: "Something went wrong!",
+                      topOffset: 10,
+                      position: "top",
+                      visibilityTime: 4000,
+                    });
+                  }
+                }}
+                disabled={currBoq?.isMeasurementApproved ? true : false}
+                style={{
+                  width: "100%",
+                  backgroundColor: currBoq?.isMeasurementApproved
+                    ? Colors.Gray
+                    : "#81B733",
+                  height: 40,
+                  borderRadius: 5,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    fontFamily: "Lexend-Medium",
+                    color: Colors.White,
+                    fontSize: 14,
+                  }}
+                >
+                  Approve
+                </Text>
+              </TouchableOpacity> */}
+              <View style={{ marginTop: 10 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  autoScroll={false}
+                  inputSearchStyle={{ color: Colors.Black }}
+                  data={[
+                    {
+                      value: "DesignChange",
+                      label: "Design Change",
+                    },
+                    {
+                      value: "IncorrectEstimation",
+                      label: "Incorrect Estimation",
+                    },
+                    {
+                      value: "Rework",
+                      label: "Rework",
+                    },
+                  ]}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Approve Reason"}
+                  value={approveMeasurement}
+                  disable={currBoq?.isMeasurementApproved ? true : false}
+                  onChange={async (item) => {
+                    setApproveMeasurement(item.value);
+                    const obj = {
+                      boqProgressId: currBoq?.contractorBOQProgressId,
+                      measurementApprovedStatus: item.value,
+                    };
+                    let resp = await dispatch(
+                      approveBOQMeasurementReason(token, obj)
+                    );
+                    if (resp.status === 200) {
+                      dispatch(
+                        getBOQListGC(
+                          token,
+                          selectedProject?.projectId
+                          // LabourContractor?.userId
+                        )
+                      );
+                      setOpenActionModal2(false);
+                      setApproveMeasurement(null);
+                      Toast.show({
+                        type: "info",
+                        text1: "Success",
+                        text2: "Measurement Approved successfully!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                      // toast.success("BOQ marked successfully!");
+                    } else {
+                      Toast.show({
+                        type: "Error",
+                        text1: "Error",
+                        text2: "Something went wrong!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                    }
+                  }}
+                />
+              </View>
+              <View style={{ marginTop: 10 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  autoScroll={false}
+                  inputSearchStyle={{ color: Colors.Black }}
+                  data={[
+                    {
+                      value: "VariationDisapproved",
+                      label: "Variation Disapproved",
+                    },
+                    {
+                      value: "IncorrectMeasurement",
+                      label: "Incorrect Measurement",
+                    },
+                  ]}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Reject Reason"}
+                  value={rejectMeasurement}
+                  disable={currBoq?.boqMeasurementRejectStatus ? true : false}
+                  onChange={async (item) => {
+                    setRejectMeasure(item.value);
+                    const obj = {
+                      boqProgressId: currBoq?.contractorBOQProgressId,
+                      boqVerificationType: "Measurement",
+                      measurementRejectStatus: item.value,
+                    };
+                    let resp = await dispatch(rejectBOQProgress(token, obj));
+                    if (resp.status === 200) {
+                      dispatch(
+                        getBOQListGC(
+                          token,
+                          selectedProject?.projectId
+                          // LabourContractor?.userId
+                        )
+                      );
+                      setOpenActionModal2(false);
+                      setRejectMeasure(null);
+                      Toast.show({
+                        type: "info",
+                        text1: "Success",
+                        text2: "Measurement Rejected successfully!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                      // toast.success("BOQ marked successfully!");
+                    } else {
+                      Toast.show({
+                        type: "Error",
+                        text1: "Error",
+                        text2: "Something went wrong!",
+                        topOffset: 10,
+                        position: "top",
+                        visibilityTime: 4000,
+                      });
+                    }
+                  }}
+                />
+              </View>
+              {/* <TextInput
+                style={styles.dropdown}
+                placeholder="Remarks"
+                placeholderTextColor={Colors.LightGray}
+                multiline={true}
+                value={remarks}
+                onChangeText={(text) => setRemarks(text)}
+                editable={currBoq?.status === "Approved" ? false : true}
+              /> */}
+              {/* <View style={{ marginTop: 20 }}>
+                {currBoq?.status === "Approved" ? (
+                  <View
+                    style={{
+                      alignItems: "center",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        color: Colors.Black,
+                        fontSize: 16,
+                        marginRight: 10,
+                      }}
+                    >
+                      Approved
+                    </Text>
+                    <Tick size={25} color={Colors.Primary} />
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    onPress={async () => {
+                      if (remarks === null) {
+                        return Toast.show({
+                          type: "info",
+                          text1: "Info",
+                          text2: "Please add remarks before verification!",
+                          topOffset: 10,
+                          position: "top",
+                          visibilityTime: 4000,
+                        });
+                      } else {
+                        const obj = {
+                          remarks,
+                          boqProgressId: currBoq?.contractorBOQProgressId,
+                          status: "Approved",
+                        };
+                        let resp = await dispatch(
+                          verifyBOQProgress(token, obj)
+                        );
+                        if (resp.status === 200) {
+                          dispatch(
+                            getBOQListGC(
+                              token,
+                              selectedProject?.projectId
+                              // LabourContractor?.userId
+                            )
+                          );
+                          setOpenActionModal(false);
+                          setRemarks(null);
+                          Toast.show({
+                            type: "info",
+                            text1: "Success",
+                            text2: "BOQ marked successfully!",
+                            topOffset: 10,
+                            position: "top",
+                            visibilityTime: 4000,
+                          });
+                          // toast.success("BOQ marked successfully!");
+                        } else {
+                          Toast.show({
+                            type: "Error",
+                            text1: "Error",
+                            text2: "Something went wrong!",
+                            topOffset: 10,
+                            position: "top",
+                            visibilityTime: 4000,
+                          });
+
+                          // toast.success("Something went wrong!");
+                        }
+                      }
+                    }}
+                    style={{
+                      width: "100%",
+                      backgroundColor: "#81B733",
+                      height: 40,
+                      borderRadius: 5,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        color: Colors.White,
+                        fontSize: 14,
+                      }}
+                    >
+                      Approve
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View> */}
             </View>
           </View>
         </View>
@@ -526,7 +1169,7 @@ const GCProductivity = ({ navigation }) => {
       </Modal>
     );
   };
-
+  // console.log("boqListGC", boqListGC)
   const renderFilterModal = () => {
     return (
       <Modal
@@ -709,245 +1352,878 @@ const GCProductivity = ({ navigation }) => {
     );
   };
 
-  const Item = ({ item, index }) => (
-    <View style={[styles.item]} key={item.key}>
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          width: "100%",
-          justifyContent: "space-between",
-          backgroundColor: "#ffffff",
-          paddingHorizontal: 8,
-          paddingVertical: 4,
-        }}
+  const renderFieldNotes = () => {
+    return (
+      <Modal
+        isVisible={openFieldNote}
+        useNativeDriver={true}
+        backdropColor={Colors.DarkGray}
+        backdropOpacity={0.6}
+        backdropTransitionInTiming={200}
+        onBackdropPress={() => setOpenFieldNote(!openFieldNote)}
       >
-        <View style={{ width: "7%" }}>
-          <Text style={styles.flatListText}>{item?.boqId || "0"}</Text>
-        </View>
         <View
           style={{
-            width: "17%",
+            width: "100%",
+            backgroundColor: Colors.White,
+            height: "90%",
+            borderRadius: 10,
+            padding: 15,
           }}
         >
+          <ScrollView contentContainerStyle={{}}>
+            <View
+              style={{
+                flexDirection: "row",
+                width: "100%",
+                alignItems: "center",
+                justifyContent: "space-between",
+                paddingHorizontal: 15,
+                marginTop: 20,
+                paddingBottom: 15,
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  handleImagePicker();
+                }}
+                style={{ width: "28%" }}
+              >
+                {fieldPic ? (
+                  <Image
+                    source={{ uri: fieldPic }}
+                    style={{ width: "100%", height: 82, borderRadius: 5 }}
+                  />
+                ) : (
+                  <View
+                    style={{
+                      justifyContent: "center",
+                      alignItems: "center",
+                      borderColor: Colors.FormBorder,
+                      borderStyle: "dashed",
+                      borderWidth: 1,
+                      borderRadius: 5,
+                      width: "100%",
+                      height: 82,
+                    }}
+                  >
+                    <Picture size={38} color={"#D1E0EE"} />
+                    <Text
+                      style={{
+                        fontFamily: "Lexend-Medium",
+                        fontSize: 10,
+                        color: Colors.Primary,
+                        textTransform: "uppercase",
+                        textDecorationLine: "underline",
+                      }}
+                    >
+                      Add Picture
+                    </Text>
+                  </View>
+                )}
+              </Pressable>
+              <View style={{ width: "68%" }}>
+                <Text style={styles.titleNote}>Scope of work</Text>
+                <View style={{ marginTop: 7 }}>
+                  <Dropdown
+                    style={styles.dropdown}
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    itemTextStyle={{
+                      fontFamily: "Lexend-Regular",
+                      fontSize: 13,
+                      color: Colors.FormText,
+                    }}
+                    iconStyle={styles.iconStyle}
+                    autoScroll={false}
+                    inputSearchStyle={{ color: Colors.Black }}
+                    data={scopeList?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele?.scopeOfWorkId,
+                    }))}
+                    maxHeight={500}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={"Select Scope"}
+                    value={scopeValue}
+                    onChange={(item) => {
+                      setScopeValue(item.value);
+                    }}
+                  />
+                </View>
+              </View>
+            </View>
+            <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
+              <Text style={styles.titleNote}>Description</Text>
+              <TextInput
+                style={{
+                  fontFamily: "Lexend-Regular",
+                  borderWidth: 1,
+                  borderColor: Colors.FormBorder,
+                  marginTop: 7,
+                  borderRadius: 4,
+                  paddingHorizontal: 7,
+                  fontSize: 12,
+                  height: 50,
+                  backgroundColor: Colors.White,
+                  elevation: 3,
+                  color: Colors.Black,
+                }}
+                onChangeText={(e) => setDescription(e)}
+                value={description}
+                placeholderTextColor={Colors.FormText}
+                placeholder="Enter Description"
+              />
+            </View>
+            <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
+              <Text style={styles.titleNote}>Select Contractor</Text>
+              <View style={{ marginTop: 7 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  data={
+                    labourContractorList?.length
+                      ? labourContractorList?.map((ele) => ({
+                          label: ele?.fullName,
+                          value: ele?.userId,
+                        }))
+                      : []
+                  }
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Select Contractor"}
+                  value={contractorValue}
+                  onChange={(item) => {
+                    setContractorValue(item.value);
+                  }}
+                />
+              </View>
+            </View>
+            <View
+              style={{
+                paddingHorizontal: 15,
+                paddingBottom: 15,
+              }}
+            >
+              <Text style={styles.titleNote}>Select Project</Text>
+              <View style={{ marginTop: 7 }}>
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={styles.placeholderStyle}
+                  selectedTextStyle={styles.selectedTextStyle}
+                  itemTextStyle={{
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 13,
+                    color: Colors.FormText,
+                  }}
+                  iconStyle={styles.iconStyle}
+                  data={projectsListSimple.map((ele) => ({
+                    label: ele.name,
+                    value: ele.projectId,
+                  }))}
+                  autoScroll={false}
+                  search
+                  searchPlaceholder="Search project"
+                  inputSearchStyle={{ color: Colors.Black }}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder={"Select Project"}
+                  value={selectedProjectNote}
+                  onChange={(item) => {
+                    setSelectedProjectNote(item.value);
+                    // dispatch(getLabourContactorAction(token, item.value));
+                  }}
+                />
+              </View>
+            </View>
+            <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
+              <Text style={styles.titleNote}>Location</Text>
+              <TextInput
+                style={{
+                  fontFamily: "Lexend-Regular",
+                  borderWidth: 1,
+                  borderColor: Colors.FormBorder,
+                  marginTop: 7,
+                  borderRadius: 4,
+                  paddingHorizontal: 7,
+                  fontSize: 12,
+                  height: 50,
+                  backgroundColor: Colors.White,
+                  elevation: 3,
+                  color: Colors.Black,
+                }}
+                onChangeText={(e) => setLocation(e)}
+                value={location}
+                placeholderTextColor={Colors.FormText}
+                placeholder="Enter Location"
+              />
+            </View>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                width: "100%",
+                paddingHorizontal: 15,
+                paddingBottom: 15,
+              }}
+            >
+              <View style={{ width: "48%" }}>
+                <Text style={styles.titleNote}>Select Date</Text>
+                <View
+                  style={[
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontFamily: "Lexend-Regular",
+                      borderWidth: 1,
+                      borderColor: Colors.FormBorder,
+                      marginTop: 7,
+                      borderRadius: 4,
+                      paddingHorizontal: 7,
+                      fontSize: 12,
+                      height: 50,
+                      backgroundColor: Colors.White,
+                      elevation: 3,
+                      color: Colors.Black,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={{
+                      fontFamily: "Lexend-Regular",
+                      color: Colors.Black,
+                      fontSize: 12,
+                      width: "80%",
+                    }}
+                    onPressIn={() => setOpen(true)}
+                    placeholderTextColor={Colors.FormText}
+                    placeholder="mm/dd/yyyy"
+                    value={
+                      date ? moment(date).format("MM/DD/YYYY") : "mm/dd/yyyy"
+                    }
+                    // onChangeText={(text) => setJobDate(text)}
+                  />
+                  <DateIcon
+                    onPress={() => setOpen(true)}
+                    color={Colors.FormBorder}
+                    size={22}
+                  />
+                </View>
+              </View>
+              <View style={{ width: "48%" }}>
+                <Text style={styles.titleNote}>Select TIME</Text>
+                <Pressable
+                  style={[
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      fontFamily: "Lexend-Regular",
+                      borderWidth: 1,
+                      borderColor: Colors.FormBorder,
+                      marginTop: 7,
+                      borderRadius: 4,
+                      paddingHorizontal: 7,
+                      fontSize: 12,
+                      height: 50,
+                      backgroundColor: Colors.White,
+                      elevation: 3,
+                      color: Colors.Black,
+                    },
+                  ]}
+                  onPress={() => setOpenTime(true)}
+                >
+                  <TextInput
+                    style={{
+                      fontFamily: "Lexend-Regular",
+                      color: Colors.Black,
+                      fontSize: 12,
+                      width: "80%",
+                    }}
+                    onPressIn={() => setOpenTime(true)}
+                    placeholderTextColor={Colors.FormText}
+                    placeholder="----"
+                    value={time ? moment(time).format("hh:mm A") : "----"}
+                  />
+                  <ClockIcon
+                    onPress={() => setOpenTime(true)}
+                    color={Colors.FormBorder}
+                    size={20}
+                  />
+                </Pressable>
+              </View>
+            </View>
+          </ScrollView>
           <View
             style={{
               flexDirection: "row",
+              justifyContent: "space-between",
+              padding: 20,
               width: "100%",
-              alignItems: "center",
             }}
           >
-            <View>
-              <Text
-                numberOfLines={1}
-                style={{
-                  fontFamily: "Lexend-SemiBold",
-                  color: Colors.Black,
-                  fontSize: 11,
-                }}
-              >
-                {item?.scopeOfWorkName || "N/A"}
-              </Text>
-              <Text
-                style={{
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Black,
-                  fontSize: 9,
-                }}
-              >
-                {item?.title || "N/A"}
-              </Text>
-            </View>
+            <TouchableOpacity
+              style={[styles.button, { width: "60%" }]}
+              onPress={() => {
+                submitHandler();
+              }}
+            >
+              <Text style={styles.buttonText}>{"Create Note"}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.button,
+                { width: "35%", backgroundColor: Colors.Secondary },
+              ]}
+              onPress={() => {
+                setOpenFieldNote(false);
+              }}
+            >
+              <Text style={styles.buttonText}>Cancel</Text>
+            </TouchableOpacity>
           </View>
         </View>
-        <View style={{ width: "10%" }}>
-          <Text style={styles.flatListText}>{item?.quantity || "N/A"}</Text>
+      </Modal>
+    );
+  };
+  const Item = ({ item, index }) => (
+    <View
+      style={{
+        width: "100%",
+        backgroundColor: "white",
+        flex: 1,
+        marginBottom: 10,
+        borderRadius: 10,
+        padding: 10,
+        elevation: 5,
+      }}
+    >
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={{ width: "40%" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.FormBorder,
+            }}
+          >
+            BOQ ID:{" "}
+            <Text style={{ color: Colors.Black }}>
+              {item?.boqNumber || "0"}
+            </Text>
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.FormBorder,
+            }}
+          >
+            Cost Code:{" "}
+            <Text style={{ color: Colors.Black }}>{item?.boqCode || "0"}</Text>
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.FormBorder,
+            }}
+          >
+            Work Order:{" "}
+            <Text style={{ color: Colors.Black }}>
+              {item?.workOrderNumber || "0"}
+            </Text>
+          </Text>
         </View>
-        <View style={{ width: "15%" }}>
-          <Text numberOfLines={1} style={styles.flatListText}>
+        <View
+          style={{
+            width: "60%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <Pressable
+            style={{
+              backgroundColor: Colors.PrimaryLight,
+              paddingHorizontal: 5,
+              borderRadius: 3,
+              paddingVertical: 2,
+              width: "25%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onPress={() => {
+              setOpenActionModal(true);
+              setCurrBoq(item);
+              setRemarks(item?.remarks);
+              setRejectQuality(item?.boqQualityRejectStatus);
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 10,
+                color: Colors.Primary,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              Quality
+            </Text>
+          </Pressable>
+          <Pressable
+            style={{
+              backgroundColor: Colors.PrimaryLight,
+              paddingHorizontal: 5,
+              borderRadius: 3,
+              paddingVertical: 2,
+              width: "38%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onPress={() => {
+              setOpenActionModal2(true);
+              setCurrBoq(item);
+              setRejectMeasure(item?.boqMeasurementRejectStatus);
+            }}
+          >
+            <Text style={{ fontSize: 10, color: Colors.Primary }}>
+              Measurement
+            </Text>
+          </Pressable>
+          <Pressable
+            style={{
+              backgroundColor: Colors.PrimaryLight,
+              paddingHorizontal: 5,
+              borderRadius: 3,
+              paddingVertical: 2,
+              width: "34%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+            onPress={() => {
+              setOpenFieldNote(true);
+            }}
+          >
+            <Text style={{ fontSize: 10, color: Colors.Primary }}>
+              Field Notes
+            </Text>
+          </Pressable>
+        </View>
+      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          width: "100%",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginVertical: 10,
+        }}
+      >
+        <View style={{ width: "40%" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 18,
+              color: Colors.Black,
+            }}
+            numberOfLines={1}
+          >
+            {item?.scopeOfWorkName || "N/A"}
+          </Text>
+        </View>
+        <View style={{ width: "60%" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.FormBorder,
+            }}
+          >
+            DESCRIPTION
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+            }}
+            numberOfLines={1}
+          >
             {item?.description || "N/A"}
           </Text>
         </View>
-        {/* <View style={{ width: "15%" }}>
-          <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
-        </View> */}
-        {/* <View style={{ width: "10%" }}>
-          <Text style={styles.flatListText}>{item?.unitName || "N/A"}</Text>
-        </View> */}
-        <View style={{ width: "14%" }}>
-          <Pressable
-            onPress={() => {
-              setOpenActionModal(true);
-              setCurrBoq(item);
-              setRemarks(item?.remarks);
-            }}
+      </View>
+      <View
+        style={{
+          width: "100%",
+          height: 0.7,
+          backgroundColor: Colors.Gray,
+          marginVertical: 10,
+          // borderWidth: 0.5,
+        }}
+      ></View>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <View style={{ width: "30%", alignItems: "center" }}>
+          <Text
             style={{
-              width: "100%",
-              backgroundColor:
-                item?.status === "Approved" ? Colors.Gray : "#81B733",
-              height: 20,
-              borderRadius: 3,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: item?.action === null ? 0.5 : 0,
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
             }}
           >
-            <Text
-              style={[
-                styles.flatListText,
-                {
-                  fontSize: 9,
-                  color: Colors.White,
-                },
-              ]}
-            >
-              {"Approve"}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              setOpenActionModal(true);
-              setCurrBoq(item);
-              setRemarks(item?.remarks);
-            }}
-            style={{
-              width: "100%",
-              backgroundColor: "#FF6247",
-              height: 20,
-              borderRadius: 3,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: item?.action === null ? 0.5 : 0,
-              marginTop: 5,
-            }}
-          >
-            <Text
-              style={[
-                styles.flatListText,
-                {
-                  fontSize: 9,
-                  color: Colors.White,
-                },
-              ]}
-            >
-              {"Reject"}
-            </Text>
-          </Pressable>
-        </View>
-        {/* <View style={{ width: "10%" }}>
-          <Text numberOfLines={1} style={styles.flatListText}>
-            {item?.amount || "N/A"}
+            TITLE
           </Text>
-        </View> */}
-
-        <View style={{ width: "14%" }}>
-          <Pressable
-            onPress={() => {
-              // setOpenActionModal(true);
-              // setCurrBoq(item);
-              // setRemarks(item?.remarks);
-            }}
+          <Text
             style={{
-              width: "100%",
-              backgroundColor: "#81B733",
-              height: 20,
-              borderRadius: 3,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: item?.action === null ? 0.5 : 0,
-            }}
-          >
-            <Text
-              style={[
-                styles.flatListText,
-                {
-                  fontSize: 9,
-                  color: Colors.White,
-                },
-              ]}
-            >
-              {"Approve"}
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              setOpenActionModal(true);
-              setCurrBoq(item);
-              setRemarks(item?.remarks);
-            }}
-            style={{
-              width: "100%",
-              backgroundColor: "#FF6247",
-              height: 20,
-              borderRadius: 3,
-              alignItems: "center",
-              justifyContent: "center",
-              borderWidth: item?.action === null ? 0.5 : 0,
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
               marginTop: 5,
             }}
           >
-            <Text
-              style={[
-                styles.flatListText,
-                {
-                  fontSize: 9,
-                  color: Colors.White,
-                },
-              ]}
-            >
-              {"Reject"}
-            </Text>
-          </Pressable>
+            {item?.title || "N/A"}
+          </Text>
+        </View>
+        <View style={{ width: "35%", alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
+            }}
+          >
+            QUANTITY
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {item?.quantity || "N/A"}
+          </Text>
+        </View>
+        <View style={{ width: "30%", alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
+            }}
+          >
+            UNIT
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {item?.unitName || "N/A"}
+          </Text>
+        </View>
+      </View>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 20,
+        }}
+      >
+        <View style={{ width: "30%", alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
+            }}
+          >
+            PERCENTAGE
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {item?.percentage.toFixed(2) || "N/A"}
+          </Text>
+        </View>
+        <View style={{ width: "35%", alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
+              textAlign: "center",
+            }}
+          >
+            QTY LEFT
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {item?.measurementLeft || "N/A"}
+          </Text>
+        </View>
+        <View style={{ width: "30%", alignItems: "center" }}>
+          <Text
+            style={{
+              fontFamily: "Lexend-SemiBold",
+              fontSize: 12,
+              color: Colors.Gray,
+            }}
+          >
+            BILLING COST
+          </Text>
+          <Text
+            style={{
+              fontFamily: "Lexend-Medium",
+              fontSize: 12,
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {item?.billingCost || "N/A"}
+          </Text>
         </View>
       </View>
     </View>
-  );
-  const ListHeader = () => {
-    return (
-      <View style={[styles.item]}>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            width: "100%",
-            justifyContent: "space-between",
-            paddingHorizontal: 8,
-            backgroundColor: Colors.White,
-            height: 50,
-            borderTopLeftRadius: 10,
-            borderTopRightRadius: 25,
-          }}
-        >
-          <View style={{ width: "7%" }}>
-            <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
-              BOQ ID
-            </Text>
-          </View>
-          <View style={{ width: "17%" }}>
-            <Text style={[styles.flatListTextHeader, { textAlign: "left" }]}>
-              SOW/Title
-            </Text>
-          </View>
-          <View style={{ width: "10%" }}>
-            <Text style={styles.flatListTextHeader}>Measurement</Text>
-          </View>
-          <View style={{ width: "15%" }}>
-            <Text style={styles.flatListTextHeader}>Description</Text>
-          </View>
-          {/* <View style={{ width: "10%" }}>
-            <Text style={styles.flatListTextHeader}>Amount</Text>
-          </View> */}
+    // <View style={[styles.item]} key={item.key}>
+    //   <View
+    //     style={{
+    //       flexDirection: "row",
+    //       alignItems: "center",
+    //       width: "100%",
+    //       justifyContent: "space-between",
+    //       backgroundColor: "#ffffff",
+    //       paddingHorizontal: 8,
+    //       paddingVertical: 4,
+    //     }}
+    //   >
+    //     <View style={{ width: "7%" }}>
+    //       <Text style={styles.flatListText}>{item?.boqId || "0"}</Text>
+    //     </View>
+    //     <View
+    //       style={{
+    //         width: "17%",
+    //       }}
+    //     >
+    //       <View
+    //         style={{
+    //           flexDirection: "row",
+    //           width: "100%",
+    //           alignItems: "center",
+    //         }}
+    //       >
+    //         <View>
+    //           <Text
+    //             numberOfLines={1}
+    //             style={{
+    //               fontFamily: "Lexend-SemiBold",
+    //               color: Colors.Black,
+    //               fontSize: 11,
+    //             }}
+    //           >
+    //             {item?.scopeOfWorkName || "N/A"}
+    //           </Text>
+    //           <Text
+    //             style={{
+    //               fontFamily: "Lexend-Regular",
+    //               color: Colors.Black,
+    //               fontSize: 9,
+    //             }}
+    //           >
+    //             {item?.title || "N/A"}
+    //           </Text>
+    //         </View>
+    //       </View>
+    //     </View>
+    //     <View style={{ width: "10%" }}>
+    //       <Text style={styles.flatListText}>{item?.quantity || "N/A"}</Text>
+    //     </View>
+    //     <View style={{ width: "15%" }}>
+    //       <Text numberOfLines={1} style={styles.flatListText}>
+    //         {item?.description || "N/A"}
+    //       </Text>
+    //     </View>
+    //     {/* <View style={{ width: "15%" }}>
+    //       <Text numberOfLines={1} style={styles.flatListText}>{item?.description || "N/A"}</Text>
+    //     </View> */}
+    //     {/* <View style={{ width: "10%" }}>
+    //       <Text style={styles.flatListText}>{item?.unitName || "N/A"}</Text>
+    //     </View> */}
+    //     <View style={{ width: "14%" }}>
+    //       <Pressable
+    //         onPress={() => {
+    //           setOpenActionModal(true);
+    //           setCurrBoq(item);
+    //           setRemarks(item?.remarks);
+    //         }}
+    //         style={{
+    //           width: "100%",
+    //           backgroundColor:
+    //             item?.status === "Approved" ? Colors.Gray : "#81B733",
+    //           height: 20,
+    //           borderRadius: 3,
+    //           alignItems: "center",
+    //           justifyContent: "center",
+    //           borderWidth: item?.action === null ? 0.5 : 0,
+    //         }}
+    //       >
+    //         <Text
+    //           style={[
+    //             styles.flatListText,
+    //             {
+    //               fontSize: 9,
+    //               color: Colors.White,
+    //             },
+    //           ]}
+    //         >
+    //           {"Approve"}
+    //         </Text>
+    //       </Pressable>
+    //       <Pressable
+    //         onPress={() => {
+    //           setOpenActionModal(true);
+    //           setCurrBoq(item);
+    //           setRemarks(item?.remarks);
+    //         }}
+    //         disabled
+    //         style={{
+    //           width: "100%",
+    //           backgroundColor: "#FF6247",
+    //           // backgroundColor: Colors.Gray,
+    //           height: 20,
+    //           borderRadius: 3,
+    //           alignItems: "center",
+    //           justifyContent: "center",
+    //           borderWidth: item?.action === null ? 0.5 : 0,
+    //           marginTop: 5,
+    //         }}
+    //       >
+    //         <Text
+    //           style={[
+    //             styles.flatListText,
+    //             {
+    //               fontSize: 9,
+    //               color: Colors.White,
+    //             },
+    //           ]}
+    //         >
+    //           {"Reject"}
+    //         </Text>
+    //       </Pressable>
+    //     </View>
+    //     {/* <View style={{ width: "10%" }}>
+    //       <Text numberOfLines={1} style={styles.flatListText}>
+    //         {item?.amount || "N/A"}
+    //       </Text>
+    //     </View> */}
 
-          <View style={{ width: "14%" }}>
-            <Text style={styles.flatListTextHeader}>Approve Quality</Text>
-          </View>
-          <View style={{ width: "14%" }}>
-            <Text style={styles.flatListTextHeader}>Approve Measurement</Text>
-          </View>
-        </View>
-      </View>
-    );
-  };
+    //     <View style={{ width: "14%" }}>
+    //       <Pressable
+    //         onPress={() => {
+    //           // setOpenActionModal(true);
+    //           // setCurrBoq(item);
+    //           // setRemarks(item?.remarks);
+    //         }}
+    //         style={{
+    //           width: "100%",
+    //           // backgroundColor: "#81B733",
+    //           backgroundColor: Colors.Gray,
+    //           height: 20,
+    //           borderRadius: 3,
+    //           alignItems: "center",
+    //           justifyContent: "center",
+    //           borderWidth: item?.action === null ? 0.5 : 0,
+    //         }}
+    //       >
+    //         <Text
+    //           style={[
+    //             styles.flatListText,
+    //             {
+    //               fontSize: 9,
+    //               color: Colors.White,
+    //             },
+    //           ]}
+    //         >
+    //           {"Approve"}
+    //         </Text>
+    //       </Pressable>
+    //       <Pressable
+    //         onPress={() => {
+    //           setOpenActionModal(true);
+    //           setCurrBoq(item);
+    //           setRemarks(item?.remarks);
+    //         }}
+    //         disabled
+    //         style={{
+    //           width: "100%",
+    //           backgroundColor: "#FF6247",
+    //           // backgroundColor: Colors.Gray,
+    //           height: 20,
+    //           borderRadius: 3,
+    //           alignItems: "center",
+    //           justifyContent: "center",
+    //           borderWidth: item?.action === null ? 0.5 : 0,
+    //           marginTop: 5,
+    //         }}
+    //       >
+    //         <Text
+    //           style={[
+    //             styles.flatListText,
+    //             {
+    //               fontSize: 9,
+    //               color: Colors.White,
+    //             },
+    //           ]}
+    //         >
+    //           {"Reject"}
+    //         </Text>
+    //       </Pressable>
+    //     </View>
+    //   </View>
+    // </View>
+  );
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -1019,38 +2295,24 @@ const GCProductivity = ({ navigation }) => {
           >
             <Text style={styles.smallButton}>Filter</Text>
           </Pressable>
-          {/* <TouchableOpacity
-            onPress={() => setOpenSearchUserModal(true)}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity> */}
         </View>
       </Pressable>
       <View
         style={{
-          backgroundColor: Colors.White,
+          // backgroundColor: Colors.White,
           alignItems: "center",
           margin: 10,
           borderRadius: 10,
-          shadowColor: "#000",
-          shadowOffset: {
-            width: 0,
-            height: 2,
-          },
-          shadowOpacity: 0.2,
-          shadowRadius: 5,
-          elevation: 4,
+          // shadowColor: "#000",
+          // shadowOffset: {
+          //   width: 0,
+          //   height: 2,
+          // },
+          // shadowOpacity: 0.2,
+          // shadowRadius: 5,
+          // elevation: 4,
           width: "93%",
-          flex: 1,
+          // flex: 1,
         }}
       >
         {!boqListGC?.result ||
@@ -1083,30 +2345,34 @@ const GCProductivity = ({ navigation }) => {
             </Text>
           </ScrollView>
         ) : (
-          <FlatList
-            refreshControl={
-              <RefreshControl
-                refreshing={loading}
-                onRefresh={() => {
-                  dispatch(
-                    getBOQListGC(token, projectsListSimple[0]?.projectId)
-                  );
-                  setSelectedProject(projectsListSimple[0]);
-                  setScopeFilter([]);
-                }}
-                tintColor={Colors.Primary}
-                colors={[Colors.Purple, Colors.Primary]}
-              />
-            }
-            data={scopeFilter.length ? scopeFilter : boqListGC?.result}
-            renderItem={({ item, index }) => <Item item={item} index={index} />}
-            keyExtractor={(item) => item.id}
-            initialNumToRender={0}
-            ListHeaderComponent={ListHeader}
-            // extraData={fieldNoteList?.length}
-            stickyHeaderIndices={[0]}
-            showsVerticalScrollIndicator={false}
-          />
+          <View style={{ width: "100%", paddingBottom: 130 }}>
+            <FlatList
+              refreshControl={
+                <RefreshControl
+                  refreshing={loading}
+                  onRefresh={() => {
+                    dispatch(
+                      getBOQListGC(token, projectsListSimple[0]?.projectId)
+                    );
+                    setSelectedProject(projectsListSimple[0]);
+                    setScopeFilter([]);
+                  }}
+                  tintColor={Colors.Primary}
+                  colors={[Colors.Purple, Colors.Primary]}
+                />
+              }
+              data={scopeFilter.length ? scopeFilter : boqListGC?.result}
+              renderItem={({ item, index }) => (
+                <Item item={item} index={index} />
+              )}
+              keyExtractor={(item) => item.id}
+              // initialNumToRender={0}
+              // ListHeaderComponent={ListHeader}
+              // extraData={fieldNoteList?.length}
+              // stickyHeaderIndices={[0]}
+              showsVerticalScrollIndicator={false}
+            />
+          </View>
         )}
       </View>
       <Modal
@@ -1207,6 +2473,36 @@ const GCProductivity = ({ navigation }) => {
       {renderSearchModal()}
       {renderActionModal()}
       {renderAssignContractorModal()}
+      {renderMeasurementModal()}
+      {renderFieldNotes()}
+      <DatePicker
+        modal
+        mode="date"
+        textColor={textColor}
+        open={open}
+        date={date}
+        onConfirm={(date) => {
+          setOpen(false);
+          setDate(date);
+        }}
+        onCancel={() => {
+          setOpen(false);
+        }}
+      />
+      <DatePicker
+        modal
+        mode="time"
+        textColor={textColor}
+        open={openTime}
+        date={date}
+        onConfirm={(date) => {
+          setOpenTime(false);
+          setTime(date);
+        }}
+        onCancel={() => {
+          setOpenTime(false);
+        }}
+      />
     </View>
   );
 };
@@ -1383,5 +2679,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     elevation: 4,
     backgroundColor: Colors.White,
+  },
+  titleNote: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 11,
+    color: Colors.FormText,
+    textTransform: "uppercase",
+  },
+  button: {
+    backgroundColor: Colors.Primary,
+    // padding: 15,
+    borderRadius: 4,
+    marginTop: 15,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  buttonText: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 14,
+    textAlign: "center",
+    color: "white",
   },
 });

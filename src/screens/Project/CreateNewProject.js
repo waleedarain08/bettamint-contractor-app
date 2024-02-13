@@ -42,7 +42,7 @@ import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
-import Geolocation from 'react-native-geolocation-service';
+import Geolocation from "react-native-geolocation-service";
 // const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 // import Geolocation from "@react-native-community/geolocation";
 // import { PermissionsAndroid } from "react-native";
@@ -68,7 +68,7 @@ const CreateNewProject = ({ navigation }) => {
   const [loader, setLoader] = useState(true);
   const [currentLocation, setCurrentLocation] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(null);
-
+  const [projectArea, setProjectArea] = useState(null);
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
@@ -88,23 +88,23 @@ const CreateNewProject = ({ navigation }) => {
     },
   ];
   useEffect(() => {
-    getLocationPermission()
-  }, [])
+    getLocationPermission();
+  }, []);
   const getLocationPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
         PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
         {
-          title: 'Location permission required',
-          message: 'Bettamint needs to access your location',
-          buttonPositive: 'OK',
-        },
+          title: "Location permission required",
+          message: "Bettamint needs to access your location",
+          buttonPositive: "OK",
+        }
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('You can use the camera');
+        console.log("You can use the camera");
         getCurrentLocation();
       } else {
-        console.log('Camera permission denied');
+        console.log("Camera permission denied");
       }
     } catch (err) {
       console.warn(err);
@@ -113,13 +113,13 @@ const CreateNewProject = ({ navigation }) => {
 
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
-      position => {
+      (position) => {
         setCurrentPosition(position);
       },
-      error => {
+      (error) => {
         console.log(error.code, error.message);
       },
-      {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
   };
   useEffect(() => {
@@ -152,6 +152,15 @@ const CreateNewProject = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
+    } else if (!projectArea) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter project area.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
     } else if (!projectImageUri) {
       Toast.show({
         type: "error",
@@ -172,6 +181,7 @@ const CreateNewProject = ({ navigation }) => {
       });
     } else {
       formData.append("Name", projectName);
+      formData.append("ProjectArea", projectArea);
       formData.append("ProjectTypeId", value);
       formData.append("DeveloperId", 0);
       formData.append("ProjectId", projectId);
@@ -266,8 +276,10 @@ const CreateNewProject = ({ navigation }) => {
   setTimeout(() => {
     mapRef?.current?.animateToRegion(
       {
-        latitude: geoFancingArray[0]?.latitude || currentPosition?.coords?.latitude,
-        longitude: geoFancingArray[0]?.longitude || currentPosition?.coords?.longitude,
+        latitude:
+          geoFancingArray[0]?.latitude || currentPosition?.coords?.latitude,
+        longitude:
+          geoFancingArray[0]?.longitude || currentPosition?.coords?.longitude,
         latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
         longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
       },
@@ -379,6 +391,41 @@ const CreateNewProject = ({ navigation }) => {
             placeholderTextColor={Colors.FormText}
             placeholder="Enter Project Name"
             value={projectName}
+          />
+          {/* </Pressable> */}
+        </View>
+        <View
+          style={{
+            paddingHorizontal: 18,
+            paddingBottom: 20,
+            // marginTop: open ? 120 : 0,
+          }}
+        >
+          <Text style={styles.title}>Project Area In SQFTS</Text>
+          {/* <Pressable
+            onPress={() => {
+              setProjectNameClick(!projectNameClick);
+            }}
+          > */}
+          <TextInput
+            style={{
+              fontFamily: "Lexend-Regular",
+              borderWidth: 1,
+              borderColor: Colors.FormBorder,
+              marginTop: 7,
+              borderRadius: 4,
+              paddingHorizontal: 7,
+              fontSize: 12,
+              height: 50,
+              backgroundColor: Colors.White,
+              elevation: 3,
+              color: "black",
+            }}
+            keyboardType="numeric"
+            onChangeText={(e) => setProjectArea(e)}
+            placeholderTextColor={Colors.FormText}
+            placeholder="Enter Project Area"
+            value={projectArea}
           />
           {/* </Pressable> */}
         </View>

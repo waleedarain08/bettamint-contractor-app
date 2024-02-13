@@ -165,20 +165,20 @@ export const getFieldNoteList =
       );
     }
   };
-
-export const markFieldNoteAction = (token, id, action) => async (dispatch) => {
+export const markFieldNoteAction = (token, id, data) => async (dispatch) => {
+  console.log("DATA", data);
   dispatch(markingFieldNoteAction());
   try {
     const response = await axios.put(
-      `${base_url}/dashboard/FieldNote/action/${id}?action=${action}`,
-      null,
+      `${base_url}/dashboard/FieldNote/action/${id}`,
+      data,
       {
         headers: {
           Authorization: token,
+          "Content-Type": "multipart/form-data", // Set the Content-Type header to multipart/form-data
         },
       }
     );
-    console.log("RES", response);
     if (response.status === 200) {
       dispatch(markingFieldNoteActionSuccess(response.data));
     } else {
@@ -190,7 +190,7 @@ export const markFieldNoteAction = (token, id, action) => async (dispatch) => {
     }
     return response;
   } catch (e) {
-    console.log("ERROR", e?.response);
+    console.log("ERROR", e?.response?.data);
     dispatch(
       markingFieldNoteActionFailure(
         "Something went wrong while marking fieldNote!"
@@ -198,6 +198,74 @@ export const markFieldNoteAction = (token, id, action) => async (dispatch) => {
     );
   }
 };
+
+export const verifyFieldNote = (token, id) => async (dispatch) => {
+  dispatch(deletingFieldNote());
+  console.log("ID", id);
+  try {
+    const response = await axios.put(
+      `${base_url}/dashboard/FieldNote/verify/${id}`,
+      {
+        actionVerification: true,
+      },
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    console.log("RESPONSE", response);
+    if (response.status === 200) {
+      dispatch(deletingFieldNoteSuccess(response.data));
+    } else {
+      dispatch(
+        deletingFieldNoteFailure(
+          "Something went wrong while verifying field note!"
+        )
+      );
+    }
+    return response;
+  } catch (e) {
+    console.log("ERROR", e?.response?.data);
+    dispatch(
+      deletingFieldNoteFailure(
+        "Something went wrong while verifying field note!"
+      )
+    );
+  }
+};
+// export const markFieldNoteAction = (token, id, action) => async (dispatch) => {
+//   dispatch(markingFieldNoteAction());
+//   try {
+//     const response = await axios.put(
+//       `${base_url}/dashboard/FieldNote/action/${id}?action=${action}`,
+//       null,
+//       {
+//         headers: {
+//           Authorization: token,
+//         },
+//       }
+//     );
+//     console.log("RES", response);
+//     if (response.status === 200) {
+//       dispatch(markingFieldNoteActionSuccess(response.data));
+//     } else {
+//       dispatch(
+//         markingFieldNoteActionFailure(
+//           "Something went wrong while marking fieldNote!"
+//         )
+//       );
+//     }
+//     return response;
+//   } catch (e) {
+//     console.log("ERROR", e?.response);
+//     dispatch(
+//       markingFieldNoteActionFailure(
+//         "Something went wrong while marking fieldNote!"
+//       )
+//     );
+//   }
+// };
 
 export const assignContractorFieldNote =
   (token, id, contractorId) => async (dispatch) => {
@@ -212,7 +280,7 @@ export const assignContractorFieldNote =
           },
         }
       );
-      console.log('RESPONSE', response)
+      console.log("RESPONSE", response);
       if (response.status === 200) {
         dispatch(assigningContractorFieldNoteActionSuccess(response.data));
       } else {
@@ -294,4 +362,5 @@ export const deleteFieldNote = (token, id) => async (dispatch) => {
 export const editFieldNoteAction = (data) => async (dispatch) => {
   dispatch(editFieldNote(data));
 };
+
 export default fieldNoteSlice.reducer;

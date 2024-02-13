@@ -68,6 +68,8 @@ const CreateNewJob = ({ navigation }) => {
   const [projectData, setProjectData] = useState(null);
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   const [toggleCheckBox2, setToggleCheckBox2] = useState(false);
+  const [publicVal, setPublicVal] = useState(true);
+  const [privateVal, setPrivateVal] = useState(false);
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
@@ -220,6 +222,7 @@ const CreateNewJob = ({ navigation }) => {
       formData.append("isAccomodation", toggleCheckBox2);
       formData.append("skillTypeId", skillLevelValue);
       formData.append("cityName", jobLocation);
+      formData.append("isPrivate", privateVal ? true : false);
 
       const response = await dispatch(createJobAction(token, formData));
       if (response?.status === 200) {
@@ -671,6 +674,58 @@ const CreateNewJob = ({ navigation }) => {
               }}
             >
               Accomodation
+            </Text>
+          </View>
+        </View>
+        <View
+          style={{
+            padding: 10,
+            width: "90%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View
+            style={{ flexDirection: "row", alignItems: "center", width: "40%" }}
+          >
+            <CheckBox
+              tintColors={{ true: Colors.Primary, false: Colors.Gray }}
+              value={publicVal}
+              onValueChange={(newValue) => {
+                setPublicVal(newValue);
+                setPrivateVal(false);
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: Colors.Black,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              Public
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", width: "40%" }}
+          >
+            <CheckBox
+              tintColors={{ true: Colors.Primary, false: Colors.Gray }}
+              value={privateVal}
+              onValueChange={(newValue) => {
+                setPublicVal(false);
+                setPrivateVal(newValue);
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: Colors.Black,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              Private
             </Text>
           </View>
         </View>

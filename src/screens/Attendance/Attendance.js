@@ -57,12 +57,13 @@ const Attendance = ({ navigation }) => {
   const [selectedStatus, setSelectedStatus] = useState(null);
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
+  const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [delistReason, setDelistReason] = useState(null);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [labourContractors, setLabourContractors] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
-
+  const [count, setCount] = useState(1);
   const dispatch = useDispatch();
 
   const attendanceList = useSelector(attendanceListReducer);
@@ -71,6 +72,8 @@ const Attendance = ({ navigation }) => {
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const isLoading = useSelector(loadingAttendance);
   const token = useSelector(authToken);
+  let pageNum = 1;
+  // const page = React.useRef(1);
 
   const status = [
     { label: "No Show", value: "NoShow" },
@@ -91,7 +94,15 @@ const Attendance = ({ navigation }) => {
     React.useCallback(() => {
       if (projectsListSimple) {
         dispatch(
-          getAllAttendanceAction(token, projectsListSimple[0]?.projectId, 0)
+          getAllAttendanceAction(
+            token,
+            projectsListSimple[0]?.projectId,
+            0,
+            1,
+            15,
+            "",
+            0
+          )
         );
         setSelectedProject(projectsListSimple[0]);
       }
@@ -112,7 +123,8 @@ const Attendance = ({ navigation }) => {
       dispatch(getAllProjectsSimpleAction(token));
       dispatch(selectAttendanceAction(null));
       dispatch(removeMusterData());
-
+      setCount(1);
+      setFilteredDataAttSource([]);
       return () => {};
     }, [])
   );
@@ -123,14 +135,64 @@ const Attendance = ({ navigation }) => {
   }, [usersList]);
 
   useEffect(() => {
+    dispatch(
+      getAllAttendanceAction(
+        token,
+        selectedProject?.projectId || projectsListSimple[0]?.projectId,
+        0,
+        count,
+        15,
+        selectedSkills?.value || "",
+        selectedOrder?.value || 0
+      )
+    );
+  }, [count]);
+
+  useEffect(() => {
     setFilteredDataSource(projectsListSimple);
     setMasterDataSource(projectsListSimple);
   }, [projectsListSimple]);
 
   useEffect(() => {
-    setFilteredDataAttSource(attendanceList);
-    setMasterDataAttSource(attendanceList);
-  }, [attendanceList]);
+    if (attendanceList?.attendances?.length > 0) {
+      setFilteredDataAttSource((prev) => {
+        return [...(prev || []), ...(attendanceList?.attendances || [])];
+      });
+      setMasterDataAttSource((prev) => {
+        return [...(prev || []), ...(attendanceList?.attendances || [])];
+      });
+
+      // console.log("attendanceList", filteredDataAttSource[0]);
+      // console.log("attendanceList", attendanceList?.attendances[0]);
+    }
+  }, [attendanceList?.attendances, selectedSkills]);
+  // console.log("filteredDataAttSource", filteredDataAttSource);
+  // useEffect(() => {
+  //   if (attendanceList?.attendances?.length > 0) {
+  //     console.log("selectedOrder", selectedOrder);
+  //     if (selectedOrder?.value === 1) {
+  //       setFilteredDataAttSource((prev) => {
+  //         return [...(attendanceList?.attendances || [])];
+  //       });
+  //       setMasterDataAttSource((prev) => {
+  //         return [...(attendanceList?.attendances || [])];
+  //       });
+  //     } else {
+  //       setFilteredDataAttSource((prev) => {
+  //         return [...(attendanceList?.attendances || [])];
+  //       });
+  //       setMasterDataAttSource((prev) => {
+  //         return [...(attendanceList?.attendances || [])];
+  //       });
+  //     }
+
+  //     // console.log("attendanceList", filteredDataAttSource[0]);
+  //     // console.log("attendanceList", attendanceList?.attendances[0]);
+  //   } else {
+  //     setFilteredDataAttSource([]);
+  //     setMasterDataAttSource([]);
+  //   }
+  // }, [selectedSkills, selectedOrder]);
   const searchFilterAttendanceFunction = (text) => {
     // Check if searched text is not blank
     console.log("TEXT", text);
@@ -220,6 +282,10 @@ const Attendance = ({ navigation }) => {
                         token,
                         selectedProject?.projectId ||
                           projectsListSimple[0]?.projectId,
+                        0,
+                        count,
+                        15,
+                        "",
                         0
                       )
                     );
@@ -269,7 +335,7 @@ const Attendance = ({ navigation }) => {
                   setSelectedStatus(item);
                   setSelectedSkills(null);
                   setFilteredAttendance(
-                    attendanceList?.filter(
+                    attendanceList?.attendances?.filter(
                       (ele) => ele.workerTypeId === item?.value
                     )
                   );
@@ -296,7 +362,7 @@ const Attendance = ({ navigation }) => {
                 iconStyle={styles.iconStyle}
                 data={skillsList?.map((ele) => ({
                   label: ele?.name,
-                  value: ele?.name,
+                  value: ele?.skillId,
                 }))}
                 maxHeight={300}
                 labelField="label"
@@ -307,11 +373,26 @@ const Attendance = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedSkills(item);
                   setSelectedStatus(null);
-                  setFilteredAttendance(
-                    attendanceList?.filter(
-                      (ele) => ele.sKillName === item?.value
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0,
+                      count,
+                      15,
+                      item?.value,
+                      0
                     )
                   );
+                  setFilteredDataAttSource([]);
+                  setMasterDataAttSource([]);
+                  // console.log(skillsList)
+                  // setFilteredAttendance(
+                  //   attendanceList?.attendances?.filter(
+                  //     (ele) => ele.sKillName === item?.value
+                  //   )
+                  // );
                 }}
               />
             </View>
@@ -352,7 +433,11 @@ const Attendance = ({ navigation }) => {
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
-                      item?.value
+                      item?.value,
+                      count,
+                      15,
+                      "",
+                      0
                     )
                   );
                   // setFilteredAttendance(
@@ -363,6 +448,60 @@ const Attendance = ({ navigation }) => {
                 }}
               />
             </View>
+            {/* <View style={{ marginVertical: 10 }}>
+              <View style={{ marginVertical: 5 }}>
+                <Text
+                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
+                >
+                  By Worker Name
+                </Text>
+              </View>
+              <Dropdown
+                style={styles.dropdown}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
+                iconStyle={styles.iconStyle}
+                data={[
+                  { label: "Ascending", value: 0 },
+                  { label: "Descending", value: 1 },
+                ]}
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select Order"}
+                value={selectedOrder}
+                onChange={(item) => {
+                  setOpenFilterModal(false);
+                  setSelectedOrder(item);
+                  setSelectedStatus(null);
+                  setSelectedSkills(null);
+                  dispatch(
+                    getAllAttendanceAction(
+                      token,
+                      selectedProject?.projectId ||
+                        projectsListSimple[0]?.projectId,
+                      0,
+                      count,
+                      15,
+                      "",
+                      item?.value
+                    )
+                  );
+                  setFilteredDataAttSource([]);
+                  setMasterDataAttSource([]);
+                  // setFilteredAttendance(
+                  //   attendanceList?.filter(
+                  //     (ele) => ele.sKillName === item?.value
+                  //   )
+                  // );
+                }}
+              />
+            </View> */}
           </View>
         </View>
       </Modal>
@@ -462,6 +601,10 @@ const Attendance = ({ navigation }) => {
                       getAllAttendanceAction(
                         token,
                         selectedProject?.projectId,
+                        0,
+                        count,
+                        15,
+                        "",
                         0
                       )
                     );
@@ -542,7 +685,7 @@ const Attendance = ({ navigation }) => {
               : item?.absentDays}
           </Text>
         </View>
-        <View style={{ width: "13%", margin: 5 }}>
+        <View style={{ width: "14%", margin: 5 }}>
           <Pressable
             onPress={() => {
               navigation.navigate("AttendanceMusterCard");
@@ -578,7 +721,7 @@ const Attendance = ({ navigation }) => {
               alignItems: "center",
             }}
           >
-            <Text style={[styles.smallButton, { color: "red", fontSize: 8 }]}>
+            <Text style={[styles.smallButton, { color: "red", fontSize: 7 }]}>
               Remove
             </Text>
           </Pressable>
@@ -807,7 +950,7 @@ const Attendance = ({ navigation }) => {
               </Text>
             </ScrollView>
           ) : ( */}
-        {!attendanceList || attendanceList?.length === 0 ? (
+        {!filteredDataAttSource || filteredDataAttSource?.length === 0 ? (
           <ScrollView
             refreshControl={
               <RefreshControl
@@ -818,9 +961,14 @@ const Attendance = ({ navigation }) => {
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
+                      0,
+                      1,
+                      15,
+                      "",
                       0
                     )
                   );
+                  setSelectedSkills(null);
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
@@ -853,17 +1001,26 @@ const Attendance = ({ navigation }) => {
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
+                      0,
+                      1,
+                      15,
+                      "",
                       0
                     )
                   );
+                  setSelectedSkills(null);
+                  setSelectedContractor(null);
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={
-              filteredAttendance ? filteredAttendance : filteredDataAttSource
-            }
+            onEndReached={() => {
+              setCount(count + 1);
+              console.log("page", ++pageNum);
+            }}
+            // onEndReachedThreshold={0.7}
+            data={filteredDataAttSource}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
             initialNumToRender={0}
@@ -951,9 +1108,21 @@ const Attendance = ({ navigation }) => {
                   }}
                   onPress={() => {
                     setSelectedProject(item);
-                    dispatch(getAllAttendanceAction(token, item?.projectId, 0));
+                    dispatch(
+                      getAllAttendanceAction(
+                        token,
+                        item?.projectId,
+                        0,
+                        1,
+                        15,
+                        "",
+                        0
+                      )
+                    );
                     setOpenSearchModal(false);
                     dispatch(saveProjectDataAction(item));
+                    setFilteredDataAttSource([]);
+                    setCount(1);
                   }}
                 >
                   <Text

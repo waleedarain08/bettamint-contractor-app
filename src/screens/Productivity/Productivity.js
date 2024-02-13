@@ -827,6 +827,11 @@ const ProgressRow = (props) => {
     setOpenUpdateProgressModal,
   } = props;
   const [progressValue, setProgressValue] = useState(0);
+  const [remarks, setRemarks] = useState("");
+  // useEffect(() => {
+  //   setRemarks(rowItem.remarks);
+  //   console.log("rowItem", rowItem);
+  // }, [rowItem]);
   const navigation = useNavigation();
   return (
     <View
@@ -932,6 +937,7 @@ const ProgressRow = (props) => {
               width: "100%",
               marginTop: 5,
             }}
+            numberOfLines={1}
           >
             {rowItem.description || "N/A"}
           </Text>
@@ -1123,6 +1129,44 @@ const ProgressRow = (props) => {
       <View
         style={{
           width: "100%",
+          marginTop: 7,
+          borderRadius: 4,
+          paddingLeft: 10,
+          height: 45,
+          backgroundColor: "#F1F1F1",
+          color: Colors.Black,
+          // flexDirection: "row",
+          // justifyContent: "space-between",
+        }}
+      >
+        <Text
+          style={{
+            color: Colors.FormText,
+            fontSize: 10,
+            top: 4,
+          }}
+        >
+          Add Remarks
+        </Text>
+        <TextInput
+          style={{
+            fontFamily: "Lexend-Regular",
+            fontSize: 13,
+            color: Colors.Black,
+            width: "100%",
+            bottom: 8,
+          }}
+          value={remarks}
+          onChangeText={(value) => {
+            setRemarks(value);
+          }}
+          placeholder="Add Remarks"
+          placeholderTextColor={Colors.Black}
+        />
+      </View>
+      <View
+        style={{
+          width: "100%",
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
@@ -1134,7 +1178,7 @@ const ProgressRow = (props) => {
             addProgressEntery(rowItem.boqId, progressValue);
           }}
           style={{
-            width: "48%",
+            width: "100%",
             height: 40,
             alignItems: "center",
             justifyContent: "center",
@@ -1154,7 +1198,7 @@ const ProgressRow = (props) => {
             Save
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
             openFieldNote();
             setOpenUpdateProgressModal();
@@ -1177,7 +1221,7 @@ const ProgressRow = (props) => {
           >
             Add Field Note
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );
@@ -1240,6 +1284,7 @@ const Productivity = ({ navigation }) => {
   const [greenTooltip, setGreenTooltip] = useState(false);
   // const projectsList = useSelector(projectsListSimpleReducer);
   const { selectedNote } = useSelector(fieldNoteReducer);
+  const [workerOrderId, setWorkerOrderId] = useState(null);
   // const labourContractorList = useSelector(labourContractorReducer);
   const userInfo = useSelector(userData);
 
@@ -1283,6 +1328,9 @@ const Productivity = ({ navigation }) => {
           timeline: 0,
           scopeListDetail: [],
           descriptions: [],
+          scopeOfWorkOrderId: 1,
+          titleOrderId: 1,
+          descriptionOrderId: 1,
         },
       ],
     },
@@ -1478,6 +1526,9 @@ const Productivity = ({ navigation }) => {
             timeline: 0,
             scopeListDetail: [],
             descriptions: [],
+            scopeOfWorkOrderId: rowList[rowList.length - 1].rowId + 1,
+            titleOrderId: 1,
+            descriptionOrderId: 1,
           },
         ],
       },
@@ -1501,6 +1552,9 @@ const Productivity = ({ navigation }) => {
               timeline: 0,
               scopeListDetail: [],
               descriptions: [],
+              scopeOfWorkOrderId: rowId,
+              titleOrderId: row.titles.length + 1,
+              descriptionOrderId: 1,
             },
           ],
         };
@@ -1532,6 +1586,9 @@ const Productivity = ({ navigation }) => {
                     rate: 0,
                     quantity: 0,
                     timeline: 0,
+                    scopeOfWorkOrderId: rowId,
+                    titleOrderId: title.titleOrderId,
+                    descriptionOrderId: title.descriptions.length + 1,
                   },
                 ],
               };
@@ -1700,6 +1757,9 @@ const Productivity = ({ navigation }) => {
           title: title.title,
           rate: parseInt(title.rate),
           quantity: parseInt(title.quantity),
+          scopeOfWorkOrderId: title.scopeOfWorkOrderId,
+          titleOrderId: title.titleOrderId,
+          descriptionOrderId: title.descriptionOrderId,
         });
 
         // Then process descriptions if they exist
@@ -1713,11 +1773,59 @@ const Productivity = ({ navigation }) => {
               title: title.title,
               rate: parseInt(desc.rate),
               quantity: parseInt(desc.quantity),
+              scopeOfWorkOrderId: title.scopeOfWorkOrderId,
+              titleOrderId: title.titleOrderId,
+              descriptionOrderId: title.descriptionOrderId + 1,
             });
           });
         }
       });
     });
+
+    function transformData(inputArray) {
+      // Create the transformed object structure
+      let transformedArray = [];
+      // Loop through the inputArray
+      inputArray.forEach((item, index) => {
+        const transformedItem = {
+          contractorBOQId: item.boqId,
+          scopeOfWorkId: item.scopeOfWorkId,
+          titles: item.titles.map((title, index) => {
+            let transformedDescriptions = [];
+            if (!transformedDescriptions.some((item) => item.id === title.id)) {
+              transformedDescriptions.push({
+                unitId: title.unitId,
+                description: title.description,
+                rate: parseFloat(title.rate),
+                quantity: parseFloat(title.quantity),
+              });
+            }
+            if (title.descriptions && title.descriptions.length > 0) {
+              let temp = title.descriptions.map((description) => ({
+                unitId: description.unitId,
+                description: description.description,
+                rate: parseFloat(description.rate),
+                quantity: parseFloat(description.quantity),
+              }));
+              transformedDescriptions = [...transformedDescriptions, ...temp];
+            }
+            const transformedTitle = {
+              title: title.title,
+              descriptions: transformedDescriptions,
+            };
+            return transformedTitle;
+          }),
+          titleOrderId: index, // You might need to assign a specific value here
+          descriptionOrderId: 0, // You might need to assign a specific value here
+        };
+
+        transformedArray.push(transformedItem);
+      });
+
+      return transformedArray;
+    }
+
+    const transformedData = transformData(rowList);
 
     if (!contractor) {
       return Toast.show({
@@ -1728,14 +1836,47 @@ const Productivity = ({ navigation }) => {
         position: "top",
         visibilityTime: 4000,
       });
+    } else if (!workerOrderId) {
+      return Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please enter worker order number.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 4000,
+      });
     }
+
+    let noValidationError = false;
+    transformedData.forEach((item, index) => {
+      item.titles.forEach((titleObj) => {
+        if (
+          titleObj.title === "" ||
+          titleObj.descriptions.some((desc) => desc.description === "")
+        ) {
+          noValidationError = true;
+          return Toast.show({
+            type: "error",
+            text1: "Error",
+            text2: "Please enter title and description",
+            topOffset: 10,
+            position: "top",
+            visibilityTime: 4000,
+          });
+        }
+      });
+    });
+
+    if (noValidationError) return;
+
     let schemaObject = {
-      boqList: changedRowList,
+      boqList: transformedData,
       projectId: project,
       contractorId: contractor,
       endDate: date,
+      workOrderNumber: workerOrderId,
     };
-
+    console.log("schemaObject", schemaObject);
     let resp = await dispatch(addBOQ(token, schemaObject));
     if (resp?.status === 200) {
       Toast.show({
@@ -1763,12 +1904,16 @@ const Productivity = ({ navigation }) => {
               timeline: 0,
               scopeListDetail: [],
               descriptions: [],
+              scopeOfWorkOrderId: 1,
+              titleOrderId: 1,
+              descriptionOrderId: 1,
             },
           ],
         },
       ]);
       setProject(null);
       setContractor(null);
+      setWorkerOrderId(null);
       setDate(new Date());
       setOpenFilterModal(false);
     } else if (resp?.status === 404) {
@@ -2031,53 +2176,6 @@ const Productivity = ({ navigation }) => {
                         ? `${projectsListSimple[0]?.name?.substring(0, 10)}...`
                         : "Select a project"}
                     </Text>
-                    {/* <Dropdown
-                      style={{
-                        height: 20,
-                        backgroundColor: Colors.White,
-                        marginVertical: 2,
-                      }}
-                      placeholderStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      itemTextStyle={{
-                        fontFamily: "Lexend-Regular",
-                        fontSize: 13,
-                        color: Colors.FormText,
-                      }}
-                      itemContainerStyle={{ width: 250 }}
-                      containerStyle={{ width: 250 }}
-                      iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
-                        label: `${ele?.name
-                          ?.split(" ")
-                          ?.slice(0, 1)
-                          .join(" ")}...`,
-                        // label: `${ele?.name.split(" ")[0]} ${
-                        //   ele?.name.split(" ")[1] === undefined
-                        //     ? ""
-                        //     : ele?.name.split(" ")[1]
-                        // }${ele?.name.split(" ").length > 2 ? "..." : ""}`,
-                        value: ele?.projectId,
-                      }))}
-                      maxHeight={400}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"Project"}
-                      value={project ? project : projectsListSimple[0]?.name}
-                      onChange={(item) => {
-                        // setOpenFilterModal(false);
-                        setProject(item.value);
-                        dispatch(getLabourContactorAction(token, item.value));
-                      }}
-                    /> */}
                   </View>
                 </Pressable>
               </View>
@@ -2118,7 +2216,7 @@ const Productivity = ({ navigation }) => {
                   </View>
                   <View style={{ width: "70%" }}>
                     <Text style={styles.selectProjectInsert}>
-                      Project End Date
+                      Completion Date
                     </Text>
                     <Text
                       onPress={() => setOpen(true)}
@@ -2133,6 +2231,27 @@ const Productivity = ({ navigation }) => {
                   </View>
                 </View>
               </View>
+            </View>
+            <View>
+              <TextInput
+                style={{
+                  width: "100%",
+                  height: 40,
+                  // borderWidth: 0.5,
+                  // borderColor: Colors.LightGray,
+                  borderRadius: 5,
+                  padding: 10,
+                  marginBottom: 10,
+                  fontFamily: "Lexend-Medium",
+                  color: Colors.Black,
+                  fontSize: 12,
+                  backgroundColor: "#F1F1F1",
+                }}
+                placeholder={"Worker Order ID"}
+                placeholderTextColor={Colors.Black}
+                value={workerOrderId}
+                onChangeText={(text) => setWorkerOrderId(text)}
+              />
             </View>
             <ScrollView>
               {rowList?.map((item, index) => (
@@ -2188,7 +2307,7 @@ const Productivity = ({ navigation }) => {
                       marginLeft: 5,
                     }}
                   >
-                    Add SOW
+                    Add Scope
                   </Text>
                 </Pressable>
               </View>
@@ -2358,7 +2477,7 @@ const Productivity = ({ navigation }) => {
               <View style={{ alignItems: "flex-end" }}>
                 <Cross
                   onPress={() => {
-                    setOpenProjectModal(!openProjectModal);
+                    setOpenMainProject(false);
                   }}
                   size={22}
                   color={Colors.Black}
@@ -3076,25 +3195,82 @@ const Productivity = ({ navigation }) => {
           </View>
         </Pressable>
         <View style={{ flexDirection: "row" }}>
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Insert BoQ's</Text>
-          </Pressable>
-          {userInfo?.user?.leadTypeId === "Contractor" ? (
+          <View style={{}}>
+            {userInfo?.user?.leadTypeId === "Contractor" ||
+            userInfo?.user?.userTypeId === "SuperAdmin" ? (
+              <Pressable
+                onPress={() => {
+                  setOpenFilterModal(true);
+                }}
+                style={{
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
+                }}
+              >
+                <Text style={styles.smallButton}>Insert</Text>
+              </Pressable>
+            ) : (
+              <></>
+            )}
+            {userInfo?.user?.leadTypeId === "Contractor" ? (
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("VerifyProgress");
+                }}
+                style={{
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
+                }}
+              >
+                <Text style={styles.smallButton}>Verify</Text>
+              </Pressable>
+            ) : (
+              <Pressable
+                onPress={() => {
+                  setOpenUpdateProgressModal(true);
+                }}
+                style={{
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
+                }}
+              >
+                <Text style={styles.smallButton}>Update</Text>
+              </Pressable>
+            )}
+          </View>
+          <View>
+            {userInfo?.user?.userTypeId === "SuperAdmin" && (
+              <Pressable
+                onPress={() => {
+                  navigation.navigate("VerifyProgress");
+                }}
+                style={{
+                  backgroundColor: "#ECE5FC",
+                  padding: 5,
+                  margin: 5,
+                  borderRadius: 3,
+                  paddingHorizontal: 9,
+                  paddingVertical: 7,
+                }}
+              >
+                <Text style={styles.smallButton}>Verify</Text>
+              </Pressable>
+            )}
             <Pressable
               onPress={() => {
-                navigation.navigate("VerifyProgress");
+                navigation.navigate("ViewBoq");
               }}
               style={{
                 backgroundColor: "#ECE5FC",
@@ -3105,25 +3281,9 @@ const Productivity = ({ navigation }) => {
                 paddingVertical: 7,
               }}
             >
-              <Text style={styles.smallButton}>Verify Progress</Text>
+              <Text style={styles.smallButton}>View</Text>
             </Pressable>
-          ) : (
-            <Pressable
-              onPress={() => {
-                setOpenUpdateProgressModal(true);
-              }}
-              style={{
-                backgroundColor: "#ECE5FC",
-                padding: 5,
-                margin: 5,
-                borderRadius: 3,
-                paddingHorizontal: 9,
-                paddingVertical: 7,
-              }}
-            >
-              <Text style={styles.smallButton}>Update Progress</Text>
-            </Pressable>
-          )}
+          </View>
         </View>
       </View>
       <View
@@ -3177,13 +3337,13 @@ const Productivity = ({ navigation }) => {
               }}
             >
               {isNaN(
-                (boqProgress?.result?.completedMeasurement /
+                (boqProgress?.result?.verifiedMeasurement /
                   boqProgress?.result?.totalMeasurement) *
                   100
               )
                 ? 0
                 : `${(
-                    (boqProgress?.result?.completedMeasurement /
+                    (boqProgress?.result?.verifiedMeasurement /
                       boqProgress?.result?.totalMeasurement) *
                     100
                   ).toFixed(0)}%`}
@@ -3196,7 +3356,7 @@ const Productivity = ({ navigation }) => {
                 textAlign: "center",
               }}
             >
-              Work Done
+              Completion
             </Text>
           </View>
         </View>
@@ -3273,11 +3433,11 @@ const Productivity = ({ navigation }) => {
               setPurpleTooltip(false);
             }}
             style={{
-              width: boqProgress?.result?.todaysMeasurement
-                ? (boqProgress?.result?.todaysMeasurement /
-                    boqProgress?.result?.totalMeasurement) *
-                    100 +
-                  "%"
+              width: boqProgress?.result?.verifiedMeasurement
+                ? Math.round(
+                    (boqProgress?.result?.verifiedMeasurement * 100) /
+                      boqProgress?.result?.totalMeasurement
+                  ) + "%"
                 : 0,
               height: 25,
               position: "absolute",
@@ -3287,7 +3447,7 @@ const Productivity = ({ navigation }) => {
               left: 7,
             }}
           ></Pressable>
-          <Text
+          {/* <Text
             style={{
               fontFamily: "Lexend-Medium",
               fontSize: 12,
@@ -3295,8 +3455,8 @@ const Productivity = ({ navigation }) => {
             }}
           >
             {boqProgress?.result?.totalMeasurement ? "0" : "-"}
-          </Text>
-          <Text
+          </Text> */}
+          {/* <Text
             style={{
               fontFamily: "Lexend-Medium",
               fontSize: 12,
@@ -3306,7 +3466,7 @@ const Productivity = ({ navigation }) => {
             {boqProgress?.result?.totalMeasurement
               ? boqProgress?.result?.totalMeasurement
               : "-"}
-          </Text>
+          </Text> */}
         </Pressable>
         {purpleTooltip && (
           <View
@@ -3335,11 +3495,16 @@ const Productivity = ({ navigation }) => {
                   fontSize: 10,
                 }}
               >{`${
-                (
+                Math.round(
                   (boqProgress?.result?.completedMeasurement /
                     boqProgress?.result?.totalMeasurement) *
-                  100
-                ).toFixed(0) + "%"
+                    100
+                ) -
+                Math.round(
+                  (boqProgress?.result?.verifiedMeasurement * 100) /
+                    boqProgress?.result?.totalMeasurement
+                ) +
+                "%"
               }`}</Text>
               <Text
                 style={{
@@ -3348,7 +3513,7 @@ const Productivity = ({ navigation }) => {
                   fontSize: 9,
                 }}
               >
-                Total Work Done
+                Uncertified
               </Text>
             </View>
             <View
@@ -3397,11 +3562,10 @@ const Productivity = ({ navigation }) => {
                   fontSize: 10,
                 }}
               >{`${
-                (
-                  (boqProgress?.result?.todaysMeasurement /
-                    boqProgress?.result?.totalMeasurement) *
-                  100
-                ).toFixed(0) + "%"
+                Math.round(
+                  (boqProgress?.result?.verifiedMeasurement * 100) /
+                    boqProgress?.result?.totalMeasurement
+                ) + "%"
               }`}</Text>
               <Text
                 style={{
@@ -3410,7 +3574,7 @@ const Productivity = ({ navigation }) => {
                   fontSize: 9,
                 }}
               >
-                Today's Update
+                Certified
               </Text>
             </View>
             <View
@@ -3479,9 +3643,7 @@ const Productivity = ({ navigation }) => {
               style={styles.tiles}
             >
               <View>
-                <Text style={styles.tileHeading}>
-                  {"Poor Workmanship Issue"}
-                </Text>
+                <Text style={styles.tileHeading}>{"Workmanship Cost"}</Text>
                 <Text
                   style={{
                     color: Colors.Black,
@@ -3489,7 +3651,7 @@ const Productivity = ({ navigation }) => {
                     fontSize: 16,
                   }}
                 >
-                  ₹ {metrics?.qualityCost || 0}
+                  ₹ {metrics?.workmanshipCost || 0}
                 </Text>
               </View>
               <View>
@@ -3524,7 +3686,7 @@ const Productivity = ({ navigation }) => {
                     fontSize: 16,
                   }}
                 >
-                  ₹ {metrics?.defectsCost || 0}
+                  ₹ {metrics?.qualityCost || 0}
                 </Text>
               </View>
               <View>

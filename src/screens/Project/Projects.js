@@ -36,6 +36,7 @@ import {
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
 import { authToken, userData } from "../../redux/slices/authSlice";
 import RestrictedScreen from "../../components/RestrictedScreen";
+import { useFocusEffect } from "@react-navigation/native";
 LogBox.ignoreAllLogs();
 
 const Projects = ({ navigation }) => {
@@ -57,28 +58,52 @@ const Projects = ({ navigation }) => {
   const projectForLabour = useSelector(projectsForLabourReducer);
   const isLoading = useSelector(loadingProject);
   const userInfo = useSelector(userData);
-
+  // console.log("userInfo", projectsListSimple);
   //! LIFE CYCLE
-  useEffect(() => {
-    dispatch(getAllProjectsAction(token));
-  }, []);
-
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-    if (userInfo?.user?.leadTypeId === "LabourContractor") {
-      dispatch(getProjectsForMapping(token));
-    } else {
+  // useEffect(() => {}, []);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getAllProjectsAction(token));
+      return () => {};
+    }, [])
+  );
+  // useEffect(() => {
+  //   dispatch(getAllProjectsSimpleAction(token));
+  //   if (userInfo?.user?.leadTypeId === "LabourContractor") {
+  //     dispatch(getProjectsForMapping(token));
+  //   } else {
+  //     dispatch(getAllProjectsSimpleAction(token));
+  //   }
+  // }, [userInfo]);
+  useFocusEffect(
+    React.useCallback(() => {
       dispatch(getAllProjectsSimpleAction(token));
-    }
-  }, [userInfo]);
+      if (userInfo?.user?.leadTypeId === "LabourContractor") {
+        dispatch(getProjectsForMapping(token));
+      } else {
+        dispatch(getAllProjectsSimpleAction(token));
+      }
 
+      return () => {};
+    }, [userInfo])
+  );
   const onValueChange = (value) => {
     setSelectedProject(value);
   };
   useEffect(() => {
-    setFilteredDataSource(projectForMapping);
-    setMasterDataSource(projectForMapping);
-  }, [projectForMapping]);
+    if (userInfo?.user?.leadTypeId === "LabourContractor") {
+      setFilteredDataSource(projectForMapping);
+      setMasterDataSource(projectForMapping);
+      console.log("projectForMapping")
+    } else {
+      setFilteredDataSource(projectsListSimple);
+      setMasterDataSource(projectsListSimple);
+      console.log("projectsListSimple")
+    }
+
+    // setFilteredDataSource(projectForMapping);
+    // setMasterDataSource(projectForMapping);
+  }, [projectForMapping, projectsListSimple]);
 
   const roles = userInfo?.user?.role?.roleFeatureSets;
   const isProjectListPresent = roles.some(
@@ -90,7 +115,7 @@ const Projects = ({ navigation }) => {
     if (text) {
       // Inserted text is not blank
       // Filter the masterDataSource and update FilteredDataSource
-      const newData = masterDataSource.filter(function (item) {
+      const newData = masterDataSource?.filter(function (item) {
         // Applying filter for the inserted text in search bar
         const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const textData = text.toUpperCase();

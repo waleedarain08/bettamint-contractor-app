@@ -325,6 +325,7 @@ export const addBOQ = (token, listObject) => async (dispatch) => {
       },
     }
   );
+  console.log("RESPONSE--->>>", response);
   // console.log("STATUS--->>>", response);
   if (response?.status === 200) {
     dispatch(addingBOQSuccess());
@@ -550,4 +551,85 @@ export const verifyBOQProgress = (token, data) => async (dispatch) => {
   return response;
 };
 
+export const rejectBOQProgress = (token, data) => async (dispatch) => {
+  dispatch(gettingFinancialGraphData());
+  const response = await axios.put(
+    `${base_url}/dashboard/Productivity/rejectprogress`,
+    data,
+    {
+      headers: {
+        Authorization: token,
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (response?.status === 200) {
+    dispatch(gettingFinancialGraphDataSuccess());
+  } else {
+    dispatch(
+      gettingFinancialGraphDataFailure(
+        "Something went wrong while getting BOQ Progress!"
+      )
+    );
+  }
+  return response;
+};
+
+export const approveBOQMeasurementReason =
+  (token, data) => async (dispatch) => {
+    dispatch(gettingFinancialGraphData());
+    const response = await axios.put(
+      `${base_url}/dashboard/Productivity/approveprogressreason`,
+      data,
+      {
+        headers: {
+          Authorization: token,
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response?.status === 200) {
+      dispatch(gettingFinancialGraphDataSuccess());
+    } else {
+      dispatch(
+        gettingFinancialGraphDataFailure(
+          "Something went wrong while getting BOQ Progress!"
+        )
+      );
+    }
+    return response;
+  };
+
+export const getListOfBOQ =
+  (
+    token,
+    projectId = 0,
+    contractorId = 0,
+    pageNumber = 1,
+    pageSize = 50,
+    sortBy = "",
+    orderBy = ""
+  ) =>
+  async (dispatch) => {
+    dispatch(gettingBoqListGC());
+    // if (projectId) {
+    const response = await axios.get(
+      `${base_url}/dashboard/Productivity/getboqlist?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}&sortBy=${sortBy}&orderBy=${orderBy}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response?.status === 200) {
+      dispatch(gettingBoqListGCSuccess(response?.data));
+    } else {
+      dispatch(
+        gettingBoqListGCFailure(
+          "Something went wrong while getting BOQ GC list!"
+        )
+      );
+    }
+    return response;
+  };
 export default productivitySlice.reducer;

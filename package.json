@@ -10,7 +10,8 @@
 		"test": "jest",
 		"pod": "cd ios && pod install && cd ..",
 		"clean": "cd android && ./gradlew clean && cd ..",
-		"release": "cd android && ./gradlew assembleRelease && cd .."
+		"release": "cd android && ./gradlew assembleRelease && cd ..",
+		"releaseapk": "cd android && ./gradlew app:assembleRelease"
 	},
 	"dependencies": {
 		"@dev-event/react-native-maps-draw": "^2.0.1",

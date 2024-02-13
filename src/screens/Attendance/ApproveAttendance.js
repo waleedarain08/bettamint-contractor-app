@@ -2,8 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
   Dimensions,
@@ -12,23 +10,19 @@ import {
   Pressable,
   RefreshControl,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Menu from "../../assets/icons/Menu.png";
+import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
 import { Building, Cross, Search } from "../../icons";
-import { OptionsButton } from "react-native-options-button";
 import { useSelector, useDispatch } from "react-redux";
 import {
   projectDataReducer,
-  getAllAttendanceAction,
-  attendanceListReducer,
   getAttendanceApproveAction,
   loadingAttendance,
   markAttendance,
+  todaysAttendanceListReducer,
+  getTodaysAttendanceAction,
 } from "../../redux/slices/attendanceSlice";
 import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
@@ -61,12 +55,15 @@ const ApproveAttendance = ({ navigation, route }) => {
   const isLoading = useSelector(loadingAttendance);
   const dispatch = useDispatch();
   const projectData = useSelector(projectDataReducer);
-  const attendance = useSelector(attendanceListReducer);
+  // const attendance = useSelector(attendanceListReducer);
+  const attendance = useSelector(todaysAttendanceListReducer);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const usersList = useSelector(usersListReducer);
   const labourContractorList = useSelector(labourContractorReducer);
   const [openDropdown, setOpenDropdown] = useState(false);
   const [currMarkedAtt, setCurrMarkedAtt] = useState(null);
+  const [count, setCount] = useState(0);
+
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
   };
@@ -87,7 +84,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   useFocusEffect(
     React.useCallback(() => {
       dispatch(
-        getAllAttendanceAction(
+        getTodaysAttendanceAction(
           token,
           projectData?.projectId || projectsListSimple[0]?.projectId
         )
@@ -96,6 +93,20 @@ const ApproveAttendance = ({ navigation, route }) => {
       return () => {};
     }, [projectData])
   );
+
+  useEffect(() => {
+    dispatch(
+      getTodaysAttendanceAction(
+        token,
+        projectData?.projectId || projectsListSimple[0]?.projectId,
+        0,
+        count,
+        15
+      )
+    );
+    console.log("COUNT", count);
+    console.log("Attendance", filteredDataAttSource?.length);
+  }, [count]);
   // Convert UTC time to Indian Standard Time
   const convertTimeToIST = (time) => {
     let indianTime;
@@ -121,20 +132,47 @@ const ApproveAttendance = ({ navigation, route }) => {
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
   useEffect(() => {
-    if (currentFilterState === "Present") {
-      setFilterAttendance(attendance?.filter((ele) => ele.isOnline === true));
-    } else if (currentFilterState === "Offline") {
-      setFilterAttendance(
-        attendance?.filter((ele) => ele.workerTypeId === "Offline")
-      );
-    } else if (currentFilterState === "Online") {
-      setFilterAttendance(
-        attendance?.filter((ele) => ele.workerTypeId === "Online")
-      );
+    if (attendance) {
+      setFilteredDataAttSource((prev) => {
+        return [...(prev || []), ...(attendance?.attendances || [])];
+      });
+      setMasterDataAttSource((prev) => {
+        return [...(prev || []), ...(attendance?.attendances || [])];
+      });
     }
-    setFilteredDataAttSource(attendance);
-    setMasterDataAttSource(attendance);
-  }, [attendance]);
+    // console.log("FILTERED DATA", attendance);
+  }, [attendance?.attendances]);
+
+  useEffect(() => {
+    if (filteredDataAttSource?.length) {
+      if (currentFilterState === "Present") {
+        setFilterAttendance((prev) => [
+          ...(prev || []),
+          ...filteredDataAttSource?.filter((ele) => ele.isOnline === true),
+        ]);
+      } else if (currentFilterState === "Offline") {
+        setFilterAttendance((prev) => [
+          ...(prev || []),
+          ...filteredDataAttSource?.filter(
+            (ele) => ele.workerTypeId === "Offline"
+          ),
+        ]);
+      } else if (currentFilterState === "Online") {
+        setFilterAttendance((prev) => [
+          ...(prev || []),
+          ...filteredDataAttSource?.filter(
+            (ele) => ele.workerTypeId === "Online"
+          ),
+        ]);
+      } else if (currentFilterState === "Absent") {
+        setFilterAttendance((prev) => [
+          ...(prev || []),
+          ...filteredDataAttSource?.filter((ele) => ele.isOnline === false),
+        ]);
+      }
+    }
+    // console.log("FILTERED DATA", attendance);
+  }, [filteredDataAttSource?.length]);
 
   const handleOfflineWorkerAttendance = async (
     workerId,
@@ -145,7 +183,7 @@ const ApproveAttendance = ({ navigation, route }) => {
     let resp = await dispatch(
       markAttendance(token, workerId, jobId, attendanceType)
     );
-    console.log('RESPONSE--->>>', resp)
+    console.log("RESPONSE--->>>", resp);
     if (resp?.status === 200) {
       // console.log("SUCCESS");
       // console.log("AFTER", moment(new Date()).format("hh:mm:ss"));
@@ -249,7 +287,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
                   dispatch(
-                    getAllAttendanceAction(
+                    getTodaysAttendanceAction(
                       token,
                       projectData?.projectId ||
                         projectsListSimple[0]?.projectId,
@@ -365,7 +403,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   );
                   setTimeout(() => {
                     dispatch(
-                      getAllAttendanceAction(
+                      getTodaysAttendanceAction(
                         token,
                         projectData?.projectId ||
                           projectsListSimple[0]?.projectId
@@ -456,7 +494,8 @@ const ApproveAttendance = ({ navigation, route }) => {
         <View style={{ width: "18%", alignItems: "center" }}>
           {currentFilterState === "Offline" ||
           currentFilterState === "Online" ||
-          currentFilterState === "Absent" ? (
+          currentFilterState === "Absent" ||
+          currentFilterState === "Present" ? (
             <View>
               {item?.todayCheckOut ? (
                 <Text style={styles.flatListText}>
@@ -541,10 +580,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 },
               ]}
             >
-              {`Present-${
-                filteredDataAttSource?.filter((ele) => ele.isOnline === true)
-                  ?.length || 0
-              }`}
+              {`Present-${attendance?.presentCount || 0}`}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -573,10 +609,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 },
               ]}
             >
-              {`Absent-${
-                filteredDataAttSource?.filter((ele) => ele.isOnline === false)
-                  ?.length || 0
-              }`}
+              {`Absent-${attendance?.absentCount || 0}`}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -607,11 +640,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 },
               ]}
             >
-              {`Online-${
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Online"
-                )?.length
-              }`}
+              {`Online-${attendance?.onlineCount || 0}`}
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -645,11 +674,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 },
               ]}
             >
-              {`Offline-${
-                filteredDataAttSource?.filter(
-                  (ele) => ele.workerTypeId === "Offline"
-                )?.length || 0
-              }`}
+              {`Offline-${attendance?.offlineCount || 0}`}
             </Text>
           </TouchableOpacity>
         </View>
@@ -683,7 +708,10 @@ const ApproveAttendance = ({ navigation, route }) => {
         <Pressable
           onPress={() => {
             setOpenFilterModal(true);
-            dispatch(getLabourContactorAction(token));
+            const projectId = projectData?.projectId
+              ? projectData?.projectId
+              : projectsListSimple[0]?.projectId;
+            dispatch(getLabourContactorAction(token, projectId));
           }}
           style={styles.contractorButton}
         >
@@ -726,7 +754,7 @@ const ApproveAttendance = ({ navigation, route }) => {
               refreshing={isLoading}
               onRefresh={() => {
                 dispatch(
-                  getAllAttendanceAction(
+                  getTodaysAttendanceAction(
                     token,
                     projectData?.projectId || projectsListSimple[0]?.projectId
                   )
@@ -736,6 +764,10 @@ const ApproveAttendance = ({ navigation, route }) => {
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
+          onEndReached={() => {
+            setCount(count + 1);
+          }}
+          // onEndReachedThreshold={0.7}
           extraData={filterAttendance}
           data={!filterAttendance ? filteredDataAttSource : filterAttendance}
           renderItem={({ item, index }) => <Item item={item} index={index} />}
