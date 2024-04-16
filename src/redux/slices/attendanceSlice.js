@@ -183,7 +183,7 @@ export const getAllAttendanceAction =
           ATTENDANCE_GETALL_URL +
             `?projectId=${projectId}&createdBy=${
               contractorId || 0
-            }&pageNumber=${pageNumber}&pageSize=${15}&skillId=${skillId}&sortBy=worker-name&sortOrder=${0}`,
+            }&pageNumber=${pageNumber}&pageSize=${1000}&skillId=${skillId}&sortBy=worker-name&sortOrder=${0}`,
           null,
           {
             Authorization: token,
@@ -193,7 +193,6 @@ export const getAllAttendanceAction =
           // console.log("ATTENDANCE RESPONSE", res)
           const data = responseHandler(res);
           if (data) {
-            // console.log("ATTENDANCE DATA", data?.result?.attendances);
             dispatch(getAttendanceSuccess(data?.result));
           }
         })
@@ -218,7 +217,15 @@ export const getAllAttendanceAction =
     }
   };
 export const getTodaysAttendanceAction =
-  (token, projectId, contractorId, pageNumber = 1, pageSize = 25) =>
+  (
+    token,
+    projectId,
+    contractorId,
+    pageNumber = 1,
+    pageSize = 25,
+    skillId = "",
+    sortOrder = 0
+  ) =>
   async (dispatch) => {
     try {
       dispatch(getTodaysAttendanceRequest());
@@ -229,17 +236,15 @@ export const getTodaysAttendanceAction =
           ATTENDANCE_GETALL_URL +
             `?projectId=${projectId}&createdBy=${
               contractorId || 0
-            }&pageNumber=${pageNumber}&pageSize=${15}`,
+            }&pageNumber=${pageNumber}&pageSize=${1000}&skillId=${skillId}&sortBy=worker-name&sortOrder=${0}`,
           null,
           {
             Authorization: token,
           }
         )
         .then((res) => {
-          // console.log("ATTENDANCE RESPONSE", res)
           const data = responseHandler(res);
           if (data) {
-            console.log("ATTENDANCE DATA", data?.result?.attendances);
             dispatch(getTodaysAttendanceSuccess(data?.result));
           }
         })
@@ -398,13 +403,14 @@ export const getAttendanceReportAction =
   };
 
 export const markAttendance =
-  (token, workerId, jobId, attendanceType) => async (dispatch) => {
+  (token, workerId, jobId, attendanceType, latitude, longitude) =>
+  async (dispatch) => {
     dispatch(markingAttendance());
     try {
       // if (projectId) {
 
       const response = await axios.post(
-        `${base_url}/dashboard/Attendance/markattendance?workerId=${workerId}&jobId=${jobId}&attendanceType=${attendanceType}`,
+        `${base_url}/dashboard/Attendance/markattendance?workerId=${workerId}&jobId=${jobId}&attendanceType=${attendanceType}&latitude=${latitude}&longitude=${longitude}`,
         null,
         {
           headers: {
@@ -412,7 +418,6 @@ export const markAttendance =
           },
         }
       );
-      console.log("markAttendance", response);
       if (response?.status === 200) {
         dispatch(markingAttendanceSuccess());
       }

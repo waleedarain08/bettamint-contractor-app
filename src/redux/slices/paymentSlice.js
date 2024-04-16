@@ -139,14 +139,25 @@ export const paymentProcess =
   };
 
 export const getAllPaymentsAction =
-  (token, projectId, contractorId) => async (dispatch) => {
+  (
+    token,
+    projectId,
+    contractorId,
+    pageNumber = 1,
+    pageSize = 25,
+    skillId = "",
+    sortOrder = 0
+  ) =>
+  async (dispatch) => {
     try {
       dispatch(getPaymentListRequest());
       await api
         .request(
           "GET",
           ATTENDANCE_GETALL_URL +
-            `?projectId=${projectId}&createdBy=${contractorId || 0}`,
+            `?projectId=${projectId}&createdBy=${
+              contractorId || 0
+            }&pageNumber=${pageNumber}&pageSize=${15}&skillId=${skillId}&sortBy=worker-name&sortOrder=${0}`,
           null,
           {
             Authorization: token,
@@ -155,7 +166,7 @@ export const getAllPaymentsAction =
         .then((res) => {
           const data = responseHandler(res);
           if (data) {
-            dispatch(getPaymentListSuccess(data));
+            dispatch(getPaymentListSuccess(data?.result));
           }
         })
         .catch((error) => {

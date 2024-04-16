@@ -25,7 +25,7 @@ import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import { BackCircleIcon, LocationIcon, Picture } from "../../icons";
+import { BackCircleIcon, Cross, LocationIcon, Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
 import { launchCamera, launchImageLibrary } from "react-native-image-picker";
@@ -43,6 +43,10 @@ import WebView from "react-native-webview";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
+import {
+  fieldNoteReducer,
+  getScopeList,
+} from "../../redux/slices/fieldNoteSlice";
 // const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
 // import Geolocation from "@react-native-community/geolocation";
 // import { PermissionsAndroid } from "react-native";
@@ -64,32 +68,107 @@ const CreateNewProject = ({ navigation }) => {
   const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
-  const [projectNameClick, setProjectNameClick] = useState(false);
+  const [openSOWModal, setOpenSOWModal] = useState(false);
   const [loader, setLoader] = useState(true);
-  const [currentLocation, setCurrentLocation] = useState(null);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [projectArea, setProjectArea] = useState(null);
+  const [sow, setSow] = useState([]);
+  const [geoFancingList, setGeoFancingList] = useState([]);
   const token = useSelector(authToken);
   const dispatch = useDispatch();
   const mapRef = useRef();
   const project = useSelector(selectedProjectReducer);
-  const geoArray = [
-    {
-      latitude: 26.04198067508024,
-      longitude: 68.94373902912463,
-    },
-    {
-      latitude: 26.04375434168726,
-      longitude: 68.94556293125476,
-    },
-    {
-      latitude: 26.042134908024217,
-      longitude: 68.94873866672839,
-    },
-  ];
+  const { scopeList } = useSelector(fieldNoteReducer);
+  // console.log("scopeList", scopeList);
+  console.log("project", project);
   useEffect(() => {
     getLocationPermission();
+    dispatch(getScopeList(token));
   }, []);
+  useEffect(() => {
+    if (scopeList.length > 0) {
+      const sowObject = convertScopeList(scopeList);
+      setSow(sowObject);
+    }
+  }, [scopeList]); // eslint-disable-line
+
+  function convertScopeList() {
+    const scopeObject = {};
+    scopeList.forEach((scope) => {
+      const retrievedScope = project?.scopeOfWorks?.find(
+        (projectScope) => projectScope.scopeOfWorkId === scope.scopeOfWorkId
+      );
+
+      // const retrievedUnit = unitList.find(
+      //   (unit) => unit.unitId === retrievedScope?.unitId
+      // );
+
+      scopeObject[scope.name] = createScopeObject({
+        scope,
+        retrievedScope,
+        // retrievedUnit,
+      });
+    });
+    return scopeObject;
+  }
+
+  function createScopeObject({ scope, retrievedScope, retrievedUnit = null }) {
+    const measurement = retrievedScope?.costPerSqFeet || "";
+    const touched = Boolean(measurement);
+    // const unit = retrievedUnit;
+    // const touched = Boolean(measurement) || Boolean(unit);
+    // const error = touched && (!measurement || !unit);
+
+    return {
+      measurement,
+      touched,
+      icon: scope.imageUrl,
+      iconKey: scope.imageKey,
+      scopeOfWorkId: scope.scopeOfWorkId,
+      // unit,
+      // error,
+    };
+  }
+
+  function getFormattedScopeOfWorks() {
+    const scopeOfWorkArray = [];
+
+    Object.keys(sow).forEach((sowLabel) => {
+      const scope = sow[sowLabel];
+
+      // if (scope.unit && scope.measurement) {
+      if (scope.measurement) {
+        const scopeObject = createFormattedScopeObject(scope);
+        scopeOfWorkArray.push(scopeObject);
+      }
+    });
+
+    return scopeOfWorkArray;
+  }
+
+  function createFormattedScopeObject(scope) {
+    return {
+      projectId: project?.projectId,
+      scopeOfWorkId: scope.scopeOfWorkId,
+      costPerSqFeet: Number(scope.measurement),
+      // unitId: scope.unit.unitId,
+    };
+  }
+  function handleMeasurementChange(label, value) {
+    // const touched = value || SOWItems[label].unit;
+    // const error = touched && (!value || !SOWItems[label].unit);
+    // const touched = Boolean(value);
+
+    setSow((prevState) => ({
+      ...prevState,
+      [label]: {
+        ...prevState[label],
+        measurement: value,
+        // touched,
+        // error,
+      },
+    }));
+  }
   const getLocationPermission = async () => {
     try {
       const granted = await PermissionsAndroid.request(
@@ -132,6 +211,10 @@ const CreateNewProject = ({ navigation }) => {
   }, [project]);
 
   const submitHandler = async () => {
+    // console.log("geoFancingArray", geoFancingArray);
+    const formattedScopeOfWOrk = getFormattedScopeOfWorks();
+
+    // console.log("SOW", formattedScopeOfWOrk);
     const formData = new FormData();
     const projectId = project ? project?.projectId : 0;
     if (!value) {
@@ -179,6 +262,15 @@ const CreateNewProject = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
+    } else if (Object.keys(sow)?.every((label) => !sow[label].measurement)) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please provide cost for atleast one scope of work.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
     } else {
       formData.append("Name", projectName);
       formData.append("ProjectArea", projectArea);
@@ -190,9 +282,10 @@ const CreateNewProject = ({ navigation }) => {
         type: projectImage?.assets[0]?.type,
         uri: projectImage?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
       });
-      formData.append("GeofencingArray", JSON.stringify(geoFancingArray));
-      formData.append("Latitude", geoFancingArray[0].latitude);
-      formData.append("Longitude", geoFancingArray[0].longitude);
+      formData.append("geofencingList", JSON.stringify(geoFancingList));
+      formData.append("Latitude", geoFancingArray[0][0].latitude);
+      formData.append("Longitude", geoFancingArray[0][0].longitude);
+      formData.append("scopeOfWorks", JSON.stringify(formattedScopeOfWOrk));
       const response = await dispatch(updateProjectAction(token, formData));
       if (response.status === 200) {
         navigation.goBack();
@@ -204,21 +297,17 @@ const CreateNewProject = ({ navigation }) => {
           position: "top",
           visibilityTime: 4000,
         });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Something went wrong. Please try again.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 3000,
+        });
       }
     }
-
-    // if (projectName === "") {
-    //   Alert.alert("Please enter project name");
-    // } else if (projectType === "") {
-    //   Alert.alert("Please enter project type");
-    // } else if (projectLocation === "") {
-    //   Alert.alert("Please enter project location");
-    // } else if (projectImage === "") {
-    //   Alert.alert("Please enter project image");
-    // } else {
-    //   dispatch(updateProjectAction(formData));
-    //   navigation.navigate("Projects");
-    // }
   };
   const handleImagePicker = async () => {
     const result = await launchImageLibrary({
@@ -249,7 +338,20 @@ const CreateNewProject = ({ navigation }) => {
           source={{ uri: mapUrl }}
           style={{ flex: 1 }}
           onMessage={(event) => {
-            setGeoFancingArray(JSON.parse(event?.nativeEvent?.data));
+            const newArray =
+              JSON.parse(event?.nativeEvent?.data) &&
+              JSON.parse(event?.nativeEvent?.data)?.map((area) =>
+                area.boundary.map((point) => ({
+                  latitude: point.latitude,
+                  longitude: point.longitude,
+                }))
+              );
+            setGeoFancingArray(newArray);
+            setGeoFancingList(JSON.parse(event?.nativeEvent?.data));
+            // JSON.parse(event?.nativeEvent?.data)?.map((area) => {
+            //   console.log("area", area);
+            // });
+            // console.log("newArray", newArray);
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
@@ -277,224 +379,315 @@ const CreateNewProject = ({ navigation }) => {
     mapRef?.current?.animateToRegion(
       {
         latitude:
-          geoFancingArray[0]?.latitude || currentPosition?.coords?.latitude,
+          (geoFancingArray[0] && geoFancingArray[0][0]?.latitude) ||
+          currentPosition?.coords?.latitude,
         longitude:
-          geoFancingArray[0]?.longitude || currentPosition?.coords?.longitude,
-        latitudeDelta: geoFancingArray[0]?.latitude ? 0.006 : 0.2,
-        longitudeDelta: geoFancingArray[0]?.longitude ? 0.001 : 20,
+          (geoFancingArray[0] && geoFancingArray[0][0]?.longitude) ||
+          currentPosition?.coords?.longitude,
+        latitudeDelta:
+          geoFancingArray[0] && geoFancingArray[0][0]?.latitude ? 0.006 : 0.2,
+        longitudeDelta:
+          geoFancingArray[0] && geoFancingArray[0][0]?.longitude ? 0.001 : 20,
       },
       2000
     );
   }, 1000);
   return (
     <View style={styles.container}>
-      {/* <Toast /> */}
       <View style={styles.header} />
       <View style={styles.graph}>
-        <View
-          style={{
-            flexDirection: "row",
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: 20,
-          }}
-        >
-          <Pressable
-            onPress={() => handleImagePicker()}
-            style={{ width: "28%" }}
-          >
-            {projectImageUri ? (
-              <Image
-                source={{ uri: projectImageUri }}
-                style={{ width: "100%", height: 82, borderRadius: 5 }}
-              />
-            ) : (
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderColor: Colors.FormBorder,
-                  borderStyle: "dashed",
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  width: "100%",
-                  height: 82,
-                }}
-              >
-                <Picture size={38} color={"#D1E0EE"} />
-                <Text style={styles.imgText}>Add Picture</Text>
-              </View>
-            )}
-          </Pressable>
-          <View style={{ width: "68%" }}>
-            <Text style={styles.title}>Project Type</Text>
-            <View style={{ marginTop: 7 }}>
-              <DropDownPicker
-                open={open}
-                value={value}
-                items={items}
-                setOpen={setOpen}
-                setValue={setValue}
-                setItems={setItems}
-                placeholder="Select"
-                // maxHeight={80}
-                placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
-                listItemContainerStyle={{ borderColor: Colors.FormBorder }}
-                dropDownContainerStyle={{
-                  backgroundColor: "#dfdfdf",
-                  borderColor: Colors.FormBorder,
-                }}
-                selectedItemLabelStyle={{
-                  fontWeight: "bold",
-                }}
-                style={{
-                  borderColor: Colors.FormBorder,
-                  borderRadius: 4,
-                  height: 50,
-                  backgroundColor: Colors.White,
-                  elevation: 3,
-                }}
-                arrowIconStyle={{ height: 20, width: 10 }}
-              />
-            </View>
-          </View>
-        </View>
-        <View
-          style={{
-            paddingHorizontal: 18,
-            paddingBottom: 20,
-            marginTop: open ? 120 : 0,
-          }}
-        >
-          <Text style={styles.title}>Project Name</Text>
-          {/* <Pressable
-            onPress={() => {
-              setProjectNameClick(!projectNameClick);
-            }}
-          > */}
-          <TextInput
-            style={{
-              fontFamily: "Lexend-Regular",
-              borderWidth: 1,
-              borderColor: Colors.FormBorder,
-              marginTop: 7,
-              borderRadius: 4,
-              paddingHorizontal: 7,
-              fontSize: 12,
-              height: 50,
-              backgroundColor: Colors.White,
-              elevation: 3,
-              color: "black",
-            }}
-            onChangeText={(e) => setProjectName(e)}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Project Name"
-            value={projectName}
-          />
-          {/* </Pressable> */}
-        </View>
-        <View
-          style={{
-            paddingHorizontal: 18,
-            paddingBottom: 20,
-            // marginTop: open ? 120 : 0,
-          }}
-        >
-          <Text style={styles.title}>Project Area In SQFTS</Text>
-          {/* <Pressable
-            onPress={() => {
-              setProjectNameClick(!projectNameClick);
-            }}
-          > */}
-          <TextInput
-            style={{
-              fontFamily: "Lexend-Regular",
-              borderWidth: 1,
-              borderColor: Colors.FormBorder,
-              marginTop: 7,
-              borderRadius: 4,
-              paddingHorizontal: 7,
-              fontSize: 12,
-              height: 50,
-              backgroundColor: Colors.White,
-              elevation: 3,
-              color: "black",
-            }}
-            keyboardType="numeric"
-            onChangeText={(e) => setProjectArea(e)}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Project Area"
-            value={projectArea}
-          />
-          {/* </Pressable> */}
-        </View>
-        {/* <View style={{position: 'absolute'}}> */}
-        <View
-          style={{
-            flex: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            height: 280,
-          }}
-        >
-          <MapView
-            provider={PROVIDER_GOOGLE} // remove if not using Google Maps
-            style={styles.map}
-            ref={mapRef}
-            showsUserLocation
-            showsMyLocationButton
-            mapType="standard"
-            loadingEnabled={true}
-          >
-            {geoFancingArray?.length !== 0 && (
-              <Polygon
-                coordinates={geoFancingArray}
-                strokeColor={Colors.Purple}
-                strokeWidth={3}
-              />
-            )}
-          </MapView>
+        <ScrollView>
           <View
             style={{
-              flex: 1,
-              // flexDirection: "row",
-              position: "absolute",
-              top: 10,
-              left: 20,
-              alignSelf: "center",
-              // justifyContent: "space-between",
-              backgroundColor: "transparent",
-              borderWidth: 0.5,
-              borderRadius: 20,
+              flexDirection: "row",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: 20,
             }}
           >
             <Pressable
-              onPress={() => {
-                setOpenMapModal(true);
-              }}
-              style={{
-                backgroundColor: Colors.Black,
-                padding: 5,
-                paddingHorizontal: 10,
-                borderRadius: 10,
-              }}
+              onPress={() => handleImagePicker()}
+              style={{ width: "28%" }}
             >
-              <View>
-                <Text
+              {projectImageUri ? (
+                <Image
+                  source={{ uri: projectImageUri }}
+                  style={{ width: "100%", height: 82, borderRadius: 5 }}
+                />
+              ) : (
+                <View
                   style={{
-                    color: Colors.White,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 14,
-                    textAlign: "center",
+                    justifyContent: "center",
+                    alignItems: "center",
+                    borderColor: Colors.FormBorder,
+                    borderStyle: "dashed",
+                    borderWidth: 1,
+                    borderRadius: 5,
+                    width: "100%",
+                    height: 82,
                   }}
                 >
-                  Draw Boundaries
-                </Text>
-              </View>
+                  <Picture size={38} color={"#D1E0EE"} />
+                  <Text style={styles.imgText}>Add Picture</Text>
+                </View>
+              )}
             </Pressable>
+            <View style={{ width: "68%" }}>
+              <Text style={styles.title}>Project Type</Text>
+              <View style={{ marginTop: 7 }}>
+                <DropDownPicker
+                  open={open}
+                  value={value}
+                  items={items}
+                  setOpen={setOpen}
+                  setValue={setValue}
+                  setItems={setItems}
+                  placeholder="Select"
+                  // maxHeight={80}
+                  placeholderStyle={{ color: Colors.FormText, fontSize: 13 }}
+                  listItemContainerStyle={{ borderColor: Colors.FormBorder }}
+                  dropDownContainerStyle={{
+                    backgroundColor: "#dfdfdf",
+                    borderColor: Colors.FormBorder,
+                  }}
+                  selectedItemLabelStyle={{
+                    fontWeight: "bold",
+                  }}
+                  style={{
+                    borderColor: Colors.FormBorder,
+                    borderRadius: 4,
+                    height: 50,
+                    backgroundColor: Colors.White,
+                    elevation: 3,
+                  }}
+                  arrowIconStyle={{ height: 20, width: 10 }}
+                />
+              </View>
+            </View>
           </View>
-        </View>
+          <View
+            style={{
+              paddingHorizontal: 18,
+              paddingBottom: 20,
+              marginTop: open ? 120 : 0,
+            }}
+          >
+            <Text style={styles.title}>Project Name</Text>
+            {/* <Pressable
+            onPress={() => {
+              setProjectNameClick(!projectNameClick);
+            }}
+          > */}
+            <TextInput
+              style={{
+                fontFamily: "Lexend-Regular",
+                borderWidth: 1,
+                borderColor: Colors.FormBorder,
+                marginTop: 7,
+                borderRadius: 4,
+                paddingHorizontal: 7,
+                fontSize: 12,
+                height: 50,
+                backgroundColor: Colors.White,
+                elevation: 3,
+                color: "black",
+              }}
+              onChangeText={(e) => setProjectName(e)}
+              placeholderTextColor={Colors.FormText}
+              placeholder="Enter Project Name"
+              value={projectName}
+            />
+            {/* </Pressable> */}
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 18,
+              paddingBottom: 20,
+              // marginTop: open ? 120 : 0,
+            }}
+          >
+            <Text style={styles.title}>Project Area In SQFTS</Text>
+            {/* <Pressable
+            onPress={() => {
+              setProjectNameClick(!projectNameClick);
+            }}
+          > */}
+            <TextInput
+              style={{
+                fontFamily: "Lexend-Regular",
+                borderWidth: 1,
+                borderColor: Colors.FormBorder,
+                marginTop: 7,
+                borderRadius: 4,
+                paddingHorizontal: 7,
+                fontSize: 12,
+                height: 50,
+                backgroundColor: Colors.White,
+                elevation: 3,
+                color: "black",
+              }}
+              keyboardType="numeric"
+              onChangeText={(e) => setProjectArea(e)}
+              placeholderTextColor={Colors.FormText}
+              placeholder="Enter Project Area"
+              value={projectArea}
+            />
+            {/* </Pressable> */}
+          </View>
+          <View
+            style={{
+              paddingHorizontal: 18,
+              paddingBottom: 20,
+            }}
+          >
+            <Text style={styles.title}>Add Scope Of Works</Text>
+            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+              {Object.keys(sow)?.length !== 0 &&
+                Object.keys(sow)?.map((item) => (
+                  <View
+                    style={{
+                      width: "50%",
+                      paddingHorizontal: 10,
+                    }}
+                  >
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        width: "100%",
+                        marginTop: 10,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.FormText,
+                          fontSize: 12,
+                        }}
+                      >
+                        {item}
+                      </Text>
+                    </View>
+                    <View style={{ width: "100%" }}>
+                      <View
+                        style={{
+                          fontFamily: "Lexend-Regular",
+                          borderWidth: 1,
+                          width: "100%",
+                          borderColor: Colors.FormBorder,
+                          marginTop: 3,
+                          borderRadius: 4,
+                          paddingHorizontal: 7,
+                          fontSize: 12,
+                          height: 40,
+                          backgroundColor: Colors.White,
+                          elevation: 3,
+                          color: "black",
+                          flexDirection: "row",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <TextInput
+                          placeholder="--"
+                          placeholderTextColor={Colors.FormText}
+                          keyboardType="numeric"
+                          onChangeText={(target) =>
+                            handleMeasurementChange(item, target)
+                          }
+                          value={sow[item]?.measurement}
+                          style={{
+                            fontFamily: "Lexend-Regular",
+                            width: "80%",
+                            fontSize: 12,
+                            backgroundColor: Colors.White,
+                            color: "black",
+                          }}
+                        />
+                        <Text
+                          style={{
+                            fontFamily: "Lexend-Regular",
+                            color: Colors.FormText,
+                            fontSize: 12,
+                          }}
+                        >
+                          /sqft
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
+                ))}
+            </View>
+          </View>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: "center",
+              alignItems: "center",
+              height: 280,
+            }}
+          >
+            <MapView
+              provider={PROVIDER_GOOGLE} // remove if not using Google Maps
+              style={styles.map}
+              ref={mapRef}
+              zoomControlEnabled
+              showsUserLocation
+              showsMyLocationButton
+              mapType="standard"
+              loadingEnabled={true}
+            >
+              {geoFancingArray?.length !== 0 &&
+                geoFancingArray.map((item, index) => (
+                  <Polygon
+                    coordinates={item}
+                    strokeColor={Colors.Purple}
+                    strokeWidth={3}
+                  />
+                ))}
+            </MapView>
+            <View
+              style={{
+                flex: 1,
+                // flexDirection: "row",
+                position: "absolute",
+                top: 10,
+                left: 20,
+                alignSelf: "center",
+                // justifyContent: "space-between",
+                backgroundColor: "transparent",
+                borderWidth: 0.5,
+                borderRadius: 20,
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  setOpenMapModal(true);
+                }}
+                style={{
+                  backgroundColor: Colors.Black,
+                  padding: 5,
+                  paddingHorizontal: 10,
+                  borderRadius: 10,
+                }}
+              >
+                <View>
+                  <Text
+                    style={{
+                      color: Colors.White,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 14,
+                      textAlign: "center",
+                    }}
+                  >
+                    Draw Boundaries
+                  </Text>
+                </View>
+              </Pressable>
+            </View>
+          </View>
+        </ScrollView>
       </View>
       {/* </View> */}
       <Spacer top={-35} />
@@ -509,6 +702,7 @@ const CreateNewProject = ({ navigation }) => {
         <TouchableOpacity
           style={[styles.button, { width: "60%" }]}
           onPress={() => submitHandler()}
+          // onPress={() => setOpenSOWModal(true)}
         >
           <Text style={styles.buttonText}>Create Project</Text>
         </TouchableOpacity>
@@ -523,6 +717,7 @@ const CreateNewProject = ({ navigation }) => {
         </TouchableOpacity>
       </View>
       {renderMapModal()}
+      {/* {renderSOWModal()} */}
     </View>
   );
 };

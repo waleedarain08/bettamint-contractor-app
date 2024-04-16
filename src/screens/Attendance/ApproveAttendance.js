@@ -36,6 +36,7 @@ import {
 } from "../../redux/slices/userSlice";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
+import Geolocation from "react-native-geolocation-service";
 
 LogBox.ignoreAllLogs();
 
@@ -63,6 +64,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const [openDropdown, setOpenDropdown] = useState(false);
   const [currMarkedAtt, setCurrMarkedAtt] = useState(null);
   const [count, setCount] = useState(0);
+  const [currentPosition, setCurrentPosition] = useState(null);
 
   const handleDropdownOpen = () => {
     setOpenDropdown(true);
@@ -72,41 +74,6 @@ const ApproveAttendance = ({ navigation, route }) => {
     setOpenDropdown(false);
   };
 
-  // useEffect(() => {
-  //   dispatch(
-  //     getAllAttendanceAction(
-  //       token,
-  //       projectData?.projectId || projectsListSimple[0]?.projectId
-  //     )
-  //   );
-  // }, [projectData]);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(
-        getTodaysAttendanceAction(
-          token,
-          projectData?.projectId || projectsListSimple[0]?.projectId
-        )
-      );
-
-      return () => {};
-    }, [projectData])
-  );
-
-  useEffect(() => {
-    dispatch(
-      getTodaysAttendanceAction(
-        token,
-        projectData?.projectId || projectsListSimple[0]?.projectId,
-        0,
-        count,
-        15
-      )
-    );
-    console.log("COUNT", count);
-    console.log("Attendance", filteredDataAttSource?.length);
-  }, [count]);
   // Convert UTC time to Indian Standard Time
   const convertTimeToIST = (time) => {
     let indianTime;
@@ -129,64 +96,130 @@ const ApproveAttendance = ({ navigation, route }) => {
     { label: "P7", value: 15 },
     { label: "PP", value: 16 },
   ];
+  console.log("ATTENDANCE", projectsListSimple[0]?.projectId);
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(
+        getTodaysAttendanceAction(
+          token,
+          projectData?.projectId || projectsListSimple[0]?.projectId,
+          0,
+          1,
+          15,
+          "",
+          0
+        )
+      );
+      getCurrentLocation();
+      return () => {};
+    }, [projectData, projectsListSimple])
+  );
 
-  const rowColors = ["#F3F4F4", "#FFFFFF"];
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentPosition(position);
+      },
+      (error) => {
+        console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  };
+  // useEffect(() => {
+  //   dispatch(
+  //     getTodaysAttendanceAction(
+  //       token,
+  //       projectData?.projectId || projectsListSimple[0]?.projectId,
+  //       0,
+  //       count,
+  //       15
+  //     )
+  //   );
+  // }, [count]);
+  // const [prevProjectId, setPrevProjectId] = useState(null);
+  // const [prevCount, setPrevCount] = useState(null);
+
+  // const projectId = projectData?.projectId || projectsListSimple[0]?.projectId;
+
+  // useFocusEffect(
+  //   React.useCallback(() => {
+  //     if (projectId !== prevProjectId) {
+  //       dispatch(getTodaysAttendanceAction(token, projectId, 0, 1, 15, "", 0));
+  //       setPrevProjectId(projectId);
+  //     }
+  //     return () => {};
+  //   }, [projectId])
+  // );
+
+  // useEffect(() => {
+  //   if (count !== prevCount) {
+  //     dispatch(
+  //       getTodaysAttendanceAction(
+  //         token,
+  //         projectId,
+  //         0,
+  //         count,
+  //         15
+  //       )
+  //     );
+  //     setPrevCount(count);
+  //   }
+  // }, [count]);
+
   useEffect(() => {
     if (attendance) {
-      setFilteredDataAttSource((prev) => {
-        return [...(prev || []), ...(attendance?.attendances || [])];
-      });
-      setMasterDataAttSource((prev) => {
-        return [...(prev || []), ...(attendance?.attendances || [])];
-      });
+      // setFilteredDataAttSource((prev) => {
+      //   return [...(prev || []), ...(attendance?.attendances || [])];
+      // });
+      // setMasterDataAttSource((prev) => {
+      //   return [...(prev || []), ...(attendance?.attendances || [])];
+      // });
+      setFilteredDataAttSource(attendance?.attendances);
+      setMasterDataAttSource(attendance?.attendances);
     }
-    // console.log("FILTERED DATA", attendance);
   }, [attendance?.attendances]);
 
   useEffect(() => {
     if (filteredDataAttSource?.length) {
+      let filteredData;
       if (currentFilterState === "Present") {
-        setFilterAttendance((prev) => [
-          ...(prev || []),
-          ...filteredDataAttSource?.filter((ele) => ele.isOnline === true),
-        ]);
+        filteredData = filteredDataAttSource?.filter(
+          (ele) => ele.isOnline === true
+        );
       } else if (currentFilterState === "Offline") {
-        setFilterAttendance((prev) => [
-          ...(prev || []),
-          ...filteredDataAttSource?.filter(
-            (ele) => ele.workerTypeId === "Offline"
-          ),
-        ]);
+        filteredData = filteredDataAttSource?.filter(
+          (ele) => ele.workerTypeId === "Offline"
+        );
       } else if (currentFilterState === "Online") {
-        setFilterAttendance((prev) => [
-          ...(prev || []),
-          ...filteredDataAttSource?.filter(
-            (ele) => ele.workerTypeId === "Online"
-          ),
-        ]);
+        filteredData = filteredDataAttSource?.filter(
+          (ele) => ele.workerTypeId === "Online"
+        );
       } else if (currentFilterState === "Absent") {
-        setFilterAttendance((prev) => [
-          ...(prev || []),
-          ...filteredDataAttSource?.filter((ele) => ele.isOnline === false),
-        ]);
+        filteredData = filteredDataAttSource?.filter(
+          (ele) => ele.isOnline === false
+        );
       }
+      setFilterAttendance(filteredData);
     }
-    // console.log("FILTERED DATA", attendance);
-  }, [filteredDataAttSource?.length]);
+  }, [filteredDataAttSource?.length, currentFilterState]);
 
   const handleOfflineWorkerAttendance = async (
     workerId,
     jobId,
     attendanceType
   ) => {
-    // console.log("BEFORE", moment(new Date()).format("hh:mm:ss"));
     let resp = await dispatch(
-      markAttendance(token, workerId, jobId, attendanceType)
+      markAttendance(
+        token,
+        workerId,
+        jobId,
+        attendanceType,
+        currentPosition?.coords?.latitude,
+        currentPosition?.coords?.longitude
+      )
     );
-    console.log("RESPONSE--->>>", resp);
     if (resp?.status === 200) {
-      // console.log("SUCCESS");
-      // console.log("AFTER", moment(new Date()).format("hh:mm:ss"));
       let key = attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
       let updatedArray = filterAttendance.map((item) =>
         item.workerId === workerId
@@ -198,7 +231,6 @@ const ApproveAttendance = ({ navigation, route }) => {
       );
       setFilterAttendance(updatedArray);
     } else {
-      console.log("ERROR");
       Toast.show({
         type: "error",
         text1: "Error",
@@ -499,7 +531,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             <View>
               {item?.todayCheckOut ? (
                 <Text style={styles.flatListText}>
-                  {convertTimeToIST(item?.todayCheckIn)}
+                  {convertTimeToIST(item?.todayCheckOut)}
                 </Text>
               ) : item?.todayCheckIn ? (
                 <Pressable
@@ -764,9 +796,9 @@ const ApproveAttendance = ({ navigation, route }) => {
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
-          onEndReached={() => {
-            setCount(count + 1);
-          }}
+          // onEndReached={() => {
+          //   setCount(count + 1);
+          // }}
           // onEndReachedThreshold={0.7}
           extraData={filterAttendance}
           data={!filterAttendance ? filteredDataAttSource : filterAttendance}

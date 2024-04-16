@@ -15,6 +15,10 @@ const initialState = {
   contractorsStats: null,
   paymentsLoading: false,
   payments: null,
+  financialProgressMetrics: null,
+  workforceMetrics: null,
+  labourTurnoverMetrics: null,
+  labourExpenseMetrics: null,
 };
 
 const countsSlice = createSlice({
@@ -127,6 +131,60 @@ const countsSlice = createSlice({
       state.error = action.payload;
       state.payments = null;
     },
+    gettingFinancialProgressMetrics(state, action) {
+      state.error = null;
+      state.financialProgressMetrics = null;
+    },
+    gettingFinancialProgressMetricsSuccess(state, action) {
+      state.error = null;
+      state.financialProgressMetrics = action.payload;
+    },
+    gettingFinancialProgressMetricsFailure(state, action) {
+      state.error = action.payload;
+      state.financialProgressMetrics = null;
+    },
+    gettingWorkforceMetrics(state, action) {
+      state.paymentsLoading = true;
+      state.error = null;
+      state.workforceMetrics = null;
+    },
+    gettingWorkforceMetricsSuccess(state, action) {
+      state.paymentsLoading = false;
+      state.error = null;
+      state.workforceMetrics = action.payload;
+    },
+    gettingWorkforceMetricsFailure(state, action) {
+      state.paymentsLoading = false;
+      state.error = action.payload;
+      state.workforceMetrics = null;
+    },
+    gettingLabourTurnoverMetrics(state, action) {
+      state.error = null;
+      state.labourTurnoverMetrics = null;
+    },
+    gettingLabourTurnoverMetricsSuccess(state, action) {
+      state.error = null;
+      state.labourTurnoverMetrics = action.payload;
+    },
+    gettingLabourTurnoverMetricsFailure(state, action) {
+      state.error = action.payload;
+      state.labourTurnoverMetrics = null;
+    },
+    gettingLabourExpenseMetrics(state, action) {
+      state.labourExpenseMetricsLoading = true;
+      state.error = null;
+      state.labourExpenseMetrics = null;
+    },
+    gettingLabourExpenseMetricsSuccess(state, action) {
+      state.labourExpenseMetricsLoading = false;
+      state.error = null;
+      state.labourExpenseMetrics = action.payload;
+    },
+    gettingLabourExpenseMetricsFailure(state, action) {
+      state.labourExpenseMetricsLoading = false;
+      state.error = action.payload;
+      state.labourExpenseMetrics = null;
+    },
   },
 });
 const {
@@ -151,6 +209,18 @@ const {
   gettingPayments,
   gettingPaymentsSuccess,
   gettingPaymentsFailure,
+  gettingFinancialProgressMetrics,
+  gettingFinancialProgressMetricsSuccess,
+  gettingFinancialProgressMetricsFailure,
+  gettingWorkforceMetrics,
+  gettingWorkforceMetricsSuccess,
+  gettingWorkforceMetricsFailure,
+  gettingLabourTurnoverMetrics,
+  gettingLabourTurnoverMetricsSuccess,
+  gettingLabourTurnoverMetricsFailure,
+  gettingLabourExpenseMetrics,
+  gettingLabourExpenseMetricsSuccess,
+  gettingLabourExpenseMetricsFailure,
 } = countsSlice.actions;
 export const countReducer = (state) => state.count;
 
@@ -306,4 +376,104 @@ export const getPayments =
     }
   };
 
+export const getFinancialProgressMetrics =
+  (token, projectId) => async (dispatch) => {
+    dispatch(gettingFinancialProgressMetrics());
+    try {
+      const response = await axios.get(
+        `${base_url}/Dashboard/stats/financial-progress-metrics?projectId=${projectId}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        dispatch(gettingFinancialProgressMetricsSuccess(response.data.result));
+      }
+      return response;
+    } catch (e) {
+      dispatch(
+        gettingFinancialProgressMetricsFailure(
+          "Something went wrong while getting count data!"
+        )
+      );
+    }
+  };
+
+export const getWorkforceMetrics = (token, projectId) => async (dispatch) => {
+  dispatch(gettingWorkforceMetrics());
+  try {
+    const response = await axios.get(
+      `${base_url}/Dashboard/stats/workforce-metrics?projectId=${projectId}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response.status === 200) {
+      dispatch(gettingWorkforceMetricsSuccess(response.data?.result));
+    }
+    return response;
+  } catch (e) {
+    dispatch(
+      gettingWorkforceMetricsFailure(
+        "Something went wrong while getting count data!"
+      )
+    );
+  }
+};
+
+export const getLabourTurnoverMetrics =
+  (token, projectId, dateFilter = "") =>
+  async (dispatch) => {
+    dispatch(gettingLabourTurnoverMetrics());
+    try {
+      const response = await axios.get(
+        `${base_url}/Dashboard/stats/labour-turnover-metrics?projectId=${projectId}&filterDate=${dateFilter}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        dispatch(gettingLabourTurnoverMetricsSuccess(response.data.result));
+      }
+      return response;
+    } catch (e) {
+      dispatch(
+        gettingLabourTurnoverMetricsFailure(
+          "Something went wrong while getting count data!"
+        )
+      );
+    }
+  };
+
+export const getLabourExpenseMetrics =
+  (token, projectId = 0, contractorId = 0) =>
+  async (dispatch) => {
+    dispatch(gettingLabourExpenseMetrics());
+    try {
+      const response = await axios.get(
+        `${base_url}/Dashboard/stats/labour-expense-metrics?projectId=${projectId}&contractorId=${contractorId}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        dispatch(gettingLabourExpenseMetricsSuccess(response.data?.result));
+      }
+      return response;
+    } catch (e) {
+      dispatch(
+        gettingLabourExpenseMetricsFailure(
+          "Something went wrong while getting count data!"
+        )
+      );
+    }
+  };
 export default countsSlice.reducer;

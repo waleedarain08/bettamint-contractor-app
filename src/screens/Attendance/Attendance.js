@@ -11,6 +11,7 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  PermissionsAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "../../utils/Colors";
@@ -40,6 +41,7 @@ import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import SearchWorkerModal from "../../components/SearchWorkerModal";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
+import Geolocation from "react-native-geolocation-service";
 
 LogBox.ignoreAllLogs();
 
@@ -81,15 +83,40 @@ const Attendance = ({ navigation }) => {
     { label: "Misconduct", value: "Misconduct" },
     { label: "Job Ended", value: "JobEnded" },
   ];
-  // useEffect(() => {
-  //   dispatch(
-  //     getAllAttendanceAction(
-  //       token,
-  //       selectedProject?.projectId || projectsListSimple[0]?.projectId,
-  //       0
-  //     )
-  //   );
-  // }, [selectedProject]);
+
+  const getLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Location permission required",
+          message: "Bettamint needs to access your location",
+          buttonPositive: "OK",
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("You can use the camera");
+        getCurrentLocation();
+      } else {
+        console.log("Camera permission denied");
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      (position) => {
+        // setCurrentPosition(position);
+        console.log(position);
+      },
+      (error) => {
+        console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  };
   useFocusEffect(
     React.useCallback(() => {
       if (projectsListSimple) {
@@ -105,6 +132,8 @@ const Attendance = ({ navigation }) => {
           )
         );
         setSelectedProject(projectsListSimple[0]);
+        dispatch(saveProjectDataAction(projectsListSimple[0]));
+        getLocationPermission();
       }
       return () => {};
     }, [projectsListSimple && projectsListSimple[0]?.projectId])
@@ -133,20 +162,24 @@ const Attendance = ({ navigation }) => {
       usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
     );
   }, [usersList]);
-
-  useEffect(() => {
-    dispatch(
-      getAllAttendanceAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0,
-        count,
-        15,
-        selectedSkills?.value || "",
-        selectedOrder?.value || 0
-      )
-    );
-  }, [count]);
+  // console.log("filteredDataAttSource", attendanceList?.attendances);
+  // useEffect(() => {
+  //   const projectId =
+  //     projectsListSimple?.[0]?.projectId || selectedProject?.projectId;
+  //   if (projectId) {
+  //     dispatch(
+  //       getAllAttendanceAction(
+  //         token,
+  //         projectId,
+  //         0,
+  //         1,
+  //         15,
+  //         selectedSkills?.value || "",
+  //         selectedOrder?.value || 0
+  //       )
+  //     );
+  //   }
+  // }, [selectedProject]);
 
   useEffect(() => {
     setFilteredDataSource(projectsListSimple);
@@ -155,16 +188,20 @@ const Attendance = ({ navigation }) => {
 
   useEffect(() => {
     if (attendanceList?.attendances?.length > 0) {
-      setFilteredDataAttSource((prev) => {
-        return [...(prev || []), ...(attendanceList?.attendances || [])];
-      });
-      setMasterDataAttSource((prev) => {
-        return [...(prev || []), ...(attendanceList?.attendances || [])];
-      });
+      console.log('USE EFFECT---->>>>>')
+      setFilteredDataAttSource(attendanceList?.attendances);
+      setMasterDataAttSource(attendanceList?.attendances);
+      // setFilteredDataAttSource((prev) => {
+      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
+      // });
+      // setMasterDataAttSource((prev) => {
+      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
+      // });
 
       // console.log("attendanceList", filteredDataAttSource[0]);
       // console.log("attendanceList", attendanceList?.attendances[0]);
     }
+    // console.log("filteredDataAttSource", filteredAttendance);
   }, [attendanceList?.attendances, selectedSkills]);
   // console.log("filteredDataAttSource", filteredDataAttSource);
   // useEffect(() => {
@@ -195,7 +232,6 @@ const Attendance = ({ navigation }) => {
   // }, [selectedSkills, selectedOrder]);
   const searchFilterAttendanceFunction = (text) => {
     // Check if searched text is not blank
-    console.log("TEXT", text);
     if (text) {
       // Inserted text is not blank
       // Filter the masterDataSource and update FilteredDataSource
@@ -1008,6 +1044,17 @@ const Attendance = ({ navigation }) => {
                       0
                     )
                   );
+                  // setFilteredDataAttSource([]);
+                  // setMasterDataAttSource([]);
+                  // if (attendanceList?.attendances?.length > 0) {
+                  //   // setMasterDataAttSource((prev) => {
+                  //   //   return [...(prev || []), ...(attendanceList?.attendances || [])];
+                  //   // });
+
+                  //   // console.log("attendanceList", filteredDataAttSource[0]);
+                  //   // console.log("attendanceList", attendanceList?.attendances[0]);
+                  // }
+                  // setCount(1);
                   setSelectedSkills(null);
                   setSelectedContractor(null);
                 }}
@@ -1015,10 +1062,9 @@ const Attendance = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            onEndReached={() => {
-              setCount(count + 1);
-              console.log("page", ++pageNum);
-            }}
+            // onEndReached={() => {
+            //   setCount(count + 1);
+            // }}
             // onEndReachedThreshold={0.7}
             data={filteredDataAttSource}
             renderItem={({ item, index }) => <Item item={item} index={index} />}

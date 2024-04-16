@@ -141,7 +141,6 @@ export const getAllProjectsAction = (token) => async (dispatch) => {
       })
       .then((res) => {
         const data = responseHandler(res);
-        // console.log("Project DATA", data);
         if (data) {
           dispatch(getProjectsSuccess(data));
         }
@@ -204,8 +203,8 @@ export const getAllProjectsSimpleAction = (token) => async (dispatch) => {
         Authorization: token,
       })
       .then((res) => {
+
         const data = responseHandler(res);
-        // console.log("Project DATA Simple", data);
         if (data) {
           dispatch(getProjectsSimpleSuccess(data));
         }

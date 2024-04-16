@@ -43,7 +43,6 @@ import {
   getAttendanceTrendline,
   getContractorsStats,
   getFinancialProgressMetrics,
-  getLabourExpenseMetrics,
   getLabourTurnoverMetrics,
   getPayments,
   getWorkerSkills,
@@ -71,6 +70,10 @@ const Dashboard = ({ navigation }) => {
   const [selectedGraph, setSelectedGraph] = useState(false);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
+  const [currentProjectBudget, setCurrentProjectBudget] = useState(null);
+  const [currentProjectFinancial, setCurrentProjectFinancial] = useState(null);
+  const [currentProjectLabourTurnover, setCurrentProjectLabourTurnover] =
+    useState(null);
 
   // Attendance Graph
   const [attendanceSelectedDate, setAttendanceSelectedDate] = useState(
@@ -90,11 +93,6 @@ const Dashboard = ({ navigation }) => {
 
   // Worker Skills Graph
   const [selectedSkillProject, setSelectedSkillProject] = useState(null);
-
-  const [currentProjectBudget, setCurrentProjectBudget] = useState(null);
-  const [currentProjectFinancial, setCurrentProjectFinancial] = useState(null);
-  const [currentProjectLabourTurnover, setCurrentProjectLabourTurnover] =
-    useState(null);
 
   // Color Scheme
   const colorScheme = Appearance.getColorScheme();
@@ -117,11 +115,11 @@ const Dashboard = ({ navigation }) => {
     financialProgressMetrics,
     workforceMetrics,
     labourTurnoverMetrics,
-    labourExpenseMetrics,
   } = useSelector(countReducer);
   const userInfo = useSelector(userData);
   const { projectBudgetData, financialGraphData } =
     useSelector(productivityReducer);
+
   // User Role instance
   const roles = userInfo?.user?.role?.roleFeatureSets;
   const isDashboardPresent = roles.some(
@@ -131,79 +129,6 @@ const Dashboard = ({ navigation }) => {
   function roundToNearestMultiple(number, multiple) {
     return Math.ceil(number / multiple) * multiple;
   }
-
-  // Set projects list initially
-  useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
-
-  //! LIFE-CYCLE-METHODS --------------------------------
-  useEffect(() => {
-    dispatch(getSkillsAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
-    setSelectedAttendanceProject(null);
-    setAttendanceSelectedDate(new Date());
-    setSelectedPaymentProject(null);
-    setPaymentsSelectedDate(new Date());
-    setSelectedContractorProject(null);
-    setPieSelectedDate(new Date());
-    dispatch(getCountsData(token));
-  }, []);
-
-  useEffect(() => {
-    if (projectsListSimple) {
-      dispatch(
-        getAttendanceTrendline(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
-      dispatch(
-        getPayments(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
-      dispatch(
-        getContractorsStats(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().format("YYYY-MM-DD")
-        )
-      );
-      dispatch(
-        getWorkerSkills(
-          token,
-          "2022-08-31T19:00:00Z",
-          moment().utc().format(),
-          projectsListSimple[0]?.projectId
-        )
-      );
-      setCurrentProjectBudget(projectsListSimple[0]?.projectId);
-      setCurrentProjectFinancial(projectsListSimple[0]?.projectId);
-      setCurrentProjectLabourTurnover(projectsListSimple[0]?.projectId);
-      // Metrics
-      dispatch(
-        getFinancialProgressMetrics(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(getWorkforceMetrics(token, projectsListSimple[0]?.projectId));
-      dispatch(
-        getLabourTurnoverMetrics(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(getProjectBudget(token, projectsListSimple[0]?.projectId));
-      dispatch(
-        getFinancialProgressData(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(
-        getLabourExpenseMetrics(token, projectsListSimple[0]?.projectId)
-      );
-    }
-  }, [projectsListSimple]);
 
   /**
    * Restructured attendance graph array
@@ -396,11 +321,6 @@ const Dashboard = ({ navigation }) => {
     return arr;
   };
 
-  const highestValue = getFinancialProgressGraphData().reduce((max, item) => {
-    const value = item.stacks[0].value;
-    return value > max ? roundToNearestMultiple(value, 100) : max;
-  }, 0);
-
   // Get color for the label
   function getColorForLabel(label) {
     // Define your color logic based on the label here
@@ -424,84 +344,84 @@ const Dashboard = ({ navigation }) => {
     return colorMap[label] || "gray"; // Default to gray if no color is defined
   }
 
-  // const terminations = labourTurnoverMetrics && labourTurnoverMetrics?.terminations;
-  // if (!terminations) {
-  //   throw new Error("labourTurnoverMetrics.terminations is undefined");
-  // }
-  const allZero = ["jobEnded", "noShow", "misconduct", "tardiness"].every(
-    (key) => labourTurnoverMetrics?.terminations[key] === 0
-  );
+  // const data = {
+  //   jobEnded: 64,
+  //   misconduct: 0,
+  //   noShow: 9,
+  //   tardiness: 27,
+  //   total: 11,
+  // };
 
-  const data = allZero
-    ? [
-        {
-          value: 100,
-          color: Colors.Gray,
-          text: "0%",
-        },
-      ]
-    : [
-        {
-          value: labourTurnoverMetrics?.terminations.jobEnded || 0,
-          color: Colors.Primary,
-          text: `${labourTurnoverMetrics?.terminations.jobEnded || 0}%`,
-        },
-        {
-          value: labourTurnoverMetrics?.terminations.noShow || 0,
-          color: Colors.Purple,
-          text: `${labourTurnoverMetrics?.terminations.noShow || 0}%`,
-        },
-        {
-          value: labourTurnoverMetrics?.terminations.misconduct || 0,
-          color: "#FFE6AE",
-          text: `${labourTurnoverMetrics?.terminations.misconduct || 0}%`,
-        },
-        {
-          value: labourTurnoverMetrics?.terminations.tardiness || 0,
-          color: "#ABDFDF",
-          text: `${labourTurnoverMetrics?.terminations.tardiness || 0}%`,
-        },
-      ];
+  const colors = ["#AA86F3", "#AA86F3", "#ABDFDF", "#6BA11F"]; // Add more colors if needed
+  const data = delete labourTurnoverMetrics?.terminations.total;
+  const result = Object.keys(data).map((key, index) => {
+    return {
+      value: data[key],
+      color: colors[index % colors.length],
+      text: `${data[key]}%`,
+    };
+  });
 
-  const allZeroVoluntary = [
-    "takingBreak",
-    "emergency",
-    "delayedPayment",
-    "betterWages",
-  ].every((key) => labourTurnoverMetrics?.voluntaryExits[key] === 0);
+  // Set projects list initially
+  // useEffect(() => {
+  //   setFilteredDataSource(projectsListSimple);
+  //   setMasterDataSource(projectsListSimple);
+  // }, [projectsListSimple]);
 
-  const voluntaryExitsData = allZeroVoluntary
-    ? [
-        {
-          value: 100,
-          color: Colors.Gray,
-          text: "0%",
-        },
-      ]
-    : [
-        {
-          value: labourTurnoverMetrics?.voluntaryExits?.takingBreak || 0,
-          color: Colors.Primary,
-          text: `${labourTurnoverMetrics?.voluntaryExits?.takingBreak || 0}%`,
-        },
-        {
-          value: labourTurnoverMetrics?.voluntaryExits?.emergency || 0,
-          color: Colors.Purple,
-          text: `${labourTurnoverMetrics?.voluntaryExits?.emergency || 0}%`,
-        },
-        {
-          value: labourTurnoverMetrics?.voluntaryExits?.delayedPayment || 0,
-          color: "#FFE6AE",
-          text: `${
-            labourTurnoverMetrics?.voluntaryExits?.delayedPayment || 0
-          }%`,
-        },
-        {
-          value: labourTurnoverMetrics?.voluntaryExits?.betterWages || 0,
-          color: "#ABDFDF",
-          text: `${labourTurnoverMetrics?.voluntaryExits?.betterWages || 0}%`,
-        },
-      ];
+  //! LIFE-CYCLE-METHODS --------------------------------
+  // useEffect(() => {
+  //   dispatch(getSkillsAction(token));
+  //   dispatch(getAllProjectsSimpleAction(token));
+  //   setSelectedAttendanceProject(null);
+  //   setAttendanceSelectedDate(new Date());
+  //   setSelectedPaymentProject(null);
+  //   setPaymentsSelectedDate(new Date());
+  //   setSelectedContractorProject(null);
+  //   setPieSelectedDate(new Date());
+  //   if (projectsListSimple) {
+  //     dispatch(
+  //       getAttendanceTrendline(
+  //         token,
+  //         projectsListSimple[0]?.projectId,
+  //         moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
+  //         moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
+  //       )
+  //     );
+  //     dispatch(
+  //       getPayments(
+  //         token,
+  //         projectsListSimple[0]?.projectId,
+  //         moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
+  //         moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
+  //       )
+  //     );
+  //     dispatch(
+  //       getContractorsStats(
+  //         token,
+  //         projectsListSimple[0]?.projectId,
+  //         moment().format("YYYY-MM-DD")
+  //       )
+  //     );
+  //     dispatch(
+  //       getWorkerSkills(
+  //         token,
+  //         "2022-08-31T19:00:00Z",
+  //         moment().utc().format(),
+  //         projectsListSimple[0]?.projectId
+  //       )
+  //     );
+  //     // setCurrentProjectBudget(projectsListSimple[0]?.projectId);
+  //     // setCurrentProjectFinancial(projectsListSimple[0]?.projectId);
+  //     // setCurrentProjectLabourTurnover(projectsListSimple[0]?.projectId);
+  //     // Metrics
+  //     // dispatch(
+  //     //   getFinancialProgressMetrics(token, projectsListSimple[0]?.projectId)
+  //     // );
+  //     // dispatch(getWorkforceMetrics(token, projectsListSimple[0]?.projectId));
+  //     // getLabourTurnoverMetrics(token, projectsListSimple[0]?.projectId);
+  //   }
+  //   dispatch(getCountsData(token));
+  // }, []);
 
   //! GET GRAPHS DATA WHILE SELECTING PROJECTS
   const getGraphsData = (item) => {
@@ -524,7 +444,6 @@ const Dashboard = ({ navigation }) => {
         )
       );
       dispatch(getWorkforceMetrics(token, item?.projectId));
-      dispatch(getLabourExpenseMetrics(token, item?.projectId));
     } else if (selectedGraph === "Contractor") {
       dispatch(
         getContractorsStats(
@@ -776,47 +695,6 @@ const Dashboard = ({ navigation }) => {
                         token,
                         "2022-08-31T19:00:00Z",
                         moment().utc().format(),
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
-                    setCurrentProjectBudget(projectsListSimple[0]?.projectId);
-                    setCurrentProjectFinancial(
-                      projectsListSimple[0]?.projectId
-                    );
-                    setCurrentProjectLabourTurnover(
-                      projectsListSimple[0]?.projectId
-                    );
-                    // Metrics
-                    dispatch(
-                      getFinancialProgressMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
-                    dispatch(
-                      getWorkforceMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
-                    dispatch(
-                      getLabourExpenseMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
-                    dispatch(
-                      getLabourTurnoverMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
-                    dispatch(
-                      getProjectBudget(token, projectsListSimple[0]?.projectId)
-                    );
-                    dispatch(
-                      getFinancialProgressData(
-                        token,
                         projectsListSimple[0]?.projectId
                       )
                     );
@@ -1117,10 +995,12 @@ const Dashboard = ({ navigation }) => {
                     Average{"\n"}Daily Wage
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 16 }]}>
-                    {labourExpenseMetrics?.averageDailyWage
-                      ? "₹" +
-                        labourExpenseMetrics?.averageDailyWage?.toLocaleString()
-                      : "0"}
+                    {currentPresent?.length > 0
+                      ? financialProgressMetrics?.requiredProductionRate
+                        ? "₹" +
+                          financialProgressMetrics?.requiredProductionRate?.toLocaleString()
+                        : "N/A"
+                      : 0}
                   </Text>
                 </View>
                 <View
@@ -1141,10 +1021,12 @@ const Dashboard = ({ navigation }) => {
                       { color: Colors.Purple, fontSize: 16 },
                     ]}
                   >
-                    {labourExpenseMetrics?.totalExpenseForLast30Days
-                      ? "₹" +
-                        labourExpenseMetrics?.totalExpenseForLast30Days?.toLocaleString()
-                      : "0"}
+                    {currentPresent?.length > 0
+                      ? financialProgressMetrics?.actualProductionRate
+                        ? "₹" +
+                          financialProgressMetrics?.actualProductionRate?.toLocaleString()
+                        : "N/A"
+                      : 0}
                   </Text>
                 </View>
               </View>
@@ -1226,6 +1108,10 @@ const Dashboard = ({ navigation }) => {
             </View>
             {userInfo?.user?.leadTypeId !== "LabourContractor" && (
               <View style={styles.scrollGraph}>
+                {/* <ScrollView
+                  contentContainerStyle={{ flex: 1 }}
+                  nestedScrollEnabled={true}
+                > */}
                 <View style={styles.graphsHeader}>
                   <Text style={styles.graphHeadingText}>Contractors Data</Text>
                   <View style={styles.graphSubHeader}>
@@ -1528,21 +1414,11 @@ const Dashboard = ({ navigation }) => {
                           color: Colors.FormText,
                         }}
                         iconStyle={styles.iconStyle}
-                        data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
-                                label: ele?.name,
-                                value: ele?.projectId,
-                                ...ele,
-                              }))
-                            : [
-                                {
-                                  label: "No Projects",
-                                  value: "No Projects",
-                                },
-                              ]
-                        }
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
                         maxHeight={400}
                         labelField="label"
                         valueField="value"
@@ -1586,7 +1462,7 @@ const Dashboard = ({ navigation }) => {
               </View>
               <View style={styles.barChart}>
                 <BarChart
-                  data={projectBudgetData && budgetGraphsData()}
+                  data={budgetGraphsData()}
                   barWidth={6}
                   spacing={30}
                   roundedTop
@@ -1595,7 +1471,7 @@ const Dashboard = ({ navigation }) => {
                   yAxisTextStyle={{ color: "gray" }}
                   xAxisTextStyle={{ color: "gray" }}
                   noOfSections={5}
-                  maxValue={projectBudgetData && getBudgetMaxValue()}
+                  maxValue={getBudgetMaxValue()}
                   frontColor={Colors.Black}
                   height={180}
                   renderTooltip={(e) => {
@@ -1626,6 +1502,9 @@ const Dashboard = ({ navigation }) => {
                     {`₹${
                       projectBudgetData?.budgetedCost?.toLocaleString() || "0"
                     }`}
+                    {/* {currentPresent?.length > 0
+                      ? currentPresent[0]?.Present
+                      : 0} */}
                   </Text>
                 </View>
                 <View style={styles.graphBottomTabs}>
@@ -1637,8 +1516,9 @@ const Dashboard = ({ navigation }) => {
                     ]}
                   >
                     {`₹${
-                      projectBudgetData?.actualCost?.toLocaleString() || "0"
+                      projectBudgetData?.actualCost.toLocaleString() || "0"
                     }`}
+                    {/* {currentAbsent?.length > 0 ? currentAbsent[0]?.Absent : 0} */}
                   </Text>
                 </View>
               </View>
@@ -1678,16 +1558,12 @@ const Dashboard = ({ navigation }) => {
                       color: Colors.White,
                       paddingLeft: 5,
                     }}
-                  >
-                    {projectBudgetData &&
-                    typeof projectBudgetData.budgetedCost === "number" &&
-                    typeof projectBudgetData.actualCost === "number"
-                      ? `₹${(
-                          projectBudgetData?.budgetedCost -
-                          projectBudgetData?.actualCost
-                        ).toLocaleString()}`
-                      : "0"}
-                  </Text>
+                  >{`₹${
+                    (
+                      projectBudgetData?.budgetedCost -
+                      projectBudgetData?.actualCost
+                    ).toLocaleString() || "0"
+                  }`}</Text>
                 </View>
               </View>
             </View>
@@ -1725,21 +1601,11 @@ const Dashboard = ({ navigation }) => {
                           color: Colors.FormText,
                         }}
                         iconStyle={styles.iconStyle}
-                        data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
-                                label: ele?.name,
-                                value: ele?.projectId,
-                                ...ele,
-                              }))
-                            : [
-                                {
-                                  label: "No Projects",
-                                  value: "No Projects",
-                                },
-                              ]
-                        }
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
                         maxHeight={400}
                         labelField="label"
                         valueField="value"
@@ -1752,7 +1618,10 @@ const Dashboard = ({ navigation }) => {
                               getFinancialProgressData(token, item?.value)
                             );
                             dispatch(
-                              getFinancialProgressMetrics(token, item?.value)
+                              getFinancialProgressMetrics(
+                                token,
+                                item?.projectId
+                              )
                             );
                           } else {
                             setCurrentProjectFinancial(
@@ -1796,10 +1665,8 @@ const Dashboard = ({ navigation }) => {
                   yAxisTextStyle={{ color: "gray" }}
                   frontColor={Colors.Black}
                   noOfSections={4}
-                  maxValue={highestValue || 100}
-                  stackData={
-                    financialGraphData && getFinancialProgressGraphData()
-                  }
+                  maxValue={2000}
+                  stackData={getFinancialProgressGraphData()}
                   renderTooltip={(e) => {
                     return (
                       <View>
@@ -1840,7 +1707,7 @@ const Dashboard = ({ navigation }) => {
                       ? financialProgressMetrics?.requiredProductionRate
                         ? "₹" +
                           financialProgressMetrics?.requiredProductionRate?.toLocaleString()
-                        : "0"
+                        : "N/A"
                       : 0}
                   </Text>
                 </View>
@@ -1866,13 +1733,13 @@ const Dashboard = ({ navigation }) => {
                       ? financialProgressMetrics?.actualProductionRate
                         ? "₹" +
                           financialProgressMetrics?.actualProductionRate?.toLocaleString()
-                        : "0"
+                        : "N/A"
                       : 0}
                   </Text>
                 </View>
               </View>
             </View>
-            <View style={styles.scrollGraph}>
+            {/* <View style={styles.scrollGraph}>
               <View style={styles.graphsHeader}>
                 <Text style={styles.graphHeadingText}>Labour Turnover</Text>
                 <View style={styles.graphSubHeader}>
@@ -1906,26 +1773,16 @@ const Dashboard = ({ navigation }) => {
                           color: Colors.FormText,
                         }}
                         iconStyle={styles.iconStyle}
-                        data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
-                                label: ele?.name,
-                                value: ele?.projectId,
-                                ...ele,
-                              }))
-                            : [
-                                {
-                                  label: "No Projects",
-                                  value: "No Projects",
-                                },
-                              ]
-                        }
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
                         maxHeight={400}
                         labelField="label"
                         valueField="value"
                         placeholder={"Project"}
-                        value={currentProjectLabourTurnover}
+                        value={currentProjectBudget}
                         onChange={(item) => {
                           if (item) {
                             setCurrentProjectLabourTurnover(item);
@@ -1966,8 +1823,7 @@ const Dashboard = ({ navigation }) => {
                     Terminations
                   </Text>
                 </View>
-                {labourTurnoverMetrics &&
-                labourTurnoverMetrics?.terminations?.jobEnded === 0 &&
+                {labourTurnoverMetrics?.terminations?.jobEnded === 0 &&
                 labourTurnoverMetrics?.terminations?.noShow === 0 &&
                 labourTurnoverMetrics?.terminations?.misconduct === 0 &&
                 labourTurnoverMetrics?.terminations?.tardiness === 0 ? (
@@ -2057,13 +1913,52 @@ const Dashboard = ({ navigation }) => {
                 <View style={styles.barChart}>
                   <PieChart
                     donut
+                    // isThreeD
                     showText
                     textColor="black"
                     radius={100}
                     textSize={11}
                     showTextBackground
                     textBackgroundRadius={15}
-                    data={data}
+                    // data={result}
+                    data={
+                      labourTurnoverMetrics?.terminations?.jobEnded === 0 &&
+                      labourTurnoverMetrics?.terminations?.noShow === 0 &&
+                      labourTurnoverMetrics?.terminations?.misconduct === 0 &&
+                      labourTurnoverMetrics?.terminations?.tardiness === 0
+                        ? [
+                            {
+                              value: 100,
+                              color: Colors.Gray,
+                              text: "0%",
+                            },
+                          ]
+                        : [
+                            {
+                              value:
+                                labourTurnoverMetrics?.terminations.jobEnded,
+                              color: Colors.Primary,
+                              text: `${labourTurnoverMetrics?.terminations.jobEnded}%`,
+                            },
+                            {
+                              value: labourTurnoverMetrics?.terminations.noShow,
+                              color: Colors.Purple,
+                              text: `${labourTurnoverMetrics?.terminations.noShow}%`,
+                            },
+                            {
+                              value:
+                                labourTurnoverMetrics?.terminations.misconduct,
+                              color: "#FFE6AE",
+                              text: `${labourTurnoverMetrics?.terminations.misconduct}%`,
+                            },
+                            {
+                              value:
+                                labourTurnoverMetrics?.terminations.tardiness,
+                              color: "#ABDFDF",
+                              text: `${labourTurnoverMetrics?.terminations.tardiness}%`,
+                            },
+                          ]
+                    }
                   />
                 </View>
               </View>
@@ -2084,8 +1979,7 @@ const Dashboard = ({ navigation }) => {
                     Voluntary Exits
                   </Text>
                 </View>
-                {labourTurnoverMetrics &&
-                labourTurnoverMetrics?.voluntaryExits?.takingBreak === 0 &&
+                {labourTurnoverMetrics?.voluntaryExits?.takingBreak === 0 &&
                 labourTurnoverMetrics?.voluntaryExits?.emergency === 0 &&
                 labourTurnoverMetrics?.voluntaryExits?.delayedPayment === 0 &&
                 labourTurnoverMetrics?.voluntaryExits?.betterWages === 0 ? (
@@ -2187,7 +2081,52 @@ const Dashboard = ({ navigation }) => {
                     textSize={11}
                     showTextBackground
                     textBackgroundRadius={15}
-                    data={voluntaryExitsData}
+                    // data={result}
+                    data={
+                      labourTurnoverMetrics?.voluntaryExits?.takingBreak ===
+                        0 &&
+                      labourTurnoverMetrics?.voluntaryExits?.emergency === 0 &&
+                      labourTurnoverMetrics?.voluntaryExits?.delayedPayment ===
+                        0 &&
+                      labourTurnoverMetrics?.voluntaryExits?.betterWages === 0
+                        ? [
+                            {
+                              value: 100,
+                              color: Colors.Gray,
+                              text: "0",
+                            },
+                          ]
+                        : [
+                            {
+                              value:
+                                labourTurnoverMetrics?.voluntaryExits
+                                  ?.takingBreak,
+                              color: Colors.Primary,
+                              text: `${labourTurnoverMetrics?.voluntaryExits?.takingBreak}%`,
+                            },
+                            {
+                              value:
+                                labourTurnoverMetrics?.voluntaryExits
+                                  ?.emergency,
+                              color: Colors.Purple,
+                              text: `${labourTurnoverMetrics?.voluntaryExits?.emergency}%`,
+                            },
+                            {
+                              value:
+                                labourTurnoverMetrics?.voluntaryExits
+                                  ?.delayedPayment,
+                              color: "#FFE6AE",
+                              text: `${labourTurnoverMetrics?.voluntaryExits?.delayedPayment}%`,
+                            },
+                            {
+                              value:
+                                labourTurnoverMetrics?.voluntaryExits
+                                  ?.betterWages,
+                              color: "#ABDFDF",
+                              text: `${labourTurnoverMetrics?.voluntaryExits?.betterWages}%`,
+                            },
+                          ]
+                    }
                   />
                 </View>
               </View>
@@ -2200,9 +2139,8 @@ const Dashboard = ({ navigation }) => {
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 14 }]}>
                     {`${
-                      labourTurnoverMetrics
-                        ? labourTurnoverMetrics?.averageTurnOverRate?.toLocaleString()
-                        : "0"
+                      labourTurnoverMetrics?.averageTurnOverRate?.toLocaleString() ||
+                      "0"
                     }`}
                   </Text>
                 </View>
@@ -2217,14 +2155,13 @@ const Dashboard = ({ navigation }) => {
                     ]}
                   >
                     {`${
-                      labourTurnoverMetrics
-                        ? labourTurnoverMetrics?.workersExited.toLocaleString()
-                        : "0"
+                      labourTurnoverMetrics?.workersExited.toLocaleString() ||
+                      "0"
                     }`}
                   </Text>
                 </View>
               </View>
-            </View>
+            </View> */}
             <DatePicker
               modal
               mode="date"
@@ -2310,7 +2247,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.WhiteGray,
     borderRadius: 8,
     padding: 12,
-    width: "45%",
+    width: "48%",
   },
   item: {
     width: "43%",

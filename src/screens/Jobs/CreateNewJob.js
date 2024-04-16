@@ -70,6 +70,8 @@ const CreateNewJob = ({ navigation }) => {
   const [toggleCheckBox2, setToggleCheckBox2] = useState(false);
   const [publicVal, setPublicVal] = useState(true);
   const [privateVal, setPrivateVal] = useState(false);
+  const [nmrVal, setNMRVal] = useState(true);
+  const [prwVal, setPRWVal] = useState(false);
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
@@ -223,6 +225,7 @@ const CreateNewJob = ({ navigation }) => {
       formData.append("skillTypeId", skillLevelValue);
       formData.append("cityName", jobLocation);
       formData.append("isPrivate", privateVal ? true : false);
+      formData.append("isNMR", nmrVal ? true : false);
 
       const response = await dispatch(createJobAction(token, formData));
       if (response?.status === 200) {
@@ -674,6 +677,58 @@ const CreateNewJob = ({ navigation }) => {
               }}
             >
               Accomodation
+            </Text>
+          </View>
+        </View>
+        <View
+          style={{
+            padding: 10,
+            width: "90%",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          <View
+            style={{ flexDirection: "row", alignItems: "center", width: "40%" }}
+          >
+            <CheckBox
+              tintColors={{ true: Colors.Primary, false: Colors.Gray }}
+              value={nmrVal}
+              onValueChange={(newValue) => {
+                setNMRVal(newValue);
+                setPRWVal(false);
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: Colors.Black,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              NMR
+            </Text>
+          </View>
+          <View
+            style={{ flexDirection: "row", alignItems: "center", width: "40%" }}
+          >
+            <CheckBox
+              tintColors={{ true: Colors.Primary, false: Colors.Gray }}
+              value={prwVal}
+              onValueChange={(newValue) => {
+                setNMRVal(false);
+                setPRWVal(newValue);
+              }}
+            />
+            <Text
+              style={{
+                fontSize: 12,
+                color: Colors.Black,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              PRW
             </Text>
           </View>
         </View>

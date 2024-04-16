@@ -66,7 +66,7 @@ const Payments = ({ navigation }) => {
   const [paymentsList, setPaymentsList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
   const dispatch = useDispatch();
-
+  const [count, setCount] = useState(1);
   //   const payments = useSelector(paymentsListReducer);
   const attendanceList = useSelector(allPaymentsListReducer);
   const skillsList = useSelector(skillsListReducer);
@@ -87,19 +87,23 @@ const Payments = ({ navigation }) => {
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
   ];
-
+  // console.log('list---', attendanceList)
   useEffect(() => {
     dispatch(
       getAllPaymentsAction(
         token,
         selectedProject?.projectId || projectsListSimple[0]?.projectId,
+        0,
+        1,
+        15,
+        "",
         0
       )
     );
-    if (attendanceList?.length) {
-      setPaymentsList(attendanceList);
+    if (attendanceList?.attendances?.length) {
+      setPaymentsList(attendanceList?.attendances);
     }
-  }, [selectedProject, attendanceList?.length]);
+  }, [selectedProject, attendanceList?.attendances?.length]);
 
   useEffect(() => {
     dispatch(getSkillsAction(token));
@@ -107,6 +111,35 @@ const Payments = ({ navigation }) => {
     dispatch(getAllProjectsSimpleAction(token));
   }, []);
 
+  useEffect(() => {
+    dispatch(
+      getAllPaymentsAction(
+        token,
+        selectedProject?.projectId || projectsListSimple[0]?.projectId,
+        0,
+        count,
+        15,
+        selectedSkills?.value || "",
+        0
+      )
+    );
+    // console.log('useEffect')
+  }, [count]);
+
+  useEffect(() => {
+    if (attendanceList?.attendances?.length > 0) {
+      setPaymentsList((prev) => {
+        return [...(prev || []), ...(attendanceList?.attendances || [])];
+      });
+      // console.log('PAYMENT---', paymentsList?.length)
+      // setMasterDataAttSource((prev) => {
+      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
+      // });
+
+      // console.log("attendanceList", filteredDataAttSource[0]);
+      // console.log("attendanceList", attendanceList?.attendances[0]);
+    }
+  }, [attendanceList?.attendances, selectedSkills]);
   useEffect(() => {
     setLabourContractors(
       usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
@@ -142,7 +175,7 @@ const Payments = ({ navigation }) => {
     }
   };
   const [data, setData] = useState({
-    array: attendanceList,
+    array: attendanceList?.attendances,
   });
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
@@ -216,6 +249,10 @@ const Payments = ({ navigation }) => {
                         token,
                         selectedProject?.projectId ||
                           projectsListSimple[0]?.projectId,
+                        0,
+                        1,
+                        15,
+                        "",
                         0
                       )
                     );
@@ -259,7 +296,7 @@ const Payments = ({ navigation }) => {
                   setSelectedStatus(item);
                   setSelectedSkills(null);
                   setFilteredAttendance(
-                    attendanceList?.filter(
+                    attendanceList?.attendances?.filter(
                       (ele) => ele.workerTypeId === item?.value
                     )
                   );
@@ -298,7 +335,7 @@ const Payments = ({ navigation }) => {
                   setSelectedSkills(item);
                   setSelectedStatus(null);
                   setFilteredAttendance(
-                    attendanceList?.filter(
+                    attendanceList?.attendances?.filter(
                       (ele) => ele.sKillName === item?.value
                     )
                   );
@@ -342,7 +379,11 @@ const Payments = ({ navigation }) => {
                       token,
                       selectedProject?.projectId ||
                         projectsListSimple[0]?.projectId,
-                      item?.value
+                      item?.value,
+                      1,
+                      15,
+                      "",
+                      0
                     )
                   );
                 }}
@@ -368,7 +409,7 @@ const Payments = ({ navigation }) => {
       return;
     }
     // if (!isChecked) {
-    let data = attendanceList.map((item) => {
+    let data = attendanceList?.attendances?.map((item) => {
       if (item.workerId === workerId && item.jobId === jobId) {
         return {
           ...item,
@@ -628,7 +669,8 @@ const Payments = ({ navigation }) => {
               // marginBottom: 10
             }}
           >
-            {!attendanceList || attendanceList?.length === 0 ? (
+            {!attendanceList?.attendances ||
+            attendanceList?.attendances?.length === 0 ? (
               <ScrollView
                 refreshControl={
                   <RefreshControl
@@ -639,6 +681,10 @@ const Payments = ({ navigation }) => {
                           token,
                           selectedProject?.projectId ||
                             projectsListSimple[0]?.projectId,
+                          0,
+                          1,
+                          15,
+                          "",
                           0
                         )
                       );
@@ -674,9 +720,17 @@ const Payments = ({ navigation }) => {
                           token,
                           selectedProject?.projectId ||
                             projectsListSimple[0]?.projectId,
+                          0,
+                          1,
+                          15,
+                          "",
                           0
                         )
                       );
+                      setCount(1)
+                    }}
+                    onEndReached={() => {
+                      setCount(count + 1);
                     }}
                     tintColor={Colors.Primary}
                     colors={[Colors.Purple, Colors.Primary]}

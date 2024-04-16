@@ -58,9 +58,8 @@ const Projects = ({ navigation }) => {
   const projectForLabour = useSelector(projectsForLabourReducer);
   const isLoading = useSelector(loadingProject);
   const userInfo = useSelector(userData);
-  // console.log("userInfo", projectsListSimple);
+
   //! LIFE CYCLE
-  // useEffect(() => {}, []);
   useFocusEffect(
     React.useCallback(() => {
       dispatch(getAllProjectsAction(token));
