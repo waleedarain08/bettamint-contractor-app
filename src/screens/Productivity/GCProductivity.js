@@ -45,6 +45,7 @@ import {
   Picture,
   DateIcon,
   ClockIcon,
+  DocumentIcon,
 } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
 import {
@@ -456,6 +457,9 @@ const GCProductivity = ({ navigation }) => {
                 />
               </View>
             </View>
+            <View>
+              <DocumentIcon size={50} color={Colors.Black} />
+            </View>
             <View style={{ marginTop: 20 }}>
               <TouchableOpacity
                 onPress={async () => {
@@ -515,7 +519,8 @@ const GCProductivity = ({ navigation }) => {
                   Approve
                 </Text>
               </TouchableOpacity>
-              <View style={{ marginTop: 10 }}>
+            </View>
+            {/* <View style={{ marginTop: 10 }}>
                 <Dropdown
                   style={styles.dropdown}
                   placeholderStyle={styles.placeholderStyle}
@@ -577,113 +582,7 @@ const GCProductivity = ({ navigation }) => {
                     }
                   }}
                 />
-              </View>
-              {/* <TextInput
-                style={styles.dropdown}
-                placeholder="Remarks"
-                placeholderTextColor={Colors.LightGray}
-                multiline={true}
-                value={remarks}
-                onChangeText={(text) => setRemarks(text)}
-                editable={currBoq?.status === "Approved" ? false : true}
-              /> */}
-              {/* <View style={{ marginTop: 20 }}>
-                {currBoq?.status === "Approved" ? (
-                  <View
-                    style={{
-                      alignItems: "center",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Lexend-Medium",
-                        color: Colors.Black,
-                        fontSize: 16,
-                        marginRight: 10,
-                      }}
-                    >
-                      Approved
-                    </Text>
-                    <Tick size={25} color={Colors.Primary} />
-                  </View>
-                ) : (
-                  <TouchableOpacity
-                    onPress={async () => {
-                      if (remarks === null) {
-                        return Toast.show({
-                          type: "info",
-                          text1: "Info",
-                          text2: "Please add remarks before verification!",
-                          topOffset: 10,
-                          position: "top",
-                          visibilityTime: 4000,
-                        });
-                      } else {
-                        const obj = {
-                          remarks,
-                          boqProgressId: currBoq?.contractorBOQProgressId,
-                          status: "Approved",
-                        };
-                        let resp = await dispatch(
-                          verifyBOQProgress(token, obj)
-                        );
-                        if (resp.status === 200) {
-                          dispatch(
-                            getBOQListGC(
-                              token,
-                              selectedProject?.projectId
-                              // LabourContractor?.userId
-                            )
-                          );
-                          setOpenActionModal(false);
-                          setRemarks(null);
-                          Toast.show({
-                            type: "info",
-                            text1: "Success",
-                            text2: "BOQ marked successfully!",
-                            topOffset: 10,
-                            position: "top",
-                            visibilityTime: 4000,
-                          });
-                          // toast.success("BOQ marked successfully!");
-                        } else {
-                          Toast.show({
-                            type: "Error",
-                            text1: "Error",
-                            text2: "Something went wrong!",
-                            topOffset: 10,
-                            position: "top",
-                            visibilityTime: 4000,
-                          });
-
-                          // toast.success("Something went wrong!");
-                        }
-                      }
-                    }}
-                    style={{
-                      width: "100%",
-                      backgroundColor: "#81B733",
-                      height: 40,
-                      borderRadius: 5,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontFamily: "Lexend-Medium",
-                        color: Colors.White,
-                        fontSize: 14,
-                      }}
-                    >
-                      Approve
-                    </Text>
-                  </TouchableOpacity>
-                )}
               </View> */}
-            </View>
           </View>
         </View>
       </Modal>
@@ -1757,7 +1656,7 @@ const GCProductivity = ({ navigation }) => {
             width: "60%",
             flexDirection: "row",
             alignItems: "center",
-            justifyContent: "space-between",
+            justifyContent: "flex-end",
           }}
         >
           <Pressable
@@ -1766,7 +1665,7 @@ const GCProductivity = ({ navigation }) => {
               paddingHorizontal: 5,
               borderRadius: 3,
               paddingVertical: 2,
-              width: "25%",
+              width: "45%",
               alignItems: "center",
               justifyContent: "center",
             }}
@@ -1779,15 +1678,15 @@ const GCProductivity = ({ navigation }) => {
           >
             <Text
               style={{
-                fontSize: 10,
+                fontSize: 14,
                 color: Colors.Primary,
                 fontFamily: "Lexend-Medium",
               }}
             >
-              Quality
+              Verify
             </Text>
           </Pressable>
-          <Pressable
+          {/* <Pressable
             style={{
               backgroundColor: Colors.PrimaryLight,
               paddingHorizontal: 5,
@@ -1806,8 +1705,8 @@ const GCProductivity = ({ navigation }) => {
             <Text style={{ fontSize: 10, color: Colors.Primary }}>
               Measurement
             </Text>
-          </Pressable>
-          <Pressable
+          </Pressable> */}
+          {/* <Pressable
             style={{
               backgroundColor: Colors.PrimaryLight,
               paddingHorizontal: 5,
@@ -1824,7 +1723,7 @@ const GCProductivity = ({ navigation }) => {
             <Text style={{ fontSize: 10, color: Colors.Primary }}>
               Field Notes
             </Text>
-          </Pressable>
+          </Pressable> */}
         </View>
       </View>
       <View

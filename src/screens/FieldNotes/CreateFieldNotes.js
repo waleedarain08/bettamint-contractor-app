@@ -1,93 +1,202 @@
-import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  Dimensions,
-  LogBox,
-  Pressable,
   Appearance,
+  Image,
+  PermissionsAndroid,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Modal,
+  ScrollView,
+  FlatList,
+  ImageBackground,
+  TextInput,
+  KeyboardAvoidingView,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
+import React, { useEffect, useState } from "react";
 import { Colors } from "../../utils/Colors";
-import { ClockIcon, DateIcon, Picture } from "../../icons";
-import Spacer from "../../components/Spacer";
-import { Dropdown } from "react-native-element-dropdown";
-import DatePicker from "react-native-date-picker";
+import { Cross, Search, VectorIcon } from "../../icons";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import { launchImageLibrary } from "react-native-image-picker";
-import {
-  selectedWorkerReducer,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import { jobsListReducer } from "../../redux/slices/jobSlice";
+import Geolocation from "@react-native-community/geolocation";
 import {
   createFieldNoteEntry,
   fieldNoteReducer,
+  getFieldNoteCost,
   getScopeList,
 } from "../../redux/slices/fieldNoteSlice";
+import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
+import DatePicker from "react-native-date-picker";
+import moment from "moment";
+import { SearchBar } from "react-native-screens";
+import { Searchbar } from "react-native-paper";
 import {
   getLabourContactorAction,
   labourContractorReducer,
 } from "../../redux/slices/userSlice";
-import moment from "moment";
-import { assetsUrl } from "../../utils/api_constants";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-LogBox.ignoreAllLogs();
+import {
+  getAllProjectsSimpleAction,
+  projectsListSimpleReducer,
+} from "../../redux/slices/projectSlice";
+import { launchCamera } from "react-native-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const CreateFieldNotes = ({ navigation }) => {
+const NewCreateFieldNotes = () => {
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
-
   const dispatch = useDispatch();
-  const [scopeValue, setScopeValue] = useState(null);
-  const [contractorValue, setContractorValue] = useState(null);
-  const [description, setDescription] = useState("");
-  const [location, setLocation] = useState("");
-  const [date, setDate] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [open, setOpen] = useState(false);
-  const [time, setTime] = useState(null);
-  const [openTime, setOpenTime] = useState(false);
-  const [fieldPic, setFieldPic] = useState("");
-  const [fieldPicForm, setFieldPicForm] = useState("");
-  const [selectedProject, setSelectedProject] = useState(null);
-
+  const userInfo = useSelector(userData);
   const projectsList = useSelector(projectsListSimpleReducer);
-  const { scopeList, selectedNote } = useSelector(fieldNoteReducer);
+  const { scopeList, selectedNote, costList } = useSelector(fieldNoteReducer);
   const labourContractorList = useSelector(labourContractorReducer);
 
   const token = useSelector(authToken);
+  const navigation = useNavigation();
+  // States
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+  const [currentPosition, setCurrentPosition] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [openScope, setOpenScope] = useState(false);
+  const [openProject, setOpenProject] = useState(false);
+  const [openContractor, setOpenContractor] = useState(false);
+  const [openCost, setOpenCost] = useState(false);
+  const [selectedScope, setSelectedScope] = useState(null);
+  const [selectedProject, setSelectedProject] = useState(null);
+  const [selectedCostCode, setSelectedCostCode] = useState(null);
+  const [selectedContractor, setSelectedContractor] = useState(null);
+  const [SOWList, setSOWList] = useState([]); // [SOWList, setSOWList
+  const [projectList, setProjectList] = useState([]); // [SOWList, setSOWList
+  const [contractorList, setContractorList] = useState([]); // [SOWList, setSOWList
+  const [search, setSearch] = useState("");
+  const [fieldPic, setFieldPic] = useState(null);
+  const [fieldPicForm, setFieldPicForm] = useState(null);
+  const [remarks, setRemarks] = useState("");
+  const [openRemarks, setOpenRemarks] = useState(false);
+  const [quantity, setQuantity] = useState("");
+  const [openLocation, setOpenLocation] = useState(false);
+  const [openDescription, setOpenDescription] = useState(false);
+  const [description, setDescription] = useState("");
+
+  const { user } = userInfo;
+  // console.log('contractorList', costList);
+  useEffect(() => {
+    setSOWList(scopeList);
+  }, [scopeList]);
+  useEffect(() => {
+    setProjectList(projectsList);
+  }, [projectsList]);
+  useEffect(() => {
+    setContractorList(labourContractorList);
+  }, [labourContractorList]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      launchCameraHandler();
+      return () => {};
+    }, [])
+  );
+  // console.log('labourContractorList', labourContractorList);
+  const getAsyncData = async () => {
+    try {
+      const jsonValue = await AsyncStorage.getItem("fieldNote");
+      if (jsonValue != null) {
+        const data = JSON.parse(jsonValue);
+        setSelectedContractor(data.contractor);
+        setSelectedProject(data.project);
+        setSelectedScope(data.scope);
+        setSelectedCostCode(data.costCode);
+        setRemarks(data.remarks);
+        setQuantity(data.quantity);
+        setCurrentLocation(data.currentLocation);
+        setDescription(data.description);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
 
   useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
+    getLocationPermission();
     dispatch(getScopeList(token));
     dispatch(getLabourContactorAction(token));
+    dispatch(getAllProjectsSimpleAction(token));
+    getAsyncData();
   }, []);
 
-  useEffect(() => {
-    console.log(selectedNote);
-    if (selectedNote) {
-      setSelectedProject(selectedNote?.projectId);
-      setContractorValue(selectedNote?.contractorId);
-      setScopeValue(selectedNote?.scopeOfWorkId);
-      setLocation(selectedNote?.location);
-      setDescription(selectedNote?.description);
-      setFieldPic(assetsUrl + selectedNote?.imageUrl);
-      setTime(new Date(selectedNote?.dateTime));
-      setDate(new Date(selectedNote?.dateTime));
-      setSelectedDate(new Date(selectedNote?.dateTime));
+  const storeDataOnAsyncStorage = async (value) => {
+    try {
+      const data = {
+        contractor: selectedContractor || null,
+        project: selectedProject || null,
+        scope: selectedScope || null,
+        costCode: selectedCostCode || null,
+        remarks: remarks || null,
+        quantity: quantity || null,
+        currentLocation: currentLocation || null,
+        description: description || null,
+      };
+      await AsyncStorage.setItem("fieldNote", JSON.stringify(data));
+    } catch (e) {
+      console.log(e);
     }
-  }, [selectedNote]);
+  };
+
+  const getLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: "Location permission required",
+          message: "Bettamint needs to access your location",
+          buttonPositive: "OK",
+        }
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log("You can use the camera");
+        getCurrentLocation();
+      } else {
+        console.log("Camera permission denied");
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+  const getCurrentLocation = () => {
+    Geolocation.getCurrentPosition(
+      (position) => {
+        setCurrentPosition(position);
+        console.log("position", position);
+      },
+      (error) => {
+        console.log(error.code, error.message);
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
+    );
+  };
+
+  const launchCameraHandler = async () => {
+    launchCamera(
+      {
+        mediaType: "photo",
+        quality: 0.5,
+        saveToPhotos: true,
+        cameraType: "back",
+      },
+      (response) => {
+        console.log(response);
+        if (response?.assets?.length > 0) {
+          setFieldPicForm(response);
+          setFieldPic(response?.assets[0]?.uri);
+        }
+      }
+    );
+  };
 
   const submitHandler = async () => {
     const formData = new FormData();
@@ -100,7 +209,7 @@ const CreateFieldNotes = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
-    } else if (!scopeValue) {
+    } else if (!selectedScope) {
       Toast.show({
         type: "error",
         text1: "Error",
@@ -109,16 +218,7 @@ const CreateFieldNotes = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
-    } else if (!description) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter description.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
-    } else if (!contractorValue) {
+    } else if (!selectedContractor) {
       Toast.show({
         type: "error",
         text1: "Error",
@@ -136,7 +236,16 @@ const CreateFieldNotes = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
-    } else if (!location) {
+    } else if (!description) {
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please Enter Description.",
+        topOffset: 10,
+        position: "top",
+        visibilityTime: 3000,
+      });
+    } else if (!currentLocation) {
       Toast.show({
         type: "error",
         text1: "Error",
@@ -145,7 +254,7 @@ const CreateFieldNotes = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
-    } else if (!selectedDate) {
+    } else if (!date) {
       Toast.show({
         type: "error",
         text1: "Error",
@@ -154,21 +263,19 @@ const CreateFieldNotes = ({ navigation }) => {
         position: "top",
         visibilityTime: 3000,
       });
-    } else if (!time) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select time.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
     } else {
-      formData.append("ScopeOfWorkId", parseInt(scopeValue, 10));
-      formData.append("ContractorId", parseInt(contractorValue, 10));
-      formData.append("ProjectId", parseInt(selectedProject, 10));
+      formData.append(
+        "ScopeOfWorkId",
+        parseInt(selectedScope?.scopeOfWorkId, 10)
+      );
+      formData.append("ContractorId", parseInt(selectedContractor?.userId, 10));
+      formData.append("ProjectId", parseInt(selectedProject?.projectId, 10));
+      formData.append(
+        "ContractorBOQProgressId",
+        parseInt(selectedCostCode?.contractorBOQId, 10)
+      );
+      formData.append("Location", currentLocation);
       formData.append("Description", description);
-      formData.append("Location", location);
       selectedNote &&
         formData.append("FieldNoteId", parseInt(selectedNote?.fieldNoteId, 10));
       !selectedNote &&
@@ -177,13 +284,11 @@ const CreateFieldNotes = ({ navigation }) => {
           type: fieldPicForm?.assets[0]?.type,
           uri: fieldPicForm?.assets[0]?.uri, //Platform.OS === 'ios' ? photo.uri.replace('file://', '') : photo.uri,
         });
-      formData.append(
-        "DateTime",
-        `${moment(date).format("YYYY-MM-DD")} ${moment(time).format("HH:mm")}`
-      );
+      formData.append("DateTime", `${moment(date).format("YYYY-MM-DD HH:mm")}`);
       console.log("FORMDATA", formData);
       const response = await dispatch(createFieldNoteEntry(token, formData));
       if (response.status === 200) {
+        console.log("Field Note Created", response.status);
         navigation.goBack();
         Toast.show({
           type: "info",
@@ -195,336 +300,707 @@ const CreateFieldNotes = ({ navigation }) => {
           position: "top",
           visibilityTime: 4000,
         });
+      } else {
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: "Something went wrong, please try again.",
+          topOffset: 10,
+          position: "top",
+          visibilityTime: 3000,
+        });
       }
     }
   };
 
-  const handleImagePicker = async () => {
-    const result = await launchImageLibrary({
-      mediaType: "photo",
-      quality: 0.5,
-      selectionLimit: 1,
-    });
-    if (result?.assets?.length > 0) {
-      console.log(result);
-      setFieldPicForm(result);
-      setFieldPic(result?.assets[0]?.uri);
-    }
+  useEffect(() => {
+    const getCurrentCity = () => {
+      if (
+        currentPosition?.coords?.latitude &&
+        currentPosition?.coords?.longitude
+      ) {
+        const locationPublish = `${currentPosition?.coords?.latitude}, ${currentPosition?.coords?.longitude}`;
+
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${locationPublish}&sensor=true&key=${GOOGLE_API_KEY}`;
+        fetch(url)
+          .then((response) => response.json())
+          .then((response) => {
+            const address = response.results[0].formatted_address;
+            console.log("address", address);
+            setCurrentLocation(address);
+          })
+          .catch((e) => {
+            console.log(e);
+          });
+      }
+    };
+    getCurrentCity();
+  }, [currentPosition]);
+
+  const renderSOWList = () => {
+    return (
+      <Modal
+        visible={openScope}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenScope(false);
+        }}
+        presentationStyle="pageSheet"
+        transparent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenScope(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Scope of Work</Text>
+              </View>
+              <Text style={styles.doneText}>DONE</Text>
+            </View>
+            <View>
+              <Searchbar
+                style={styles.searchbarStyle}
+                placeholder="Search"
+                placeholderTextColor={"#FFFFFF"}
+                mode="bar"
+                icon={() => <Search size={20} color={"#8E8E93"} />}
+                clearIcon={() => <Cross size={20} color={"#8E8E93"} />}
+                onChangeText={(text) => {
+                  setSearch(text);
+                  if (text) {
+                    const filteredList = scopeList.filter((item) =>
+                      item.name.toLowerCase().includes(text.toLowerCase())
+                    );
+                    setSOWList(filteredList);
+                  } else {
+                    setSOWList(scopeList);
+                  }
+                }}
+                value={search}
+              />
+            </View>
+
+            <View style={styles.marginTop} />
+            <FlatList
+              data={SOWList}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.flatlistItem}
+                  onPress={() => {
+                    setSelectedScope(item);
+                    setOpenScope(false);
+                    setSearch("");
+                  }}
+                >
+                  <View style={styles.flatlistItemInner}>
+                    <View
+                      style={[
+                        styles.flatlistItemIndicator,
+                        {
+                          backgroundColor:
+                            selectedScope === item
+                              ? Colors.Primary
+                              : Colors.Black,
+                        },
+                      ]}
+                    />
+                    <Text style={styles.flatlistItemText}>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderProjectList = () => {
+    return (
+      <Modal
+        visible={openProject}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenProject(false);
+        }}
+        presentationStyle="pageSheet"
+        transparent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenProject(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Project</Text>
+              </View>
+              <Text style={styles.doneText}>DONE</Text>
+            </View>
+            <View>
+              <Searchbar
+                style={styles.searchbarStyle}
+                placeholder="Search"
+                placeholderTextColor={"#FFFFFF"}
+                mode="bar"
+                icon={() => <Search size={20} color={"#8E8E93"} />}
+                clearIcon={() => <Cross size={20} color={"#8E8E93"} />}
+                onChangeText={(text) => {
+                  setSearch(text);
+                  if (text) {
+                    const filteredList = projectsList.filter((item) =>
+                      item.name.toLowerCase().includes(text.toLowerCase())
+                    );
+                    setProjectList(filteredList);
+                  } else {
+                    setProjectList(scopeList);
+                  }
+                }}
+                value={search}
+              />
+            </View>
+
+            <View style={styles.marginTop} />
+            <FlatList
+              data={projectList}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.flatlistItem}
+                  onPress={() => {
+                    setSelectedProject(item);
+                    setOpenProject(false);
+                    setSearch("");
+                    console.log("selectedProject", item);
+                    console.log("selectedScope", selectedScope);
+                    console.log("selectedContractor", selectedContractor);
+                    dispatch(
+                      getFieldNoteCost(
+                        token,
+                        item?.projectId,
+                        selectedScope?.scopeOfWorkId,
+                        selectedContractor?.userId
+                      )
+                    );
+                  }}
+                >
+                  <View style={styles.flatlistItemInner}>
+                    <View
+                      style={[
+                        styles.flatlistItemIndicator,
+                        {
+                          backgroundColor:
+                            selectedProject === item
+                              ? Colors.Primary
+                              : Colors.Black,
+                        },
+                      ]}
+                    />
+                    <Text style={styles.flatlistItemText}>{item.name}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderContractorList = () => {
+    return (
+      <Modal
+        visible={openContractor}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenContractor(false);
+        }}
+        // presentationStyle="pageSheet"
+        transparent
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenContractor(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Select Contractor</Text>
+              </View>
+              {/* <Text style={styles.doneText}>DONE</Text> */}
+            </View>
+            <View>
+              <Searchbar
+                style={styles.searchbarStyle}
+                placeholder="Search"
+                placeholderTextColor={"#FFFFFF"}
+                mode="bar"
+                icon={() => <Search size={20} color={"#8E8E93"} />}
+                clearIcon={() => <Cross size={20} color={"#8E8E93"} />}
+                onChangeText={(text) => {
+                  setSearch(text);
+                  if (text) {
+                    const filteredList = labourContractorList.filter((item) =>
+                      item.fullName.toLowerCase().includes(text.toLowerCase())
+                    );
+                    setContractorList(filteredList);
+                  } else {
+                    setContractorList(scopeList);
+                  }
+                }}
+                value={search}
+              />
+            </View>
+
+            <View style={styles.marginTop} />
+            <FlatList
+              data={contractorList}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.flatlistItem}
+                  onPress={() => {
+                    setSelectedContractor(item);
+                    setOpenContractor(false);
+                    setSearch("");
+                  }}
+                >
+                  <View style={styles.flatlistItemInner}>
+                    <View
+                      style={[
+                        styles.flatlistItemIndicator,
+                        {
+                          backgroundColor:
+                            selectedContractor === item
+                              ? Colors.Primary
+                              : Colors.Black,
+                        },
+                      ]}
+                    />
+                    <Text style={styles.flatlistItemText}>{item.fullName}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderCostCodeList = () => {
+    return (
+      <Modal
+        visible={openCost}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenCost(false);
+        }}
+        transparent
+        // presentationStyle="pageSheet"
+      >
+        <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenCost(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Select Cost Code</Text>
+              </View>
+            </View>
+            <View style={styles.marginTop} />
+            <FlatList
+              data={costList}
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({ item, index }) => (
+                <TouchableOpacity
+                  key={index}
+                  style={styles.flatlistItem}
+                  onPress={() => {
+                    setSelectedCostCode(item);
+                    setOpenCost(false);
+                    setSearch("");
+                  }}
+                >
+                  <View style={styles.flatlistItemInner}>
+                    <View
+                      style={[
+                        styles.flatlistItemIndicator,
+                        {
+                          backgroundColor:
+                            selectedCostCode === item
+                              ? Colors.Primary
+                              : Colors.Black,
+                        },
+                      ]}
+                    />
+                    <Text style={styles.flatlistItemText}>{item.costCode}</Text>
+                  </View>
+                </TouchableOpacity>
+              )}
+            />
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
+  const renderRemarksTextfieldModal = () => {
+    return (
+      <Modal
+        visible={openRemarks}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenRemarks(false);
+        }}
+        transparent
+        // presentationStyle="pageSheet"
+      >
+        <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenRemarks(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Remarks</Text>
+              </View>
+              <Text
+                onPress={() => setOpenRemarks(false)}
+                style={styles.doneText}
+              >
+                DONE
+              </Text>
+            </View>
+            <View>
+              <TextInput
+                onChangeText={(text) => setRemarks(text)}
+                value={remarks}
+                multiline
+                numberOfLines={4}
+                placeholder="Enter Remarks"
+                placeholderTextColor={"#FFFFFF"}
+                style={{ color: Colors.White, padding: 10, fontSize: 16 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderDesTextfieldModal = () => {
+    return (
+      <Modal
+        visible={openDescription}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenDescription(false);
+        }}
+        transparent
+        // presentationStyle="pageSheet"
+      >
+        <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenDescription(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Description</Text>
+              </View>
+              <Text
+                onPress={() => setOpenDescription(false)}
+                style={styles.doneText}
+              >
+                DONE
+              </Text>
+            </View>
+            <View>
+              <TextInput
+                onChangeText={(text) => setDescription(text)}
+                value={description}
+                multiline
+                numberOfLines={4}
+                placeholder="Enter Description"
+                placeholderTextColor={"#FFFFFF"}
+                style={{ color: Colors.White, padding: 10, fontSize: 16 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+  const renderLocationTextfieldModal = () => {
+    return (
+      <Modal
+        visible={openLocation}
+        animationType="slide"
+        onRequestClose={() => {
+          setOpenLocation(false);
+        }}
+        transparent
+        // presentationStyle="pageSheet"
+      >
+        <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
+          <View style={styles.innerModalContainer}>
+            <View style={styles.headerContainer}>
+              <View style={styles.titleContainer}>
+                <TouchableOpacity onPress={() => setOpenLocation(false)}>
+                  <Cross size={30} color={Colors.White} />
+                </TouchableOpacity>
+                <Text style={styles.titleText}>Location</Text>
+              </View>
+              <Text
+                onPress={() => setOpenLocation(false)}
+                style={styles.doneText}
+              >
+                DONE
+              </Text>
+            </View>
+            <View>
+              <TextInput
+                onChangeText={(text) => setCurrentLocation(text)}
+                value={currentLocation}
+                multiline
+                numberOfLines={4}
+                placeholder="Enter Location"
+                placeholderTextColor={"#FFFFFF"}
+                style={{ color: Colors.White, padding: 10, fontSize: 16 }}
+              />
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header} />
-      <ScrollView style={styles.graph}>
-        <View
-          style={{
-            flexDirection: "row",
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 15,
-            marginTop: 20,
-            paddingBottom: 15,
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              handleImagePicker();
-            }}
-            style={{ width: "28%" }}
-          >
-            {fieldPic ? (
-              <Image
-                source={{ uri: fieldPic }}
-                style={{ width: "100%", height: 82, borderRadius: 5 }}
-              />
-            ) : (
-              <View
-                style={{
-                  justifyContent: "center",
-                  alignItems: "center",
-                  borderColor: Colors.FormBorder,
-                  borderStyle: "dashed",
-                  borderWidth: 1,
-                  borderRadius: 5,
-                  width: "100%",
-                  height: 82,
+    <ImageBackground
+      source={{ uri: fieldPic }}
+      style={{
+        flex: 1,
+        resizeMode: "cover",
+        justifyContent: "center",
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      {openContractor ||
+      openLocation ||
+      openCost ||
+      openProject ||
+      openScope ||
+      openRemarks ||
+      openDescription ? (
+        <View style={styles.mainContainer}>
+          <View style={styles.topContainer}></View>
+          <View style={{ flex: 5, width: "100%" }}></View>
+          <View style={styles.outerContainer}></View>
+        </View>
+      ) : (
+        <View style={styles.mainContainer}>
+          <View style={styles.topContainer}>
+            <View style={styles.innerTopContainer}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation.goBack();
                 }}
+                style={styles.iconContainer}
               >
-                <Picture size={38} color={"#D1E0EE"} />
-                <Text style={styles.imgText}>Add Picture</Text>
+                <VectorIcon
+                  type={"AntDesign"}
+                  name={"close"}
+                  color={Colors.White}
+                  size={30}
+                />
+              </TouchableOpacity>
+              <View style={styles.userContainer}>
+                <VectorIcon
+                  type={"Ionicons"}
+                  name={"person-circle-sharp"}
+                  color={Colors.White}
+                  size={35}
+                />
+                <View>
+                  <Text
+                    onPress={() => setOpenContractor(true)}
+                    style={styles.textContainer}
+                  >
+                    {selectedContractor?.fullName || "Assign To"}
+                  </Text>
+                  <Text
+                    onPress={() => setOpenLocation(true)}
+                    style={styles.locationContainer}
+                  >
+                    {currentLocation || "Location"}
+                  </Text>
+                </View>
               </View>
-            )}
-          </Pressable>
-          <View style={{ width: "68%" }}>
-            <Text style={styles.title}>Scope of work</Text>
-            <View style={{ marginTop: 7 }}>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
-                iconStyle={styles.iconStyle}
-                autoScroll={false}
-                inputSearchStyle={{ color: Colors.Black }}
-                data={scopeList?.map((ele) => ({
-                  label: ele?.name,
-                  value: ele?.scopeOfWorkId,
-                }))}
-                maxHeight={500}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select Scope"}
-                value={scopeValue}
-                onChange={(item) => {
-                  setScopeValue(item.value);
-                }}
-              />
+              <View style={styles.dateContainer}>
+                <TouchableOpacity
+                  onPress={() => setOpen(true)}
+                  style={{ flexDirection: "row", alignItems: "center" }}
+                >
+                  <Text style={styles.dateText}>
+                    {moment(date).format("DD MMM, YYYY")}
+                  </Text>
+                  <VectorIcon
+                    name={"calendar"}
+                    type={"AntDesign"}
+                    color={Colors.White}
+                    size={18}
+                  />
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
-          <Text style={styles.title}>Description</Text>
-          <TextInput
-            style={{
-              fontFamily: "Lexend-Regular",
-              borderWidth: 1,
-              borderColor: Colors.FormBorder,
-              marginTop: 7,
-              borderRadius: 4,
-              paddingHorizontal: 7,
-              fontSize: 12,
-              height: 50,
-              backgroundColor: Colors.White,
-              elevation: 3,
-              color: Colors.Black,
-            }}
-            onChangeText={(e) => setDescription(e)}
-            value={description}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Description"
-          />
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
-          <Text style={styles.title}>Select Contractor</Text>
-          <View style={{ marginTop: 7 }}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              data={
-                labourContractorList?.length
-                  ? labourContractorList?.map((ele) => ({
-                      label: ele?.fullName,
-                      value: ele?.userId,
-                    }))
-                  : []
-              }
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Select Contractor"}
-              value={contractorValue}
-              onChange={(item) => {
-                setContractorValue(item.value);
-              }}
-            />
-          </View>
-        </View>
-        <View
-          style={{
-            paddingHorizontal: 15,
-            paddingBottom: 15,
-          }}
-        >
-          <Text style={styles.title}>Select Project</Text>
-          <View style={{ marginTop: 7 }}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              data={projectsList.map((ele) => ({
-                label: ele.name,
-                value: ele.projectId,
-              }))}
-              autoScroll={false}
-              search
-              searchPlaceholder="Search project"
-              inputSearchStyle={{ color: Colors.Black }}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Select Project"}
-              value={selectedProject}
-              onChange={(item) => {
-                setSelectedProject(item.value);
-              }}
-            />
-          </View>
-        </View>
-        <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
-          <Text style={styles.title}>Location</Text>
-          <TextInput
-            style={{
-              fontFamily: "Lexend-Regular",
-              borderWidth: 1,
-              borderColor: Colors.FormBorder,
-              marginTop: 7,
-              borderRadius: 4,
-              paddingHorizontal: 7,
-              fontSize: 12,
-              height: 50,
-              backgroundColor: Colors.White,
-              elevation: 3,
-              color: Colors.Black,
-            }}
-            onChangeText={(e) => setLocation(e)}
-            value={location}
-            placeholderTextColor={Colors.FormText}
-            placeholder="Enter Location"
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            width: "100%",
-            paddingHorizontal: 15,
-            paddingBottom: 15,
-          }}
-        >
-          <View style={{ width: "48%" }}>
-            <Text style={styles.title}>Select Date</Text>
+          <View style={{ flex: 5, width: "100%" }}>
             <View
-              style={[
-                {
+              style={{
+                flex: 1,
+                width: "100%",
+                justifyContent: "center",
+                padding: 10,
+              }}
+            >
+              <TouchableOpacity
+                style={{
+                  width: "100%",
                   flexDirection: "row",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  fontFamily: "Lexend-Regular",
-                  borderWidth: 1,
-                  borderColor: Colors.FormBorder,
-                  marginTop: 7,
-                  borderRadius: 4,
-                  paddingHorizontal: 7,
-                  fontSize: 12,
-                  height: 50,
-                  backgroundColor: Colors.White,
-                  elevation: 3,
-                  color: Colors.Black,
-                },
-              ]}
-            >
-              <TextInput
-                style={{
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Black,
-                  fontSize: 12,
-                  width: "80%",
+                  padding: 10,
                 }}
-                onPressIn={() => setOpen(true)}
-                placeholderTextColor={Colors.FormText}
-                placeholder="mm/dd/yyyy"
-                value={date ? moment(date).format("MM/DD/YYYY") : "mm/dd/yyyy"}
-                // onChangeText={(text) => setJobDate(text)}
-              />
-              <DateIcon
-                onPress={() => setOpen(true)}
-                color={Colors.FormBorder}
-                size={22}
-              />
+                onPress={() => setOpenScope(true)}
+              >
+                <Image
+                  source={require("../../assets/icons/Shape-3.png")}
+                  style={styles.image}
+                />
+                <Text style={styles.text}>
+                  {selectedScope?.name || "SCOPE OF WORK"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 10,
+                }}
+                onPress={() => setOpenProject(true)}
+              >
+                <Image
+                  source={require("../../assets/icons/Shape-4.png")}
+                  style={styles.image}
+                />
+                <Text style={styles.text}>
+                  {selectedProject?.name || "PROJECT"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 10,
+                }}
+                onPress={() => setOpenCost(true)}
+              >
+                <Image
+                  source={require("../../assets/icons/Shape-5.png")}
+                  style={styles.image}
+                />
+                <Text style={styles.text}>
+                  {selectedCostCode?.costCode || "COST CODE"}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{
+                  width: "100%",
+                  flexDirection: "row",
+                  alignItems: "center",
+                  padding: 10,
+                }}
+                onPress={() => setOpenDescription(true)}
+              >
+                <Image
+                  source={require("../../assets/icons/Shape-5.png")}
+                  style={styles.image}
+                />
+                <Text style={styles.text}>{description || "Description"}</Text>
+              </TouchableOpacity>
             </View>
           </View>
-          <View style={{ width: "48%" }}>
-            <Text style={styles.title}>Select TIME</Text>
-            <Pressable
-              style={[
-                {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  fontFamily: "Lexend-Regular",
-                  borderWidth: 1,
-                  borderColor: Colors.FormBorder,
-                  marginTop: 7,
-                  borderRadius: 4,
-                  paddingHorizontal: 7,
-                  fontSize: 12,
-                  height: 50,
-                  backgroundColor: Colors.White,
-                  elevation: 3,
-                  color: Colors.Black,
-                },
-              ]}
-              onPress={() => setOpenTime(true)}
-            >
-              <TextInput
-                style={{
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Black,
-                  fontSize: 12,
-                  width: "80%",
-                }}
-                onPressIn={() => setOpenTime(true)}
-                placeholderTextColor={Colors.FormText}
-                placeholder="----"
-                value={time ? moment(time).format("hh:mm A") : "----"}
-              />
-              <ClockIcon
-                onPress={() => setOpenTime(true)}
-                color={Colors.FormBorder}
-                size={20}
-              />
-            </Pressable>
+          <View style={styles.outerContainer}>
+            <View style={styles.innerOuterContainer}>
+              <View style={styles.remarksContainer}>
+                <TouchableOpacity
+                  onPress={() => setOpenRemarks(true)}
+                  style={styles.button}
+                >
+                  <Image
+                    source={require("../../assets/icons/Shape.png")}
+                    style={styles.image}
+                  />
+                  <Text
+                    numberOfLines={1}
+                    style={[styles.text, { width: "60%" }]}
+                  >
+                    {remarks || "REMARKS"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity style={styles.button}>
+                  <Image
+                    source={require("../../assets/icons/Shape-2.png")}
+                    style={styles.image}
+                  />
+                  <KeyboardAvoidingView style={{ width: "100%" }}>
+                    <TextInput
+                      placeholder="QUANTITY"
+                      placeholderTextColor={Colors.White}
+                      keyboardType="numeric"
+                      onChangeText={(text) => setQuantity(text)}
+                      value={quantity}
+                      style={{
+                        color: Colors.White,
+                        fontFamily: "Lexend-Regular",
+                        fontSize: 12,
+                        width: "100%",
+                        // padding: 10,
+                      }}
+                    />
+                  </KeyboardAvoidingView>
+                </TouchableOpacity>
+              </View>
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  onPress={() => {
+                    storeDataOnAsyncStorage();
+                    submitHandler();
+                  }}
+                  style={styles.arrowButton}
+                >
+                  <VectorIcon
+                    name={"arrowright"}
+                    type={"AntDesign"}
+                    size={30}
+                    color={Colors.White}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
           </View>
         </View>
-      </ScrollView>
-      <Spacer top={-20} />
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          padding: 20,
-          width: "100%",
-        }}
-      >
-        <TouchableOpacity
-          style={[styles.button, { width: "60%" }]}
-          onPress={() => {
-            submitHandler();
-            // console.log('CLICK')
-          }}
-        >
-          <Text style={styles.buttonText}>
-            {selectedNote ? "Update Note" : "Create Note"}
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.button,
-            { width: "35%", backgroundColor: Colors.Secondary },
-          ]}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.buttonText}>Cancel</Text>
-        </TouchableOpacity>
-      </View>
+      )}
       <DatePicker
         modal
         mode="date"
@@ -532,7 +1008,6 @@ const CreateFieldNotes = ({ navigation }) => {
         open={open}
         date={date}
         onConfirm={(date) => {
-          // console.log(date)
           setOpen(false);
           setDate(date);
           setSelectedDate(date);
@@ -541,199 +1016,169 @@ const CreateFieldNotes = ({ navigation }) => {
           setOpen(false);
         }}
       />
-      <DatePicker
-        modal
-        mode="time"
-        textColor={textColor}
-        open={openTime}
-        date={date}
-        onConfirm={(date) => {
-          setOpenTime(false);
-          setTime(date);
-        }}
-        onCancel={() => {
-          setOpenTime(false);
-        }}
-      />
-    </View>
+      {renderSOWList()}
+      {renderProjectList()}
+      {renderContractorList()}
+      {renderCostCodeList()}
+      {renderRemarksTextfieldModal()}
+      {renderLocationTextfieldModal()}
+      {renderDesTextfieldModal()}
+    </ImageBackground>
   );
 };
-export default CreateFieldNotes;
+
+export default NewCreateFieldNotes;
 
 const styles = StyleSheet.create({
-  container: {
+  mainContainer: {
+    // backgroundColor: Colors.FormBorder,
+    flexDirection: "column",
     flex: 1,
-    backgroundColor: "#FFF",
-  },
-  header: {
-    backgroundColor: Colors.Primary,
-    height: "15%",
-    borderBottomLeftRadius: 50,
-    borderBottomRightRadius: 50,
-    paddingHorizontal: 20,
-  },
-  headerLogo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 25,
     width: "100%",
   },
-  graph: {
-    height: "88%",
-    backgroundColor: Colors.White,
-    marginTop: -90,
-    margin: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
-    borderRadius: 10,
-    // padding: 20,
-  },
-  graphBottom: {
+  topContainer: {
+    flex: 0.5,
+    width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    padding: 10,
   },
-  graphBottomText: {
-    fontSize: 10,
-    fontFamily: "Lexend-Regular",
-    color: Colors.Black,
-  },
-  graphBottomTextBold: {
-    fontSize: 32,
-    fontFamily: "Lexend-Bold",
-    color: Colors.Secondary,
-    paddingLeft: 10,
-  },
-  graphBottomTabs: {
+  innerTopContainer: {
+    width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    backgroundColor: Colors.WhiteGray,
-    borderRadius: 8,
-    padding: 12,
-  },
-  item: {
-    flex: 1,
-    padding: 20,
-    marginVertical: 8,
-    marginHorizontal: 15,
-    backgroundColor: Colors.White,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
-    borderRadius: 10,
-  },
-  title: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 11,
-    color: Colors.FormText,
-    textTransform: "uppercase",
-  },
-  imgText: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 10,
-    color: Colors.Primary,
-    textTransform: "uppercase",
-    textDecorationLine: "underline",
-  },
-  stat: {
-    fontFamily: "Lexend-Medium",
-    fontSize: 6,
-    textAlign: "right",
-    color: Colors.LightGray,
-  },
-  scrollGraph: {
-    height: "50%",
-    backgroundColor: Colors.White,
-    margin: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
-    borderRadius: 10,
-  },
-  inputField: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    fontFamily: "Lexend-Regular",
-    height: 40,
-    borderColor: "#C4C4C4",
-    borderWidth: 1,
-    borderRadius: 4,
-    marginTop: 15,
-    backgroundColor: Colors.White,
-    paddingLeft: 10,
-  },
-  button: {
-    backgroundColor: Colors.Primary,
-    // padding: 15,
-    borderRadius: 4,
-    marginTop: 15,
-    height: 40,
-    justifyContent: "center",
     alignItems: "center",
   },
-  buttonText: {
+  iconContainer: {
+    width: "10%",
+  },
+  userContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "50%",
+  },
+  textContainer: {
+    color: Colors.White,
+    fontFamily: "Lexend-Medium",
+    fontSize: 12,
+  },
+  locationContainer: {
+    color: Colors.White,
     fontFamily: "Lexend-Regular",
-    fontSize: 14,
-    textAlign: "center",
-    color: "white",
+    fontSize: 12,
   },
-  dropdown: {
-    height: 50,
-    borderColor: "gray",
-    borderWidth: 0.5,
-    borderRadius: 5,
-    paddingHorizontal: 8,
-    elevation: 4,
-    backgroundColor: Colors.White,
+  dateContainer: {
+    width: "40%",
+    alignItems: "flex-end",
   },
-  icon: {
+  dateText: {
+    fontFamily: "Lexend-Regular",
+    color: Colors.White,
+    fontSize: 12,
     marginRight: 5,
   },
-  label: {
-    position: "absolute",
-    backgroundColor: "white",
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 12,
+  outerContainer: {
+    flex: 0.7,
+    width: "100%",
+  },
+  innerOuterContainer: {
+    width: "100%",
+    padding: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  remarksContainer: {
+    width: "38%",
+    // height: 60,
+  },
+  quantityContainer: {
+    width: "40%",
+    height: 60,
+  },
+  buttonContainer: {
+    width: "20%",
+    alignItems: "flex-end",
+  },
+  button: {
+    width: "100%",
+    backgroundColor: "#00000080",
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    borderRadius: 30,
+    height: 60,
+  },
+  image: {
+    width: 30,
+    height: 30,
+    marginRight: 5,
+  },
+  text: {
+    color: Colors.White,
     fontFamily: "Lexend-Regular",
-  },
-  placeholderStyle: {
     fontSize: 12,
+  },
+  arrowButton: {
+    width: 60,
+    height: 60,
+    backgroundColor: Colors.Primary,
+    borderRadius: 50,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  modalContainer: {
+    width: "100%",
+    backgroundColor: "#00000080",
+    flex: 1,
+  },
+  innerModalContainer: {
+    borderRadius: 10,
+  },
+  headerContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: 10,
+  },
+  titleContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  titleText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 18,
+    color: Colors.White,
+  },
+  doneText: {
     fontFamily: "Lexend-Regular",
-    color: Colors.FormText,
+    fontSize: 14,
+    color: Colors.White,
   },
-  selectedTextStyle: {
-    fontSize: 12,
+  searchbarStyle: {
+    backgroundColor: "#262626",
+    borderRadius: 10,
+    marginHorizontal: 10,
+  },
+  marginTop: {
+    marginTop: 20,
+  },
+  flatlistItem: {
+    backgroundColor: Colors.Black,
+    marginBottom: 8,
+    height: 55,
+    justifyContent: "center",
+  },
+  flatlistItemInner: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  flatlistItemIndicator: {
+    width: 10,
+    height: 55,
+  },
+  flatlistItemText: {
     fontFamily: "Lexend-Regular",
-    color: Colors.Black,
-  },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
+    fontSize: 14,
+    color: Colors.White,
+    marginLeft: 10,
   },
 });

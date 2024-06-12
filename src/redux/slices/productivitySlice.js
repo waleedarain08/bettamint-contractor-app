@@ -19,6 +19,7 @@ const initialState = {
   projectBudgetData: null,
   financialGraphData: null,
   financialGraphLoading: null,
+  boqListGCViewMode: [],
 };
 
 const productivitySlice = createSlice({
@@ -197,6 +198,24 @@ const productivitySlice = createSlice({
       state.error = action.payload;
       state.financialGraphData = null;
     },
+    gettingBoqListGCViewMode(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    gettingBoqListGCSuccessViewMode(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.boqListGCViewMode = action.payload?.map((item) => ({
+        ...item,
+        scopeOfWorkName: state.scopeList.filter(
+          (scope) => scope.scopeOfWorkId === item.scopeOfWorkId
+        )?.[0]?.name,
+      }));
+    },
+    gettingBoqListGCFailureViewMode(state, action) {
+      state.loading = false;
+      state.error = null;
+    },
   },
 });
 const {
@@ -247,6 +266,10 @@ const {
   gettingFinancialGraphData,
   gettingFinancialGraphDataSuccess,
   gettingFinancialGraphDataFailure,
+
+  gettingBoqListGCViewMode,
+  gettingBoqListGCSuccessViewMode,
+  gettingBoqListGCFailureViewMode,
 } = productivitySlice.actions;
 
 export const productivityReducer = (state) => state.productivity;
@@ -626,6 +649,70 @@ export const getListOfBOQ =
     } else {
       dispatch(
         gettingBoqListGCFailure(
+          "Something went wrong while getting BOQ GC list!"
+        )
+      );
+    }
+    return response;
+  };
+
+export const getListOfBOQV2 =
+  (
+    token,
+    projectId = 0,
+    contractorId = 0,
+    pageNumber = 1,
+    pageSize = 50,
+    sortBy = "",
+    orderBy = ""
+  ) =>
+  async (dispatch) => {
+    dispatch(gettingBoqListGCViewMode());
+    // if (projectId) {
+    const response = await axios.get(
+      `${base_url}/dashboard/Productivity/getboqlist/v2?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}&sortBy=${sortBy}&orderBy=${orderBy}`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    if (response?.status === 200) {
+      dispatch(
+        gettingBoqListGCSuccessViewMode(
+          response?.data.map((item) => ({
+            ...item,
+            boQs: item.boQs.map((param) => ({
+              ...param,
+              titles: param.titles.map((param1) => ({
+                ...param1,
+                totalAmount: param1.descriptions.reduce(
+                  (accumulator, currentValue) =>
+                    accumulator + currentValue.amount,
+                  0
+                ),
+                totalAcutalAmount: param1.descriptions.reduce(
+                  (accumulator, currentValue) =>
+                    accumulator + currentValue.actualAmount,
+                  0
+                ),
+                descriptions: param1.descriptions.map((param2) => ({
+                  ...param2,
+                  percentage:
+                    (param2.amount / param2.actualAmount) * 100 === Infinity
+                      ? 0
+                      : (param2.amount / param2.actualAmount) * 100,
+                })),
+              })),
+            })),
+          }))
+        )
+      );
+
+      // ({ ...item, boQs: item.boQs.map(param => ({ ...param, titles: param.titles.map(param1 => param1.descriptions.map(param2 => ({(...param2.amount / param2.actualAmount) * 100 === Infinity ? 0))})})})))));
+    } else {
+      dispatch(
+        gettingBoqListGCFailureViewMode(
           "Something went wrong while getting BOQ GC list!"
         )
       );

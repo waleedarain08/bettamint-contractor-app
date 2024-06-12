@@ -18,7 +18,7 @@ import Modal from "react-native-modal";
 import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-import { Searchbar } from "react-native-paper";
+import { ActivityIndicator, Searchbar } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
 import {
   getAllAttendanceAction,
@@ -108,6 +108,8 @@ const DescriptionRow = ({
   deleteTitleDescription,
   unitList,
   updateTitleDescValue,
+  openCompletionDatePicker,
+  setOpenCompletionDatePicker,
 }) => {
   return (
     <View
@@ -146,7 +148,7 @@ const DescriptionRow = ({
           justifyContent: "space-between",
         }}
       >
-        <View style={{ width: "90%" }}>
+        <View style={{ width: "70%" }}>
           <Text
             style={{
               color: Colors.FormText,
@@ -312,7 +314,7 @@ const DescriptionRow = ({
       >
         <View
           style={{
-            width: "40%",
+            width: "48%",
             borderRadius: 4,
             paddingLeft: 10,
             height: 45,
@@ -353,7 +355,7 @@ const DescriptionRow = ({
         </View>
         <View
           style={{
-            width: "40%",
+            width: "48%",
             borderRadius: 4,
             paddingLeft: 10,
             height: 45,
@@ -383,6 +385,70 @@ const DescriptionRow = ({
             placeholderTextColor={Colors.Black}
           />
         </View>
+      </View>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 7,
+        }}
+      >
+        <View
+          style={{
+            width: "70%",
+            paddingLeft: 10,
+            borderRadius: 4,
+            paddingLeft: 10,
+            height: 45,
+            backgroundColor: "#F1F1F1",
+            color: Colors.Black,
+          }}
+        >
+          <Text
+            style={{
+              color: Colors.FormText,
+              fontSize: 10,
+
+              // top: 4,
+            }}
+          >
+            Completion Date
+          </Text>
+          <Text
+            onPress={() => setOpenCompletionDatePicker(true)}
+            style={{
+              fontSize: 12,
+              fontFamily: "Lexend-Regular",
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {desc.EndDate ? moment(desc.EndDate).format("YYYY-MM-DD") : "N/A"}
+          </Text>
+        </View>
+        <DatePicker
+          modal
+          mode="date"
+          // textColor={textColor}
+          open={openCompletionDatePicker}
+          date={rowItem.EndDate ? new Date(rowItem.EndDate) : new Date()}
+          onConfirm={(date) => {
+            setOpenCompletionDatePicker(false);
+            updateTitleDescValue(
+              rowItem.rowId,
+              title.id,
+              desc.id,
+              "EndDate",
+              moment(date).format("YYYY-MM-DD")
+            );
+            // setDate(date);
+          }}
+          onCancel={() => {
+            setOpenCompletionDatePicker(false);
+          }}
+        />
         <View style={{ width: "15%" }}>
           <Pressable
             onPress={() => {
@@ -399,24 +465,6 @@ const DescriptionRow = ({
           >
             <DeleteIcon size={23} color={Colors.Black} />
           </Pressable>
-
-          {/* {index === 0 && rowIndex !== 0 && (
-            <Pressable
-              onPress={() => {
-                deleteRow(rowItem.rowId);
-              }}
-              style={{
-                width: 45,
-                height: 45,
-                backgroundColor: "#F6F7F9",
-                borderRadius: 4,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <DeleteIcon size={23} color={Colors.Black} />
-            </Pressable>
-          )} */}
         </View>
       </View>
     </View>
@@ -438,13 +486,15 @@ const TitleRow = (props) => {
     deleteTitle,
     updateScopeWorkValue,
     updateTitleValue,
+    sowIndex,
+    titleIndex,
+    setOpenCompletionDatePicker,
+    openCompletionDatePicker,
   } = props;
   return (
     <View
       style={{
         width: "100%",
-        borderBottomColor: Colors.LightGray,
-        borderBottomWidth: 0.5,
         paddingBottom: 15,
       }}
     >
@@ -456,47 +506,29 @@ const TitleRow = (props) => {
           justifyContent: "space-between",
         }}
       >
-        <View style={{ width: "48%" }}>
-          {index === 0 ? (
-            <Dropdown
-              style={{
-                height: 40,
-                backgroundColor: Colors.White,
-              }}
-              placeholderStyle={{
-                fontSize: 14,
-                fontFamily: "Lexend-Regular",
-                color: Colors.Black,
-              }}
-              selectedTextStyle={{
-                fontSize: 14,
-                fontFamily: "Lexend-Regular",
-                color: Colors.Black,
-              }}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              data={scopeList?.map((ele) => ({
-                label: ele?.name,
-                value: ele?.scopeOfWorkId,
-              }))}
-              maxHeight={400}
-              labelField="label"
-              valueField="value"
-              placeholder={"Scope of work"}
-              value={rowItem.scopeOfWorkId}
-              onChange={(item) => {
-                updateScopeWorkValue(rowItem.rowId, item.value);
-              }}
-            />
-          ) : null}
+        <View style={{ width: "40%" }}>
+          <Text
+            style={{
+              fontSize: 16,
+              fontFamily: "Lexend-Regular",
+              color: Colors.LightGray,
+            }}
+          >
+            Cost Code
+          </Text>
+          <Text
+            style={{
+              fontSize: 14,
+              fontFamily: "Lexend-Regular",
+              color: Colors.Black,
+            }}
+          >
+            {`${sowIndex + 1}.${titleIndex + 1}.1`}
+          </Text>
         </View>
         <View
           style={{
-            width: "48%",
+            width: "58%",
             marginTop: 7,
             borderRadius: 4,
             paddingLeft: 10,
@@ -705,7 +737,7 @@ const TitleRow = (props) => {
       >
         <View
           style={{
-            width: "40%",
+            width: "48%",
             borderRadius: 4,
             paddingLeft: 10,
             height: 45,
@@ -740,7 +772,7 @@ const TitleRow = (props) => {
         </View>
         <View
           style={{
-            width: "40%",
+            width: "48%",
             borderRadius: 4,
             paddingLeft: 10,
             height: 45,
@@ -770,6 +802,69 @@ const TitleRow = (props) => {
             placeholderTextColor={Colors.Black}
           />
         </View>
+      </View>
+      <View
+        style={{
+          width: "100%",
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginTop: 7,
+        }}
+      >
+        <View
+          style={{
+            width: "70%",
+            paddingLeft: 10,
+            borderRadius: 4,
+            paddingLeft: 10,
+            height: 45,
+            backgroundColor: "#F1F1F1",
+            color: Colors.Black,
+          }}
+        >
+          <Text
+            style={{
+              color: Colors.FormText,
+              fontSize: 10,
+
+              // top: 4,
+            }}
+          >
+            Completion Date
+          </Text>
+          <Text
+            onPress={() => setOpenCompletionDatePicker(true)}
+            style={{
+              fontSize: 12,
+              fontFamily: "Lexend-Regular",
+              color: Colors.Black,
+              marginTop: 5,
+            }}
+          >
+            {title.EndDate ? moment(title.EndDate).format("YYYY-MM-DD") : "N/A"}
+          </Text>
+        </View>
+        <DatePicker
+          modal
+          mode="date"
+          // textColor={textColor}
+          open={openCompletionDatePicker}
+          date={rowItem.EndDate ? new Date(rowItem.EndDate) : new Date()}
+          onConfirm={(date) => {
+            setOpenCompletionDatePicker(false);
+            updateTitleValue(
+              rowItem.rowId,
+              title.id,
+              "EndDate",
+              moment(date).format("YYYY-MM-DD")
+            );
+            // setDate(date);
+          }}
+          onCancel={() => {
+            setOpenCompletionDatePicker(false);
+          }}
+        />
         <View style={{ width: "15%" }}>
           {index !== 0 && (
             <Pressable
@@ -809,37 +904,41 @@ const TitleRow = (props) => {
       </View>
       {title.descriptions.length > 0 &&
         title.descriptions.map((desc, i) => (
-          <DescriptionRow key={desc.id} desc={desc} descIndex={i} {...props} />
+          <DescriptionRow
+            key={desc.id}
+            desc={desc}
+            descIndex={i}
+            sowIndex={sowIndex}
+            titleIndex={titleIndex}
+            openCompletionDatePicker={openCompletionDatePicker}
+            setOpenCompletionDatePicker={setOpenCompletionDatePicker}
+            {...props}
+          />
         ))}
     </View>
   );
 };
 
-const ProgressRow = (props) => {
-  const {
-    unitList,
-    scopeList,
+const Row = (props) => {
+  let {
     rowItem,
-    setRowList,
+    rowIndex: sowIndex,
+    updateScopeWorkValue,
+    scopeList,
     rowList,
-    addProgressEntery,
-    openFieldNote,
-    setOpenUpdateProgressModal,
+    setOpenCompletionDatePicker,
+    openCompletionDatePicker,
   } = props;
-  const [progressValue, setProgressValue] = useState(0);
-  const [remarks, setRemarks] = useState("");
-  // useEffect(() => {
-  //   setRemarks(rowItem.remarks);
-  //   console.log("rowItem", rowItem);
-  // }, [rowItem]);
-  const navigation = useNavigation();
+  const prevRows = rowList.map((row) => row.scopeOfWorkId);
   return (
     <View
       style={{
-        width: "100%",
-        borderBottomColor: Colors.LightGray,
-        borderBottomWidth: 0.5,
-        paddingBottom: 15,
+        borderWidth: 1,
+        borderColor: Colors.LightGray,
+        borderRadius: 5,
+        marginBottom: 10,
+        alignItems: "center",
+        padding: 10,
       }}
     >
       <View
@@ -848,11 +947,15 @@ const ProgressRow = (props) => {
           flexDirection: "row",
           alignItems: "center",
           justifyContent: "space-between",
+          marginBottom: 10,
         }}
       >
         <View
           style={{
-            width: "48%",
+            width: 30,
+            height: 30,
+            borderRadius: 15,
+            backgroundColor: Colors.Gray,
             alignItems: "center",
             justifyContent: "center",
           }}
@@ -860,379 +963,74 @@ const ProgressRow = (props) => {
           <Text
             style={{
               fontSize: 16,
-              fontFamily: "Lexend-Regular",
-              color: Colors.Black,
-              // height: 40,
+              fontFamily: "Lexend-Semibold",
+              color: Colors.White,
+            }}
+          >
+            {sowIndex + 1}
+          </Text>
+        </View>
+        <View
+          style={{
+            width: "85%",
+          }}
+        >
+          <Dropdown
+            style={{
+              height: 40,
+              borderBottomWidth: 1,
               backgroundColor: Colors.White,
+              borderBottomColor: Colors.LightGray,
             }}
-          >
-            {rowItem.scopeOfWorkName || "Scope of work"}
-          </Text>
-        </View>
-        <View
-          style={{
-            width: "48%",
-            marginTop: 7,
-            borderRadius: 4,
-            paddingLeft: 10,
-            height: 45,
-            backgroundColor: Colors.White,
-            color: Colors.Black,
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
-          <View style={{ width: "80%" }}>
-            <Text
-              style={{
-                color: Colors.FormText,
-                fontSize: 10,
-                top: 4,
-              }}
-            >
-              Title*
-            </Text>
-            <Text
-              style={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.Black,
-                width: "100%",
-                marginTop: 5,
-              }}
-            >
-              {rowItem.title || "N/A"}
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View
-        style={{
-          width: "100%",
-          marginTop: 7,
-          borderRadius: 4,
-          paddingLeft: 10,
-          height: 45,
-          backgroundColor: Colors.White,
-          color: Colors.Black,
-          flexDirection: "row",
-          justifyContent: "space-between",
-        }}
-      >
-        <View style={{ width: "90%" }}>
-          <Text
-            style={{
-              color: Colors.FormText,
-              fontSize: 10,
-              top: 4,
-            }}
-          >
-            Description
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
-              fontSize: 13,
-              color: Colors.Black,
-              width: "100%",
-              marginTop: 5,
-            }}
-            numberOfLines={1}
-          >
-            {rowItem.description || "N/A"}
-          </Text>
-        </View>
-      </View>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <View
-          style={{
-            width: "48%",
-            marginTop: 7,
-            borderRadius: 4,
-            paddingLeft: 10,
-            height: 45,
-            backgroundColor: Colors.White,
-            color: Colors.Black,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.FormText,
-              fontSize: 10,
-              top: 4,
-            }}
-          >
-            Quantity*
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
-              fontSize: 13,
-              color: Colors.Black,
-              width: "100%",
-              marginTop: 5,
-            }}
-          >
-            {rowItem.remainingQuantity || "0"}
-          </Text>
-        </View>
-        <View
-          style={{
-            width: "48%",
-            marginTop: 7,
-            borderRadius: 4,
-            paddingLeft: 10,
-            height: 45,
-            backgroundColor: Colors.White,
-            color: Colors.Black,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.FormText,
-              fontSize: 10,
-              top: 4,
-            }}
-          >
-            Unit*
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
-              fontSize: 13,
-              color: Colors.Black,
-              width: "100%",
-              marginTop: 5,
-            }}
-          >
-            {rowItem.unitName || "N/A"}
-          </Text>
-        </View>
-      </View>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: 7,
-        }}
-      >
-        <View
-          style={{
-            width: "48%",
-            borderRadius: 4,
-            paddingLeft: 10,
-            height: 45,
-            backgroundColor: Colors.White,
-            color: Colors.Black,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.FormText,
-              fontSize: 10,
-              top: 4,
-            }}
-          >
-            Rate*
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
-              fontSize: 13,
-              color: Colors.Black,
-              width: "100%",
-              marginTop: 5,
-            }}
-          >
-            {rowItem.rate || "N/A"}
-          </Text>
-        </View>
-        <View
-          style={{
-            width: "48%",
-            borderRadius: 4,
-            paddingLeft: 10,
-            height: 45,
-            backgroundColor: Colors.White,
-            color: Colors.Black,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.FormText,
-              fontSize: 10,
-              top: 4,
-            }}
-          >
-            Amount*
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
-              fontSize: 13,
-              color: Colors.Black,
-              width: "100%",
-              marginTop: 5,
-            }}
-          >
-            {rowItem.amount || "N/A"}
-          </Text>
-        </View>
-      </View>
-      <View
-        style={{
-          width: "100%",
-          marginTop: 7,
-          borderRadius: 4,
-          paddingLeft: 10,
-          height: 45,
-          backgroundColor: "#F1F1F1",
-          color: Colors.Black,
-          // flexDirection: "row",
-          // justifyContent: "space-between",
-        }}
-      >
-        <Text
-          style={{
-            color: Colors.FormText,
-            fontSize: 10,
-            top: 4,
-          }}
-        >
-          Today's Progress
-        </Text>
-        <TextInput
-          style={{
-            fontFamily: "Lexend-Regular",
-            fontSize: 13,
-            color: Colors.Black,
-            width: "100%",
-            bottom: 8,
-          }}
-          value={progressValue}
-          onChangeText={(value) => {
-            setProgressValue(value);
-          }}
-          placeholder="Enter Progress"
-          placeholderTextColor={Colors.Black}
-        />
-      </View>
-      <View
-        style={{
-          width: "100%",
-          marginTop: 7,
-          borderRadius: 4,
-          paddingLeft: 10,
-          height: 45,
-          backgroundColor: "#F1F1F1",
-          color: Colors.Black,
-          // flexDirection: "row",
-          // justifyContent: "space-between",
-        }}
-      >
-        <Text
-          style={{
-            color: Colors.FormText,
-            fontSize: 10,
-            top: 4,
-          }}
-        >
-          Add Remarks
-        </Text>
-        <TextInput
-          style={{
-            fontFamily: "Lexend-Regular",
-            fontSize: 13,
-            color: Colors.Black,
-            width: "100%",
-            bottom: 8,
-          }}
-          value={remarks}
-          onChangeText={(value) => {
-            setRemarks(value);
-          }}
-          placeholder="Add Remarks"
-          placeholderTextColor={Colors.Black}
-        />
-      </View>
-      <View
-        style={{
-          width: "100%",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          marginTop: 10,
-        }}
-      >
-        <TouchableOpacity
-          onPress={() => {
-            addProgressEntery(rowItem.boqId, progressValue);
-          }}
-          style={{
-            width: "100%",
-            height: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor:
-              rowItem?.remainingQuantity === 0 ? Colors.Gray : Colors.Purple,
-            borderRadius: 4,
-          }}
-          disabled={rowItem?.remainingQuantity === 0}
-        >
-          <Text
-            style={{
-              fontFamily: "Lexend-Regular",
+            placeholderStyle={{
               fontSize: 14,
-              color: Colors.White,
-            }}
-          >
-            Save
-          </Text>
-        </TouchableOpacity>
-        {/* <TouchableOpacity
-          onPress={() => {
-            openFieldNote();
-            setOpenUpdateProgressModal();
-          }}
-          style={{
-            width: "48%",
-            height: 40,
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: Colors.Primary,
-            borderRadius: 4,
-          }}
-        >
-          <Text
-            style={{
               fontFamily: "Lexend-Regular",
-              fontSize: 14,
-              color: Colors.White,
+              color: Colors.Black,
             }}
-          >
-            Add Field Note
-          </Text>
-        </TouchableOpacity> */}
+            selectedTextStyle={{
+              fontSize: 14,
+              fontFamily: "Lexend-Regular",
+              color: Colors.Black,
+            }}
+            itemTextStyle={{
+              fontFamily: "Lexend-Regular",
+              fontSize: 13,
+              color: Colors.FormText,
+            }}
+            iconStyle={styles.iconStyle}
+            data={scopeList
+              .filter(
+                (list) =>
+                  !prevRows.includes(list.scopeOfWorkId) ||
+                  list.scopeOfWorkId === rowItem.scopeOfWorkId
+              )
+              .map((ele) => ({
+                label: ele?.name,
+                value: ele?.scopeOfWorkId,
+              }))}
+            maxHeight={400}
+            labelField="label"
+            valueField="value"
+            placeholder={"Scope of work"}
+            value={rowItem.scopeOfWorkId}
+            onChange={(item) => {
+              updateScopeWorkValue(rowItem.rowId, item.value);
+            }}
+          />
+        </View>
       </View>
-    </View>
-  );
-};
-const Row = (props) => {
-  let { rowItem } = props;
-  return (
-    <View>
       {rowItem.titles?.length &&
         rowItem.titles.map((item, index) => (
-          <TitleRow key={item.id} index={index} title={item} {...props} />
+          <TitleRow
+            key={item.id}
+            index={index}
+            title={item}
+            titleIndex={index}
+            sowIndex={sowIndex}
+            setOpenCompletionDatePicker={setOpenCompletionDatePicker}
+            openCompletionDatePicker={openCompletionDatePicker}
+            {...props}
+          />
         ))}
     </View>
   );
@@ -1249,7 +1047,8 @@ const Productivity = ({ navigation }) => {
   const [LabourContractorProgress, setLabourContractorProgress] = useState(0);
   const [date, setDate] = useState(new Date());
   const [open, setOpen] = useState(false);
-
+  const [openCompletionDatePicker, setOpenCompletionDatePicker] =
+    useState(false);
   //Field notes state
   const [scopeValue, setScopeValue] = useState(null);
   const [contractorValue, setContractorValue] = useState(null);
@@ -1279,7 +1078,8 @@ const Productivity = ({ navigation }) => {
   const [currentProjectProgressGraph, setCurrentProjectProgressGraph] =
     useState(null);
   const [currentProjectBudget, setCurrentProjectBudget] = useState(null);
-
+  const [verifyLoader, setVerifyLoader] = useState(false);
+  const [updateLoader, setUpdateLoader] = useState(false);
   const [purpleTooltip, setPurpleTooltip] = useState(false);
   const [greenTooltip, setGreenTooltip] = useState(false);
   // const projectsList = useSelector(projectsListSimpleReducer);
@@ -1331,6 +1131,7 @@ const Productivity = ({ navigation }) => {
           scopeOfWorkOrderId: 1,
           titleOrderId: 1,
           descriptionOrderId: 1,
+          EndDate: moment().format("YYYY-MM-DD"),
         },
       ],
     },
@@ -1529,6 +1330,7 @@ const Productivity = ({ navigation }) => {
             scopeOfWorkOrderId: rowList[rowList.length - 1].rowId + 1,
             titleOrderId: 1,
             descriptionOrderId: 1,
+            EndDate: moment().format("YYYY-MM-DD"),
           },
         ],
       },
@@ -1589,6 +1391,7 @@ const Productivity = ({ navigation }) => {
                     scopeOfWorkOrderId: rowId,
                     titleOrderId: title.titleOrderId,
                     descriptionOrderId: title.descriptions.length + 1,
+                    EndDate: moment().format("YYYY-MM-DD"),
                   },
                 ],
               };
@@ -1674,7 +1477,7 @@ const Productivity = ({ navigation }) => {
       }
       return row;
     });
-
+    // console.log("updatedData", updatedData);
     setRowList(updatedData);
   };
 
@@ -1760,6 +1563,7 @@ const Productivity = ({ navigation }) => {
           scopeOfWorkOrderId: title.scopeOfWorkOrderId,
           titleOrderId: title.titleOrderId,
           descriptionOrderId: title.descriptionOrderId,
+          EndDate: title.EndDate,
         });
 
         // Then process descriptions if they exist
@@ -1776,6 +1580,7 @@ const Productivity = ({ navigation }) => {
               scopeOfWorkOrderId: title.scopeOfWorkOrderId,
               titleOrderId: title.titleOrderId,
               descriptionOrderId: title.descriptionOrderId + 1,
+              EndDate: desc.EndDate,
             });
           });
         }
@@ -1798,6 +1603,7 @@ const Productivity = ({ navigation }) => {
                 description: title.description,
                 rate: parseFloat(title.rate),
                 quantity: parseFloat(title.quantity),
+                EndDate: title.EndDate,
               });
             }
             if (title.descriptions && title.descriptions.length > 0) {
@@ -1806,6 +1612,7 @@ const Productivity = ({ navigation }) => {
                 description: description.description,
                 rate: parseFloat(description.rate),
                 quantity: parseFloat(description.quantity),
+                EndDate: description.EndDate,
               }));
               transformedDescriptions = [...transformedDescriptions, ...temp];
             }
@@ -1876,7 +1683,6 @@ const Productivity = ({ navigation }) => {
       endDate: date,
       workOrderNumber: workerOrderId,
     };
-    console.log("schemaObject", schemaObject);
     let resp = await dispatch(addBOQ(token, schemaObject));
     if (resp?.status === 200) {
       Toast.show({
@@ -1907,6 +1713,7 @@ const Productivity = ({ navigation }) => {
               scopeOfWorkOrderId: 1,
               titleOrderId: 1,
               descriptionOrderId: 1,
+              EndDate: moment().format("YYYY-MM-DD"),
             },
           ],
         },
@@ -2265,6 +2072,8 @@ const Productivity = ({ navigation }) => {
                   scopeList={scopeList}
                   rowList={rowList}
                   setRowList={setRowList}
+                  setOpenCompletionDatePicker={setOpenCompletionDatePicker}
+                  openCompletionDatePicker={openCompletionDatePicker}
                   // //! METHODS
                   addTitle={addTitle}
                   addTitleDescription={addTitleDescription}
@@ -2765,49 +2574,6 @@ const Productivity = ({ navigation }) => {
                 </View>
               </View>
             </View>
-            <ScrollView>
-              {loading ? (
-                <Text
-                  style={{
-                    color: Colors.Black,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 14,
-                  }}
-                >
-                  Loading...
-                </Text>
-              ) : !boqList || boqList?.length === 0 ? (
-                <Text
-                  style={{
-                    color: Colors.Black,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 14,
-                  }}
-                >
-                  No BOQ Found!
-                </Text>
-              ) : (
-                boqList?.map((item) => (
-                  <ProgressRow
-                    key={item}
-                    rowItem={item}
-                    // classes={classes}
-                    // icon={general}
-                    unitList={unitList}
-                    scopeList={scopeList}
-                    setRowList={setRowList}
-                    rowList={rowList}
-                    addProgressEntery={addProgressEntery}
-                    openFieldNote={() => {
-                      setOpenFieldNote(true);
-                    }}
-                    setOpenUpdateProgressModal={() => {
-                      setOpenUpdateProgressModal(false);
-                    }}
-                  />
-                ))
-              )}
-            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -3219,7 +2985,11 @@ const Productivity = ({ navigation }) => {
             {userInfo?.user?.leadTypeId === "Contractor" ? (
               <Pressable
                 onPress={() => {
-                  navigation.navigate("VerifyProgress");
+                  // navigation.navigate("VerifyProgress");
+                  setVerifyLoader(true);
+                  setTimeout(() => {
+                    setVerifyLoader(false);
+                  }, 10000);
                 }}
                 style={{
                   backgroundColor: "#ECE5FC",
@@ -3230,12 +3000,29 @@ const Productivity = ({ navigation }) => {
                   paddingVertical: 7,
                 }}
               >
-                <Text style={styles.smallButton}>Verify</Text>
+                {verifyLoader ? (
+                  <ActivityIndicator
+                    size="small"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    color={Colors.Purple}
+                  />
+                ) : (
+                  <Text style={styles.smallButton}>Verify</Text>
+                )}
               </Pressable>
             ) : (
               <Pressable
                 onPress={() => {
-                  setOpenUpdateProgressModal(true);
+                  // setOpenUpdateProgressModal(true);
+                  setUpdateLoader(true);
+                  setTimeout(() => {
+                    setUpdateLoader(false);
+                  }, 10000);
                 }}
                 style={{
                   backgroundColor: "#ECE5FC",
@@ -3244,9 +3031,24 @@ const Productivity = ({ navigation }) => {
                   borderRadius: 3,
                   paddingHorizontal: 9,
                   paddingVertical: 7,
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <Text style={styles.smallButton}>Update</Text>
+                {updateLoader ? (
+                  <ActivityIndicator
+                    size="small"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    color={Colors.Purple}
+                  />
+                ) : (
+                  <Text style={styles.smallButton}>Update</Text>
+                )}
               </Pressable>
             )}
           </View>
@@ -3254,7 +3056,11 @@ const Productivity = ({ navigation }) => {
             {userInfo?.user?.userTypeId === "SuperAdmin" && (
               <Pressable
                 onPress={() => {
-                  navigation.navigate("VerifyProgress");
+                  // navigation.navigate("VerifyProgress");
+                  setVerifyLoader(true);
+                  setTimeout(() => {
+                    setVerifyLoader(false);
+                  }, 10000);
                 }}
                 style={{
                   backgroundColor: "#ECE5FC",
@@ -3263,9 +3069,24 @@ const Productivity = ({ navigation }) => {
                   borderRadius: 3,
                   paddingHorizontal: 9,
                   paddingVertical: 7,
+                  alignItems: "center",
+                  justifyContent: "center",
                 }}
               >
-                <Text style={styles.smallButton}>Verify</Text>
+                {verifyLoader ? (
+                  <ActivityIndicator
+                    size="small"
+                    style={{
+                      width: 10,
+                      height: 10,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    color={Colors.Purple}
+                  />
+                ) : (
+                  <Text style={styles.smallButton}>Verify</Text>
+                )}
               </Pressable>
             )}
             <Pressable
@@ -3638,7 +3459,7 @@ const Productivity = ({ navigation }) => {
           >
             <Pressable
               onPress={() => {
-                navigation.navigate("VerifyProgress");
+                // navigation.navigate("VerifyProgress");
               }}
               style={styles.tiles}
             >
@@ -3671,7 +3492,7 @@ const Productivity = ({ navigation }) => {
             </Pressable>
             <Pressable
               onPress={() => {
-                navigation.navigate("VerifyProgress");
+                // navigation.navigate("VerifyProgress");
               }}
               style={styles.tiles}
             >
@@ -3706,7 +3527,7 @@ const Productivity = ({ navigation }) => {
             </Pressable>
             <Pressable
               onPress={() => {
-                navigation.navigate("VerifyProgress");
+                // navigation.navigate("VerifyProgress");
               }}
               style={styles.tiles}
             >

@@ -1506,6 +1506,7 @@ const FieldNotesNavigator = ({ navigation }) => {
         name="CreateFieldNotes"
         component={CreateFieldNotes}
         options={{
+          headerShown: false,
           headerTitle: () => (
             <Text
               style={{

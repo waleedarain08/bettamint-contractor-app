@@ -10,6 +10,7 @@ const initialState = {
   markingFieldNoteLoading: false,
   scopeList: [],
   selectedNote: null,
+  costList: [],
 };
 
 const fieldNoteSlice = createSlice({
@@ -93,6 +94,19 @@ const fieldNoteSlice = createSlice({
     editFieldNote(state, action) {
       state.selectedNote = action.payload;
     },
+    gettingFieldNoteCost(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    gettingFieldNoteCostSuccess(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.costList = action.payload;
+    },
+    gettingFieldNoteCostFailure(state, action) {
+      state.loading = false;
+      state.error = action.payload;
+    },
   },
 });
 const {
@@ -115,6 +129,9 @@ const {
   gettingScopeList,
   gettingScopeListSuccess,
   gettingScopeListFailure,
+  gettingFieldNoteCost,
+  gettingFieldNoteCostSuccess,
+  gettingFieldNoteCostFailure,
 } = fieldNoteSlice.actions;
 export const fieldNoteReducer = (state) => state.fieldNote;
 
@@ -138,6 +155,31 @@ export const getScopeList = (token) => async (dispatch) => {
   }
   return response;
 };
+
+export const getFieldNoteCost =
+  (token, projectId, scopeOfWorkId, contractorId) => async (dispatch) => {
+    dispatch(gettingFieldNoteCost());
+    try {
+      const response = await axios.get(
+        `${base_url}/dashboard/FieldNote/getcostcodes?projectId=${projectId}&scopeOfWorkId=${scopeOfWorkId}&contractorId=${contractorId}`,
+        {
+          headers: {
+            Authorization: token,
+          },
+        }
+      );
+      if (response.status === 200) {
+        dispatch(gettingFieldNoteCostSuccess(response.data.result));
+      }
+      return response;
+    } catch (e) {
+      dispatch(
+        gettingFieldNoteCostFailure(
+          "Something went wrong while getting fieldNote!"
+        )
+      );
+    }
+  };
 
 export const getFieldNoteList =
   (token, projectId = 0) =>

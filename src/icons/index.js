@@ -532,3 +532,13 @@ export const PlusCircleIcon = ({ color, size, style, onPress }) => (
     onPress={onPress}
   />
 );
+export const DocumentIcon = ({ color, size, style, onPress }) => (
+  <VectorIcon
+    name="document-text-outline"
+    color={color}
+    size={size}
+    type="Ionicons"
+    style={style}
+    onPress={onPress}
+  />
+);
