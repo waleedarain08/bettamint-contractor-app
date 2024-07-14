@@ -95,7 +95,7 @@ import {
 import DatePicker from "react-native-date-picker";
 import { launchImageLibrary } from "react-native-image-picker";
 import { BarChart } from "react-native-gifted-charts";
-import Tooltip from "react-native-walkthrough-tooltip";
+import ActionButton from "./components/ActionButton";
 
 LogBox.ignoreAllLogs();
 
@@ -1037,7 +1037,6 @@ const Row = (props) => {
 };
 
 const Productivity = ({ navigation }) => {
-  const [openMainProjectModal, setOpenMainProject] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
@@ -1297,6 +1296,20 @@ const Productivity = ({ navigation }) => {
   function roundToNearestMultiple(number, multiple) {
     return Math.ceil(number / multiple) * multiple;
   }
+
+  const handleProjectChange = (item) => {
+    if (item) {
+      setCurrentProject(item.value);
+      setCurrentProjectDetail(item);
+      dispatch(getBOQProgress(token, item.value));
+      dispatch(getBOQMetrics(token, item.value));
+    } else {
+      dispatch(getBOQProgress(token, projectsListSimple[0]?.projectId));
+      setCurrentProjectDetail(projectsListSimple[0]);
+      setCurrentProject(projectsListSimple[0]?.projectId);
+      dispatch(getBOQMetrics(projectsListSimple[0]?.projectId));
+    }
+  };
   const getProjectProgressMaxValue = () => {
     let progressMax = 100;
     if (projectProgressData?.graphData) {
@@ -2247,107 +2260,6 @@ const Productivity = ({ navigation }) => {
       </Modal>
     );
   };
-  const renderMainProjectSelectModal = () => {
-    return (
-      <Modal
-        isVisible={openMainProjectModal}
-        useNativeDriver={true}
-        backdropColor={Colors.DarkGray}
-        backdropOpacity={0.6}
-        backdropTransitionInTiming={200}
-        onBackdropPress={() => setOpenMainProject(!openMainProjectModal)}
-      >
-        <View
-          style={{
-            width: "100%",
-            backgroundColor: Colors.White,
-            height: "60%",
-            borderRadius: 10,
-            padding: 15,
-          }}
-        >
-          <View style={styles.filterInnerContainer}>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Bold",
-                    color: Colors.LightGray,
-                    fontSize: 16,
-                  }}
-                >
-                  Project
-                </Text>
-              </View>
-              <View style={{ alignItems: "flex-end" }}>
-                <Cross
-                  onPress={() => {
-                    setOpenMainProject(false);
-                  }}
-                  size={22}
-                  color={Colors.Black}
-                />
-              </View>
-            </View>
-
-            <View style={{ marginVertical: 10 }}>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={{
-                  fontSize: 14,
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Black,
-                }}
-                selectedTextStyle={{
-                  fontSize: 14,
-                  fontFamily: "Lexend-Regular",
-                  color: Colors.Black,
-                }}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
-                iconStyle={styles.iconStyle}
-                data={projectsListSimple?.map((ele) => ({
-                  label: ele?.name,
-                  value: ele?.projectId,
-                  ...ele,
-                }))}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select Project"}
-                value={currentProject}
-                onChange={(item) => {
-                  setOpenMainProject(false);
-                  if (item) {
-                    setCurrentProject(item.value);
-                    setCurrentProjectDetail(item);
-                    dispatch(getBOQProgress(token, item.value));
-                    dispatch(getBOQMetrics(token, item.value));
-                  } else {
-                    dispatch(
-                      getBOQProgress(token, projectsListSimple[0]?.projectId)
-                    );
-                    setCurrentProjectDetail(projectsListSimple[0]);
-                    setCurrentProject(projectsListSimple[0]?.projectId);
-                    dispatch(getBOQMetrics(projectsListSimple[0]?.projectId));
-                  }
-                }}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-    );
-  };
 
   const renderContractorSelectModal = () => {
     return (
@@ -2921,679 +2833,505 @@ const Productivity = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <View style={styles.graph}>
-        <Pressable
-          onPress={() => {
-            setOpenMainProject(true);
-          }}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Building size={20} color={Colors.LightGray} />
-          </View>
-          <View>
-            <Text style={[styles.selectText, { paddingLeft: 7 }]}>
-              Select a Project
-            </Text>
-            <Text
-              style={{
-                fontSize: 10,
-                fontFamily: "Lexend-Regular",
-                color: Colors.Black,
-                paddingLeft: 7,
-              }}
-            >
-              {currentProjectDetail
-                ? currentProjectDetail?.name
-                : "Select a Project"}
-            </Text>
-          </View>
-        </Pressable>
-        <View style={{ flexDirection: "row" }}>
-          <View style={{}}>
-            {Number(measurementAccess) !== 1 ? (
-              <Pressable
-                onPress={() => {
-                  setOpenFilterModal(true);
-                }}
-                style={{
-                  backgroundColor: "#ECE5FC",
-                  padding: 5,
-                  margin: 5,
-                  borderRadius: 3,
-                  paddingHorizontal: 9,
-                  paddingVertical: 7,
-                }}
-              >
-                <Text style={styles.smallButton}>Insert</Text>
-              </Pressable>
-            ) : (
-              <></>
-            )}
-            {Number(measurementAccess) !== 1 ? (
-              <Pressable
-                onPress={() => {
-                  // setOpenUpdateProgressModal(true);
-                  setUpdateLoader(true);
-                  setTimeout(() => {
-                    setUpdateLoader(false);
-                  }, 10000);
-                }}
-                style={{
-                  backgroundColor: "#ECE5FC",
-                  padding: 5,
-                  margin: 5,
-                  borderRadius: 3,
-                  paddingHorizontal: 9,
-                  paddingVertical: 7,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {updateLoader ? (
-                  <ActivityIndicator
-                    size="small"
-                    style={{
-                      width: 10,
-                      height: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    color={Colors.Purple}
-                  />
-                ) : (
-                  <Text style={styles.smallButton}>Update</Text>
-                )}
-              </Pressable>
-            ) : (
-              <></>
-            )}
-          </View>
-          <View>
-            {(userInfo?.user?.role?.name === "SuperAdmin" ||
-              Number(measurementAccess) === 3) && (
-              <Pressable
-                onPress={() => {
-                  // navigation.navigate("VerifyProgress");
-                  setVerifyLoader(true);
-                  setTimeout(() => {
-                    setVerifyLoader(false);
-                  }, 10000);
-                }}
-                style={{
-                  backgroundColor: "#ECE5FC",
-                  padding: 5,
-                  margin: 5,
-                  borderRadius: 3,
-                  paddingHorizontal: 9,
-                  paddingVertical: 7,
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {verifyLoader ? (
-                  <ActivityIndicator
-                    size="small"
-                    style={{
-                      width: 10,
-                      height: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    color={Colors.Purple}
-                  />
-                ) : (
-                  <Text style={styles.smallButton}>Verify</Text>
-                )}
-              </Pressable>
-            )}
-            <Pressable
-              onPress={() => {
-                navigation.navigate("ViewBoq");
-              }}
-              style={{
-                backgroundColor: "#ECE5FC",
-                padding: 5,
-                margin: 5,
-                borderRadius: 3,
-                paddingHorizontal: 9,
-                paddingVertical: 7,
-              }}
-            >
-              <Text style={styles.smallButton}>View</Text>
-            </Pressable>
-          </View>
-        </View>
-      </View>
-      <View
-        style={{ width: "93%", flexDirection: "row", alignItems: "center" }}
-      >
-        <View style={{ width: "25%" }}>
-          <Image
-            source={{
-              uri: currentProjectDetail?.url
-                ? assetsUrl + currentProjectDetail?.url
-                : "https://sandbox.bettamint.com/static/media/dummyProjectImageForProductivity.0c507095.png",
-            }}
-            style={{ width: 80, height: 80, borderRadius: 20 }}
-          />
-        </View>
-        <View
-          style={{
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "65%",
-          }}
-        >
-          <View style={{ width: "50%" }}>
-            <Text
-              style={{
-                fontFamily: "Lexend-Bold",
-                fontSize: 15,
-                color: Colors.White,
-              }}
-            >
-              {currentProjectDetail?.name || "N/A"}
-            </Text>
-            <Text
-              style={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 12,
-                color: Colors.White,
-              }}
-            >
-              {currentProjectDetail?.projectTypeId || "N/A"}
-            </Text>
-          </View>
-          <View>
-            <Text
-              style={{
-                fontFamily: "Lexend-Bold",
-                fontSize: 24,
-                color: Colors.White,
-                textAlign: "center",
-              }}
-            >
-              {isNaN(
-                (boqProgress?.result?.verifiedMeasurement /
-                  boqProgress?.result?.totalMeasurement) *
-                  100
-              )
-                ? 0
-                : `${(
-                    (boqProgress?.result?.verifiedMeasurement /
-                      boqProgress?.result?.totalMeasurement) *
-                    100
-                  ).toFixed(0)}%`}
-            </Text>
-            <Text
-              style={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 10,
-                color: Colors.White,
-                textAlign: "center",
-              }}
-            >
-              Completion
-            </Text>
-          </View>
-        </View>
-      </View>
-      <View style={{ width: "90%" }}>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-            width: "100%",
-          }}
-        >
-          <Text
-            style={{
-              fontFamily: "Lexend-Medium",
-              fontSize: 12,
-              color: Colors.White,
-            }}
-          >
-            0%
-          </Text>
-          <Text
-            style={{
-              fontFamily: "Lexend-Medium",
-              fontSize: 12,
-              color: Colors.White,
-            }}
-          >
-            100%
-          </Text>
-        </View>
-        <Pressable
-          onPress={() => {
-            setPurpleTooltip(false);
-            setGreenTooltip(false);
-          }}
-          style={{
-            width: "100%",
-            height: 40,
-            backgroundColor: Colors.White,
-            borderRadius: 25,
-            elevation: 5,
-            marginVertical: 5,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-            paddingHorizontal: 10,
-          }}
-        >
-          <Pressable
-            onPress={() => {
-              setPurpleTooltip(!purpleTooltip);
-              setGreenTooltip(false);
-            }}
-            style={{
-              width: boqProgress?.result?.completedMeasurement
-                ? (boqProgress?.result?.completedMeasurement /
-                    boqProgress?.result?.totalMeasurement) *
-                    100 +
-                  "%"
-                : 0,
-              height: 33,
-              backgroundColor: Colors.Purple,
-              position: "absolute",
-              borderTopLeftRadius: 25,
-              borderBottomLeftRadius: 25,
-              left: 5,
-            }}
-          ></Pressable>
-          <Pressable
-            onPress={() => {
-              setGreenTooltip(!greenTooltip);
-              setPurpleTooltip(false);
-            }}
-            style={{
-              width: boqProgress?.result?.verifiedMeasurement
-                ? Math.round(
-                    (boqProgress?.result?.verifiedMeasurement * 100) /
-                      boqProgress?.result?.totalMeasurement
-                  ) + "%"
-                : 0,
-              height: 25,
-              position: "absolute",
-              backgroundColor: Colors.PrimaryLight,
-              borderTopLeftRadius: 25,
-              borderBottomLeftRadius: 25,
-              left: 7,
-            }}
-          ></Pressable>
-          {/* <Text
-            style={{
-              fontFamily: "Lexend-Medium",
-              fontSize: 12,
-              color: Colors.Black,
-            }}
-          >
-            {boqProgress?.result?.totalMeasurement ? "0" : "-"}
-          </Text> */}
-          {/* <Text
-            style={{
-              fontFamily: "Lexend-Medium",
-              fontSize: 12,
-              color: Colors.Black,
-            }}
-          >
-            {boqProgress?.result?.totalMeasurement
-              ? boqProgress?.result?.totalMeasurement
-              : "-"}
-          </Text> */}
-        </Pressable>
-        {purpleTooltip && (
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              position: "absolute",
-              bottom: 70,
-              left: 50,
-            }}
-          >
-            <View
-              style={{
-                width: 90,
-                height: 40,
-                backgroundColor: Colors.PurpleOpacity,
-                borderRadius: 5,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.Black,
-                  fontFamily: "Lexend-SemiBold",
-                  fontSize: 10,
-                }}
-              >{`${
-                Math.round(
-                  (boqProgress?.result?.completedMeasurement /
-                    boqProgress?.result?.totalMeasurement) *
-                    100
-                ) -
-                Math.round(
-                  (boqProgress?.result?.verifiedMeasurement * 100) /
-                    boqProgress?.result?.totalMeasurement
-                ) +
-                "%"
-              }`}</Text>
-              <Text
-                style={{
-                  color: Colors.Black,
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 9,
-                }}
-              >
-                Uncertified
-              </Text>
+      <View style={styles.innerContainer}>
+        <View style={styles.graph}>
+          <View style={styles.dropdownContainer}>
+            <View style={styles.buildingIconBg}>
+              <Building size={18} color={Colors.LightGray} />
             </View>
-            <View
-              style={{
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                width: 0,
-                height: 0,
-                backgroundColor: "transparent",
-                borderStyle: "solid",
-                borderLeftWidth: 10,
-                borderRightWidth: 10,
-                borderBottomWidth: 0,
-                borderTopWidth: 15,
-                borderTopColor: Colors.PurpleOpacity,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            ></View>
-          </View>
-        )}
-        {greenTooltip && (
-          <View
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              position: "absolute",
-              bottom: 70,
-              left: 10,
-            }}
-          >
-            <View
-              style={{
-                width: 90,
-                height: 40,
-                backgroundColor: Colors.PrimaryLight,
-                borderRadius: 5,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <Text
-                style={{
-                  color: Colors.Black,
-                  fontFamily: "Lexend-SemiBold",
-                  fontSize: 10,
-                }}
-              >{`${
-                Math.round(
-                  (boqProgress?.result?.verifiedMeasurement * 100) /
-                    boqProgress?.result?.totalMeasurement
-                ) + "%"
-              }`}</Text>
-              <Text
-                style={{
-                  color: Colors.Black,
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 9,
-                }}
-              >
-                Certified
+            <View style={{ width: "85%" }}>
+              <Text style={[styles.selectText, { paddingLeft: 0 }]}>
+                Select a Project
               </Text>
-            </View>
-            <View
-              style={{
-                borderLeftColor: "transparent",
-                borderRightColor: "transparent",
-                width: 0,
-                height: 0,
-                backgroundColor: "transparent",
-                borderStyle: "solid",
-                borderLeftWidth: 10,
-                borderRightWidth: 10,
-                borderBottomWidth: 0,
-                borderTopWidth: 15,
-                borderTopColor: Colors.PrimaryLight,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            ></View>
-          </View>
-        )}
-        <View
-          style={{
-            flexDirection: "row",
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "space-between",
-            marginBottom: 5,
-          }}
-        >
-          <Text
-            style={{
-              color: Colors.Black,
-              fontSize: 12,
-              fontFamily: "Lexend-Medium",
-            }}
-          >
-            {boqProgress?.result?.startDate
-              ? moment(boqProgress?.result?.startDate).format("DD MMM YYYY")
-              : ""}
-          </Text>
-          <Text
-            style={{
-              color: Colors.Black,
-              fontSize: 12,
-              fontFamily: "Lexend-Medium",
-            }}
-          >
-            {boqProgress?.result?.endDate
-              ? moment(boqProgress?.result?.endDate).format("DD MMM YYYY")
-              : ""}
-          </Text>
-        </View>
-      </View>
-      <View style={{ width: "100%", flex: 1 }}>
-        <ScrollView contentContainerStyle={{ width: "100%" }}>
-          <View
-            style={{
-              width: "100%",
-            }}
-          >
-            <Pressable
-              onPress={() => {
-                // navigation.navigate("VerifyProgress");
-              }}
-              style={styles.tiles}
-            >
-              <View>
-                <Text style={styles.tileHeading}>{"Workmanship Cost"}</Text>
-                <Text
-                  style={{
-                    color: Colors.Black,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 16,
-                  }}
-                >
-                  ₹ {metrics?.workmanshipCost || 0}
-                </Text>
-              </View>
-              <View>
-                <View
-                  style={{
-                    backgroundColor: Colors.Primary,
-                    width: 35,
-                    height: 35,
-                    borderRadius: 5,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <HomeIcon size={20} color={Colors.White} />
-                </View>
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                // navigation.navigate("VerifyProgress");
-              }}
-              style={styles.tiles}
-            >
-              <View>
-                <Text style={styles.tileHeading}>
-                  {"Material Defects Cost"}
-                </Text>
-                <Text
-                  style={{
-                    color: Colors.Black,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 16,
-                  }}
-                >
-                  ₹ {metrics?.qualityCost || 0}
-                </Text>
-              </View>
-              <View>
-                <View
-                  style={{
-                    backgroundColor: Colors.Primary,
-                    width: 35,
-                    height: 35,
-                    borderRadius: 5,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <HatIcon size={20} color={Colors.White} />
-                </View>
-              </View>
-            </Pressable>
-            <Pressable
-              onPress={() => {
-                // navigation.navigate("VerifyProgress");
-              }}
-              style={styles.tiles}
-            >
-              <View>
-                <Text style={styles.tileHeading}>{"Variation Cost"}</Text>
-                <Text
-                  style={{
-                    color: Colors.Black,
-                    fontFamily: "Lexend-Medium",
-                    fontSize: 16,
-                  }}
-                >
-                  ₹ {metrics?.excessCost || 0}
-                </Text>
-              </View>
-              <View>
-                <View
-                  style={{
-                    backgroundColor: Colors.Primary,
-                    width: 35,
-                    height: 35,
-                    borderRadius: 5,
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <ChatIcon size={20} color={Colors.White} />
-                </View>
-              </View>
-            </Pressable>
-          </View>
-          <View style={styles.scrollGraph}>
-            <View style={styles.graphsHeader}>
-              <Text style={styles.graphHeadingText}>Project Progress</Text>
-              <View style={styles.graphSubHeader}>
-                <View style={styles.selectProjectButton}>
-                  <View style={styles.buildingIconBg}>
-                    <Building size={15} color={Colors.LightGray} />
-                  </View>
-                  <View>
-                    <Text style={styles.selectText}>Select a Project</Text>
-                    <Dropdown
-                      style={{
-                        height: 20,
-                        marginTop: 3,
-                        width: 200,
-                        ...styles.selectText,
-                      }}
-                      placeholderStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      containerStyle={{ width: 250 }}
-                      itemTextStyle={{
-                        fontFamily: "Lexend-Regular",
-                        fontSize: 13,
-                        color: Colors.FormText,
-                      }}
-                      iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
+              <Dropdown
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                itemTextStyle={styles.dropdownItemText}
+                showsVerticalScrollIndicator={false}
+                iconStyle={styles.iconStyle}
+                data={
+                  projectsListSimple.length
+                    ? projectsListSimple?.map((ele) => ({
                         label: ele?.name,
                         value: ele?.projectId,
                         ...ele,
-                      }))}
-                      maxHeight={400}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"Project"}
-                      value={currentProjectProgressGraph}
-                      onChange={(item) => {
-                        if (item) {
-                          setCurrentProjectProgressGraph(item.value);
-                          dispatch(getProjectProgressGraph(token, item.value));
-                        } else {
-                          setCurrentProjectProgressGraph(
-                            projectsListSimple[0]?.projectId
-                          );
-                          dispatch(
-                            getProjectProgressGraph(
-                              token,
-                              projectsListSimple[0]?.projectId
-                            )
-                          );
-                        }
-                      }}
-                    />
+                      }))
+                    : []
+                }
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={"Select a Project"}
+                value={currentProject}
+                onChange={(item) => {
+                  handleProjectChange(item);
+                }}
+              />
+            </View>
+          </View>
+        </View>
+        <View style={styles.actionBtnContainer}>
+          {Number(measurementAccess) !== 1 && (
+            <ActionButton
+              onPress={() => setOpenFilterModal(!openFilterModal)}
+              title={"Insert"}
+            />
+          )}
+          {Number(measurementAccess) !== 1 && (
+            <ActionButton
+              onPress={() => {
+                setUpdateLoader(true);
+                setTimeout(() => {
+                  setUpdateLoader(false);
+                }, 10000);
+              }}
+              title={"Update"}
+            />
+          )}
+          {(userInfo?.user?.role?.name === "SuperAdmin" ||
+            Number(measurementAccess) === 3) && (
+            <ActionButton
+              onPress={() => {
+                // navigation.navigate("VerifyProgress");
+                setVerifyLoader(true);
+                setTimeout(() => {
+                  setVerifyLoader(false);
+                }, 10000);
+              }}
+              title={"Verify"}
+            />
+          )}
+          <ActionButton
+            onPress={() => {
+              navigation.navigate("ViewBoq");
+            }}
+            title={"View"}
+          />
+        </View>
+        <View style={styles.projectDetailContainer}>
+          <View style={styles.projectDetail}>
+            <View style={{ width: "32%" }}>
+              <Image
+                source={{
+                  uri: currentProjectDetail?.url
+                    ? assetsUrl + currentProjectDetail?.url
+                    : "https://sandbox.bettamint.com/static/media/dummyProjectImageForProductivity.0c507095.png",
+                }}
+                style={styles.projectImage}
+              />
+            </View>
+            <View style={{ width: "66%" }}>
+              <Text style={styles.projectName}>
+                {currentProjectDetail?.name || "N/A"}
+              </Text>
+              <Text style={styles.projectType}>
+                {currentProjectDetail?.projectTypeId || "N/A"}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.projectPercentage}>
+            <View>
+              <Text style={styles.percenatgeText}>
+                {isNaN(
+                  (boqProgress?.result?.verifiedMeasurement /
+                    boqProgress?.result?.totalMeasurement) *
+                    100
+                )
+                  ? 0
+                  : `${(
+                      (boqProgress?.result?.verifiedMeasurement /
+                        boqProgress?.result?.totalMeasurement) *
+                      100
+                    ).toFixed(0)}%`}
+              </Text>
+              <Text style={styles.completionText}>Completion</Text>
+            </View>
+          </View>
+        </View>
+        <View style={{ width: "100%", marginTop: 15 }}>
+          <View style={styles.percentageRange}>
+            <Text style={styles.percentageRangeText}>0%</Text>
+            <View style={styles.line} />
+            <Text style={styles.percentageRangeText}>100%</Text>
+          </View>
+          <Pressable
+            onPress={() => {
+              setPurpleTooltip(false);
+              setGreenTooltip(false);
+            }}
+            style={styles.progressContainer}
+          >
+            <Pressable
+              onPress={() => {
+                setPurpleTooltip(!purpleTooltip);
+                setGreenTooltip(false);
+              }}
+              style={[
+                styles.purpleProgressBar,
+                {
+                  width: boqProgress?.result?.completedMeasurement
+                    ? (boqProgress?.result?.completedMeasurement /
+                        boqProgress?.result?.totalMeasurement) *
+                        100 +
+                      "%"
+                    : 0,
+                },
+              ]}
+            ></Pressable>
+            <Pressable
+              onPress={() => {
+                setGreenTooltip(!greenTooltip);
+                setPurpleTooltip(false);
+              }}
+              style={[
+                styles.greenProgressBar,
+                {
+                  width: boqProgress?.result?.verifiedMeasurement
+                    ? Math.round(
+                        (boqProgress?.result?.verifiedMeasurement * 100) /
+                          boqProgress?.result?.totalMeasurement
+                      ) + "%"
+                    : 0,
+                },
+              ]}
+            ></Pressable>
+          </Pressable>
+          {purpleTooltip && (
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "absolute",
+                bottom: 70,
+                left: 50,
+              }}
+            >
+              <View
+                style={{
+                  width: 90,
+                  height: 40,
+                  backgroundColor: Colors.PurpleOpacity,
+                  borderRadius: 5,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: Colors.Black,
+                    fontFamily: "Lexend-SemiBold",
+                    fontSize: 10,
+                  }}
+                >{`${
+                  Math.round(
+                    (boqProgress?.result?.completedMeasurement /
+                      boqProgress?.result?.totalMeasurement) *
+                      100
+                  ) -
+                  Math.round(
+                    (boqProgress?.result?.verifiedMeasurement * 100) /
+                      boqProgress?.result?.totalMeasurement
+                  ) +
+                  "%"
+                }`}</Text>
+                <Text
+                  style={{
+                    color: Colors.Black,
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 9,
+                  }}
+                >
+                  Uncertified
+                </Text>
+              </View>
+              <View
+                style={{
+                  borderLeftColor: "transparent",
+                  borderRightColor: "transparent",
+                  width: 0,
+                  height: 0,
+                  backgroundColor: "transparent",
+                  borderStyle: "solid",
+                  borderLeftWidth: 10,
+                  borderRightWidth: 10,
+                  borderBottomWidth: 0,
+                  borderTopWidth: 15,
+                  borderTopColor: Colors.PurpleOpacity,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              ></View>
+            </View>
+          )}
+          {greenTooltip && (
+            <View
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                position: "absolute",
+                bottom: 70,
+                left: 10,
+              }}
+            >
+              <View
+                style={{
+                  width: 90,
+                  height: 40,
+                  backgroundColor: Colors.PrimaryLight,
+                  borderRadius: 5,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Text
+                  style={{
+                    color: Colors.Black,
+                    fontFamily: "Lexend-SemiBold",
+                    fontSize: 10,
+                  }}
+                >{`${
+                  Math.round(
+                    (boqProgress?.result?.verifiedMeasurement * 100) /
+                      boqProgress?.result?.totalMeasurement
+                  ) + "%"
+                }`}</Text>
+                <Text
+                  style={{
+                    color: Colors.Black,
+                    fontFamily: "Lexend-Regular",
+                    fontSize: 9,
+                  }}
+                >
+                  Certified
+                </Text>
+              </View>
+              <View
+                style={{
+                  borderLeftColor: "transparent",
+                  borderRightColor: "transparent",
+                  width: 0,
+                  height: 0,
+                  backgroundColor: "transparent",
+                  borderStyle: "solid",
+                  borderLeftWidth: 10,
+                  borderRightWidth: 10,
+                  borderBottomWidth: 0,
+                  borderTopWidth: 15,
+                  borderTopColor: Colors.PrimaryLight,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              ></View>
+            </View>
+          )}
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "space-between",
+              marginBottom: 5,
+            }}
+          >
+            <Text
+              style={{
+                color: Colors.Black,
+                fontSize: 12,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              {boqProgress?.result?.startDate
+                ? moment(boqProgress?.result?.startDate).format("DD MMM YYYY")
+                : ""}
+            </Text>
+            <Text
+              style={{
+                color: Colors.Black,
+                fontSize: 12,
+                fontFamily: "Lexend-Medium",
+              }}
+            >
+              {boqProgress?.result?.endDate
+                ? moment(boqProgress?.result?.endDate).format("DD MMM YYYY")
+                : ""}
+            </Text>
+          </View>
+        </View>
+        <View style={{ width: "100%", flex: 1 }}>
+          <ScrollView contentContainerStyle={{ width: "100%" }}>
+            <View
+              style={{
+                width: "100%",
+              }}
+            >
+              <Pressable
+                onPress={() => {
+                  // navigation.navigate("VerifyProgress");
+                }}
+                style={styles.tiles}
+              >
+                <View>
+                  <Text style={styles.tileHeading}>{"Workmanship Cost"}</Text>
+                  <Text
+                    style={{
+                      color: Colors.Black,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 16,
+                    }}
+                  >
+                    ₹ {metrics?.workmanshipCost || 0}
+                  </Text>
+                </View>
+                <View>
+                  <View
+                    style={{
+                      backgroundColor: Colors.Primary,
+                      width: 35,
+                      height: 35,
+                      borderRadius: 5,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <HomeIcon size={20} color={Colors.White} />
                   </View>
                 </View>
-                {/* <Pressable
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  // navigation.navigate("VerifyProgress");
+                }}
+                style={styles.tiles}
+              >
+                <View>
+                  <Text style={styles.tileHeading}>
+                    {"Material Defects Cost"}
+                  </Text>
+                  <Text
+                    style={{
+                      color: Colors.Black,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 16,
+                    }}
+                  >
+                    ₹ {metrics?.qualityCost || 0}
+                  </Text>
+                </View>
+                <View>
+                  <View
+                    style={{
+                      backgroundColor: Colors.Primary,
+                      width: 35,
+                      height: 35,
+                      borderRadius: 5,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <HatIcon size={20} color={Colors.White} />
+                  </View>
+                </View>
+              </Pressable>
+              <Pressable
+                onPress={() => {
+                  // navigation.navigate("VerifyProgress");
+                }}
+                style={styles.tiles}
+              >
+                <View>
+                  <Text style={styles.tileHeading}>{"Variation Cost"}</Text>
+                  <Text
+                    style={{
+                      color: Colors.Black,
+                      fontFamily: "Lexend-Medium",
+                      fontSize: 16,
+                    }}
+                  >
+                    ₹ {metrics?.excessCost || 0}
+                  </Text>
+                </View>
+                <View>
+                  <View
+                    style={{
+                      backgroundColor: Colors.Primary,
+                      width: 35,
+                      height: 35,
+                      borderRadius: 5,
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <ChatIcon size={20} color={Colors.White} />
+                  </View>
+                </View>
+              </Pressable>
+            </View>
+            <View style={styles.scrollGraph}>
+              <View style={styles.graphsHeader}>
+                <Text style={styles.graphHeadingText}>Project Progress</Text>
+                <View style={styles.graphSubHeader}>
+                  <View style={styles.selectProjectButton}>
+                    <View style={styles.buildingIconBg}>
+                      <Building size={15} color={Colors.LightGray} />
+                    </View>
+                    <View>
+                      <Text style={styles.selectText}>Select a Project</Text>
+                      <Dropdown
+                        style={{
+                          height: 20,
+                          marginTop: 3,
+                          width: 200,
+                          ...styles.selectText,
+                        }}
+                        placeholderStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        selectedTextStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        containerStyle={{ width: 250 }}
+                        itemTextStyle={{
+                          fontFamily: "Lexend-Regular",
+                          fontSize: 13,
+                          color: Colors.FormText,
+                        }}
+                        iconStyle={styles.iconStyle}
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
+                        maxHeight={400}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={"Project"}
+                        value={currentProjectProgressGraph}
+                        onChange={(item) => {
+                          if (item) {
+                            setCurrentProjectProgressGraph(item.value);
+                            dispatch(
+                              getProjectProgressGraph(token, item.value)
+                            );
+                          } else {
+                            setCurrentProjectProgressGraph(
+                              projectsListSimple[0]?.projectId
+                            );
+                            dispatch(
+                              getProjectProgressGraph(
+                                token,
+                                projectsListSimple[0]?.projectId
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </View>
+                  </View>
+                  {/* <Pressable
                   onPress={() => {
                     // setOpen(true);
                     // setSelectedGraph("Attendance");
@@ -3618,9 +3356,9 @@ const Productivity = ({ navigation }) => {
                     </Text>
                   </View>
                 </Pressable> */}
+                </View>
               </View>
-            </View>
-            {/* <View
+              {/* <View
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -3635,313 +3373,313 @@ const Productivity = ({ navigation }) => {
               <Text style={styles.attendanceSubText}>Absent</Text>
             </View>
           </View> */}
-            <View style={styles.barChart}>
-              <BarChart
-                data={projectProgressGraphsData()}
-                barWidth={10}
-                spacing={30}
-                roundedTop
-                xAxisThickness={0}
-                yAxisThickness={0}
-                yAxisTextStyle={{ color: "gray" }}
-                xAxisTextStyle={{ color: "gray" }}
-                noOfSections={5}
-                maxValue={getProjectProgressMaxValue()}
-                frontColor={Colors.Black}
-                height={180}
-                width={260}
-              />
+              <View style={styles.barChart}>
+                <BarChart
+                  data={projectProgressGraphsData()}
+                  barWidth={10}
+                  spacing={30}
+                  roundedTop
+                  xAxisThickness={0}
+                  yAxisThickness={0}
+                  yAxisTextStyle={{ color: "gray" }}
+                  xAxisTextStyle={{ color: "gray" }}
+                  noOfSections={5}
+                  maxValue={getProjectProgressMaxValue()}
+                  frontColor={Colors.Black}
+                  height={180}
+                  width={260}
+                />
+              </View>
             </View>
-          </View>
-          <View style={styles.scrollGraph}>
-            <View style={styles.graphsHeader}>
-              <Text style={styles.graphHeadingText}>Financial Progress</Text>
-              <View style={styles.graphSubHeader}>
-                <View style={styles.selectProjectButton}>
-                  <View style={styles.buildingIconBg}>
-                    <Building size={15} color={Colors.LightGray} />
-                  </View>
-                  <View>
-                    <Text style={styles.selectText}>Select a Project</Text>
-                    <Dropdown
-                      style={{
-                        height: 20,
-                        marginTop: 3,
-                        width: 200,
-                        ...styles.selectText,
-                      }}
-                      placeholderStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      containerStyle={{ width: 250 }}
-                      itemTextStyle={{
-                        fontFamily: "Lexend-Regular",
-                        fontSize: 13,
-                        color: Colors.FormText,
-                      }}
-                      iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
-                        label: ele?.name,
-                        value: ele?.projectId,
-                        ...ele,
-                      }))}
-                      maxHeight={400}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"Project"}
-                      value={currentProjectFinancial}
-                      onChange={(item) => {
-                        if (item) {
-                          setCurrentProjectFinancial(item);
-                          dispatch(
-                            getFinancialProgressData(token, item?.value)
-                          );
-                        } else {
-                          setCurrentProjectFinancial(
-                            projectsListSimple[0]?.projectId
-                          );
-                          dispatch(
-                            getFinancialProgressData(
-                              token,
+            <View style={styles.scrollGraph}>
+              <View style={styles.graphsHeader}>
+                <Text style={styles.graphHeadingText}>Financial Progress</Text>
+                <View style={styles.graphSubHeader}>
+                  <View style={styles.selectProjectButton}>
+                    <View style={styles.buildingIconBg}>
+                      <Building size={15} color={Colors.LightGray} />
+                    </View>
+                    <View>
+                      <Text style={styles.selectText}>Select a Project</Text>
+                      <Dropdown
+                        style={{
+                          height: 20,
+                          marginTop: 3,
+                          width: 200,
+                          ...styles.selectText,
+                        }}
+                        placeholderStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        selectedTextStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        containerStyle={{ width: 250 }}
+                        itemTextStyle={{
+                          fontFamily: "Lexend-Regular",
+                          fontSize: 13,
+                          color: Colors.FormText,
+                        }}
+                        iconStyle={styles.iconStyle}
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
+                        maxHeight={400}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={"Project"}
+                        value={currentProjectFinancial}
+                        onChange={(item) => {
+                          if (item) {
+                            setCurrentProjectFinancial(item);
+                            dispatch(
+                              getFinancialProgressData(token, item?.value)
+                            );
+                          } else {
+                            setCurrentProjectFinancial(
                               projectsListSimple[0]?.projectId
-                            )
-                          );
-                        }
-                      }}
-                    />
+                            );
+                            dispatch(
+                              getFinancialProgressData(
+                                token,
+                                projectsListSimple[0]?.projectId
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </View>
                   </View>
                 </View>
               </View>
+              <ScrollView
+                horizontal={true}
+                nestedScrollEnabled={true}
+                contentContainerStyle={[
+                  styles.barChart,
+                  {
+                    paddingBottom: 60,
+                    marginTop: 40,
+                    width: 560,
+                  },
+                ]}
+              >
+                <BarChart
+                  height={180}
+                  barWidth={20}
+                  xAxisLabelTextStyle={{ color: "gray" }}
+                  yAxisTextStyle={{ color: "gray" }}
+                  frontColor={Colors.Black}
+                  noOfSections={4}
+                  maxValue={2000}
+                  stackData={getFinancialProgressGraphData()}
+                  renderTooltip={(e) => {
+                    return (
+                      <View>
+                        {e.stacks.map((item) => (
+                          <Text
+                            style={{
+                              color: Colors.Black,
+                              fontFamily: "Lexend-Regular",
+                              fontSize: 12,
+                              marginVertical: 5,
+                              marginLeft: 10,
+                            }}
+                          >
+                            {item.value}
+                          </Text>
+                        ))}
+                      </View>
+                    );
+                  }}
+                  // stackData={[
+                  //   {
+                  //     stacks: [
+                  //       { value: 10, color: "orange" },
+                  //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
+                  //     ],
+                  //     label: "Jan",
+                  //   },
+                  //   {
+                  //     stacks: [
+                  //       { value: 10, color: "#4ABFF4" },
+                  //       { value: 11, color: "orange", marginBottom: 2 },
+                  //       { value: 15, color: "#28B2B3", marginBottom: 2 },
+                  //     ],
+                  //     label: "Mar",
+                  //   },
+                  //   {
+                  //     stacks: [
+                  //       { value: 14, color: "orange" },
+                  //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
+                  //     ],
+                  //     label: "Feb",
+                  //   },
+                  // ]}
+                  width={800}
+                />
+              </ScrollView>
             </View>
-            <ScrollView
-              horizontal={true}
-              nestedScrollEnabled={true}
-              contentContainerStyle={[
-                styles.barChart,
-                {
-                  paddingBottom: 60,
-                  marginTop: 40,
-                  width: 560,
-                },
-              ]}
-            >
-              <BarChart
-                height={180}
-                barWidth={20}
-                xAxisLabelTextStyle={{ color: "gray" }}
-                yAxisTextStyle={{ color: "gray" }}
-                frontColor={Colors.Black}
-                noOfSections={4}
-                maxValue={2000}
-                stackData={getFinancialProgressGraphData()}
-                renderTooltip={(e) => {
-                  return (
+            <View style={styles.scrollGraph}>
+              <View style={styles.graphsHeader}>
+                <Text style={styles.graphHeadingText}>
+                  Budgeted VS Actual Cost
+                </Text>
+                <View style={styles.graphSubHeader}>
+                  <View style={styles.selectProjectButton}>
+                    <View style={styles.buildingIconBg}>
+                      <Building size={15} color={Colors.LightGray} />
+                    </View>
                     <View>
-                      {e.stacks.map((item) => (
+                      <Text style={styles.selectText}>Select a Project</Text>
+                      <Dropdown
+                        style={{
+                          height: 20,
+                          marginTop: 3,
+                          width: 200,
+                          ...styles.selectText,
+                        }}
+                        placeholderStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        selectedTextStyle={{
+                          fontSize: 10,
+                          fontFamily: "Lexend-Regular",
+                          color: Colors.Black,
+                        }}
+                        containerStyle={{ width: 250 }}
+                        itemTextStyle={{
+                          fontFamily: "Lexend-Regular",
+                          fontSize: 13,
+                          color: Colors.FormText,
+                        }}
+                        iconStyle={styles.iconStyle}
+                        data={projectsListSimple?.map((ele) => ({
+                          label: ele?.name,
+                          value: ele?.projectId,
+                          ...ele,
+                        }))}
+                        maxHeight={400}
+                        labelField="label"
+                        valueField="value"
+                        placeholder={"Project"}
+                        value={currentProjectBudget}
+                        onChange={(item) => {
+                          if (item) {
+                            setCurrentProjectBudget(item);
+                            dispatch(getProjectBudget(token, item?.value));
+                          } else {
+                            setCurrentProjectBudget(
+                              projectsListSimple[0]?.projectId
+                            );
+                            dispatch(
+                              getProjectBudget(
+                                token,
+                                projectsListSimple[0]?.projectId
+                              )
+                            );
+                          }
+                        }}
+                      />
+                    </View>
+                  </View>
+                </View>
+              </View>
+              <View
+                style={{
+                  flexDirection: "row",
+                  alignItems: "center",
+                }}
+              >
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <DotIcon color={Colors.Primary} size={40} />
+                  <Text style={styles.attendanceSubText}>Budget Cost</Text>
+                </View>
+                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                  <DotIcon color={Colors.Purple} size={40} />
+                  <Text style={styles.attendanceSubText}>Actual Cost</Text>
+                </View>
+              </View>
+              <View style={styles.barChart}>
+                <BarChart
+                  data={budgetGraphsData()}
+                  barWidth={6}
+                  spacing={30}
+                  roundedTop
+                  xAxisThickness={0}
+                  yAxisThickness={0}
+                  yAxisTextStyle={{ color: "gray" }}
+                  xAxisTextStyle={{ color: "gray" }}
+                  noOfSections={5}
+                  maxValue={getBudgetMaxValue()}
+                  frontColor={Colors.Black}
+                  height={180}
+                  renderTooltip={(e) => {
+                    return (
+                      <View>
                         <Text
                           style={{
                             color: Colors.Black,
                             fontFamily: "Lexend-Regular",
                             fontSize: 12,
-                            marginVertical: 5,
-                            marginLeft: 10,
                           }}
                         >
-                          {item.value}
+                          {e.value}
                         </Text>
-                      ))}
-                    </View>
-                  );
-                }}
-                // stackData={[
-                //   {
-                //     stacks: [
-                //       { value: 10, color: "orange" },
-                //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
-                //     ],
-                //     label: "Jan",
-                //   },
-                //   {
-                //     stacks: [
-                //       { value: 10, color: "#4ABFF4" },
-                //       { value: 11, color: "orange", marginBottom: 2 },
-                //       { value: 15, color: "#28B2B3", marginBottom: 2 },
-                //     ],
-                //     label: "Mar",
-                //   },
-                //   {
-                //     stacks: [
-                //       { value: 14, color: "orange" },
-                //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
-                //     ],
-                //     label: "Feb",
-                //   },
-                // ]}
-                width={800}
-              />
-            </ScrollView>
-          </View>
-          <View style={styles.scrollGraph}>
-            <View style={styles.graphsHeader}>
-              <Text style={styles.graphHeadingText}>
-                Budgeted VS Actual Cost
-              </Text>
-              <View style={styles.graphSubHeader}>
-                <View style={styles.selectProjectButton}>
-                  <View style={styles.buildingIconBg}>
-                    <Building size={15} color={Colors.LightGray} />
-                  </View>
-                  <View>
-                    <Text style={styles.selectText}>Select a Project</Text>
-                    <Dropdown
-                      style={{
-                        height: 20,
-                        marginTop: 3,
-                        width: 200,
-                        ...styles.selectText,
-                      }}
-                      placeholderStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      selectedTextStyle={{
-                        fontSize: 10,
-                        fontFamily: "Lexend-Regular",
-                        color: Colors.Black,
-                      }}
-                      containerStyle={{ width: 250 }}
-                      itemTextStyle={{
-                        fontFamily: "Lexend-Regular",
-                        fontSize: 13,
-                        color: Colors.FormText,
-                      }}
-                      iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
-                        label: ele?.name,
-                        value: ele?.projectId,
-                        ...ele,
-                      }))}
-                      maxHeight={400}
-                      labelField="label"
-                      valueField="value"
-                      placeholder={"Project"}
-                      value={currentProjectBudget}
-                      onChange={(item) => {
-                        if (item) {
-                          setCurrentProjectBudget(item);
-                          dispatch(getProjectBudget(token, item?.value));
-                        } else {
-                          setCurrentProjectBudget(
-                            projectsListSimple[0]?.projectId
-                          );
-                          dispatch(
-                            getProjectBudget(
-                              token,
-                              projectsListSimple[0]?.projectId
-                            )
-                          );
-                        }
-                      }}
-                    />
-                  </View>
-                </View>
+                      </View>
+                    );
+                  }}
+                  width={260}
+                />
               </View>
             </View>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
+            <DatePicker
+              modal
+              mode="date"
+              textColor={textColor}
+              open={open}
+              date={date}
+              onConfirm={(date) => {
+                setOpen(false);
+                setDate(date);
               }}
-            >
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <DotIcon color={Colors.Primary} size={40} />
-                <Text style={styles.attendanceSubText}>Budget Cost</Text>
-              </View>
-              <View style={{ flexDirection: "row", alignItems: "center" }}>
-                <DotIcon color={Colors.Purple} size={40} />
-                <Text style={styles.attendanceSubText}>Actual Cost</Text>
-              </View>
-            </View>
-            <View style={styles.barChart}>
-              <BarChart
-                data={budgetGraphsData()}
-                barWidth={6}
-                spacing={30}
-                roundedTop
-                xAxisThickness={0}
-                yAxisThickness={0}
-                yAxisTextStyle={{ color: "gray" }}
-                xAxisTextStyle={{ color: "gray" }}
-                noOfSections={5}
-                maxValue={getBudgetMaxValue()}
-                frontColor={Colors.Black}
-                height={180}
-                renderTooltip={(e) => {
-                  return (
-                    <View>
-                      <Text
-                        style={{
-                          color: Colors.Black,
-                          fontFamily: "Lexend-Regular",
-                          fontSize: 12,
-                        }}
-                      >
-                        {e.value}
-                      </Text>
-                    </View>
-                  );
-                }}
-                width={260}
-              />
-            </View>
-          </View>
-          <DatePicker
-            modal
-            mode="date"
-            textColor={textColor}
-            open={open}
-            date={date}
-            onConfirm={(date) => {
-              setOpen(false);
-              setDate(date);
-            }}
-            onCancel={() => {
-              setOpen(false);
-            }}
-          />
-          <DatePicker
-            modal
-            mode="time"
-            textColor={textColor}
-            open={openTime}
-            date={date}
-            onConfirm={(date) => {
-              setOpenTime(false);
-              setTime(date);
-            }}
-            onCancel={() => {
-              setOpenTime(false);
-            }}
-          />
-        </ScrollView>
+              onCancel={() => {
+                setOpen(false);
+              }}
+            />
+            <DatePicker
+              modal
+              mode="time"
+              textColor={textColor}
+              open={openTime}
+              date={date}
+              onConfirm={(date) => {
+                setOpenTime(false);
+                setTime(date);
+              }}
+              onCancel={() => {
+                setOpenTime(false);
+              }}
+            />
+          </ScrollView>
+        </View>
+        {renderFilterModal()}
+        {renderUpdateProgressModal()}
+        {renderFieldNotes()}
+        {renderProjectSelectModal()}
+        {renderContractorSelectModal()}
+        {/* {renderSearchModal()} */}
+        {/* {renderActionModal()} */}
+        {/* {renderAssignContractorModal()} */}
       </View>
-      {renderFilterModal()}
-      {renderUpdateProgressModal()}
-      {renderFieldNotes()}
-      {renderProjectSelectModal()}
-      {renderContractorSelectModal()}
-      {renderMainProjectSelectModal()}
-      {/* {renderSearchModal()} */}
-      {/* {renderActionModal()} */}
-      {/* {renderAssignContractorModal()} */}
     </View>
   );
 };
@@ -3983,17 +3721,10 @@ const styles = StyleSheet.create({
     opacity: 0.9,
     marginTop: -190,
     padding: 10,
-    margin: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
     shadowOpacity: 0.2,
     shadowRadius: 5,
     elevation: 4,
     borderRadius: 10,
-    width: "93%",
   },
   graphBottom: {
     flexDirection: "row",
@@ -4057,11 +3788,6 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: Colors.Gray,
     paddingLeft: 10,
-  },
-  smallButton: {
-    fontFamily: "Lexend-SemiBold",
-    fontSize: 8,
-    color: Colors.Secondary,
   },
   linkText: {
     fontFamily: "Lexend-Medium",
@@ -4244,12 +3970,118 @@ const styles = StyleSheet.create({
     color: Colors.Black,
   },
   barChart: {
-    // flex: 1,
     width: "70%",
-    // paddingHorizontal: 10,
     marginTop: 10,
     alignItems: "center",
-    // padding: 0
     paddingBottom: 10,
+  },
+  dropdownContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  innerContainer: {
+    width: "100%",
+    flex: 1,
+    alignItems: "center",
+    paddingHorizontal: 10,
+  },
+  actionBtnContainer: {
+    flexDirection: "row",
+    width: "100%",
+    justifyContent: "space-between",
+    marginVertical: 5,
+  },
+  projectDetailContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "95%",
+  },
+  projectDetail: {
+    width: "70%",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  projectImage: {
+    width: 65,
+    height: 65,
+    borderRadius: 33,
+    borderWidth: 5,
+    borderColor: Colors.White,
+  },
+  projectName: {
+    fontFamily: "Lexend-Bold",
+    fontSize: 15,
+    color: Colors.White,
+  },
+  projectType: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    color: Colors.White,
+  },
+  projectPercentage: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    width: "20%",
+  },
+  percenatgeText: {
+    fontFamily: "Lexend-Bold",
+    fontSize: 24,
+    color: Colors.White,
+    textAlign: "center",
+  },
+  completionText: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    color: Colors.White,
+    textAlign: "center",
+  },
+  percentageRange: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  percentageRangeText: {
+    fontFamily: "Lexend-Bold",
+    fontSize: 14,
+    color: Colors.Purple,
+  },
+  line: {
+    width: "78%",
+    borderWidth: 1,
+    borderColor: Colors.Purple,
+    borderStyle: "dashed",
+  },
+  progressContainer: {
+    width: "100%",
+    height: 40,
+    backgroundColor: Colors.White,
+    borderRadius: 25,
+    elevation: 5,
+    marginVertical: 5,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+  },
+  purpleProgressBar: {
+    height: 33,
+    backgroundColor: Colors.Purple,
+    position: "absolute",
+    borderTopLeftRadius: 25,
+    borderBottomLeftRadius: 25,
+    left: 5,
+  },
+  greenProgressBar: {
+    height: 25,
+    position: "absolute",
+    backgroundColor: Colors.PrimaryLight,
+    borderTopLeftRadius: 25,
+    borderBottomLeftRadius: 25,
+    left: 7,
   },
 });
