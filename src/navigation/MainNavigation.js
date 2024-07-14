@@ -1016,6 +1016,15 @@ const ProjectNavigator = ({ navigation }) => {
   const isProjectListPresent = roles.some(
     (item) => item.featureSet.name === "Project List"
   );
+  const projectBoundariesAccess = roles.some(
+    (item) =>
+      item.featureSet.route === "PROJECT_BOUNDARY" &&
+      Number(item.accessRightId) !== 1
+  );
+  const showPressable =
+    userInfo?.user?.role?.name === "SuperAdmin" ||
+    (isProjectListPresent && projectBoundariesAccess);
+
   const dispatch = useDispatch();
   return (
     <ProjectStack.Navigator
@@ -1059,7 +1068,7 @@ const ProjectNavigator = ({ navigation }) => {
                 alignItems: "center",
               }}
             >
-              {isProjectListPresent && (
+              {showPressable && (
                 <Pressable
                   onPress={() => {
                     navigation.navigate("CreateNewProject");
@@ -1718,10 +1727,8 @@ function MainNavigation({ navigation }) {
     },
   };
   const userInfo = useSelector(userData);
-  // console.log("UserInfo--->>>", userInfo);
-  // const navigation = useNavigation();
   const roles = userInfo?.user?.role?.roleFeatureSets;
-
+  console.log("UserInfo--->>>", userInfo);
   // Array of expected names
   const expectedNames = [
     "Attendance List",

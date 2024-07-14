@@ -40,7 +40,7 @@ import { GOOGLE_API_KEY, assetsUrl, mapUrl } from "../../utils/api_constants";
 import MapViewGestures from "@dev-event/react-native-maps-draw";
 import { TTouchPoint } from "@dev-event/react-native-maps-draw";
 import WebView from "react-native-webview";
-import { authToken } from "../../redux/slices/authSlice";
+import { authToken, userData } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
 import {
@@ -68,7 +68,6 @@ const CreateNewProject = ({ navigation }) => {
   const [geoFancingArray, setGeoFancingArray] = useState([]);
   const [projectImageUri, setProjectImageUri] = useState(null);
   const [openMapModal, setOpenMapModal] = useState(false);
-  const [openSOWModal, setOpenSOWModal] = useState(false);
   const [loader, setLoader] = useState(true);
   const [currentPosition, setCurrentPosition] = useState(null);
   const [projectArea, setProjectArea] = useState(null);
@@ -79,8 +78,25 @@ const CreateNewProject = ({ navigation }) => {
   const mapRef = useRef();
   const project = useSelector(selectedProjectReducer);
   const { scopeList } = useSelector(fieldNoteReducer);
-  // console.log("scopeList", scopeList);
-  console.log("project", project);
+  const userInfo = useSelector(userData);
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+  console.log(
+    "Create Project roles",
+    roles.filter((item) => item.accessRightId === 3)
+  );
+  const projectBudgetAccess = roles.some(
+    (item) =>
+      item.featureSet.route === "PROJECT_BUDGET" &&
+      Number(item.accessRightId) !== 1
+  );
+  const projectBoundariesAccess = roles.some(
+    (item) =>
+      item.featureSet.route === "PROJECT_BOUNDARY" &&
+      Number(item.accessRightId) !== 1
+  );
+  const showPressableBoun =
+    userInfo?.user?.role?.name === "SuperAdmin" || projectBoundariesAccess;
+
   useEffect(() => {
     getLocationPermission();
     dispatch(getScopeList(token));
@@ -535,76 +551,32 @@ const CreateNewProject = ({ navigation }) => {
             />
             {/* </Pressable> */}
           </View>
-          <View
-            style={{
-              paddingHorizontal: 18,
-              paddingBottom: 20,
-            }}
-          >
-            <Text style={styles.title}>Add Scope Of Works</Text>
-            <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
-              {Object.keys(sow)?.length !== 0 &&
-                Object.keys(sow)?.map((item) => (
-                  <View
-                    style={{
-                      width: "50%",
-                      paddingHorizontal: 10,
-                    }}
-                  >
+          {(userInfo?.user?.role?.name === "SuperAdmin" ||
+            projectBudgetAccess) && (
+            <View
+              style={{
+                paddingHorizontal: 18,
+                paddingBottom: 20,
+              }}
+            >
+              <Text style={styles.title}>Add Scope Of Works</Text>
+              <View style={{ flexDirection: "row", flexWrap: "wrap" }}>
+                {Object.keys(sow)?.length !== 0 &&
+                  Object.keys(sow)?.map((item) => (
                     <View
                       style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        width: "100%",
-                        marginTop: 10,
+                        width: "50%",
+                        paddingHorizontal: 10,
                       }}
                     >
-                      <Text
-                        style={{
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.FormText,
-                          fontSize: 12,
-                        }}
-                      >
-                        {item}
-                      </Text>
-                    </View>
-                    <View style={{ width: "100%" }}>
                       <View
                         style={{
-                          fontFamily: "Lexend-Regular",
-                          borderWidth: 1,
-                          width: "100%",
-                          borderColor: Colors.FormBorder,
-                          marginTop: 3,
-                          borderRadius: 4,
-                          paddingHorizontal: 7,
-                          fontSize: 12,
-                          height: 40,
-                          backgroundColor: Colors.White,
-                          elevation: 3,
-                          color: "black",
                           flexDirection: "row",
-                          justifyContent: "space-between",
                           alignItems: "center",
+                          width: "100%",
+                          marginTop: 10,
                         }}
                       >
-                        <TextInput
-                          placeholder="--"
-                          placeholderTextColor={Colors.FormText}
-                          keyboardType="numeric"
-                          onChangeText={(target) =>
-                            handleMeasurementChange(item, target)
-                          }
-                          value={sow[item]?.measurement}
-                          style={{
-                            fontFamily: "Lexend-Regular",
-                            width: "80%",
-                            fontSize: 12,
-                            backgroundColor: Colors.White,
-                            color: "black",
-                          }}
-                        />
                         <Text
                           style={{
                             fontFamily: "Lexend-Regular",
@@ -612,14 +584,61 @@ const CreateNewProject = ({ navigation }) => {
                             fontSize: 12,
                           }}
                         >
-                          /sqft
+                          {item}
                         </Text>
                       </View>
+                      <View style={{ width: "100%" }}>
+                        <View
+                          style={{
+                            fontFamily: "Lexend-Regular",
+                            borderWidth: 1,
+                            width: "100%",
+                            borderColor: Colors.FormBorder,
+                            marginTop: 3,
+                            borderRadius: 4,
+                            paddingHorizontal: 7,
+                            fontSize: 12,
+                            height: 40,
+                            backgroundColor: Colors.White,
+                            elevation: 3,
+                            color: "black",
+                            flexDirection: "row",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                          }}
+                        >
+                          <TextInput
+                            placeholder="--"
+                            placeholderTextColor={Colors.FormText}
+                            keyboardType="numeric"
+                            onChangeText={(target) =>
+                              handleMeasurementChange(item, target)
+                            }
+                            value={sow[item]?.measurement}
+                            style={{
+                              fontFamily: "Lexend-Regular",
+                              width: "80%",
+                              fontSize: 12,
+                              backgroundColor: Colors.White,
+                              color: "black",
+                            }}
+                          />
+                          <Text
+                            style={{
+                              fontFamily: "Lexend-Regular",
+                              color: Colors.FormText,
+                              fontSize: 12,
+                            }}
+                          >
+                            /sqft
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                ))}
+                  ))}
+              </View>
             </View>
-          </View>
+          )}
           <View
             style={{
               flex: 1,
@@ -647,45 +666,48 @@ const CreateNewProject = ({ navigation }) => {
                   />
                 ))}
             </MapView>
-            <View
-              style={{
-                flex: 1,
-                // flexDirection: "row",
-                position: "absolute",
-                top: 10,
-                left: 20,
-                alignSelf: "center",
-                // justifyContent: "space-between",
-                backgroundColor: "transparent",
-                borderWidth: 0.5,
-                borderRadius: 20,
-              }}
-            >
-              <Pressable
-                onPress={() => {
-                  setOpenMapModal(true);
-                }}
+            {(userInfo?.user?.role?.name === "SuperAdmin" ||
+              projectBoundariesAccess) && (
+              <View
                 style={{
-                  backgroundColor: Colors.Black,
-                  padding: 5,
-                  paddingHorizontal: 10,
-                  borderRadius: 10,
+                  flex: 1,
+                  // flexDirection: "row",
+                  position: "absolute",
+                  top: 10,
+                  left: 20,
+                  alignSelf: "center",
+                  // justifyContent: "space-between",
+                  backgroundColor: "transparent",
+                  borderWidth: 0.5,
+                  borderRadius: 20,
                 }}
               >
-                <View>
-                  <Text
-                    style={{
-                      color: Colors.White,
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 14,
-                      textAlign: "center",
-                    }}
-                  >
-                    Draw Boundaries
-                  </Text>
-                </View>
-              </Pressable>
-            </View>
+                <Pressable
+                  onPress={() => {
+                    setOpenMapModal(true);
+                  }}
+                  style={{
+                    backgroundColor: Colors.Black,
+                    padding: 5,
+                    paddingHorizontal: 10,
+                    borderRadius: 10,
+                  }}
+                >
+                  <View>
+                    <Text
+                      style={{
+                        color: Colors.White,
+                        fontFamily: "Lexend-Medium",
+                        fontSize: 14,
+                        textAlign: "center",
+                      }}
+                    >
+                      Draw Boundaries
+                    </Text>
+                  </View>
+                </Pressable>
+              </View>
+            )}
           </View>
         </ScrollView>
       </View>

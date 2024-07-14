@@ -1,7 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import {
-  base_url,
-} from "../../utils/api_constants";
+import { base_url } from "../../utils/api_constants";
 import axios from "axios";
 const initialState = {
   loading: false,
@@ -75,7 +73,7 @@ export const logoutAction = () => async (dispatch) => {
 
 export const userLoginAction = (username, password) => async (dispatch) => {
   const url = `${base_url}/dashboard/User/Login`;
-
+  console.log('URL', username, password)
   dispatch(userLoginRequest());
   try {
     let response = await axios.post(
@@ -96,6 +94,8 @@ export const userLoginAction = (username, password) => async (dispatch) => {
     // }
     // throw new Error("Unable to login, Please try again later");
     return error;
+  } finally {
+    dispatch(userLoginFailure("Something went wrong!"));
   }
 };
 
@@ -104,14 +104,12 @@ export const userSignupAction = (data) => async (dispatch) => {
 
   dispatch(userLoginRequest());
   try {
-    let response = await axios.post(
-      `${base_url}/dashboard/Lead`, data, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "text/plain",
-        }
-      }
-    );
+    let response = await axios.post(`${base_url}/dashboard/Lead`, data, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "text/plain",
+      },
+    });
     if (response.status === 200) {
       dispatch(userLoginSuccess(response.data));
       console.log("Signup Response", response.data);

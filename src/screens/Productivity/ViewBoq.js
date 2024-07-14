@@ -3,90 +3,40 @@ import {
   View,
   Text,
   StyleSheet,
-  FlatList,
-  Dimensions,
   LogBox,
   Pressable,
   RefreshControl,
-  TextInput,
   ScrollView,
-  TouchableOpacity,
   Appearance,
 } from "react-native";
 import Accordion from "react-native-collapsible/Accordion";
 import Modal from "react-native-modal";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
 import { Searchbar } from "react-native-paper";
 import { useSelector, useDispatch } from "react-redux";
-import {
-  getAllAttendanceAction,
-  attendanceListReducer,
-  saveProjectDataAction,
-  selectAttendanceAction,
-  loadingAttendance,
-  removeMusterData,
-} from "../../redux/slices/attendanceSlice";
 import {
   projectsListSimpleReducer,
   getAllProjectsSimpleAction,
 } from "../../redux/slices/projectSlice";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import {
-  Building,
-  Search,
-  BackIcon,
-  Cross,
-  EditIcon,
-  DeleteIcon,
-  TickIcon,
-  Tick,
-  Picture,
-  DateIcon,
-  ClockIcon,
-  VectorIcon,
-} from "../../icons";
+import { Building, Search, Cross, VectorIcon } from "../../icons";
+import { useFocusEffect } from "@react-navigation/native";
+import { Dropdown } from "react-native-element-dropdown";
+import Toast from "react-native-toast-message";
 import { authToken } from "../../redux/slices/authSlice";
 import {
-  getSkillsAction,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
-import { Dropdown } from "react-native-element-dropdown";
-import {
   getLabourContactorAction,
-  getUsersAction,
   labourContractorReducer,
-  usersListReducer,
 } from "../../redux/slices/userSlice";
 import {
   assignContractorFieldNote,
-  createFieldNoteEntry,
-  deleteFieldNote,
-  editFieldNoteAction,
   fieldNoteReducer,
   getFieldNoteList,
-  //   getScopeList,
-  markFieldNoteAction,
 } from "../../redux/slices/fieldNoteSlice";
-import { Image } from "react-native";
-import { assetsUrl } from "../../utils/api_constants";
-import moment from "moment";
-import { useFocusEffect } from "@react-navigation/native";
-// import Toast from "react-native-toast-message";
 import {
-  approveBOQMeasurementReason,
-  getBOQListGC,
   getListOfBOQ,
   getListOfBOQV2,
-  getScopeList,
   productivityReducer,
-  rejectBOQProgress,
-  verifyBOQProgress,
 } from "../../redux/slices/productivitySlice";
-import Toast from "react-native-toast-message";
-import { launchImageLibrary } from "react-native-image-picker";
 import DatePicker from "react-native-date-picker";
 
 LogBox.ignoreAllLogs();
@@ -124,7 +74,6 @@ const ViewBoq = ({ navigation }) => {
   const labourContractorList = useSelector(labourContractorReducer);
   const { scopeList, boqListGC, loading, boqListGCViewMode } =
     useSelector(productivityReducer);
-  // console.log("boqListGC", boqListGCViewMode);
   useFocusEffect(
     React.useCallback(() => {
       dispatch(getAllProjectsSimpleAction(token));
@@ -140,27 +89,10 @@ const ViewBoq = ({ navigation }) => {
   );
 
   useEffect(() => {
-    // const calculateBoqGrandTotal = () => {
-    //   setCalculations((prev) => ({
-    //     amount: { value: 0, inProcess: true },
-    //     percentage: { value: 0, inProcess: true },
-    //   }));
-    //   const totalActualAmount = getGrandTotalAmount(boqListGCViewMode);
-    //   setCalculations((prev) => ({
-    //     ...prev,
-    //     amount: { value: totalActualAmount, inProcess: false },
-    //   }));
-    //   const totalPercentage = getGrandTotalPercentage(boqListGCViewMode);
-    //   setCalculations((prev) => ({
-    //     ...prev,
-    //     percentage: { value: totalPercentage, inProcess: false },
-    //   }));
-    // };
     if (boqListGCViewMode?.length > 0) {
       setBoqList(
         boqListGCViewMode.map((item) => ({ ...item, showMore: false }))
       );
-      // GrandTotal();
     }
   }, [boqListGCViewMode]);
   useEffect(() => {
@@ -520,348 +452,6 @@ const ViewBoq = ({ navigation }) => {
     );
   };
 
-  // const Item = ({ item, index }) => (
-  //   <View
-  //     style={{
-  //       width: "100%",
-  //       backgroundColor: "white",
-  //       flex: 1,
-  //       marginBottom: 10,
-  //       borderRadius: 10,
-  //       padding: 10,
-  //       elevation: 5,
-  //     }}
-  //   >
-  //     <View
-  //       style={{
-  //         width: "100%",
-  //         flexDirection: "row",
-  //         alignItems: "center",
-  //         justifyContent: "space-between",
-  //       }}
-  //     >
-  //       {/* <View style={{ width: "40%" }}> */}
-  //       <Text
-  //         style={{
-  //           fontFamily: "Lexend-Medium",
-  //           fontSize: 12,
-  //           color: Colors.FormBorder,
-  //         }}
-  //       >
-  //         BOQ ID:{" "}
-  //         <Text style={{ color: Colors.Black }}>{item?.boqNumber || "0"}</Text>
-  //       </Text>
-  //       <Text
-  //         style={{
-  //           fontFamily: "Lexend-Medium",
-  //           fontSize: 12,
-  //           color: Colors.FormBorder,
-  //         }}
-  //       >
-  //         Cost Code:{" "}
-  //         <Text style={{ color: Colors.Black }}>{item?.boqCode || "0"}</Text>
-  //       </Text>
-  //       <Text
-  //         style={{
-  //           fontFamily: "Lexend-Medium",
-  //           fontSize: 12,
-  //           color: Colors.FormBorder,
-  //         }}
-  //       >
-  //         Work Order:{" "}
-  //         <Text style={{ color: Colors.Black }}>
-  //           {item?.workOrderNumber || "0"}
-  //         </Text>
-  //       </Text>
-  //       {/* </View> */}
-  //     </View>
-  //     {/* <View
-  //       style={{
-  //         flexDirection: "row",
-  //         width: "100%",
-  //         alignItems: "center",
-  //         justifyContent: "space-between",
-  //         marginVertical: 10,
-  //       }}
-  //     >
-  //       <View style={{ width: "40%" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 18,
-  //             color: Colors.Black,
-  //           }}
-  //           numberOfLines={1}
-  //         >
-  //           {item?.scopeOfWorkName || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "60%" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.FormBorder,
-  //           }}
-  //         >
-  //           DESCRIPTION
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //           }}
-  //           numberOfLines={1}
-  //         >
-  //           {item?.description || "N/A"}
-  //         </Text>
-  //       </View>
-  //     </View> */}
-  //     <View
-  //       style={{
-  //         width: "100%",
-  //         height: 0.7,
-  //         backgroundColor: Colors.Gray,
-  //         marginVertical: 10,
-  //         // borderWidth: 0.5,
-  //       }}
-  //     ></View>
-  //     <View
-  //       style={{
-  //         width: "100%",
-  //         flexDirection: "row",
-  //         alignItems: "center",
-  //         justifyContent: "space-between",
-  //       }}
-  //     >
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           SOW
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //           numberOfLines={1}
-  //         >
-  //           {item?.scopeOfWorkName || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "35%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           DESCRIPTION
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //           numberOfLines={1}
-  //         >
-  //           {item?.description || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           TITLE
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.title || "N/A"}
-  //         </Text>
-  //       </View>
-  //     </View>
-  //     <View
-  //       style={{
-  //         width: "100%",
-  //         flexDirection: "row",
-  //         alignItems: "center",
-  //         justifyContent: "space-between",
-  //         marginVertical: 10,
-  //       }}
-  //     >
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           QUALITY
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.quantity || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "35%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           UNIT
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.unitCode || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           AMOUNT
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.amount || "N/A"}
-  //         </Text>
-  //       </View>
-  //     </View>
-  //     <View
-  //       style={{
-  //         width: "100%",
-  //         flexDirection: "row",
-  //         alignItems: "center",
-  //         justifyContent: "space-between",
-  //       }}
-  //     >
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           RATE
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.rate || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "35%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //             textAlign: "center",
-  //           }}
-  //         >
-  //           QUALITY STATUS
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.qualityStatus || "N/A"}
-  //         </Text>
-  //       </View>
-  //       <View style={{ width: "30%", alignItems: "center" }}>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-SemiBold",
-  //             fontSize: 12,
-  //             color: Colors.Gray,
-  //           }}
-  //         >
-  //           MEASUREMENT STATUS
-  //         </Text>
-  //         <Text
-  //           style={{
-  //             fontFamily: "Lexend-Medium",
-  //             fontSize: 12,
-  //             color: Colors.Black,
-  //             marginTop: 5,
-  //           }}
-  //         >
-  //           {item?.measurementStatus || "N/A"}
-  //         </Text>
-  //       </View>
-  //     </View>
-  //   </View>
-  // );
-  const SECTIONS = [
-    {
-      title: "First",
-      header: "First Header",
-      content: "Lorem ipsum...",
-    },
-    {
-      title: "Second",
-      header: "Second Header",
-      content: "Lorem ipsum...",
-    },
-  ];
-
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -870,62 +460,30 @@ const ViewBoq = ({ navigation }) => {
           onPress={() => {
             setOpenSearchModal(true);
           }}
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+          style={styles.pressable}
         >
-          <View
-            style={{
-              backgroundColor: "#F7F8F9",
-              borderRadius: 50,
-              width: 40,
-              height: 40,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
+          <View style={styles.iconContainer}>
             <Building size={20} color={Colors.LightGray} />
           </View>
           <View>
             <Text style={styles.selectText}>Select a Project</Text>
-            <Text
-              style={[
-                styles.selectText,
-                { fontFamily: "Lexend-SemiBold", color: Colors.Black },
-              ]}
-            >
+            <Text style={[styles.selectText, styles.projectName]}>
               {selectedProject ? selectedProject?.name : "Select a project"}
             </Text>
           </View>
         </Pressable>
-        <View style={{ flexDirection: "row" }}>
+        <View style={styles.row}>
           <Pressable
             onPress={() => {
               setOpenFilterModal(true);
             }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
+            style={styles.filterButton}
           >
             <Text style={styles.smallButton}>Filter</Text>
           </Pressable>
         </View>
       </View>
-      <View
-        style={{
-          alignItems: "center",
-          margin: 10,
-          borderRadius: 10,
-          width: "93%",
-        }}
-      >
+      <View style={styles.accordianContainer}>
         {!boqListGC || boqListGC?.length === 0 ? (
           <ScrollView
             refreshControl={
@@ -938,24 +496,12 @@ const ViewBoq = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            contentContainerStyle={{
-              flex: 1,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
+            contentContainerStyle={styles.noRecordContainer}
           >
-            <Text
-              style={{
-                fontFamily: "Lexend-Medium",
-                fontSize: 18,
-                color: Colors.Gray,
-              }}
-            >
-              No Record Found!
-            </Text>
+            <Text style={styles.noRecordText}>No Record Found!</Text>
           </ScrollView>
         ) : (
-          <View style={{ width: "100%" }}>
+          <View style={styles.fullWidth}>
             <ScrollView>
               <Accordion
                 sections={boqListGCViewMode}
@@ -963,25 +509,13 @@ const ViewBoq = ({ navigation }) => {
                 renderHeader={(item) => (
                   <View style={styles.firstAccordionHeader}>
                     <View style={styles.firstLayer}>
-                      <View style={{ width: "10%" }}>
-                        <Text
-                          style={{
-                            fontFamily: "Lexend-Medium",
-                            fontSize: 12,
-                            color: Colors.Black,
-                          }}
-                        >
+                      <View style={styles.headerPartOne}>
+                        <Text style={styles.headerText}>
                           {item.scopeOfWorkId}
                         </Text>
                       </View>
-                      <View style={{ width: "80%" }}>
-                        <Text
-                          style={{
-                            fontFamily: "Lexend-Medium",
-                            fontSize: 12,
-                            color: Colors.Black,
-                          }}
-                        >
+                      <View style={styles.headerPartTwo}>
+                        <Text style={styles.headerText}>
                           {item.scopeOfWorkName}
                         </Text>
                       </View>
@@ -1002,16 +536,10 @@ const ViewBoq = ({ navigation }) => {
                       renderHeader={(item) => (
                         <View style={styles.firstAccordionHeader}>
                           <View style={styles.firstLayer}>
-                            <View style={{ width: "80%" }}>
+                            <View style={styles.headerPartTwo}>
                               <Text
-                                style={{
-                                  fontFamily: "Lexend-Medium",
-                                  fontSize: 12,
-                                  color: Colors.Black,
-                                }}
-                              >
-                                {`WORKORDER # ${item.workOrder}`}
-                              </Text>
+                                style={styles.headerText}
+                              >{`WORKORDER # ${item.workOrder}`}</Text>
                             </View>
                             <VectorIcon
                               type="Entypo"
@@ -1023,318 +551,81 @@ const ViewBoq = ({ navigation }) => {
                         </View>
                       )}
                       renderContent={(item) =>
-                        item?.titles?.map((subItem, index) => {
-                          // return the JSX you want for each item here
-                          // for example:
-                          return (
-                            <View
-                              style={{
-                                width: "100%",
-                                backgroundColor: "white",
-                                flex: 1,
-                                marginBottom: 10,
-                                borderRadius: 10,
-                                padding: 10,
-                                elevation: 5,
-                              }}
-                            >
-                              <View
-                                style={{
-                                  width: "100%",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                {/* <View style={{ width: "40%" }}> */}
-                                <Text
-                                  style={{
-                                    fontFamily: "Lexend-Medium",
-                                    fontSize: 12,
-                                    color: Colors.FormBorder,
-                                  }}
-                                >
-                                  BOQ ID:{" "}
-                                  <Text style={{ color: Colors.Black }}>
-                                    {/* {item?.boqNumber || "0"} */}
-                                  </Text>
+                        item?.titles?.map((subItem, index) => (
+                          <View style={styles.contentContainer} key={index}>
+                            <View style={styles.row}>
+                              <Text style={styles.boqText}>
+                                BOQ ID:{" "}
+                                <Text style={styles.boqValue}>
+                                  {/* {item?.boqNumber || "0"} */}
                                 </Text>
-                                <Text
-                                  style={{
-                                    fontFamily: "Lexend-Medium",
-                                    fontSize: 12,
-                                    color: Colors.FormBorder,
-                                  }}
-                                >
-                                  Cost Code:{" "}
-                                  <Text style={{ color: Colors.Black }}>
-                                    {subItem?.title || "0"}
-                                  </Text>
+                              </Text>
+                              <Text style={styles.boqText}>
+                                Cost Code:{" "}
+                                <Text style={styles.boqValue}>
+                                  {subItem?.boqCode || "0"}
                                 </Text>
-                                <Text
-                                  style={{
-                                    fontFamily: "Lexend-Medium",
-                                    fontSize: 12,
-                                    color: Colors.FormBorder,
-                                  }}
-                                >
-                                  Work Order:{" "}
-                                  <Text style={{ color: Colors.Black }}>
-                                    {/* {item?.workOrderNumber || "0"} */}
-                                  </Text>
+                              </Text>
+                              <Text style={styles.boqText}>
+                                Work Order:{" "}
+                                <Text style={styles.boqValue}>
+                                  {/* {item?.workOrderNumber || "0"} */}
                                 </Text>
-                                {/* </View> */}
+                              </Text>
+                            </View>
+                            <View style={styles.divider} />
+                            <View style={styles.row}>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>SOW</Text>
+                                <Text style={styles.value} numberOfLines={1}>
+                                  {"N/A"}
+                                </Text>
                               </View>
-                              <View
-                                style={{
-                                  width: "100%",
-                                  height: 0.7,
-                                  backgroundColor: Colors.Gray,
-                                  marginVertical: 10,
-                                  // borderWidth: 0.5,
-                                }}
-                              ></View>
-                              <View
-                                style={{
-                                  width: "100%",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    SOW
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                    numberOfLines={1}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "35%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    DESCRIPTION
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                    numberOfLines={1}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    TITLE
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>DESCRIPTION</Text>
+                                <Text style={styles.value} numberOfLines={1}>
+                                  {"N/A"}
+                                </Text>
                               </View>
-                              <View
-                                style={{
-                                  width: "100%",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                  marginVertical: 10,
-                                }}
-                              >
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    QUALITY
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "35%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    UNIT
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    AMOUNT
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                              </View>
-                              <View
-                                style={{
-                                  width: "100%",
-                                  flexDirection: "row",
-                                  alignItems: "center",
-                                  justifyContent: "space-between",
-                                }}
-                              >
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    RATE
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {item?.rate || "N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "35%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                      textAlign: "center",
-                                    }}
-                                  >
-                                    QUALITY STATUS
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
-                                <View
-                                  style={{ width: "30%", alignItems: "center" }}
-                                >
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-SemiBold",
-                                      fontSize: 12,
-                                      color: Colors.Gray,
-                                    }}
-                                  >
-                                    MEASUREMENT STATUS
-                                  </Text>
-                                  <Text
-                                    style={{
-                                      fontFamily: "Lexend-Medium",
-                                      fontSize: 12,
-                                      color: Colors.Black,
-                                      marginTop: 5,
-                                    }}
-                                  >
-                                    {"N/A"}
-                                  </Text>
-                                </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>TITLE</Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
                               </View>
                             </View>
-                          );
-                        })
+                            <View style={styles.row}>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>QUALITY</Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
+                              </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>UNIT</Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
+                              </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>AMOUNT</Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
+                              </View>
+                            </View>
+                            <View style={styles.row}>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>RATE</Text>
+                                <Text style={styles.value}>
+                                  {item?.rate || "N/A"}
+                                </Text>
+                              </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>QUALITY STATUS</Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
+                              </View>
+                              <View style={styles.column}>
+                                <Text style={styles.label}>
+                                  MEASUREMENT STATUS
+                                </Text>
+                                <Text style={styles.value}>{"N/A"}</Text>
+                              </View>
+                            </View>
+                          </View>
+                        ))
                       }
                       onChange={(activeSection) => {
                         setInnerActiveSections(activeSection);
@@ -1347,31 +638,10 @@ const ViewBoq = ({ navigation }) => {
                 }}
               />
             </ScrollView>
-            {/* <FlatList
-              refreshControl={
-                <RefreshControl
-                  refreshing={loading}
-                  onRefresh={() => {
-                    dispatch(
-                      getListOfBOQ(token, projectsListSimple[0]?.projectId)
-                    );
-                    setSelectedProject(projectsListSimple[0]);
-                  }}
-                  tintColor={Colors.Primary}
-                  colors={[Colors.Purple, Colors.Primary]}
-                />
-              }
-              data={boqListGC}
-              renderItem={({ item, index }) => (
-                <CollapableItem item={item} index={index} />
-              )}
-              keyExtractor={(item) => item.id}
-              showsVerticalScrollIndicator={false}
-            /> */}
           </View>
         )}
       </View>
-      <Modal
+      {/* <Modal
         isVisible={openSearchModal}
         useNativeDriver={true}
         backdropColor={Colors.WhiteGray}
@@ -1462,9 +732,9 @@ const ViewBoq = ({ navigation }) => {
             />
           </View>
         </View>
-      </Modal>
+      </Modal> */}
       {renderFilterModal()}
-      {renderSearchModal()}
+      {/* {renderSearchModal()} */}
       {/* {renderAssignContractorModal()} */}
       <DatePicker
         modal
@@ -1706,5 +976,122 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     width: "50%",
+  },
+  accordianContainer: {
+    alignItems: "center",
+    margin: 10,
+    borderRadius: 10,
+    width: "93%",
+  },
+  noRecordContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  noRecordText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 18,
+    color: Colors.Gray,
+  },
+  fullWidth: {
+    width: "100%",
+  },
+  firstLayer: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  headerPartOne: {
+    width: "10%",
+  },
+  headerPartTwo: {
+    width: "80%",
+  },
+  headerText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 12,
+    color: Colors.Black,
+  },
+  contentContainer: {
+    width: "100%",
+    backgroundColor: "white",
+    flex: 1,
+    marginBottom: 10,
+    borderRadius: 10,
+    padding: 10,
+    elevation: 5,
+  },
+  row: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  boqText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 12,
+    color: Colors.FormBorder,
+  },
+  boqValue: {
+    color: Colors.Black,
+  },
+  divider: {
+    width: "100%",
+    height: 0.7,
+    backgroundColor: Colors.Gray,
+    marginVertical: 10,
+  },
+  column: {
+    width: "30%",
+    alignItems: "center",
+  },
+  label: {
+    fontFamily: "Lexend-SemiBold",
+    fontSize: 12,
+    color: Colors.Gray,
+  },
+  value: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 12,
+    color: Colors.Black,
+    marginTop: 5,
+  },
+  pressable: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  iconContainer: {
+    backgroundColor: "#F7F8F9",
+    borderRadius: 50,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selectText: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 14,
+    color: Colors.Gray,
+  },
+  projectName: {
+    fontFamily: "Lexend-SemiBold",
+    color: Colors.Black,
+  },
+  row: {
+    flexDirection: "row",
+  },
+  filterButton: {
+    backgroundColor: "#ECE5FC",
+    padding: 5,
+    margin: 5,
+    borderRadius: 3,
+    paddingHorizontal: 9,
+    paddingVertical: 7,
+  },
+  smallButton: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    color: Colors.Black,
   },
 });

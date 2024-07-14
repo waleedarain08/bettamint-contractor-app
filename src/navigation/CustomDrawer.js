@@ -13,6 +13,11 @@ const CustomDrawer = ({ navigation }) => {
   const userdata = useSelector(userData);
   const roles = userdata?.user?.role?.roleFeatureSets;
 
+  const fieldNotesAccess =
+    roles &&
+    roles.filter((item) => item.featureSet.route === "QUALITY_MANAGEMENT")[0]
+      ?.accessRightId !== 1;
+
   const isDashboardPresent = roles.some(
     (item) => item.featureSet.name === "Dashboard"
   );
@@ -63,7 +68,7 @@ const CustomDrawer = ({ navigation }) => {
       name: "Field Notes",
       route: "FieldNotes",
       id: 8,
-      access: isUsersListPresent,
+      access: fieldNotesAccess,
     },
     {
       name: "Productivity",

@@ -24,6 +24,9 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 import {
   createUserAction,
+  featuresReducer,
+  getFeatures,
+  getFeaturesV2,
   getRoles,
   rolesReducer,
 } from "../../redux/slices/userSlice";
@@ -35,6 +38,10 @@ import {
 } from "../../redux/slices/projectSlice";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
+import {
+  createRole,
+  rolesResponseReducer,
+} from "../../redux/slices/rolesSlice";
 
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
@@ -45,13 +52,79 @@ const CreateNewUser = ({ navigation, route }) => {
   const [email, setEmail] = useState("");
   const [userRole, setUseRole] = useState(null);
   const [project, setProject] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [value, setValue] = useState(null);
-  const [items, setItems] = useState([
-    { label: "Apple", value: "apple" },
-    // { label: "Banana", value: "banana" },
-  ]);
+  const [activeRolesAndRights, setActiveRolesAndRights] = useState({});
+  const [roleName, setRoleName] = useState("");
+  const [errors, setErrors] = useState(false);
+  const userInfo = route?.params?.userInfo;
+  const {
+    loading: loadingRoles,
+    rolesList,
+    res,
+  } = useSelector(rolesResponseReducer);
+
+  // Selectors
+  const {
+    loading,
+    featuresList,
+    featuresListV2: userRights,
+  } = useSelector(featuresReducer);
+  const token = useSelector(authToken);
+  const roles = useSelector(rolesReducer);
   const projectsList = useSelector(projectsListSimpleReducer);
+
+  const dispatch = useDispatch();
+
+  // useEffect
+  useFocusEffect(
+    React.useCallback(() => {
+      dispatch(getFeatures(token));
+      dispatch(getFeaturesV2(token));
+      dispatch(getRoles(token));
+      dispatch(getAllProjectsSimpleAction(token));
+      return () => {};
+    }, [dispatch, token])
+  );
+  // UseEffect
+  // useEffect(() => {
+  //   dispatch(getRoles(token));
+  // }, []);
+
+  // console.log("featuresList", roles);
+
+  const handleSubmit = async () => {
+    if (!roleName) {
+      setErrors(true);
+      return;
+    }
+
+    console.log("this is called");
+    const featureListArray = [];
+    featuresList.forEach((feature) => {
+      const featureExtensible = JSON.parse(JSON.stringify(feature));
+      if (activeRolesAndRights[featureExtensible.featureSetId]) {
+        featureExtensible.accessRightList = [];
+        featureExtensible.accessRightList =
+          activeRolesAndRights[featureExtensible.featureSetId];
+        delete featureExtensible.name;
+        delete featureExtensible.route;
+        featureListArray.push(featureExtensible);
+      } else {
+        featureExtensible.accessRightList = [1];
+        delete featureExtensible.name;
+        delete featureExtensible.route;
+        featureListArray.push(featureExtensible);
+      }
+    });
+
+    const role = {
+      name: roleName,
+      roleId: 0,
+      featureSets: featureListArray,
+    };
+    console.log("ROLE--->>>", role);
+    let resp = await dispatch(createRole(role));
+  };
+
   function generatePassword(length) {
     const charset =
       "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -64,22 +137,151 @@ const CreateNewUser = ({ navigation, route }) => {
 
     return password;
   }
-  const userInfo = route?.params?.userInfo;
+  const groupFeaturesByParent = (features) => {
+    const parentMap = {
+      Project: [
+        "Project Information",
+        "Project Budget",
+        "Project Boundary",
+        "Project Linking",
+      ],
+      User: ["User Rights Management"],
+      Billing: [
+        "Contact and Contractor Management",
+        "Bill Management",
+        "Payout Management",
+      ],
+      Productivity: [
+        "Measurement Management",
+        "Change Management",
+        "Quality Management",
+        "Variation Management",
+      ],
+      Inventory: [
+        "Material Masters",
+        "Material Indenting",
+        "Material Issuance",
+        "Material Receiving",
+      ],
+      Workforce: ["Worker Onboarding", "Attendance", "Payroll", "Payments"],
+      Rewards: ["Goal Setting", "Goal Approval"],
+      Communication: ["In App Chat Features"],
+      Reports: ["Progress Reports", "Compliance Reports"],
+    };
 
-  const token = useSelector(authToken);
-  const roles = useSelector(rolesReducer);
+    const groupedFeatures = new Map();
 
-  const dispatch = useDispatch();
-  // useEffect(() => {}, []);
-  useFocusEffect(
-    React.useCallback(() => {
-      // setTimeout(() => {
-      dispatch(getRoles(token));
-      dispatch(getAllProjectsSimpleAction(token));
-      // }, 1000);
-      return () => {};
-    }, [dispatch, token])
-  );
+    features.forEach((feature) => {
+      Object.keys(parentMap).forEach((parent) => {
+        if (parentMap[parent].includes(feature.name)) {
+          if (!groupedFeatures.has(parent)) {
+            groupedFeatures.set(parent, [feature]);
+          } else {
+            groupedFeatures.get(parent).push(feature);
+          }
+        }
+      });
+    });
+
+    return groupedFeatures;
+  };
+
+  const groupedFeatures = groupFeaturesByParent(featuresList);
+
+  const handleCheckbox = (featureSetId, accessRightId, value) => {
+    setActiveRolesAndRights((prev) => {
+      const deepCopy = { ...prev };
+      deepCopy[featureSetId] = [accessRightId];
+      return deepCopy;
+    });
+  };
+
+  const renderUserRights = () => {
+    return (
+      <View style={styles.tableRow}>
+        <View
+          style={{
+            width: "20%",
+          }}
+        >
+          <Text style={styles.tableHeader}>Module</Text>
+        </View>
+        <View
+          style={{
+            width: "80%",
+            flexDirection: "row",
+            justifyContent: "space-between",
+          }}
+        >
+          {userRights.map((right) => (
+            <Text style={styles.tableHeader} key={right.accessRightId}>
+              {right.name}
+            </Text>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const renderCheckbox = (featureSetId, accessRightId) => {
+    const featureSetAccess = activeRolesAndRights[featureSetId] || [1];
+    return (
+      <CheckBox
+        value={featureSetAccess[0] === accessRightId}
+        onValueChange={(value) =>
+          handleCheckbox(featureSetId, accessRightId, value)
+        }
+        disabled={[4, 5].includes(accessRightId)}
+        tintColors={{ true: Colors.Primary, false: Colors.FormText }}
+        // style={{ borderColor: 'red', borderRadius: 4}}
+      />
+    );
+  };
+
+  const renderRightsOptions = (featureSetId) => {
+    return userRights.map((right) => (
+      <View key={right.accessRightId} style={styles.tableCell}>
+        {renderCheckbox(featureSetId, right.accessRightId)}
+      </View>
+    ));
+  };
+
+  const renderBody = () => {
+    return (
+      <FlatList
+        data={Array.from(groupedFeatures.entries())}
+        keyExtractor={(item) => item[0]}
+        renderItem={({ item: [parent, childFeatures] }) => (
+          <View
+            key={parent}
+            style={{
+              width: "100%",
+            }}
+          >
+            {childFeatures.map((feature, index) => (
+              <View key={feature.featureSetId} style={styles.tableRow}>
+                <View
+                  style={{
+                    width: "20%",
+                  }}
+                >
+                  <Text style={styles.tableCell}>{feature.name}</Text>
+                </View>
+                <View
+                  style={{
+                    width: "80%",
+                    flexDirection: "row",
+                  }}
+                >
+                  {renderRightsOptions(feature.featureSetId)}
+                </View>
+              </View>
+            ))}
+          </View>
+        )}
+      />
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -163,8 +365,6 @@ const CreateNewUser = ({ navigation, route }) => {
               }}
               iconStyle={styles.iconStyle}
               autoScroll={false}
-              // search
-              // searchPlaceholder="Search Skill"
               inputSearchStyle={{ color: Colors.Black }}
               data={
                 projectsList?.length
@@ -179,15 +379,8 @@ const CreateNewUser = ({ navigation, route }) => {
               valueField="value"
               placeholder={"Select Project"}
               value={project}
-              // onFocus={() => {
-              //   // setIsFocus(true);
-              //   dispatch(getAllProjectsSimpleAction(token));
-              // }}
-              // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
                 setProject(item);
-
-                // setIsFocus(false);
               }}
             />
           </View>
@@ -235,451 +428,34 @@ const CreateNewUser = ({ navigation, route }) => {
             />
           </View>
         </View>
-        {/* <View style={{ paddingHorizontal: 15, paddingBottom: 13 }}>
-          <Text style={styles.title}>OR Enter New Role</Text>
-          <View
-            style={[
-              styles.inputField,
-              {
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "space-between",
-              },
-            ]}
-          >
+        <View style={styles.rolesContainer}>
+          <View style={styles.inputContainer}>
+            <Text style={styles.title}>OR Enter New Role</Text>
             <TextInput
-              style={{
-                fontFamily: "Lexend-Medium",
-                color: Colors.Black,
-                fontSize: 12,
-                width: "80%",
-              }}
+              style={[styles.inputField]}
               placeholderTextColor={Colors.FormText}
-              placeholder="Enter new role name here"
-              // value="₹ 56,000"
+              placeholder="Enter New Role Name Here"
+              value={roleName}
+              onChangeText={(text) => {
+                setRoleName(text);
+                setErrors(false);
+              }}
             />
-            <Pressable
-              style={{
-                width: "15%",
-                backgroundColor: "#ECE5FC",
-                alignItems: "center",
-                padding: 4,
-                borderRadius: 4,
-              }}
-            >
-              <View>
-                <Text
-                  style={{
-                    fontFamily: "Lexend-Regular",
-                    fontSize: 12,
-                    color: Colors.Purple,
-                  }}
-                >
-                  Add
-                </Text>
-              </View>
-            </Pressable>
+            {errors && <Text style={styles.errorText}>Name is required</Text>}
           </View>
-        </View> */}
-        {/* <View style={{ paddingHorizontal: 15, marginTop: 10 }}>
-          <Text
-            style={{
-              fontFamily: "Lexend-Medium",
-              color: Colors.Black,
-              fontSize: 12,
-              textTransform: "uppercase",
-            }}
-          >
-            Select features to assign to this new role*
-          </Text>
-        </View> */}
-        {/* <View style={{ width: "100%", alignItems: "center", marginTop: 10 }}>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              // paddingHorizontal: 10,
-              paddingBottom: 5,
-              marginBottom: 10,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                Dashboard
+          <View style={styles.table}>
+            <View style={styles.tableHeaderRow}>
+              <Text style={styles.tableHeader} colSpan={7}>
+                User Rights
               </Text>
             </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
+            {renderUserRights()}
+            {loading && <Text>Loading...</Text>}
+            {renderBody()}
           </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              paddingBottom: 5,
-              marginBottom: 10,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                Project
-              </Text>
-            </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              paddingBottom: 5,
-              marginBottom: 10,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                Jobs
-              </Text>
-            </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              paddingBottom: 5,
-              marginBottom: 10,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                Attendance
-              </Text>
-            </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              paddingBottom: 5,
-              marginBottom: 10,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                Worker
-              </Text>
-            </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
-          </View>
-          <View
-            style={{
-              flexDirection: "row",
-              justifyContent: "space-between",
-              // flex: 1,
-              width: "90%",
-              alignItems: "center",
-              paddingBottom: 5,
-              marginBottom: 20,
-              borderBottomWidth: 0.2,
-              borderBottomColor: Colors.FormBorder,
-            }}
-          >
-            <View style={{ width: "30%" }}>
-              <Text
-                style={[
-                  styles.title,
-                  {
-                    color: Colors.Black,
-                    fontSize: 14,
-                    fontFamily: "Lexend-Regular",
-                  },
-                ]}
-              >
-                User
-              </Text>
-            </View>
-
-            <View
-              style={{
-                // padding: 10,
-                width: "25%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>view</Text>
-            </View>
-            <View
-              style={{
-                // padding: 10,
-                width: "35%",
-                flexDirection: "row",
-                alignItems: "center",
-              }}
-            >
-              <CheckBox
-                disabled={false}
-                value={toggleCheckBox}
-                onValueChange={(newValue) => setToggleCheckBox(newValue)}
-                tintColors={{ true: Colors.Primary, false: Colors.Gray }}
-              />
-              <Text style={[styles.title, { color: Colors.Black }]}>
-                Create/Edit
-              </Text>
-            </View>
-          </View>
-        </View> */}
-        {/* <Spacer top={20} /> */}
-        {/* <View>
-					<Text style={styles.heading}>
-						Select features to assign to this new role*
-					</Text>
-				</View> */}
+          {/* <Button title="Submit" onPress={handleSubmit} /> */}
+        </View>
+        <Spacer top={20} />
       </ScrollView>
       <Spacer top={-20} />
       <View
@@ -721,7 +497,7 @@ const CreateNewUser = ({ navigation, route }) => {
                 position: "top",
                 visibilityTime: 4000,
               });
-            } else if (!userRole) {
+            } else if (!userRole && !roleName) {
               Toast.show({
                 type: "error",
                 text1: "Error",
@@ -731,16 +507,48 @@ const CreateNewUser = ({ navigation, route }) => {
                 visibilityTime: 4000,
               });
             } else {
-              const user = {
-                userId: 0,
-                username: email,
-                fullName: fullName,
-                password: password,
-                emailAddress: email,
-                userTypeId: 0,
-                roleId: userRole,
-                projectIds: project,
+              if (!roleName) {
+                setErrors(true);
+                return;
+              }
+              console.log("this is called");
+              const featureListArray = [];
+              featuresList.forEach((feature) => {
+                const featureExtensible = JSON.parse(JSON.stringify(feature));
+                if (activeRolesAndRights[featureExtensible.featureSetId]) {
+                  featureExtensible.accessRightList = [];
+                  featureExtensible.accessRightList =
+                    activeRolesAndRights[featureExtensible.featureSetId];
+                  delete featureExtensible.name;
+                  delete featureExtensible.route;
+                  featureListArray.push(featureExtensible);
+                } else {
+                  featureExtensible.accessRightList = [1];
+                  delete featureExtensible.name;
+                  delete featureExtensible.route;
+                  featureListArray.push(featureExtensible);
+                }
+              });
+              const role = {
+                name: roleName,
+                roleId: 0,
+                featureSets: featureListArray,
               };
+              // console.log("ROLE--->>>", role);
+              const response = await dispatch(createRole(token, role));
+              // setTimeout(() => {
+              console.log("res===>>>", response);
+              if (response?.status === 200) {
+                const user = {
+                  userId: 0,
+                  username: email,
+                  fullName: fullName,
+                  password: password,
+                  emailAddress: email,
+                  userTypeId: 0,
+                  roleId: roles[roles.length - 1].roleId + 1,
+                  projectIds: project,
+                };
                 const response = await dispatch(createUserAction(token, user));
                 if (response?.status === 200) {
                   navigation.goBack();
@@ -762,6 +570,8 @@ const CreateNewUser = ({ navigation, route }) => {
                     visibilityTime: 4000,
                   });
                 }
+              }
+              // }, 2000);
             }
           }}
         >
@@ -970,5 +780,59 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: "Lexend-Regular",
     color: Colors.Black,
+  },
+  rolesContainer: {
+    flex: 1,
+    padding: 16,
+  },
+  inputContainer: {
+    marginBottom: 16,
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 4,
+    padding: 8,
+  },
+  errorInput: {
+    borderColor: "red",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 12,
+    marginTop: 4,
+  },
+  table: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 4,
+    overflow: "hidden",
+  },
+  tableHeaderRow: {
+    flexDirection: "row",
+    backgroundColor: "#f0f0f0",
+    padding: 5,
+  },
+  tableRow: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    borderBottomColor: "#ccc",
+    // padding: 8,
+    width: "100%",
+  },
+  tableHeader: {
+    flex: 1,
+    fontFamily: "Lexend-Medium",
+    fontSize: 10,
+    textAlign: "center",
+    color: Colors.Black,
+  },
+  tableCell: {
+    flex: 1,
+    padding: 5,
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    color: Colors.Black,
+    // width: "30%",
   },
 });

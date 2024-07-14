@@ -12,6 +12,7 @@ import paymentSlice from "./slices/paymentSlice";
 import countsSlice from "./slices/countsSlice";
 import fieldNoteSlice from "./slices/fieldNoteSlice";
 import productivitySlice from "./slices/productivitySlice";
+import rolesSlice from "./slices/rolesSlice";
 
 const persistConfig = {
   key: "root",
@@ -34,7 +35,8 @@ const reducers = combineReducers({
   payment: paymentSlice,
   count: countsSlice,
   fieldNote: fieldNoteSlice,
-  productivity: productivitySlice
+  productivity: productivitySlice,
+  roles: rolesSlice,
 });
 const persistedReducer = persistReducer(persistConfig, reducers);
 const store = configureStore({

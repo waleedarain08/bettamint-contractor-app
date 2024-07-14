@@ -1054,9 +1054,6 @@ const Productivity = ({ navigation }) => {
   const [contractorValue, setContractorValue] = useState(null);
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  // const [date, setDateNote] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(null);
-  // const [open, setOpen] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [selectedProject, setSelectedProject] = useState(null);
   const [openProjectModal, setOpenProjectModal] = useState(false);
@@ -1082,11 +1079,16 @@ const Productivity = ({ navigation }) => {
   const [updateLoader, setUpdateLoader] = useState(false);
   const [purpleTooltip, setPurpleTooltip] = useState(false);
   const [greenTooltip, setGreenTooltip] = useState(false);
-  // const projectsList = useSelector(projectsListSimpleReducer);
   const { selectedNote } = useSelector(fieldNoteReducer);
   const [workerOrderId, setWorkerOrderId] = useState(null);
-  // const labourContractorList = useSelector(labourContractorReducer);
   const userInfo = useSelector(userData);
+  const roles = userInfo?.user?.role?.roleFeatureSets;
+
+  const measurementAccess =
+    roles &&
+    roles.filter(
+      (item) => item.featureSet.route === "MEASUREMENT_MANAGEMENT"
+    )[0]?.accessRightId;
 
   const dispatch = useDispatch();
   const {
@@ -2962,8 +2964,7 @@ const Productivity = ({ navigation }) => {
         </Pressable>
         <View style={{ flexDirection: "row" }}>
           <View style={{}}>
-            {userInfo?.user?.leadTypeId === "Contractor" ||
-            userInfo?.user?.userTypeId === "SuperAdmin" ? (
+            {Number(measurementAccess) !== 1 ? (
               <Pressable
                 onPress={() => {
                   setOpenFilterModal(true);
@@ -2982,40 +2983,7 @@ const Productivity = ({ navigation }) => {
             ) : (
               <></>
             )}
-            {userInfo?.user?.leadTypeId === "Contractor" ? (
-              <Pressable
-                onPress={() => {
-                  // navigation.navigate("VerifyProgress");
-                  setVerifyLoader(true);
-                  setTimeout(() => {
-                    setVerifyLoader(false);
-                  }, 10000);
-                }}
-                style={{
-                  backgroundColor: "#ECE5FC",
-                  padding: 5,
-                  margin: 5,
-                  borderRadius: 3,
-                  paddingHorizontal: 9,
-                  paddingVertical: 7,
-                }}
-              >
-                {verifyLoader ? (
-                  <ActivityIndicator
-                    size="small"
-                    style={{
-                      width: 10,
-                      height: 10,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                    color={Colors.Purple}
-                  />
-                ) : (
-                  <Text style={styles.smallButton}>Verify</Text>
-                )}
-              </Pressable>
-            ) : (
+            {Number(measurementAccess) !== 1 ? (
               <Pressable
                 onPress={() => {
                   // setOpenUpdateProgressModal(true);
@@ -3050,10 +3018,13 @@ const Productivity = ({ navigation }) => {
                   <Text style={styles.smallButton}>Update</Text>
                 )}
               </Pressable>
+            ) : (
+              <></>
             )}
           </View>
           <View>
-            {userInfo?.user?.userTypeId === "SuperAdmin" && (
+            {(userInfo?.user?.role?.name === "SuperAdmin" ||
+              Number(measurementAccess) === 3) && (
               <Pressable
                 onPress={() => {
                   // navigation.navigate("VerifyProgress");

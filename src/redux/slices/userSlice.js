@@ -10,6 +10,8 @@ const initialState = {
   counts: null,
   rolesList: null,
   labourContractorList: null,
+  featuresList: [],
+  featuresListV2: [],
 };
 
 const userSlice = createSlice({
@@ -87,6 +89,34 @@ const userSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+    gettingFeatures(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    gettingFeaturesSuccess(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.featuresList = action.payload;
+    },
+    gettingFeaturesFailure(state, action) {
+      state.loading = false;
+      state.featuresList = [];
+      state.error = action.payload;
+    },
+    gettingFeaturesV2(state, action) {
+      state.loading = true;
+      state.error = null;
+    },
+    gettingFeaturesV2Success(state, action) {
+      state.loading = false;
+      state.error = null;
+      state.featuresListV2 = action.payload;
+    },
+    gettingFeaturesV2Failure(state, action) {
+      state.loading = false;
+      state.featuresListV2 = [];
+      state.error = action.payload;
+    },
   },
 });
 const {
@@ -106,8 +136,15 @@ const {
   gettingLabourContractor,
   gettingLabourContractorSuccess,
   gettingLabourContractorFailure,
+  gettingFeatures,
+  gettingFeaturesSuccess,
+  gettingFeaturesFailure,
+  gettingFeaturesV2,
+  gettingFeaturesV2Success,
+  gettingFeaturesV2Failure,
 } = userSlice.actions;
 
+export const featuresReducer = (state) => state.users;
 export const usersListReducer = (state) => state.users.usersList;
 export const countsReducer = (state) => state.users.counts;
 export const loadingUsers = (state) => state.users.loading;
@@ -227,4 +264,49 @@ export const createUserAction = (token, user) => async (dispatch) => {
     return e;
   }
 };
+
+export const getFeatures = (token) => async (dispatch) => {
+  dispatch(gettingFeatures());
+  try {
+    const response = await axios.get(`${base_url}/dashboard/FeatureSet`, {
+      headers: {
+        Authorization: token,
+      },
+    });
+
+    if (response?.status === 200) {
+      dispatch(gettingFeaturesSuccess(response.data));
+    }
+    return response;
+  } catch (e) {
+    dispatch(
+      gettingFeaturesFailure("Something went wrong while getting feature!")
+    );
+    return e;
+  }
+};
+
+export const getFeaturesV2 = (token) => async (dispatch) => {
+  dispatch(gettingFeaturesV2());
+  try {
+    const response = await axios.get(
+      `${base_url}/dashboard/FeatureSet/access-rights`,
+      {
+        headers: {
+          Authorization: token,
+        },
+      }
+    );
+    console.log("Features V2", response.data);
+    if (response?.status === 200) {
+      dispatch(gettingFeaturesV2Success(response.data));
+    }
+    return response;
+  } catch (error) {
+    dispatch(
+      gettingFeaturesV2Failure("Something went weong while getting roles v2!")
+    );
+  }
+};
+
 export default userSlice.reducer;
