@@ -51,6 +51,7 @@ import {
   ClockIcon,
   ChatIcon,
   DotIcon,
+  VectorIcon,
 } from "../../icons";
 import { authToken, userData } from "../../redux/slices/authSlice";
 import {
@@ -96,6 +97,7 @@ import DatePicker from "react-native-date-picker";
 import { launchImageLibrary } from "react-native-image-picker";
 import { BarChart } from "react-native-gifted-charts";
 import ActionButton from "./components/ActionButton";
+import CostProgress from "./components/CostProgress";
 
 LogBox.ignoreAllLogs();
 
@@ -1877,6 +1879,18 @@ const Productivity = ({ navigation }) => {
     }
   };
 
+  const onChangeProgressProject = (item) => {
+    if (item) {
+      setCurrentProjectProgressGraph(item.value);
+      dispatch(getProjectProgressGraph(token, item.value));
+    } else {
+      setCurrentProjectProgressGraph(projectsListSimple[0]?.projectId);
+      dispatch(
+        getProjectProgressGraph(token, projectsListSimple[0]?.projectId)
+      );
+    }
+  };
+
   const renderFilterModal = () => {
     return (
       <Modal
@@ -2830,6 +2844,7 @@ const Productivity = ({ navigation }) => {
       </Modal>
     );
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -3157,520 +3172,343 @@ const Productivity = ({ navigation }) => {
             </Text>
           </View>
         </View>
-        <View style={{ width: "100%", flex: 1 }}>
-          <ScrollView contentContainerStyle={{ width: "100%" }}>
-            <View
-              style={{
-                width: "100%",
-              }}
-            >
-              <Pressable
-                onPress={() => {
-                  // navigation.navigate("VerifyProgress");
-                }}
-                style={styles.tiles}
-              >
-                <View>
-                  <Text style={styles.tileHeading}>{"Workmanship Cost"}</Text>
-                  <Text
-                    style={{
-                      color: Colors.Black,
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 16,
-                    }}
-                  >
-                    ₹ {metrics?.workmanshipCost || 0}
-                  </Text>
+        <ScrollView
+          style={styles.scrollViewContainer}
+          contentContainerStyle={{ alignItems: "center" }}
+        >
+          <View style={{ width: "99%" }}>
+            <CostProgress metrics={metrics} />
+          </View>
+          <View style={styles.scrollGraph}>
+            <View style={styles.graphsHeader}>
+              <Text style={styles.graphHeadingText}>Project Progress</Text>
+              <View style={styles.selectProjectButton}>
+                <View style={styles.buildingIconBg}>
+                  <Building size={18} color={Colors.LightGray} />
                 </View>
-                <View>
-                  <View
-                    style={{
-                      backgroundColor: Colors.Primary,
-                      width: 35,
-                      height: 35,
-                      borderRadius: 5,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <HomeIcon size={20} color={Colors.White} />
-                  </View>
+                <View style={{ width: "85%" }}>
+                  <Text style={styles.selectText}>Select a Project</Text>
+                  <Dropdown
+                    placeholderStyle={styles.placeholderStyle}
+                    selectedTextStyle={styles.selectedTextStyle}
+                    itemTextStyle={styles.dropdownItemText}
+                    showsVerticalScrollIndicator={false}
+                    iconStyle={styles.iconStyle}
+                    containerStyle={{ width: 250 }}
+                    data={projectsListSimple?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele?.projectId,
+                      ...ele,
+                    }))}
+                    maxHeight={400}
+                    labelField="label"
+                    valueField="value"
+                    placeholder={"Project"}
+                    value={currentProjectProgressGraph}
+                    onChange={onChangeProgressProject}
+                  />
                 </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  // navigation.navigate("VerifyProgress");
-                }}
-                style={styles.tiles}
-              >
-                <View>
-                  <Text style={styles.tileHeading}>
-                    {"Material Defects Cost"}
-                  </Text>
-                  <Text
-                    style={{
-                      color: Colors.Black,
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 16,
-                    }}
-                  >
-                    ₹ {metrics?.qualityCost || 0}
-                  </Text>
-                </View>
-                <View>
-                  <View
-                    style={{
-                      backgroundColor: Colors.Primary,
-                      width: 35,
-                      height: 35,
-                      borderRadius: 5,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <HatIcon size={20} color={Colors.White} />
-                  </View>
-                </View>
-              </Pressable>
-              <Pressable
-                onPress={() => {
-                  // navigation.navigate("VerifyProgress");
-                }}
-                style={styles.tiles}
-              >
-                <View>
-                  <Text style={styles.tileHeading}>{"Variation Cost"}</Text>
-                  <Text
-                    style={{
-                      color: Colors.Black,
-                      fontFamily: "Lexend-Medium",
-                      fontSize: 16,
-                    }}
-                  >
-                    ₹ {metrics?.excessCost || 0}
-                  </Text>
-                </View>
-                <View>
-                  <View
-                    style={{
-                      backgroundColor: Colors.Primary,
-                      width: 35,
-                      height: 35,
-                      borderRadius: 5,
-                      alignItems: "center",
-                      justifyContent: "center",
-                    }}
-                  >
-                    <ChatIcon size={20} color={Colors.White} />
-                  </View>
-                </View>
-              </Pressable>
+              </View>
             </View>
-            <View style={styles.scrollGraph}>
-              <View style={styles.graphsHeader}>
-                <Text style={styles.graphHeadingText}>Project Progress</Text>
-                <View style={styles.graphSubHeader}>
-                  <View style={styles.selectProjectButton}>
-                    <View style={styles.buildingIconBg}>
-                      <Building size={15} color={Colors.LightGray} />
-                    </View>
-                    <View>
-                      <Text style={styles.selectText}>Select a Project</Text>
-                      <Dropdown
-                        style={{
-                          height: 20,
-                          marginTop: 3,
-                          width: 200,
-                          ...styles.selectText,
-                        }}
-                        placeholderStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        selectedTextStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        containerStyle={{ width: 250 }}
-                        itemTextStyle={{
-                          fontFamily: "Lexend-Regular",
-                          fontSize: 13,
-                          color: Colors.FormText,
-                        }}
-                        iconStyle={styles.iconStyle}
-                        data={projectsListSimple?.map((ele) => ({
-                          label: ele?.name,
-                          value: ele?.projectId,
-                          ...ele,
-                        }))}
-                        maxHeight={400}
-                        labelField="label"
-                        valueField="value"
-                        placeholder={"Project"}
-                        value={currentProjectProgressGraph}
-                        onChange={(item) => {
-                          if (item) {
-                            setCurrentProjectProgressGraph(item.value);
-                            dispatch(
-                              getProjectProgressGraph(token, item.value)
-                            );
-                          } else {
-                            setCurrentProjectProgressGraph(
-                              projectsListSimple[0]?.projectId
-                            );
-                            dispatch(
-                              getProjectProgressGraph(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    </View>
-                  </View>
-                  {/* <Pressable
-                  onPress={() => {
-                    // setOpen(true);
-                    // setSelectedGraph("Attendance");
-                  }}
-                  style={styles.selectDateButton}
-                >
+            <View style={styles.barChart}>
+              <BarChart
+                data={projectProgressGraphsData()}
+                barWidth={10}
+                spacing={30}
+                roundedTop
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: "gray" }}
+                xAxisTextStyle={{ color: "gray" }}
+                noOfSections={5}
+                maxValue={getProjectProgressMaxValue()}
+                frontColor={Colors.Black}
+                height={180}
+                width={260}
+              />
+            </View>
+          </View>
+          {/* </View> */}
+          <View style={styles.scrollGraph}>
+            <View style={styles.graphsHeader}>
+              <Text style={styles.graphHeadingText}>Financial Progress</Text>
+              <View style={styles.graphSubHeader}>
+                <View style={styles.selectProjectButton}>
                   <View style={styles.buildingIconBg}>
-                    <DateIcon size={15} color={Colors.LightGray} />
+                    <Building size={15} color={Colors.LightGray} />
                   </View>
                   <View>
-                    <Text style={styles.selectText}>Select Date</Text>
-                    <Text
-                      style={[
-                        styles.selectText,
-                        {
-                          fontFamily: "Lexend-SemiBold",
-                          color: Colors.Black,
-                        },
-                      ]}
-                    >
-                      {"MM/DD/YYYY"}
-                    </Text>
-                  </View>
-                </Pressable> */}
-                </View>
-              </View>
-              {/* <View
-            style={{
-              flexDirection: "row",
-              alignItems: "center",
-            }}
-          >
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <DotIcon color={Colors.Primary} size={40} />
-              <Text style={styles.attendanceSubText}>Present</Text>
-            </View>
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
-              <DotIcon color={Colors.Purple} size={40} />
-              <Text style={styles.attendanceSubText}>Absent</Text>
-            </View>
-          </View> */}
-              <View style={styles.barChart}>
-                <BarChart
-                  data={projectProgressGraphsData()}
-                  barWidth={10}
-                  spacing={30}
-                  roundedTop
-                  xAxisThickness={0}
-                  yAxisThickness={0}
-                  yAxisTextStyle={{ color: "gray" }}
-                  xAxisTextStyle={{ color: "gray" }}
-                  noOfSections={5}
-                  maxValue={getProjectProgressMaxValue()}
-                  frontColor={Colors.Black}
-                  height={180}
-                  width={260}
-                />
-              </View>
-            </View>
-            <View style={styles.scrollGraph}>
-              <View style={styles.graphsHeader}>
-                <Text style={styles.graphHeadingText}>Financial Progress</Text>
-                <View style={styles.graphSubHeader}>
-                  <View style={styles.selectProjectButton}>
-                    <View style={styles.buildingIconBg}>
-                      <Building size={15} color={Colors.LightGray} />
-                    </View>
-                    <View>
-                      <Text style={styles.selectText}>Select a Project</Text>
-                      <Dropdown
-                        style={{
-                          height: 20,
-                          marginTop: 3,
-                          width: 200,
-                          ...styles.selectText,
-                        }}
-                        placeholderStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        selectedTextStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        containerStyle={{ width: 250 }}
-                        itemTextStyle={{
-                          fontFamily: "Lexend-Regular",
-                          fontSize: 13,
-                          color: Colors.FormText,
-                        }}
-                        iconStyle={styles.iconStyle}
-                        data={projectsListSimple?.map((ele) => ({
-                          label: ele?.name,
-                          value: ele?.projectId,
-                          ...ele,
-                        }))}
-                        maxHeight={400}
-                        labelField="label"
-                        valueField="value"
-                        placeholder={"Project"}
-                        value={currentProjectFinancial}
-                        onChange={(item) => {
-                          if (item) {
-                            setCurrentProjectFinancial(item);
-                            dispatch(
-                              getFinancialProgressData(token, item?.value)
-                            );
-                          } else {
-                            setCurrentProjectFinancial(
+                    <Text style={styles.selectText}>Select a Project</Text>
+                    <Dropdown
+                      style={{
+                        height: 20,
+                        marginTop: 3,
+                        width: 200,
+                        ...styles.selectText,
+                      }}
+                      placeholderStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      selectedTextStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      containerStyle={{ width: 250 }}
+                      itemTextStyle={{
+                        fontFamily: "Lexend-Regular",
+                        fontSize: 13,
+                        color: Colors.FormText,
+                      }}
+                      iconStyle={styles.iconStyle}
+                      data={projectsListSimple?.map((ele) => ({
+                        label: ele?.name,
+                        value: ele?.projectId,
+                        ...ele,
+                      }))}
+                      maxHeight={400}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={"Project"}
+                      value={currentProjectFinancial}
+                      onChange={(item) => {
+                        if (item) {
+                          setCurrentProjectFinancial(item);
+                          dispatch(
+                            getFinancialProgressData(token, item?.value)
+                          );
+                        } else {
+                          setCurrentProjectFinancial(
+                            projectsListSimple[0]?.projectId
+                          );
+                          dispatch(
+                            getFinancialProgressData(
+                              token,
                               projectsListSimple[0]?.projectId
-                            );
-                            dispatch(
-                              getFinancialProgressData(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    </View>
+                            )
+                          );
+                        }
+                      }}
+                    />
                   </View>
                 </View>
               </View>
-              <ScrollView
-                horizontal={true}
-                nestedScrollEnabled={true}
-                contentContainerStyle={[
-                  styles.barChart,
-                  {
-                    paddingBottom: 60,
-                    marginTop: 40,
-                    width: 560,
-                  },
-                ]}
-              >
-                <BarChart
-                  height={180}
-                  barWidth={20}
-                  xAxisLabelTextStyle={{ color: "gray" }}
-                  yAxisTextStyle={{ color: "gray" }}
-                  frontColor={Colors.Black}
-                  noOfSections={4}
-                  maxValue={2000}
-                  stackData={getFinancialProgressGraphData()}
-                  renderTooltip={(e) => {
-                    return (
-                      <View>
-                        {e.stacks.map((item) => (
-                          <Text
-                            style={{
-                              color: Colors.Black,
-                              fontFamily: "Lexend-Regular",
-                              fontSize: 12,
-                              marginVertical: 5,
-                              marginLeft: 10,
-                            }}
-                          >
-                            {item.value}
-                          </Text>
-                        ))}
-                      </View>
-                    );
-                  }}
-                  // stackData={[
-                  //   {
-                  //     stacks: [
-                  //       { value: 10, color: "orange" },
-                  //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
-                  //     ],
-                  //     label: "Jan",
-                  //   },
-                  //   {
-                  //     stacks: [
-                  //       { value: 10, color: "#4ABFF4" },
-                  //       { value: 11, color: "orange", marginBottom: 2 },
-                  //       { value: 15, color: "#28B2B3", marginBottom: 2 },
-                  //     ],
-                  //     label: "Mar",
-                  //   },
-                  //   {
-                  //     stacks: [
-                  //       { value: 14, color: "orange" },
-                  //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
-                  //     ],
-                  //     label: "Feb",
-                  //   },
-                  // ]}
-                  width={800}
-                />
-              </ScrollView>
             </View>
-            <View style={styles.scrollGraph}>
-              <View style={styles.graphsHeader}>
-                <Text style={styles.graphHeadingText}>
-                  Budgeted VS Actual Cost
-                </Text>
-                <View style={styles.graphSubHeader}>
-                  <View style={styles.selectProjectButton}>
-                    <View style={styles.buildingIconBg}>
-                      <Building size={15} color={Colors.LightGray} />
-                    </View>
+            <ScrollView
+              horizontal={true}
+              nestedScrollEnabled={true}
+              contentContainerStyle={[
+                styles.barChart,
+                {
+                  paddingBottom: 60,
+                  marginTop: 40,
+                  width: 560,
+                },
+              ]}
+            >
+              <BarChart
+                height={180}
+                barWidth={20}
+                xAxisLabelTextStyle={{ color: "gray" }}
+                yAxisTextStyle={{ color: "gray" }}
+                frontColor={Colors.Black}
+                noOfSections={4}
+                maxValue={2000}
+                stackData={getFinancialProgressGraphData()}
+                renderTooltip={(e) => {
+                  return (
                     <View>
-                      <Text style={styles.selectText}>Select a Project</Text>
-                      <Dropdown
-                        style={{
-                          height: 20,
-                          marginTop: 3,
-                          width: 200,
-                          ...styles.selectText,
-                        }}
-                        placeholderStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        selectedTextStyle={{
-                          fontSize: 10,
-                          fontFamily: "Lexend-Regular",
-                          color: Colors.Black,
-                        }}
-                        containerStyle={{ width: 250 }}
-                        itemTextStyle={{
-                          fontFamily: "Lexend-Regular",
-                          fontSize: 13,
-                          color: Colors.FormText,
-                        }}
-                        iconStyle={styles.iconStyle}
-                        data={projectsListSimple?.map((ele) => ({
-                          label: ele?.name,
-                          value: ele?.projectId,
-                          ...ele,
-                        }))}
-                        maxHeight={400}
-                        labelField="label"
-                        valueField="value"
-                        placeholder={"Project"}
-                        value={currentProjectBudget}
-                        onChange={(item) => {
-                          if (item) {
-                            setCurrentProjectBudget(item);
-                            dispatch(getProjectBudget(token, item?.value));
-                          } else {
-                            setCurrentProjectBudget(
-                              projectsListSimple[0]?.projectId
-                            );
-                            dispatch(
-                              getProjectBudget(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
-                            );
-                          }
-                        }}
-                      />
-                    </View>
-                  </View>
-                </View>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <DotIcon color={Colors.Primary} size={40} />
-                  <Text style={styles.attendanceSubText}>Budget Cost</Text>
-                </View>
-                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                  <DotIcon color={Colors.Purple} size={40} />
-                  <Text style={styles.attendanceSubText}>Actual Cost</Text>
-                </View>
-              </View>
-              <View style={styles.barChart}>
-                <BarChart
-                  data={budgetGraphsData()}
-                  barWidth={6}
-                  spacing={30}
-                  roundedTop
-                  xAxisThickness={0}
-                  yAxisThickness={0}
-                  yAxisTextStyle={{ color: "gray" }}
-                  xAxisTextStyle={{ color: "gray" }}
-                  noOfSections={5}
-                  maxValue={getBudgetMaxValue()}
-                  frontColor={Colors.Black}
-                  height={180}
-                  renderTooltip={(e) => {
-                    return (
-                      <View>
+                      {e.stacks.map((item) => (
                         <Text
                           style={{
                             color: Colors.Black,
                             fontFamily: "Lexend-Regular",
                             fontSize: 12,
+                            marginVertical: 5,
+                            marginLeft: 10,
                           }}
                         >
-                          {e.value}
+                          {item.value}
                         </Text>
-                      </View>
-                    );
-                  }}
-                  width={260}
-                />
+                      ))}
+                    </View>
+                  );
+                }}
+                // stackData={[
+                //   {
+                //     stacks: [
+                //       { value: 10, color: "orange" },
+                //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
+                //     ],
+                //     label: "Jan",
+                //   },
+                //   {
+                //     stacks: [
+                //       { value: 10, color: "#4ABFF4" },
+                //       { value: 11, color: "orange", marginBottom: 2 },
+                //       { value: 15, color: "#28B2B3", marginBottom: 2 },
+                //     ],
+                //     label: "Mar",
+                //   },
+                //   {
+                //     stacks: [
+                //       { value: 14, color: "orange" },
+                //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
+                //     ],
+                //     label: "Feb",
+                //   },
+                // ]}
+                width={800}
+              />
+            </ScrollView>
+          </View>
+          <View style={styles.scrollGraph}>
+            <View style={styles.graphsHeader}>
+              <Text style={styles.graphHeadingText}>
+                Budgeted VS Actual Cost
+              </Text>
+              <View style={styles.graphSubHeader}>
+                <View style={styles.selectProjectButton}>
+                  <View style={styles.buildingIconBg}>
+                    <Building size={15} color={Colors.LightGray} />
+                  </View>
+                  <View>
+                    <Text style={styles.selectText}>Select a Project</Text>
+                    <Dropdown
+                      style={{
+                        height: 20,
+                        marginTop: 3,
+                        width: 200,
+                        ...styles.selectText,
+                      }}
+                      placeholderStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      selectedTextStyle={{
+                        fontSize: 10,
+                        fontFamily: "Lexend-Regular",
+                        color: Colors.Black,
+                      }}
+                      containerStyle={{ width: 250 }}
+                      itemTextStyle={{
+                        fontFamily: "Lexend-Regular",
+                        fontSize: 13,
+                        color: Colors.FormText,
+                      }}
+                      iconStyle={styles.iconStyle}
+                      data={projectsListSimple?.map((ele) => ({
+                        label: ele?.name,
+                        value: ele?.projectId,
+                        ...ele,
+                      }))}
+                      maxHeight={400}
+                      labelField="label"
+                      valueField="value"
+                      placeholder={"Project"}
+                      value={currentProjectBudget}
+                      onChange={(item) => {
+                        if (item) {
+                          setCurrentProjectBudget(item);
+                          dispatch(getProjectBudget(token, item?.value));
+                        } else {
+                          setCurrentProjectBudget(
+                            projectsListSimple[0]?.projectId
+                          );
+                          dispatch(
+                            getProjectBudget(
+                              token,
+                              projectsListSimple[0]?.projectId
+                            )
+                          );
+                        }
+                      }}
+                    />
+                  </View>
+                </View>
               </View>
             </View>
-            <DatePicker
-              modal
-              mode="date"
-              textColor={textColor}
-              open={open}
-              date={date}
-              onConfirm={(date) => {
-                setOpen(false);
-                setDate(date);
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
               }}
-              onCancel={() => {
-                setOpen(false);
-              }}
-            />
-            <DatePicker
-              modal
-              mode="time"
-              textColor={textColor}
-              open={openTime}
-              date={date}
-              onConfirm={(date) => {
-                setOpenTime(false);
-                setTime(date);
-              }}
-              onCancel={() => {
-                setOpenTime(false);
-              }}
-            />
-          </ScrollView>
-        </View>
+            >
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <DotIcon color={Colors.Primary} size={40} />
+                <Text style={styles.attendanceSubText}>Budget Cost</Text>
+              </View>
+              <View style={{ flexDirection: "row", alignItems: "center" }}>
+                <DotIcon color={Colors.Purple} size={40} />
+                <Text style={styles.attendanceSubText}>Actual Cost</Text>
+              </View>
+            </View>
+            <View style={styles.barChart}>
+              <BarChart
+                data={budgetGraphsData()}
+                barWidth={6}
+                spacing={30}
+                roundedTop
+                xAxisThickness={0}
+                yAxisThickness={0}
+                yAxisTextStyle={{ color: "gray" }}
+                xAxisTextStyle={{ color: "gray" }}
+                noOfSections={5}
+                maxValue={getBudgetMaxValue()}
+                frontColor={Colors.Black}
+                height={180}
+                renderTooltip={(e) => {
+                  return (
+                    <View>
+                      <Text
+                        style={{
+                          color: Colors.Black,
+                          fontFamily: "Lexend-Regular",
+                          fontSize: 12,
+                        }}
+                      >
+                        {e.value}
+                      </Text>
+                    </View>
+                  );
+                }}
+                width={260}
+              />
+            </View>
+          </View>
+          <DatePicker
+            modal
+            mode="date"
+            textColor={textColor}
+            open={open}
+            date={date}
+            onConfirm={(date) => {
+              setOpen(false);
+              setDate(date);
+            }}
+            onCancel={() => {
+              setOpen(false);
+            }}
+          />
+          <DatePicker
+            modal
+            mode="time"
+            textColor={textColor}
+            open={openTime}
+            date={date}
+            onConfirm={(date) => {
+              setOpenTime(false);
+              setTime(date);
+            }}
+            onCancel={() => {
+              setOpenTime(false);
+            }}
+          />
+        </ScrollView>
+        {/* </View> */}
         {renderFilterModal()}
         {renderUpdateProgressModal()}
         {renderFieldNotes()}
@@ -3785,9 +3623,9 @@ const styles = StyleSheet.create({
 
   selectText: {
     fontFamily: "Lexend-Medium",
-    fontSize: 10,
+    fontSize: 12,
     color: Colors.Gray,
-    paddingLeft: 10,
+    // paddingLeft: 10,
   },
   linkText: {
     fontFamily: "Lexend-Medium",
@@ -3846,19 +3684,12 @@ const styles = StyleSheet.create({
     marginVertical: 6,
     marginHorizontal: 15,
     backgroundColor: Colors.White,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
     elevation: 4,
     borderRadius: 10,
-    // width: 340,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
+    // justifyContent: "space-between",
+    width: "100%",
   },
   tileHeading: {
     fontFamily: "Lexend-Medium",
@@ -3914,19 +3745,11 @@ const styles = StyleSheet.create({
   },
   scrollGraph: {
     backgroundColor: Colors.White,
-    margin: 15,
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 5,
     elevation: 4,
     borderRadius: 10,
-    width: "93%",
+    width: "98%",
     paddingBottom: 10,
-    alignItems: "center",
+    marginVertical: 10,
     flex: 1,
   },
   graphsHeader: {
@@ -3944,18 +3767,21 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    width: "100%",
   },
   selectProjectButton: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     marginVertical: 10,
-    marginBottom: 25,
+    // marginBottom: 25,
+    width: "100%",
   },
   buildingIconBg: {
     backgroundColor: "#F7F8F9",
     borderRadius: 25,
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -3970,10 +3796,11 @@ const styles = StyleSheet.create({
     color: Colors.Black,
   },
   barChart: {
-    width: "70%",
-    marginTop: 10,
+    width: "100%",
+    marginTop: 25,
     alignItems: "center",
     paddingBottom: 10,
+    flex: 1,
   },
   dropdownContainer: {
     flexDirection: "row",
@@ -4084,4 +3911,29 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 25,
     left: 7,
   },
+  scrollViewContainer: {
+    width: "100%",
+    padding: 5,
+  },
+  cardView: {
+    width: "45%",
+    padding: 15,
+    marginVertical: 6,
+    backgroundColor: Colors.White,
+    elevation: 4,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 30,
+  },
+  innerCardView: {
+    width: "70%",
+  },
+  costText: {
+    color: Colors.Black,
+    fontFamily: "Lexend-Medium",
+    fontSize: 16,
+  },
+  innerCardViewEnd: { width: "30%", alignItems: "flex-end" },
 });
