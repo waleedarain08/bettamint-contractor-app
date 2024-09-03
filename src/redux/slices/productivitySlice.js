@@ -404,30 +404,30 @@ export const addProgress = (token, data) => async (dispatch) => {
   return response;
 };
 
-export const getBOQListGC =
-  (token, projectId = 0, contractorId = 0, pageNumber = 1, pageSize = 50) =>
-  async (dispatch) => {
-    dispatch(gettingBoqListGC());
-    // if (projectId) {
-    const response = await axios.get(
-      `${base_url}/dashboard/Productivity/getboqprogresslist?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
-      {
-        headers: {
-          Authorization: token,
-        },
-      }
-    );
-    if (response?.status === 200) {
-      dispatch(gettingBoqListGCSuccess(response?.data));
-    } else {
-      dispatch(
-        gettingBoqListGCFailure(
-          "Something went wrong while getting BOQ GC list!"
-        )
-      );
-    }
-    return response;
-  };
+// export const getBOQListGC =
+//   (token, projectId = 0, contractorId = 0, pageNumber = 1, pageSize = 50) =>
+//   async (dispatch) => {
+//     dispatch(gettingBoqListGC());
+//     // if (projectId) {
+//     const response = await axios.get(
+//       `${base_url}/dashboard/Productivity/getboqprogresslist?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}`,
+//       {
+//         headers: {
+//           Authorization: token,
+//         },
+//       }
+//     );
+//     if (response?.status === 200) {
+//       dispatch(gettingBoqListGCSuccess(response?.data));
+//     } else {
+//       dispatch(
+//         gettingBoqListGCFailure(
+//           "Something went wrong while getting BOQ GC list!"
+//         )
+//       );
+//     }
+//     return response;
+//   };
 
 export const getBOQProgress =
   (token, projectId = 0, contractorId = 0) =>
@@ -575,6 +575,7 @@ export const verifyBOQProgress = (token, data) => async (dispatch) => {
 };
 
 export const rejectBOQProgress = (token, data) => async (dispatch) => {
+  console.log("REJECTING BOQ PROGRESS", data);
   dispatch(gettingFinancialGraphData());
   const response = await axios.put(
     `${base_url}/dashboard/Productivity/rejectprogress`,
@@ -586,6 +587,7 @@ export const rejectBOQProgress = (token, data) => async (dispatch) => {
       },
     }
   );
+  console.log("RESPONSE--->>>", response);
   if (response?.status === 200) {
     dispatch(gettingFinancialGraphDataSuccess());
   } else {
@@ -718,5 +720,50 @@ export const getListOfBOQV2 =
       );
     }
     return response;
+  };
+
+export const getBOQListGC =
+  (
+    token,
+    projectId = 0,
+    contractorId = 0,
+    pageNumber = 1,
+    pageSize = 1000,
+    QualityStatusFilter = "",
+    IsHistory = false,
+    searchQuery = ""
+  ) =>
+  async (dispatch) => {
+    console.log("GETTING BOQ LIST GC", projectId);
+    dispatch(gettingBoqListGC());
+
+    const url = `${base_url}/dashboard/Productivity/getboqprogresslist/v2?projectId=${projectId}&contractorId=${contractorId}&pageNumber=${pageNumber}&pageSize=${pageSize}&QualityStatusFilter=${QualityStatusFilter}&isHistory=${IsHistory}&search=${searchQuery}`;
+
+    try {
+      const response = await axios.get(url, {
+        headers: {
+          Authorization: token,
+        },
+      });
+      console.log("RESPONSE URL --->>>", response.request.responseURL);
+      if (response?.status === 200) {
+        dispatch(gettingBoqListGCSuccess(response?.data.result?.sowList));
+      } else {
+        dispatch(
+          gettingBoqListGCFailure(
+            "Something went wrong while getting BOQ GC list!"
+          )
+        );
+      }
+      return response;
+    } catch (error) {
+      console.error("Error fetching BOQ list GC:", error);
+      dispatch(
+        gettingBoqListGCFailure(
+          "Something went wrong while getting BOQ GC list!"
+        )
+      );
+      throw error;
+    }
   };
 export default productivitySlice.reducer;

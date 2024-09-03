@@ -1466,10 +1466,10 @@
   dependencies:
     merge-options "^3.0.4"
 
-"@react-native-community/checkbox@^0.5.15":
-  version "0.5.15"
-  resolved "https://registry.npmjs.org/@react-native-community/checkbox/-/checkbox-0.5.15.tgz"
-  integrity sha512-cdg/P4pF8CXd5+6MBIl2luihFTzjfIcKIEVRnF1wgoNoItRVQlyulWYJEPvL2OmdAYTaBsZTXUIdcOkGqpxLZg==
+"@react-native-community/checkbox@^0.5.17":
+  version "0.5.17"
+  resolved "https://registry.yarnpkg.com/@react-native-community/checkbox/-/checkbox-0.5.17.tgz#80dd335ca5c61ac2ca4525a21d8fef3f7a021ef7"
+  integrity sha512-ZZx/eOH3SIxBg+hvA2zRd7lX5zPQEWcZU8C8Dn7WLdpJkiTkPmIUDFHWrmzxCnwZcyoD+BIt6gUZPKGGb9WmeQ==
 
 "@react-native-community/cli-clean@^10.1.1":
   version "10.1.1"
@@ -6474,6 +6474,11 @@ react-native-paper@^5.6.0:
     "@callstack/react-theme-provider" "^3.0.8"
     color "^3.1.2"
     use-latest-callback "^0.1.5"
+
+react-native-radio-buttons-group@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/react-native-radio-buttons-group/-/react-native-radio-buttons-group-3.1.0.tgz#b19d383fc2dece17eba1ce37b9f357c47431aded"
+  integrity sha512-DiNM1yI6WfRygUZ+Z/bsjggyLypXsxRNXPNYpPHXSEVbRD6uF5Aei+HMIwyeRbfMKPtHwLq7cGsmUDV01i+rOQ==
 
 react-native-reanimated@2.14.4:
   version "2.14.4"

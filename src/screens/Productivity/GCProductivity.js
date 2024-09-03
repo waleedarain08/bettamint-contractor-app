@@ -134,7 +134,6 @@ const GCProductivity = ({ navigation }) => {
   const labourContractorList = useSelector(labourContractorReducer);
   const { scopeList, boqListGC, loading } = useSelector(productivityReducer);
   const [scopeFilter, setScopeFilter] = useState([]);
-
   useFocusEffect(
     React.useCallback(() => {
       dispatch(getSkillsAction(token));
@@ -148,20 +147,20 @@ const GCProductivity = ({ navigation }) => {
         getLabourContactorAction(token, projectsListSimple[0]?.projectId)
       );
       setSelectedProject(projectsListSimple[0]);
-      dispatch(getBOQListGC(token, projectsListSimple[0]?.projectId));
+      dispatch(getBOQListGC(token,104));
 
       return () => {};
     }, [])
   );
 
-  useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+  // useEffect(() => {
+  //   setFilteredDataSource(projectsListSimple);
+  //   setMasterDataSource(projectsListSimple);
+  // }, [projectsListSimple]);
 
-  useEffect(() => {
-    setFilteredDataNoteSource(fieldNoteList);
-  }, [fieldNoteList]);
+  // useEffect(() => {
+  //   setFilteredDataNoteSource(fieldNoteList);
+  // }, [fieldNoteList]);
 
   const searchFieldNotesFunction = (text) => {
     // Check if searched text is not blank
@@ -1068,7 +1067,7 @@ const GCProductivity = ({ navigation }) => {
       </Modal>
     );
   };
-  // console.log("boqListGC", boqListGC)
+
   const renderFilterModal = () => {
     return (
       <Modal
@@ -2251,7 +2250,7 @@ const GCProductivity = ({ navigation }) => {
                   refreshing={loading}
                   onRefresh={() => {
                     dispatch(
-                      getBOQListGC(token, projectsListSimple[0]?.projectId)
+                      getBOQListGC(token, 104)
                     );
                     setSelectedProject(projectsListSimple[0]);
                     setScopeFilter([]);
@@ -2265,16 +2264,12 @@ const GCProductivity = ({ navigation }) => {
                 <Item item={item} index={index} />
               )}
               keyExtractor={(item) => item.id}
-              // initialNumToRender={0}
-              // ListHeaderComponent={ListHeader}
-              // extraData={fieldNoteList?.length}
-              // stickyHeaderIndices={[0]}
               showsVerticalScrollIndicator={false}
             />
           </View>
         )}
       </View>
-      <Modal
+      {/* <Modal
         isVisible={openSearchModal}
         useNativeDriver={true}
         backdropColor={Colors.WhiteGray}
@@ -2367,13 +2362,13 @@ const GCProductivity = ({ navigation }) => {
             />
           </View>
         </View>
-      </Modal>
-      {renderFilterModal()}
+      </Modal> */}
+      {/* {renderFilterModal()}
       {renderSearchModal()}
       {renderActionModal()}
       {renderAssignContractorModal()}
       {renderMeasurementModal()}
-      {renderFieldNotes()}
+      {renderFieldNotes()} */}
       <DatePicker
         modal
         mode="date"

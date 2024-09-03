@@ -101,6 +101,7 @@ import {
 import Productivity from "../screens/Productivity/Productivity";
 import GCProductivity from "../screens/Productivity/GCProductivity";
 import ViewBoq from "../screens/Productivity/ViewBoq";
+import VerifyBoq from "../screens/Productivity/VerifyBoq";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -1601,7 +1602,7 @@ const ProductivityNavigator = ({ navigation }) => {
       />
       <ProductivityStack.Screen
         name="VerifyProgress"
-        component={GCProductivity}
+        component={VerifyBoq}
         options={{
           // headerBackVisible: false,
           headerTitle: () => (

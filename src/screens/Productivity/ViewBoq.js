@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -6,6 +6,7 @@ import {
   Pressable,
   RefreshControl,
   SectionList,
+  ActivityIndicator,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "../../utils/Colors";
@@ -23,20 +24,20 @@ import {
   labourContractorReducer,
 } from "../../redux/slices/userSlice";
 import {
-  getListOfBOQ,
   getListOfBOQV2,
   productivityReducer,
 } from "../../redux/slices/productivitySlice";
 
 const ViewBoq = ({ navigation }) => {
   const [selectedProject, setSelectedProject] = useState(null);
+  const [showMore, setShowMore] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const dispatch = useDispatch();
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
   const labourContractorList = useSelector(labourContractorReducer);
   const { loading, boqListGCViewMode } = useSelector(productivityReducer);
-
   const transformedArray = boqListGCViewMode.map((item) => ({
     title: {
       sow: item.scopeOfWorkName,
@@ -45,21 +46,26 @@ const ViewBoq = ({ navigation }) => {
     },
     data: item.boQs.map((boq) => boq),
   }));
-
   useFocusEffect(
     React.useCallback(() => {
+      // setTimeout(() => {
       dispatch(getAllProjectsSimpleAction(token));
-      dispatch(
-        getLabourContactorAction(token, projectsListSimple[0]?.projectId)
-      );
+      // dispatch(
+      //   getLabourContactorAction(token, projectsListSimple[0]?.projectId)
+      // );
       setSelectedProject(projectsListSimple[0]?.projectId);
-      dispatch(getListOfBOQ(token, projectsListSimple[0]?.projectId));
       dispatch(getListOfBOQV2(token, projectsListSimple[0]?.projectId));
-
+      // }, 2000);
       return () => {};
     }, [])
   );
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setInitialLoading(false);
+    }, 2000);
 
+    return () => clearTimeout(timer); // Cleanup the timer on component unmount
+  }, []);
   // const renderAssignContractorModal = () => {
   //   return (
   //     <Modal
@@ -173,6 +179,20 @@ const ViewBoq = ({ navigation }) => {
   //   );
   // };
 
+  if (initialLoading) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: "center",
+          alignItems: "center",
+          backgroundColor: Colors.White,
+        }}
+      >
+        <ActivityIndicator size="large" color={Colors.Primary} />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <View
@@ -213,7 +233,11 @@ const ViewBoq = ({ navigation }) => {
               <Dropdown
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={styles.dropdownItemText}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.FormText,
+                }}
                 showsVerticalScrollIndicator={false}
                 iconStyle={styles.iconStyle}
                 data={
@@ -276,10 +300,21 @@ const ViewBoq = ({ navigation }) => {
         ) : (
           <SectionList
             sections={transformedArray}
+            refreshControl={
+              <RefreshControl
+                onRefresh={() =>
+                  dispatch(getListOfBOQV2(token, selectedProject))
+                }
+                refreshing={loading}
+                tintColor={Colors.Primary}
+                colors={[Colors.Primary, Colors.Purple]}
+              />
+            }
+            pagingEnabled={true}
             contentContainerStyle={{ paddingBottom: 150 }}
             style={{ width: "100%" }}
             keyExtractor={(item, index) => item + index}
-            renderItem={({ item }) => (
+            renderItem={({ item, index }) => (
               <View style={styles.mainView}>
                 <View style={styles.workOrderCon}>
                   <Text style={styles.workOrderText}>
@@ -294,6 +329,124 @@ const ViewBoq = ({ navigation }) => {
                       : item?.titles[0]?.totalAmount}
                   </Text>
                 </View>
+                {item?.titles.map((title, titleIndex) =>
+                  title?.descriptions.map((desc, descIndex) => (
+                    <View
+                      key={`${titleIndex}-${descIndex}`}
+                      style={styles.itemDesCon}
+                    >
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Cost Code: </Text>
+                          <Text style={styles.itemDesText}>{desc.boqCode}</Text>
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>
+                            Title:{" "}
+                            <Text
+                              onPress={() => {
+                                // console.log("idx", index, descIndex, titleIndex);
+                                if (descIndex === 0) {
+                                  setShowMore(!showMore);
+                                }
+                              }}
+                              style={{
+                                color: Colors.Purple,
+                                fontFamily: "Lexend-Bold",
+                                fontSize: 12,
+                              }}
+                            >
+                              Show {showMore ? "Less" : "More"}
+                            </Text>
+                          </Text>
+                          {showMore ? (
+                            <Text style={styles.itemDesText}>
+                              {descIndex === 0 ? title.title : ""}
+                            </Text>
+                          ) : (
+                            <Text numberOfLines={1} style={styles.itemDesText}>
+                              {descIndex === 0 ? title.title : ""}
+                            </Text>
+                          )}
+                        </View>
+                      </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>
+                            Description:{" "}
+                          </Text>
+                          <Text numberOfLines={1} style={styles.itemDesText}>
+                            {desc.description}
+                          </Text>
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Unit: </Text>
+                          <Text style={styles.itemDesText}>
+                            {desc.unitCode}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Quantity: </Text>
+                          <Text numberOfLines={1} style={styles.itemDesText}>
+                            {desc.quantity}
+                          </Text>
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Rate: </Text>
+                          <Text style={styles.itemDesText}>₹ {desc.rate}</Text>
+                        </View>
+                      </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Amount: </Text>
+                          <Text numberOfLines={1} style={styles.itemDesText}>
+                            ₹{" "}
+                            {desc.amount >= 100000
+                              ? `${Math.round(desc.amount / 100000)} Lakhs`
+                              : desc.amount}
+                          </Text>
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>
+                            Actual Quantity:{" "}
+                          </Text>
+                          <Text style={styles.itemDesText}>
+                            {desc.actualQuantity}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>
+                            Actual Amount:{" "}
+                          </Text>
+                          <Text numberOfLines={1} style={styles.itemDesText}>
+                            ₹{" "}
+                            {desc.actualAmount >= 100000
+                              ? `${Math.round(
+                                  desc.actualAmount / 100000
+                                )} Lakhs`
+                              : desc.actualAmount}
+                          </Text>
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Percentage: </Text>
+                          <Text style={styles.itemDesText}>
+                            {((desc.actualAmount / desc.amount) * 100).toFixed(
+                              2
+                            )}{" "}
+                            %
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  ))
+                )}
+                {/* {item?.titles.map((title) => (
+                  {title?.descriptions.map((desc) => (
+
                 <View style={styles.itemDesCon}>
                   <View style={styles.desCon}>
                     <View style={styles.width}>
@@ -305,7 +458,7 @@ const ViewBoq = ({ navigation }) => {
                     <View style={styles.width}>
                       <Text style={styles.itemDesHeader}>Title: </Text>
                       <Text style={styles.itemDesText}>
-                        {item?.titles[0]?.title}
+                        {title?.title}
                       </Text>
                     </View>
                   </View>
@@ -383,6 +536,8 @@ const ViewBoq = ({ navigation }) => {
                     </View>
                   </View>
                 </View>
+                  )}
+                ))} */}
               </View>
             )}
             renderSectionHeader={({ section: { title } }) => (

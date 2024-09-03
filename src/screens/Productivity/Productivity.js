@@ -1148,44 +1148,45 @@ const Productivity = ({ navigation }) => {
       dispatch(removeMusterData());
       dispatch(getFieldNoteList(token));
       dispatch(getScopeList(token));
-      dispatch(
-        getLabourContactorAction(token, projectsListSimple[0]?.projectId)
-      );
       dispatch(getUnitList(token));
+
+      if (projectsListSimple.length > 0) {
+        const projectId = projectsListSimple[0]?.projectId;
+        dispatch(getLabourContactorAction(token, projectId));
+      }
+
       return () => {};
-    }, [])
+    }, [dispatch, token, projectsListSimple])
   );
 
   useEffect(() => {
-    // setFilteredDataSource(projectsListSimple);
-    // setMasterDataSource(projectsListSimple);
-    dispatch(getBOQList(token, projectsListSimple[0]?.projectId));
-  }, [projectsListSimple]);
+    if (projectsListSimple.length > 0) {
+      const projectId = projectsListSimple[0]?.projectId;
+      dispatch(getBOQList(token, projectId));
+    }
+  }, [dispatch, token, projectsListSimple]);
 
   useEffect(() => {
     if (projectsListSimple.length > 0) {
-      setCurrentProjectProgress(projectsListSimple[0]?.projectId);
-      setCurrentProjectDetail(projectsListSimple[0]);
-      setCurrentProject(projectsListSimple[0]?.projectId);
-      setProject(projectsListSimple[0]?.projectId);
-      setCurrentProjectBOQ(projectsListSimple[0]?.projectId);
-      dispatch(getBOQProgress(token, projectsListSimple[0]?.projectId));
-      // dispatch(getContractors(projectClassificationList[0]?.projectId));
-      // dispatch(getBOQList(projectClassificationList[0]?.projectId));
-      dispatch(getBOQMetrics(token, projectsListSimple[0]?.projectId));
-      setCurrentProjectProgressGraph(projectsListSimple[0]?.projectId);
-      dispatch(
-        getProjectProgressGraph(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(getProjectBudget(token, projectsListSimple[0]?.projectId));
-      setCurrentProjectBudget(projectsListSimple[0]?.projectId);
-      setCurrentProjectFinancial(projectsListSimple[0]?.projectId);
-      dispatch(
-        getFinancialProgressData(token, projectsListSimple[0]?.projectId)
-      );
-      // call(projectClassificationList[0]);
+      const project = projectsListSimple[0];
+      const projectId = project?.projectId;
+
+      setCurrentProjectProgress(projectId);
+      setCurrentProjectDetail(project);
+      setCurrentProject(projectId);
+      setProject(projectId);
+      setCurrentProjectBOQ(projectId);
+      setCurrentProjectProgressGraph(projectId);
+      setCurrentProjectBudget(projectId);
+      setCurrentProjectFinancial(projectId);
+
+      dispatch(getBOQProgress(token, projectId));
+      dispatch(getBOQMetrics(token, projectId));
+      dispatch(getProjectProgressGraph(token, projectId));
+      dispatch(getProjectBudget(token, projectId));
+      dispatch(getFinancialProgressData(token, projectId));
     }
-  }, [projectsListSimple?.length]);
+  }, [dispatch, token, projectsListSimple]);
 
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
@@ -1219,10 +1220,6 @@ const Productivity = ({ navigation }) => {
         resultArray.push({ stacks, label: month });
       });
     }
-    //   const arr = resultArray.map((item) => {
-    //     item.stacks.length === 0&& (
-    //   item.stacks.push({value: 0, color: "gray"
-    // })));
     const arr = resultArray?.map((item) => {
       if (item?.stacks?.length === 0) {
         item?.stacks?.push({ value: 0, color: "white" });
@@ -2861,7 +2858,11 @@ const Productivity = ({ navigation }) => {
               <Dropdown
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={styles.dropdownItemText}
+                itemTextStyle={{
+                  fontFamily: "Lexend-Regular",
+                  fontSize: 13,
+                  color: Colors.Black,
+                }}
                 showsVerticalScrollIndicator={false}
                 iconStyle={styles.iconStyle}
                 data={
@@ -2892,26 +2893,29 @@ const Productivity = ({ navigation }) => {
               title={"Insert"}
             />
           )}
-          {Number(measurementAccess) !== 1 && (
-            <ActionButton
-              onPress={() => {
-                setUpdateLoader(true);
-                setTimeout(() => {
-                  setUpdateLoader(false);
-                }, 10000);
-              }}
-              title={"Update"}
-            />
-          )}
+          {Number(measurementAccess) !== 1 &&
+            (updateLoader ? (
+              <ActivityIndicator size="small" color={Colors.White} />
+            ) : (
+              <ActionButton
+                onPress={() => {
+                  setUpdateLoader(true);
+                  setTimeout(() => {
+                    setUpdateLoader(false);
+                  }, 10000);
+                }}
+                title={"Update"}
+              />
+            ))}
           {(userInfo?.user?.role?.name === "SuperAdmin" ||
             Number(measurementAccess) === 3) && (
             <ActionButton
               onPress={() => {
-                // navigation.navigate("VerifyProgress");
-                setVerifyLoader(true);
-                setTimeout(() => {
-                  setVerifyLoader(false);
-                }, 10000);
+                navigation.navigate("VerifyProgress");
+                // setVerifyLoader(true);
+                // setTimeout(() => {
+                //   setVerifyLoader(false);
+                // }, 10000);
               }}
               title={"Verify"}
             />
