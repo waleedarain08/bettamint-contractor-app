@@ -10,20 +10,16 @@ import {
   Pressable,
   RefreshControl,
   Appearance,
+  ToastAndroid,
 } from "react-native";
 import { ScrollView, TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 import { BarChart, PieChart } from "react-native-gifted-charts";
 import Modal from "react-native-modal";
-import {
-  countsReducer,
-  getCountsData,
-  loadingUsers,
-} from "../../redux/slices/userSlice";
+import { loadingUsers } from "../../redux/slices/userSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { authToken, userData } from "../../redux/slices/authSlice";
-import { getSkillsAction } from "../../redux/slices/workerSlice";
 import {
   getAllProjectsSimpleAction,
   projectsListSimpleReducer,
@@ -57,12 +53,77 @@ import {
   productivityReducer,
 } from "../../redux/slices/productivitySlice";
 import { Dropdown } from "react-native-element-dropdown";
+import { useAuth } from "../../context/authContext";
+import { useGeneralContext } from "../../context/generalContext";
+import { useFocusEffect } from "@react-navigation/native";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 
 LogBox.ignoreAllLogs();
 
 const Dashboard = ({ navigation }) => {
+  // Context instance
+  const { user } = useAuth();
+  const {
+    projects,
+    getStatsCount,
+    statsCount,
+    getAttendanceGraphData,
+    attendanceGraphData,
+    getPaymentsGraphData,
+    paymentsGraphData,
+    getContractorsGraphData,
+    contractorsGraphData,
+  } = useGeneralContext();
+
+  // Initial Dates
+  const startDate = moment().startOf("week").format("YYYY-MM-DD HH:mm:ss");
+  const endDate = moment().endOf("week").format("YYYY-MM-DD HH:mm:ss");
+
+  const getData = async () => {
+    const promises = [];
+
+    // Add getStatsCount to the promises array
+    promises.push(
+      getStatsCount().catch((error) => {
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      })
+    );
+
+    // Add getAttendanceGraphData only if projects exist
+    if (projects !== null && projects.length > 0) {
+      promises.push(
+        getAttendanceGraphData(
+          projects[0]?.projectId,
+          startDate,
+          endDate
+        ).catch((error) => {
+          ToastAndroid.show(error.message, ToastAndroid.SHORT);
+        })
+      );
+      promises.push(
+        getPaymentsGraphData(projects[0]?.projectId, startDate, endDate).catch(
+          (error) => {
+            ToastAndroid.show(error.message, ToastAndroid.SHORT);
+          }
+        )
+      );
+      promises.push(
+        getContractorsGraphData(projects[0]?.projectId, startDate).catch(
+          (error) => {
+            ToastAndroid.show(error.message, ToastAndroid.SHORT);
+          }
+        )
+      );
+    }
+
+    // Execute all promises and wait for them to settle
+    await Promise.allSettled(promises);
+  };
+  useEffect(() => {
+    getData();
+  }, [projects?.length]);
+
   // Local States
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -106,12 +167,11 @@ const Dashboard = ({ navigation }) => {
 
   //! SELECTORS
   const token = useSelector(authToken);
-  const counts = useSelector(countsReducer);
   const isLoading = useSelector(loadingUsers);
   const projectsListSimple = useSelector(projectsListSimpleReducer);
   const {
     workerSkill,
-    attendanceTrendline,
+    // attendanceGraphData,
     contractorsStats,
     payments,
     financialProgressMetrics,
@@ -119,11 +179,10 @@ const Dashboard = ({ navigation }) => {
     labourTurnoverMetrics,
     labourExpenseMetrics,
   } = useSelector(countReducer);
-  const userInfo = useSelector(userData);
   const { projectBudgetData, financialGraphData } =
     useSelector(productivityReducer);
   // User Role instance
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const roles = user?.user?.role?.roleFeatureSets;
   const isDashboardPresent = roles.some(
     (item) => item.featureSet.name === "Dashboard"
   );
@@ -133,77 +192,61 @@ const Dashboard = ({ navigation }) => {
   }
 
   // Set projects list initially
-  useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+  useFocusEffect(
+    React.useCallback(() => {
+      setFilteredDataSource(projects);
+      setMasterDataSource(projects);
+    }, [projects])
+  );
 
   //! LIFE-CYCLE-METHODS --------------------------------
   useEffect(() => {
-    dispatch(getSkillsAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
+    // dispatch(getAllProjectsSimpleAction(token));
     setSelectedAttendanceProject(null);
     setAttendanceSelectedDate(new Date());
     setSelectedPaymentProject(null);
     setPaymentsSelectedDate(new Date());
     setSelectedContractorProject(null);
     setPieSelectedDate(new Date());
-    dispatch(getCountsData(token));
   }, []);
 
   useEffect(() => {
-    if (projectsListSimple) {
-      dispatch(
-        getAttendanceTrendline(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
-      dispatch(
-        getPayments(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
-      dispatch(
-        getContractorsStats(
-          token,
-          projectsListSimple[0]?.projectId,
-          moment().format("YYYY-MM-DD")
-        )
-      );
+    if (projects) {
+      // dispatch(
+      //   getPayments(
+      //     token,
+      //     projects[0]?.projectId,
+      //     moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
+      //     moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
+      //   )
+      // );
+      // dispatch(
+      //   getContractorsStats(
+      //     token,
+      //     projects[0]?.projectId,
+      //     moment().format("YYYY-MM-DD")
+      //   )
+      // );
       dispatch(
         getWorkerSkills(
           token,
           "2022-08-31T19:00:00Z",
           moment().utc().format(),
-          projectsListSimple[0]?.projectId
+          projects[0]?.projectId
         )
       );
-      setCurrentProjectBudget(projectsListSimple[0]?.projectId);
-      setCurrentProjectFinancial(projectsListSimple[0]?.projectId);
-      setCurrentProjectLabourTurnover(projectsListSimple[0]?.projectId);
+      setCurrentProjectBudget(projects[0]?.projectId);
+      setCurrentProjectFinancial(projects[0]?.projectId);
+      setCurrentProjectLabourTurnover(projects[0]?.projectId);
       // Metrics
-      dispatch(
-        getFinancialProgressMetrics(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(getWorkforceMetrics(token, projectsListSimple[0]?.projectId));
-      dispatch(
-        getLabourTurnoverMetrics(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(getProjectBudget(token, projectsListSimple[0]?.projectId));
-      dispatch(
-        getFinancialProgressData(token, projectsListSimple[0]?.projectId)
-      );
-      dispatch(
-        getLabourExpenseMetrics(token, projectsListSimple[0]?.projectId)
-      );
+      dispatch(getFinancialProgressMetrics(token, projects[0]?.projectId));
+      dispatch(getWorkforceMetrics(token, projects[0]?.projectId));
+      dispatch(getLabourTurnoverMetrics(token, projects[0]?.projectId));
+      dispatch(getProjectBudget(token, projects[0]?.projectId));
+      dispatch(getFinancialProgressData(token, projects[0]?.projectId));
+      dispatch(getLabourExpenseMetrics(token, projects[0]?.projectId));
     }
-  }, [projectsListSimple]);
+  }, [projects]);
 
   /**
    * Restructured attendance graph array
@@ -211,7 +254,7 @@ const Dashboard = ({ navigation }) => {
    * @returns Array
    */
   const attendanceGraphsData = () => {
-    return attendanceTrendline?.flatMap((item) => [
+    return attendanceGraphData?.flatMap((item) => [
       {
         value: item.Present || 0,
         label: item.Day,
@@ -229,10 +272,10 @@ const Dashboard = ({ navigation }) => {
 
   const getAttendanceMaxValue = () => {
     let attendanceMax = 100;
-    if (attendanceTrendline) {
+    if (attendanceGraphData) {
       let attendanceValues =
-        attendanceTrendline &&
-        attendanceTrendline?.map((item) => item.Present || item.Absent);
+        attendanceGraphData &&
+        attendanceGraphData?.map((item) => item.Present || item.Absent);
 
       // Find the maximum value from the array
       const attendanceMaxValue = Math?.max(...attendanceValues);
@@ -247,7 +290,7 @@ const Dashboard = ({ navigation }) => {
    * @returns Array
    */
   const paymentGraphData = () => {
-    return payments?.map((item) => ({
+    return paymentsGraphData?.map((item) => ({
       value: item?.DueAmount <= 0 ? 0 : item?.DueAmount,
       label: item?.Day,
       labelTextStyle: { color: Colors.Black, fontSize: 10 },
@@ -256,8 +299,9 @@ const Dashboard = ({ navigation }) => {
 
   const getPaymentMaxValue = () => {
     let paymentMax = 2000;
-    if (payments) {
-      let paymentValues = payments && payments?.map((item) => item.DueAmount);
+    if (paymentsGraphData) {
+      let paymentValues =
+        paymentsGraphData && paymentsGraphData?.map((item) => item.DueAmount);
 
       // Find the maximum value from the array
       const paymentMaxValue = Math?.max(...paymentValues);
@@ -273,8 +317,8 @@ const Dashboard = ({ navigation }) => {
    */
   const contractorGraphData = () => {
     return (
-      contractorsStats &&
-      Object?.values(contractorsStats)[0]?.map((item, index) => ({
+      contractorsGraphData &&
+      Object?.values(contractorsGraphData)[0]?.map((item, index) => ({
         label: item?.contractor,
         value: item.present || 0,
       }))
@@ -545,13 +589,13 @@ const Dashboard = ({ navigation }) => {
     }
   };
 
-  let currentPresent = attendanceTrendline?.filter((item) => {
+  let currentPresent = attendanceGraphData?.filter((item) => {
     if (moment().format("ddd").toUpperCase() === item?.Day) {
       return item;
     }
   });
 
-  let currentAbsent = attendanceTrendline?.filter((item) => {
+  let currentAbsent = attendanceGraphData?.filter((item) => {
     if (moment().format("ddd").toUpperCase() === item.Day) {
       return item;
     }
@@ -568,7 +612,7 @@ const Dashboard = ({ navigation }) => {
           token,
           selectedAttendanceProject?.projectId
             ? selectedAttendanceProject?.projectId
-            : projectsListSimple[0]?.projectId,
+            : projects[0]?.projectId,
           startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
           endOfWeek.format("YYYY-MM-DD HH:mm:ss")
         )
@@ -579,7 +623,7 @@ const Dashboard = ({ navigation }) => {
           token,
           selectedAttendanceProject?.projectId
             ? selectedAttendanceProject?.projectId
-            : projectsListSimple[0]?.projectId,
+            : projects[0]?.projectId,
           moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
           moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
         )
@@ -595,7 +639,7 @@ const Dashboard = ({ navigation }) => {
         token,
         selectedPaymentProject?.projectId
           ? selectedPaymentProject?.projectId
-          : projectsListSimple[0]?.projectId,
+          : projects[0]?.projectId,
         startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
         endOfWeek.format("YYYY-MM-DD HH:mm:ss")
       )
@@ -609,7 +653,7 @@ const Dashboard = ({ navigation }) => {
         token,
         selectedContractorProject?.projectId
           ? selectedContractorProject?.projectId
-          : projectsListSimple[0]?.projectId,
+          : projects[0]?.projectId,
         moment(date).format("YYYY-MM-DD")
       )
     );
@@ -746,12 +790,11 @@ const Dashboard = ({ navigation }) => {
               <RefreshControl
                 refreshing={isLoading}
                 onRefresh={() => {
-                  dispatch(getCountsData(token));
-                  if (projectsListSimple) {
+                  if (projects) {
                     dispatch(
                       getAttendanceTrendline(
                         token,
-                        projectsListSimple[0]?.projectId,
+                        projects[0]?.projectId,
                         moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
                         moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
                       )
@@ -759,7 +802,7 @@ const Dashboard = ({ navigation }) => {
                     dispatch(
                       getPayments(
                         token,
-                        projectsListSimple[0]?.projectId,
+                        projects[0]?.projectId,
                         moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
                         moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
                       )
@@ -767,7 +810,7 @@ const Dashboard = ({ navigation }) => {
                     dispatch(
                       getContractorsStats(
                         token,
-                        projectsListSimple[0]?.projectId,
+                        projects[0]?.projectId,
                         moment().format("YYYY-MM-DD")
                       )
                     );
@@ -776,44 +819,26 @@ const Dashboard = ({ navigation }) => {
                         token,
                         "2022-08-31T19:00:00Z",
                         moment().utc().format(),
-                        projectsListSimple[0]?.projectId
+                        projects[0]?.projectId
                       )
                     );
-                    setCurrentProjectBudget(projectsListSimple[0]?.projectId);
-                    setCurrentProjectFinancial(
-                      projectsListSimple[0]?.projectId
-                    );
-                    setCurrentProjectLabourTurnover(
-                      projectsListSimple[0]?.projectId
-                    );
+                    setCurrentProjectBudget(projects[0]?.projectId);
+                    setCurrentProjectFinancial(projects[0]?.projectId);
+                    setCurrentProjectLabourTurnover(projects[0]?.projectId);
                     // Metrics
                     dispatch(
-                      getFinancialProgressMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
+                      getFinancialProgressMetrics(token, projects[0]?.projectId)
                     );
                     dispatch(
-                      getWorkforceMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
+                      getWorkforceMetrics(token, projects[0]?.projectId)
                     );
                     dispatch(
-                      getLabourExpenseMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
+                      getLabourExpenseMetrics(token, projects[0]?.projectId)
                     );
                     dispatch(
-                      getLabourTurnoverMetrics(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
+                      getLabourTurnoverMetrics(token, projects[0]?.projectId)
                     );
-                    dispatch(
-                      getProjectBudget(token, projectsListSimple[0]?.projectId)
-                    );
+                    dispatch(getProjectBudget(token, projects[0]?.projectId));
                     dispatch(
                       getFinancialProgressData(
                         token,
@@ -837,7 +862,7 @@ const Dashboard = ({ navigation }) => {
                       style={styles.projectImageIcon}
                     />
                     <Spacer right={10} />
-                    <Text style={styles.num}>{counts?.totalProjects}</Text>
+                    <Text style={styles.num}>{statsCount?.totalProjects}</Text>
                   </View>
                 </View>
                 <View style={styles.item}>
@@ -848,7 +873,9 @@ const Dashboard = ({ navigation }) => {
                       style={styles.projectImageIcon}
                     />
                     <Spacer right={10} />
-                    <Text style={styles.num}>{counts?.totalContractor}</Text>
+                    <Text style={styles.num}>
+                      {statsCount?.totalContractor}
+                    </Text>
                   </View>
                 </View>
               </View>
@@ -861,7 +888,7 @@ const Dashboard = ({ navigation }) => {
                       style={styles.projectImageIcon}
                     />
                     <Spacer right={10} />
-                    <Text style={styles.num}>{counts?.workerPresent}</Text>
+                    <Text style={styles.num}>{statsCount?.workerPresent}</Text>
                   </View>
                 </View>
                 <View style={styles.item}>
@@ -872,7 +899,7 @@ const Dashboard = ({ navigation }) => {
                       style={styles.projectImageIcon}
                     />
                     <Spacer right={10} />
-                    <Text style={styles.num}>{counts?.workerAbsent}</Text>
+                    <Text style={styles.num}>{statsCount?.workerAbsent}</Text>
                   </View>
                 </View>
               </View>
@@ -1224,7 +1251,7 @@ const Dashboard = ({ navigation }) => {
                 </Pressable>
               </View>
             </View>
-            {userInfo?.user?.leadTypeId !== "LabourContractor" && (
+            {user?.user?.leadTypeId !== "LabourContractor" && (
               <View style={styles.scrollGraph}>
                 <View style={styles.graphsHeader}>
                   <Text style={styles.graphHeadingText}>Contractors Data</Text>

@@ -8,10 +8,12 @@ import { logoutAction, userData } from "../redux/slices/authSlice";
 import { getVersion } from "react-native-device-info";
 import { emptyAttendanceAction } from "../redux/slices/attendanceSlice";
 import { emptyAllProjectsSimpleAction } from "../redux/slices/projectSlice";
+import { useAuth } from "../context/authContext";
 
 const CustomDrawer = ({ navigation }) => {
   const userdata = useSelector(userData);
-  const roles = userdata?.user?.role?.roleFeatureSets;
+  const {user, logout} = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
 
   const fieldNotesAccess =
     roles &&
@@ -159,9 +161,10 @@ const CustomDrawer = ({ navigation }) => {
         <View>
           <Pressable
             onPress={() => {
-              dispatch(logoutAction());
-              dispatch(emptyAttendanceAction());
-              dispatch(emptyAllProjectsSimpleAction());
+              logout();
+              // dispatch(logoutAction());
+              // dispatch(emptyAttendanceAction());
+              // dispatch(emptyAllProjectsSimpleAction());
             }}
             style={{
               marginVertical: 25,

@@ -1,4 +1,13 @@
-import { View, Text, StatusBar, SafeAreaView, ScrollView, BackHandler, Linking, Alert } from "react-native";
+import {
+  View,
+  Text,
+  StatusBar,
+  SafeAreaView,
+  ScrollView,
+  BackHandler,
+  Linking,
+  Alert,
+} from "react-native";
 import React, { useEffect } from "react";
 import MainNavigation from "./src/navigation/MainNavigation";
 import { Colors } from "./src/utils/Colors";
@@ -9,7 +18,9 @@ import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
 import { enableLatestRenderer } from "react-native-maps";
 import Toast from "react-native-toast-message";
-import VersionCheck from 'react-native-version-check';
+import VersionCheck from "react-native-version-check";
+import { AuthProvider } from "./src/context/authContext";
+import { GeneralProvider } from "./src/context/generalContext";
 
 enableLatestRenderer();
 
@@ -18,7 +29,7 @@ const persistor = persistStore(store);
 const App = () => {
   useEffect(() => {
     SplashScreen.hide();
-    checkUpdateNeeded()
+    checkUpdateNeeded();
   }, []);
 
   const checkUpdateNeeded = async () => {
@@ -26,19 +37,19 @@ const App = () => {
       let updateNeeded = await VersionCheck.needUpdate();
       if (updateNeeded && updateNeeded.isNeeded) {
         Alert.alert(
-          'Please Update App',
-          'You will have to update your app to the latest version to continue using Bettamint - Contractor.',
+          "Please Update App",
+          "You will have to update your app to the latest version to continue using Bettamint - Contractor.",
           [
             {
-              text: 'Update',
+              text: "Update",
               onPress: () => {
                 BackHandler.exitApp();
                 Linking.openURL(
-                  'https://play.google.com/store/apps/details?id=com.bettamintcontractor',
+                  "https://play.google.com/store/apps/details?id=com.bettamintcontractor"
                 );
               },
             },
-          ],
+          ]
         );
       }
     } catch (err) {
@@ -47,14 +58,21 @@ const App = () => {
   };
   return (
     <Provider store={store}>
-      <SafeAreaView />
-      <StatusBar backgroundColor={Colors.Primary} />
-      <PersistGate loading={null} persistor={persistor}>
-        <MainNavigation />
-        <Toast />
-      </PersistGate>
+      <AuthProvider>
+        <GeneralProvider>
+          <SafeAreaView />
+          <StatusBar backgroundColor={Colors.Primary} />
+          <MainNavigation />
+        </GeneralProvider>
+      </AuthProvider>
     </Provider>
   );
 };
+// {/* <SafeAreaView />
+// <StatusBar backgroundColor={Colors.Primary} />
+// <PersistGate loading={null} persistor={persistor}>
+//   <MainNavigation />
+//   <Toast />
+// </PersistGate> */}
 
 export default App;

@@ -1,10 +1,16 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import React from "react";
 import { Colors } from "../utils/Colors";
 
 const Button = ({
   onPress,
-  backgroundColor = Colors.Primary,
+  backgroundColor = Colors.Secondary,
   width = "100%",
   height = 40,
   title,
@@ -13,6 +19,7 @@ const Button = ({
   style = {},
   textStyle = {},
   disabled = false,
+  loading = false,
 }) => {
   return (
     <TouchableOpacity
@@ -29,16 +36,20 @@ const Button = ({
         ...style,
       }}
     >
-      <Text
-        style={{
-          fontFamily: "Lexend-Medium",
-          fontSize: titleSize,
-          color: titleColor,
-          ...textStyle,
-        }}
-      >
-        {title}
-      </Text>
+      {loading ? (
+        <ActivityIndicator size="small" color={Colors.White} />
+      ) : (
+        <Text
+          style={{
+            fontFamily: "Lexend-Medium",
+            fontSize: titleSize,
+            color: titleColor,
+            ...textStyle,
+          }}
+        >
+          {title}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };

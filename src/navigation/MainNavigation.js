@@ -102,6 +102,8 @@ import Productivity from "../screens/Productivity/Productivity";
 import GCProductivity from "../screens/Productivity/GCProductivity";
 import ViewBoq from "../screens/Productivity/ViewBoq";
 import VerifyBoq from "../screens/Productivity/VerifyBoq";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useAuth } from "../context/authContext";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -1713,12 +1715,26 @@ const ProductivityNavigator = ({ navigation }) => {
 };
 
 function MainNavigation({ navigation }) {
-  React.useEffect(() => {
+  const { user, setUser } = useAuth();
+  useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
     }, 5000);
   }, []);
-  const auth = useSelector(authToken);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const userData = await AsyncStorage.getItem("user");
+      if (!userData) {
+        return;
+      }
+      console.log("TOKEN--->>>", {
+        token: JSON.parse(userData).token,
+      });
+      setUser(JSON.parse(userData));
+    };
+    getUser();
+  }, []);
 
   const MyTheme = {
     ...DefaultTheme,
@@ -1727,9 +1743,9 @@ function MainNavigation({ navigation }) {
       background: "#fff",
     },
   };
-  const userInfo = useSelector(userData);
-  const roles = userInfo?.user?.role?.roleFeatureSets;
-  console.log("UserInfo--->>>", userInfo);
+
+  const roles = user?.user?.role?.roleFeatureSets;
+
   // Array of expected names
   const expectedNames = [
     "Attendance List",
@@ -1761,7 +1777,7 @@ function MainNavigation({ navigation }) {
   return (
     <>
       <NavigationContainer theme={MyTheme} ref={navigationRef}>
-        {!auth ? (
+        {!user?.isAuthenticated ? (
           <Stack.Navigator
             initialRouteName="Login"
             screenOptions={{
@@ -1956,6 +1972,7 @@ function AttendanceTabDrawer() {
 }
 
 function TabNavigator({ navigation }) {
+  const { user } = useAuth();
   const tabBarStyle = {
     height: Platform.OS === "ios" ? 80 : 55,
   };
@@ -1968,7 +1985,7 @@ function TabNavigator({ navigation }) {
     [isOpened]
   );
   const userdata = useSelector(userData);
-  const roles = userdata?.user?.role?.roleFeatureSets;
+  const roles = user?.user?.role?.roleFeatureSets;
 
   const isDashboardPresent = roles.some(
     (item) => item?.featureSet?.name === "Dashboard"

@@ -1,8 +1,10 @@
-// export const base_url = "https://api-sandbox.bettamint.com/api";
-// export const assetsUrl = "https://api-sandbox.bettamint.com";
+export const base_url = "https://api-sandbox.bettamint.com/api";
+export const baseUrl = "https://api-sandbox.bettamint.com/api";
+export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-export const base_url = "https://api-prod.bettamint.com/api";
-export const assetsUrl = "https://api-prod.bettamint.com";
+// export const base_url = "https://api-prod.bettamint.com/api";
+// export const baseUrl = "https://api-prod.bettamint.com/api";
+// export const assetsUrl = "https://api-prod.bettamint.com";
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";
@@ -17,7 +19,7 @@ export const PROJECT_FOR_MAPPING_URL = "dashboard/Project/getformapping";
 export const PROJECT_USER_LIST_URL = "dashboard/User/project";
 export const WORKER_GETALL_URL = "Dashboard/worker";
 export const UPDATE_WORKER_URL = "Dashboard/worker/addupdateworker";
-// export const GET_SKILLS_URL = "app/Skills";
+export const GET_SKILLS_URL = "app/Skills";
 export const ATTENDANCE_MUSTER_URL = "dashboard/Attendance/mustercard";
 export const ATTENDANCE_APPROVE_URL = "dashboard/Attendance/approve";
 export const ATTENDANCE_REPORT_URL = "dashboard/Attendance/getbyprojectreport";
@@ -41,3 +43,16 @@ export const GOOGLE_API_KEY = "AIzaSyDmPu3_XheAsKf93Ab3pwbLU_ri9nmg5XM";
 // GC account :
 // chiranjeevikm@k2kinfra.net
 // HjmPHylNqEWF3VP
+
+export const API = {
+  // Auth Routes
+  login: `${base_url}/dashboard/User/Login`,
+  register: `${base_url}/dashboard/Lead`,
+  // General Routes
+  getProjects: `${base_url}/dashboard/Project/getallsimple`,
+  getStatsCount : `${base_url}/Dashboard/stats/count`,
+  getAttendanceGraphData: `${base_url}/Dashboard/stats/attendancetrendline`,
+  getPaymentsGraphData: `${base_url}/Dashboard/stats/payments`,
+  getContractorsGraphData: `${base_url}/Dashboard/stats/contractors`,
+  getWorkersSkill: `${base_url}/Dashboard/stats/workerskill`,
+};
