@@ -1,60 +1,35 @@
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
   Image,
-  ImageBackground,
   StyleSheet,
-  FlatList,
-  Dimensions,
   LogBox,
-  Alert,
   Pressable,
   Modal,
-  Animated,
   ActivityIndicator,
   PermissionsAndroid,
+  ToastAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import { BackCircleIcon, Cross, LocationIcon, Picture } from "../../icons";
+import { Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
 import DropDownPicker from "react-native-dropdown-picker";
-import { launchCamera, launchImageLibrary } from "react-native-image-picker";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  selectedProjectReducer,
-  updateProjectAction,
-} from "../../redux/slices/projectSlice";
-import MapView, { PROVIDER_GOOGLE, Marker, Polygon } from "react-native-maps"; // remove PROVIDER_GOOGLE import if not using Google Maps
-import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
-import { GOOGLE_API_KEY, assetsUrl, mapUrl } from "../../utils/api_constants";
-import MapViewGestures from "@dev-event/react-native-maps-draw";
-import { TTouchPoint } from "@dev-event/react-native-maps-draw";
+import { launchImageLibrary } from "react-native-image-picker";
+import MapView, { PROVIDER_GOOGLE, Polygon } from "react-native-maps";
+import { assetsUrl, mapUrl } from "../../utils/api_constants";
 import WebView from "react-native-webview";
-import { authToken, userData } from "../../redux/slices/authSlice";
-import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
-import {
-  fieldNoteReducer,
-  getScopeList,
-} from "../../redux/slices/fieldNoteSlice";
-// const AnimatedPolygon = Animated.createAnimatedComponent(Polygon);
-// import Geolocation from "@react-native-community/geolocation";
-// import { PermissionsAndroid } from "react-native";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
+import { useAuth } from "../../context/authContext";
+import { useProject } from "../../context/projectContext";
+import { useGeneralContext } from "../../context/generalContext";
 LogBox.ignoreAllLogs();
 
 const CreateNewProject = ({ navigation }) => {
+  const { user } = useAuth();
+  const { scopeList } = useGeneralContext();
+  const { loading, selectedProject, createProject } = useProject();
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
   const [items, setItems] = useState([
@@ -73,17 +48,9 @@ const CreateNewProject = ({ navigation }) => {
   const [projectArea, setProjectArea] = useState(null);
   const [sow, setSow] = useState([]);
   const [geoFancingList, setGeoFancingList] = useState([]);
-  const token = useSelector(authToken);
-  const dispatch = useDispatch();
   const mapRef = useRef();
-  const project = useSelector(selectedProjectReducer);
-  const { scopeList } = useSelector(fieldNoteReducer);
-  const userInfo = useSelector(userData);
-  const roles = userInfo?.user?.role?.roleFeatureSets;
-  console.log(
-    "Create Project roles",
-    roles.filter((item) => item.accessRightId === 3)
-  );
+  const roles = user?.user?.role?.roleFeatureSets;
+
   const projectBudgetAccess = roles.some(
     (item) =>
       item.featureSet.route === "PROJECT_BUDGET" &&
@@ -94,12 +61,9 @@ const CreateNewProject = ({ navigation }) => {
       item.featureSet.route === "PROJECT_BOUNDARY" &&
       Number(item.accessRightId) !== 1
   );
-  const showPressableBoun =
-    userInfo?.user?.role?.name === "SuperAdmin" || projectBoundariesAccess;
 
   useEffect(() => {
     getLocationPermission();
-    dispatch(getScopeList(token));
   }, []);
   useEffect(() => {
     if (scopeList.length > 0) {
@@ -111,7 +75,7 @@ const CreateNewProject = ({ navigation }) => {
   function convertScopeList() {
     const scopeObject = {};
     scopeList.forEach((scope) => {
-      const retrievedScope = project?.scopeOfWorks?.find(
+      const retrievedScope = selectedProject?.scopeOfWorks?.find(
         (projectScope) => projectScope.scopeOfWorkId === scope.scopeOfWorkId
       );
 
@@ -164,24 +128,17 @@ const CreateNewProject = ({ navigation }) => {
 
   function createFormattedScopeObject(scope) {
     return {
-      projectId: project?.projectId,
+      projectId: selectedProject?.projectId,
       scopeOfWorkId: scope.scopeOfWorkId,
       costPerSqFeet: Number(scope.measurement),
-      // unitId: scope.unit.unitId,
     };
   }
   function handleMeasurementChange(label, value) {
-    // const touched = value || SOWItems[label].unit;
-    // const error = touched && (!value || !SOWItems[label].unit);
-    // const touched = Boolean(value);
-
     setSow((prevState) => ({
       ...prevState,
       [label]: {
         ...prevState[label],
         measurement: value,
-        // touched,
-        // error,
       },
     }));
   }
@@ -196,7 +153,6 @@ const CreateNewProject = ({ navigation }) => {
         }
       );
       if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-        console.log("You can use the camera");
         getCurrentLocation();
       } else {
         console.log("Camera permission denied");
@@ -218,75 +174,33 @@ const CreateNewProject = ({ navigation }) => {
     );
   };
   useEffect(() => {
-    if (project) {
-      setProjectImageUri(assetsUrl + project?.url);
-      setProjectName(project?.name);
-      setValue(project?.projectTypeId);
-      setGeoFancingArray(project?.geofencingArray);
+    if (selectedProject) {
+      setProjectImageUri(assetsUrl + selectedProject?.url);
+      setProjectName(selectedProject?.name);
+      setValue(selectedProject?.projectTypeId);
+      setGeoFancingArray(selectedProject?.geofencingArray);
     }
-  }, [project]);
+  }, [selectedProject]);
 
   const submitHandler = async () => {
-    // console.log("geoFancingArray", geoFancingArray);
     const formattedScopeOfWOrk = getFormattedScopeOfWorks();
-
-    // console.log("SOW", formattedScopeOfWOrk);
     const formData = new FormData();
-    const projectId = project ? project?.projectId : 0;
+    const projectId = selectedProject ? selectedProject?.projectId : 0;
     if (!value) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select project type.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show("Please select project type.", ToastAndroid.SHORT);
     } else if (!projectName) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter project name.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show("Please enter project name.", ToastAndroid.SHORT);
     } else if (!projectArea) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter project area.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show("Please enter project area.", ToastAndroid.SHORT);
     } else if (!projectImageUri) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please add project image.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show("Please select project image.", ToastAndroid.SHORT);
     } else if (geoFancingArray.length === 0) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please draw project coordinates.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show("Please draw project boundaries.", ToastAndroid.SHORT);
     } else if (Object.keys(sow)?.every((label) => !sow[label].measurement)) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please provide cost for atleast one scope of work.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
-      });
+      ToastAndroid.show(
+        "Please enter at least one scope of work.",
+        ToastAndroid.SHORT
+      );
     } else {
       formData.append("Name", projectName);
       formData.append("ProjectArea", projectArea);
@@ -302,27 +216,25 @@ const CreateNewProject = ({ navigation }) => {
       formData.append("Latitude", geoFancingArray[0][0].latitude);
       formData.append("Longitude", geoFancingArray[0][0].longitude);
       formData.append("scopeOfWorks", JSON.stringify(formattedScopeOfWOrk));
-      const response = await dispatch(updateProjectAction(token, formData));
-      if (response.status === 200) {
-        navigation.goBack();
-        Toast.show({
-          type: "info",
-          text1: "Project Created",
-          text2: "New project is created successfully.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
+
+      createProject(formData)
+        .then((response) => {
+          if (response.status === 200) {
+            navigation.goBack();
+            ToastAndroid.show("Project Created", ToastAndroid.SHORT);
+          } else {
+            ToastAndroid.show(
+              "Something went wrong. Please try again.",
+              ToastAndroid.SHORT
+            );
+          }
+        })
+        .catch((error) => {
+          ToastAndroid.show(
+            error.message || "Something went wrong. Please try again.",
+            ToastAndroid.SHORT
+          );
         });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Something went wrong. Please try again.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 3000,
-        });
-      }
     }
   };
   const handleImagePicker = async () => {
@@ -364,10 +276,6 @@ const CreateNewProject = ({ navigation }) => {
               );
             setGeoFancingArray(newArray);
             setGeoFancingList(JSON.parse(event?.nativeEvent?.data));
-            // JSON.parse(event?.nativeEvent?.data)?.map((area) => {
-            //   console.log("area", area);
-            // });
-            // console.log("newArray", newArray);
             setOpenMapModal(false);
           }}
           injectedJavaScript={runFirst}
@@ -551,8 +459,7 @@ const CreateNewProject = ({ navigation }) => {
             />
             {/* </Pressable> */}
           </View>
-          {(userInfo?.user?.role?.name === "SuperAdmin" ||
-            projectBudgetAccess) && (
+          {(user?.user?.role?.name === "SuperAdmin" || projectBudgetAccess) && (
             <View
               style={{
                 paddingHorizontal: 18,
@@ -666,7 +573,7 @@ const CreateNewProject = ({ navigation }) => {
                   />
                 ))}
             </MapView>
-            {(userInfo?.user?.role?.name === "SuperAdmin" ||
+            {(user?.user?.role?.name === "SuperAdmin" ||
               projectBoundariesAccess) && (
               <View
                 style={{
@@ -724,9 +631,12 @@ const CreateNewProject = ({ navigation }) => {
         <TouchableOpacity
           style={[styles.button, { width: "60%" }]}
           onPress={() => submitHandler()}
-          // onPress={() => setOpenSOWModal(true)}
         >
-          <Text style={styles.buttonText}>Create Project</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color={Colors.White} />
+          ) : (
+            <Text style={styles.buttonText}>Create Project</Text>
+          )}
         </TouchableOpacity>
         <TouchableOpacity
           style={[

@@ -10,6 +10,7 @@ import {
   LogBox,
   Alert,
   Pressable,
+  ToastAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -36,17 +37,18 @@ import { assetsUrl } from "../../utils/api_constants";
 import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
 import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
+import { useGeneralContext } from "../../context/generalContext";
+import { useWorker } from "../../context/workerContext";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewWorker = ({ navigation }) => {
+  const { projects, skills, jobs } = useGeneralContext();
+  const { createWorker } = useWorker();
   const dispatch = useDispatch();
-  const [skills, setSkills] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [skillValue, setSkillValue] = useState(null);
-  const [projectValue, setProjectValue] = useState(null);
   const [genderValue, setGenderValue] = useState(null);
   const [skillLevelValue, setSkillLevelValue] = useState(null);
   const [fullName, setFullName] = useState("");
@@ -58,26 +60,11 @@ const CreateNewWorker = ({ navigation }) => {
   const [profilePicForm, setProfilePicForm] = useState("");
   const [aadharCard, setAadharCard] = useState("");
   const [aadharCardForm, setAadharCardForm] = useState("");
-  const [workerId, setWorkerId] = useState(null);
-  const [uploadType, setUploadType] = useState(null);
-  const [initialFetch, setInitialFetch] = useState(true);
   const [filterJobs, setFilterJob] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
-
-  const projectsList = useSelector(projectsListSimpleReducer);
-  const skillsList = useSelector(skillsListReducer);
-  const jobsList = useSelector(jobsListReducer);
   const token = useSelector(authToken);
 
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-    // dispatch(getAllJobsAction(token, 0));
-  }, []);
-
-  // useEffect(() => {
-  //   dispatch(getSkillsAction());
-  // }, []);
   const worker = useSelector(selectedWorkerReducer);
 
   const data = [
@@ -129,23 +116,51 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
 
-    const response = await dispatch(
-      updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
+    console.log("Form Data", formData);
+
+    const response = await createWorker(
+      formData,
+      profilePicForm,
+      aadharCardForm
     );
-    if (response.status === 200) {
-      navigation.goBack();
-      Toast.show({
-        type: "info",
-        text1: worker ? "Worker Updated" : "Worker Created",
-        text2: worker
-          ? "Worker is updated successfully."
-          : "Worker is created successfully.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
-    }
+
+    console.log("Response", response);
+    // if (typeof createWorker === "function") {
+    // createWorker(formData, profilePicForm, aadharCardForm)
+    //   .then((response) => {
+    //     if (response.status === 200) {
+    //       // navigation.goBack();
+    //       ToastAndroid.show("Worker Created", ToastAndroid.SHORT);
+    //     }
+    //   })
+    //   .catch((error) => {
+    //     console.log("Error", error);
+    //     ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    //   });
+    // } else {
+    //   console.error("createWorker is not a function");
+    //   ToastAndroid.show(
+    //     "Internal error: createWorker is not a function",
+    //     ToastAndroid.SHORT
+    //   );
+    // }
   };
+  // const response = await dispatch(
+  //   updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
+  // );
+  // if (response.status === 200) {
+  //   navigation.goBack();
+  //   Toast.show({
+  //     type: "info",
+  //     text1: worker ? "Worker Updated" : "Worker Created",
+  //     text2: worker
+  //       ? "Worker is updated successfully."
+  //       : "Worker is created successfully.",
+  //     topOffset: 10,
+  //     position: "top",
+  //     visibilityTime: 4000,
+  //   });
+  // }
 
   const handleImagePicker = async () => {
     const result = await launchImageLibrary({
@@ -244,8 +259,8 @@ const CreateNewWorker = ({ navigation }) => {
                 autoScroll={false}
                 search
                 searchPlaceholder="Search Skill"
-                inputSearchStyle={{color: Colors.Black}}
-                data={skillsList?.map((ele) => ({
+                inputSearchStyle={{ color: Colors.Black }}
+                data={skills?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
                 }))}
@@ -258,10 +273,10 @@ const CreateNewWorker = ({ navigation }) => {
                 // onBlur={() => setIsFocus(false)}
                 onChange={(item) => {
                   setSkillValue(item.value);
-                  setFilterJob([])
-                  setSkillLevelValue(null)
-                  setSelectedProject(null)
-                  setSelectedJob(null)
+                  setFilterJob([]);
+                  setSkillLevelValue(null);
+                  setSelectedProject(null);
+                  setSelectedJob(null);
                   // setIsFocus(false);
                 }}
               />
@@ -318,37 +333,6 @@ const CreateNewWorker = ({ navigation }) => {
             />
           </View>
         </View>
-        {/* <View style={{ paddingHorizontal: 15, paddingBottom: 15 }}>
-          <Text style={styles.title}>Project</Text>
-          <View style={{ marginTop: 7 }}>
-            <Dropdown
-              style={styles.dropdown}
-              placeholderStyle={styles.placeholderStyle}
-              selectedTextStyle={styles.selectedTextStyle}
-              itemTextStyle={{
-                fontFamily: "Lexend-Regular",
-                fontSize: 13,
-                color: Colors.FormText,
-              }}
-              iconStyle={styles.iconStyle}
-              data={projectsList?.map((ele) => ({
-                label: ele?.name,
-                value: ele.projectId,
-              }))}
-              maxHeight={300}
-              labelField="label"
-              valueField="value"
-              placeholder={"Select Project"}
-              value={projectValue}
-              // onFocus={() => setIsFocus(true)}
-              // onBlur={() => setIsFocus(false)}
-              onChange={(item) => {
-                setProjectValue(item.value);
-                // setIsFocus(false);
-              }}
-            />
-          </View>
-        </View> */}
         <View
           style={{
             paddingHorizontal: 15,
@@ -399,14 +383,14 @@ const CreateNewWorker = ({ navigation }) => {
                 color: Colors.FormText,
               }}
               iconStyle={styles.iconStyle}
-              data={projectsList.map((ele) => ({
+              data={projects.map((ele) => ({
                 label: ele.name,
                 value: ele.projectId,
               }))}
               autoScroll={false}
               search
               searchPlaceholder="Search project"
-              inputSearchStyle={{color: Colors.Black}}
+              inputSearchStyle={{ color: Colors.Black }}
               maxHeight={300}
               labelField="label"
               valueField="value"
@@ -414,7 +398,7 @@ const CreateNewWorker = ({ navigation }) => {
               value={selectedProject}
               onChange={(item) => {
                 setSelectedProject(item.value);
-                const filterBySkill = jobsList?.filter(
+                const filterBySkill = jobs?.filter(
                   (ele) => ele?.skillId === skillValue
                 );
                 const filterBySkillLevel = filterBySkill?.filter(
@@ -454,7 +438,7 @@ const CreateNewWorker = ({ navigation }) => {
               autoScroll={false}
               search
               searchPlaceholder="Search Job"
-              inputSearchStyle={{color: Colors.Black}}
+              inputSearchStyle={{ color: Colors.Black }}
               // data={[]}
               maxHeight={300}
               labelField="label"
@@ -504,7 +488,7 @@ const CreateNewWorker = ({ navigation }) => {
                 // backgroundColor: Colors.White,
                 // elevation: 3,
                 color: Colors.Black,
-                width: '7%'
+                width: "7%",
               }}
             >
               +91
@@ -522,12 +506,12 @@ const CreateNewWorker = ({ navigation }) => {
                 // backgroundColor: Colors.White,
                 // elevation: 3,
                 color: Colors.Black,
-                width: '93%'
+                width: "93%",
               }}
               keyboardType="number-pad"
               onChangeText={(e) => {
                 if (e?.length <= 10) {
-                setPhoneNumber(e);
+                  setPhoneNumber(e);
                 }
               }}
               value={phoneNumber}

@@ -21,6 +21,12 @@ import Toast from "react-native-toast-message";
 import VersionCheck from "react-native-version-check";
 import { AuthProvider } from "./src/context/authContext";
 import { GeneralProvider } from "./src/context/generalContext";
+import { AttendanceProvider } from "./src/context/attendanceContext";
+import { ProjectProvider } from "./src/context/projectContext";
+import { JobProvider } from "./src/context/jobContext";
+import { WorkerProvider } from "./src/context/workerContext";
+import { ProductivityProvider } from "./src/context/productivityContext";
+import { UserProvider } from "./src/context/userContext";
 
 enableLatestRenderer();
 
@@ -60,9 +66,21 @@ const App = () => {
     <Provider store={store}>
       <AuthProvider>
         <GeneralProvider>
-          <SafeAreaView />
-          <StatusBar backgroundColor={Colors.Primary} />
-          <MainNavigation />
+          <AttendanceProvider>
+            <JobProvider>
+              <ProjectProvider>
+                <WorkerProvider>
+                  <UserProvider>
+                    <ProductivityProvider>
+                      <SafeAreaView />
+                      <StatusBar backgroundColor={Colors.Primary} />
+                      <MainNavigation />
+                    </ProductivityProvider>
+                  </UserProvider>
+                </WorkerProvider>
+              </ProjectProvider>
+            </JobProvider>
+          </AttendanceProvider>
         </GeneralProvider>
       </AuthProvider>
     </Provider>

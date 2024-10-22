@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,11 +9,10 @@ import {
   Modal,
   Pressable,
   RefreshControl,
+  ToastAndroid,
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { Building, Cross, Search } from "../../icons";
 import { useSelector, useDispatch } from "react-redux";
 import {
@@ -37,10 +36,27 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
+import { useAttendance } from "../../context/attendanceContext";
+import { useGeneralContext } from "../../context/generalContext";
 
 LogBox.ignoreAllLogs();
 
 const ApproveAttendance = ({ navigation, route }) => {
+  const {
+    loading,
+    getAttendance,
+    attendance,
+    markWorkerAttendance,
+    approveAttendance,
+  } = useAttendance();
+  const {
+    projects,
+    skills,
+    labourContractorList,
+    getLabourContractors,
+    setProject,
+    project,
+  } = useGeneralContext();
   const [selectedAttendance, setSelectedAttendance] = useState(null);
   const [openApproveModal, setOpenApproveModal] = useState(false);
   const [approveStatus, setApproveStatus] = useState(null);
@@ -52,27 +68,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [currentFilterState, setCurrentFilterState] = useState("Present");
-  const token = useSelector(authToken);
-  const isLoading = useSelector(loadingAttendance);
-  const dispatch = useDispatch();
-  const projectData = useSelector(projectDataReducer);
-  // const attendance = useSelector(attendanceListReducer);
-  const attendance = useSelector(todaysAttendanceListReducer);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const usersList = useSelector(usersListReducer);
-  const labourContractorList = useSelector(labourContractorReducer);
-  const [openDropdown, setOpenDropdown] = useState(false);
-  const [currMarkedAtt, setCurrMarkedAtt] = useState(null);
-  const [count, setCount] = useState(0);
   const [currentPosition, setCurrentPosition] = useState(null);
-
-  const handleDropdownOpen = () => {
-    setOpenDropdown(true);
-  };
-
-  const handleDropdownClose = () => {
-    setOpenDropdown(false);
-  };
 
   // Convert UTC time to Indian Standard Time
   const convertTimeToIST = (time) => {
@@ -96,23 +92,22 @@ const ApproveAttendance = ({ navigation, route }) => {
     { label: "P7", value: 15 },
     { label: "PP", value: 16 },
   ];
-  console.log("ATTENDANCE", projectsListSimple[0]?.projectId);
+
+  const getData = (
+    projectId = projects[0]?.projectId,
+    contractorId = 0,
+    skillId = ""
+  ) => {
+    getAttendance(projectId, contractorId, skillId).catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
+  };
   useFocusEffect(
-    React.useCallback(() => {
-      dispatch(
-        getTodaysAttendanceAction(
-          token,
-          projectData?.projectId || projectsListSimple[0]?.projectId,
-          0,
-          1,
-          15,
-          "",
-          0
-        )
-      );
+    useCallback(() => {
+      getData();
       getCurrentLocation();
       return () => {};
-    }, [projectData, projectsListSimple])
+    }, [project, projects?.length])
   );
 
   const getCurrentLocation = () => {
@@ -126,55 +121,9 @@ const ApproveAttendance = ({ navigation, route }) => {
       { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
     );
   };
-  // useEffect(() => {
-  //   dispatch(
-  //     getTodaysAttendanceAction(
-  //       token,
-  //       projectData?.projectId || projectsListSimple[0]?.projectId,
-  //       0,
-  //       count,
-  //       15
-  //     )
-  //   );
-  // }, [count]);
-  // const [prevProjectId, setPrevProjectId] = useState(null);
-  // const [prevCount, setPrevCount] = useState(null);
-
-  // const projectId = projectData?.projectId || projectsListSimple[0]?.projectId;
-
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (projectId !== prevProjectId) {
-  //       dispatch(getTodaysAttendanceAction(token, projectId, 0, 1, 15, "", 0));
-  //       setPrevProjectId(projectId);
-  //     }
-  //     return () => {};
-  //   }, [projectId])
-  // );
-
-  // useEffect(() => {
-  //   if (count !== prevCount) {
-  //     dispatch(
-  //       getTodaysAttendanceAction(
-  //         token,
-  //         projectId,
-  //         0,
-  //         count,
-  //         15
-  //       )
-  //     );
-  //     setPrevCount(count);
-  //   }
-  // }, [count]);
 
   useEffect(() => {
     if (attendance) {
-      // setFilteredDataAttSource((prev) => {
-      //   return [...(prev || []), ...(attendance?.attendances || [])];
-      // });
-      // setMasterDataAttSource((prev) => {
-      //   return [...(prev || []), ...(attendance?.attendances || [])];
-      // });
       setFilteredDataAttSource(attendance?.attendances);
       setMasterDataAttSource(attendance?.attendances);
     }
@@ -209,46 +158,43 @@ const ApproveAttendance = ({ navigation, route }) => {
     jobId,
     attendanceType
   ) => {
-    let resp = await dispatch(
-      markAttendance(
-        token,
+    try {
+      const response = await markWorkerAttendance({
         workerId,
         jobId,
         attendanceType,
-        currentPosition?.coords?.latitude,
-        currentPosition?.coords?.longitude
-      )
-    );
-    if (resp?.status === 200) {
-      let key = attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
-      let updatedArray = filterAttendance.map((item) =>
-        item.workerId === workerId
-          ? {
-              ...item,
-              [key]: moment.utc(),
-            }
-          : item
-      );
-      setFilterAttendance(updatedArray);
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Something want wrong!",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 3000,
+        latitude: currentPosition?.coords?.latitude,
+        longitude: currentPosition?.coords?.longitude,
       });
+      if (response) {
+        getData(
+          project?.projectId || projects[0]?.projectId,
+          selectedContractor?.value || 0
+        );
+        ToastAndroid.show(
+          "Attendance marked successfully!",
+          ToastAndroid.SHORT
+        );
+        let key =
+          attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
+        let updatedArray = filterAttendance.map((item) =>
+          item.workerId === workerId
+            ? {
+                ...item,
+                [key]: moment.utc(),
+              }
+            : item
+        );
+        setFilterAttendance(updatedArray);
+      }
+    } catch (error) {
+      ToastAndroid.show("Something went wrong!", ToastAndroid.SHORT);
     }
   };
 
   const searchFilterAttendanceFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataAttSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.workerName
           ? item.workerName.toUpperCase()
           : "".toUpperCase();
@@ -258,8 +204,6 @@ const ApproveAttendance = ({ navigation, route }) => {
       setFilteredDataAttSource(newData);
       setSearchAttendance(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataAttSource(masterDataAttSource);
       setSearchAttendance(text);
     }
@@ -318,13 +262,9 @@ const ApproveAttendance = ({ navigation, route }) => {
                 onChange={(item) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
-                  dispatch(
-                    getTodaysAttendanceAction(
-                      token,
-                      projectData?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      item?.value
-                    )
+                  getData(
+                    project?.projectId || projects[0]?.projectId,
+                    item?.value
                   );
                 }}
               />
@@ -419,30 +359,33 @@ const ApproveAttendance = ({ navigation, route }) => {
                 valueField="value"
                 placeholder={"Approve"}
                 value={approveStatus}
-                onFocus={handleDropdownOpen}
-                onBlur={handleDropdownClose}
                 onChange={(item) => {
                   setOpenApproveModal(false);
                   setApproveStatus(item);
-                  dispatch(
-                    getAttendanceApproveAction(
-                      token,
-                      selectedAttendance?.jobId,
-                      selectedAttendance?.workerId,
-                      new Date().toISOString(),
-                      item?.value
-                    )
-                  );
-                  setTimeout(() => {
-                    dispatch(
-                      getTodaysAttendanceAction(
-                        token,
-                        projectData?.projectId ||
-                          projectsListSimple[0]?.projectId
-                      )
-                    );
-                    setApproveStatus(null);
-                  }, 2000);
+                  approveAttendance(
+                    selectedAttendance?.jobId,
+                    selectedAttendance?.workerId,
+                    new Date().toISOString(),
+                    item?.value
+                  )
+                    .then((res) => {
+                      if (res) {
+                        ToastAndroid.show(
+                          "Attendance Approved",
+                          ToastAndroid.SHORT
+                        );
+                        getData(project?.projectId || projects[0]?.projectId);
+                        setApproveStatus(null);
+                      } else {
+                        ToastAndroid.show(
+                          "Something went wrong",
+                          ToastAndroid.SHORT
+                        );
+                      }
+                    })
+                    .catch((error) => {
+                      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+                    });
                 }}
               />
             </View>
@@ -738,12 +681,12 @@ const ApproveAttendance = ({ navigation, route }) => {
       <View style={styles.header} />
       <Pressable style={styles.graph}>
         <Pressable
-          onPress={() => {
+          onPress={async () => {
             setOpenFilterModal(true);
-            const projectId = projectData?.projectId
-              ? projectData?.projectId
-              : projectsListSimple[0]?.projectId;
-            dispatch(getLabourContactorAction(token, projectId));
+            const projectId = project?.projectId
+              ? project?.projectId
+              : projects[0]?.projectId;
+            await getLabourContractors(projectId);
           }}
           style={styles.contractorButton}
         >
@@ -783,23 +726,14 @@ const ApproveAttendance = ({ navigation, route }) => {
         <FlatList
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
+              refreshing={loading}
               onRefresh={() => {
-                dispatch(
-                  getTodaysAttendanceAction(
-                    token,
-                    projectData?.projectId || projectsListSimple[0]?.projectId
-                  )
-                );
+                getData(project?.projectId || projects[0]?.projectId);
               }}
               tintColor={Colors.Primary}
               colors={[Colors.Purple, Colors.Primary]}
             />
           }
-          // onEndReached={() => {
-          //   setCount(count + 1);
-          // }}
-          // onEndReachedThreshold={0.7}
           extraData={filterAttendance}
           data={!filterAttendance ? filteredDataAttSource : filterAttendance}
           renderItem={({ item, index }) => <Item item={item} index={index} />}

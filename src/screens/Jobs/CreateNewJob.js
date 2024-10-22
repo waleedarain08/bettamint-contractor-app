@@ -2,54 +2,32 @@ import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
-  FlatList,
-  Dimensions,
   LogBox,
-  Alert,
   Appearance,
   Pressable,
+  ToastAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import {
-  ClockIcon,
-  DateIcon,
-  LocationIcon,
-  Picture,
-  RupeesIcon,
-} from "../../icons";
+import { ClockIcon, DateIcon, LocationIcon, RupeesIcon } from "../../icons";
 import Spacer from "../../components/Spacer";
-import DropDownPicker from "react-native-dropdown-picker";
 import CheckBox from "@react-native-community/checkbox";
-import { createJobAction, createJobReducer } from "../../redux/slices/jobSlice";
 import { useDispatch, useSelector } from "react-redux";
-import Toast from "react-native-toast-message";
-import {
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-  projectsListReducer,
-  getAllProjectsAction,
-} from "../../redux/slices/projectSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
-import {
-  getSkillsAction,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
 import { GOOGLE_API_KEY } from "../../utils/api_constants";
 import { authToken } from "../../redux/slices/authSlice";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
+import { useGeneralContext } from "../../context/generalContext";
+import { useJob } from "../../context/jobContext";
+import { useAuth } from "../../context/authContext";
+
 LogBox.ignoreAllLogs();
 
 const CreateNewJob = ({ navigation }) => {
+  const { projects, skills } = useGeneralContext();
+  const { createJob, getJobs } = useJob();
   const [selectedProject, setSelectedProject] = useState(null);
   const [requiredWorkers, setRequiredWorkers] = useState(null);
   const [dailyWage, setDailyWage] = useState(null);
@@ -72,17 +50,9 @@ const CreateNewJob = ({ navigation }) => {
   const [privateVal, setPrivateVal] = useState(false);
   const [nmrVal, setNMRVal] = useState(true);
   const [prwVal, setPRWVal] = useState(false);
-  const dispatch = useDispatch();
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const token = useSelector(authToken);
-  const skillsList = useSelector(skillsListReducer);
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
-
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-  }, [selectedProject]);
 
   const skillLevel = [
     { label: "Supervisor", value: "Supervisor" },
@@ -91,12 +61,8 @@ const CreateNewJob = ({ navigation }) => {
   ];
 
   useEffect(() => {
-    dispatch(getSkillsAction(token));
-  }, []);
-
-  useEffect(() => {
     const getCurrentCity = () => {
-      const project = projectsListSimple?.filter(
+      const project = projects?.filter(
         (ele) => ele?.projectId === selectedProject
       );
       setProjectData(project[0]);
@@ -119,89 +85,26 @@ const CreateNewJob = ({ navigation }) => {
     getCurrentCity();
   }, [selectedProject]);
 
-  const submitHandler = async () => {
+  const submitHandler = () => {
     const formData = new FormData();
     if (!selectedProject) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select the project.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please select the project.", ToastAndroid.SHORT);
     } else if (!requiredWorkers) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter required workers.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please enter required workers.", ToastAndroid.SHORT);
     } else if (!manDay) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter man days.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please enter man days.", ToastAndroid.SHORT);
     } else if (!skillValue) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select skill.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please select skill.", ToastAndroid.SHORT);
     } else if (!skillLevelValue) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select skill level.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please select skill level.", ToastAndroid.SHORT);
     } else if (!time) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please select reporting time.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please select reporting time.", ToastAndroid.SHORT);
     } else if (!dailyWage) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter daily wage.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please enter daily wage.", ToastAndroid.SHORT);
     } else if (!jobDescription) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter job description.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please enter job description.", ToastAndroid.SHORT);
     } else if (!number) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Please enter contact number.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+      ToastAndroid.show("Please enter contact number.", ToastAndroid.SHORT);
     } else {
       formData.append("contractorId", 1);
       formData.append("startDate", moment(date).format("YYYY-MM-DD"));
@@ -210,7 +113,7 @@ const CreateNewJob = ({ navigation }) => {
       formData.append("longitude", Number(projectData?.longitude));
       formData.append("skillId", parseInt(skillValue, 10));
       formData.append("skillLevel", 0);
-      formData.append("reportingTime", moment(time).format("hh:mm"));
+      formData.append("reportingTime", moment(time).format("YYYY-MM-DD hh:mm"));
       formData.append("rating", 0);
       formData.append("requiredWorkers", parseInt(requiredWorkers, 10));
       formData.append("dailyWage", parseInt(dailyWage, 10));
@@ -225,53 +128,27 @@ const CreateNewJob = ({ navigation }) => {
       formData.append("skillTypeId", skillLevelValue);
       formData.append("cityName", jobLocation);
       formData.append("isPrivate", privateVal ? true : false);
+      formData.append("supervisorName", supervisorName);
       formData.append("isNMR", nmrVal ? true : false);
-
-      const response = await dispatch(createJobAction(token, formData));
-      if (response?.status === 200) {
-        navigation.goBack();
-        Toast.show({
-          type: "info",
-          text1: "Job Created",
-          text2: "Job is created successfully.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
+      createJob(formData)
+        .then((response) => {
+          if (response?.status === 200) {
+            getJobs(0);
+            navigation.goBack();
+            ToastAndroid.show("Job Created", ToastAndroid.SHORT);
+          } else {
+            ToastAndroid.show("Job Not Created", ToastAndroid.SHORT);
+          }
+        })
+        .catch((error) => {
+          console.log("ERROR", error);
+          ToastAndroid.show(
+            "Something went wrong! Try again.",
+            ToastAndroid.SHORT
+          );
         });
-        dispatch(getAllJobsAction(token, 0));
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Job Not Created",
-          text2: "Something want wrong! Try again.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
-        });
-      }
     }
   };
-  // contractorId: 1
-  // startDate: 2023-04-17
-  // endDate:
-  // latitude: 24.9184106
-  // longitude: 67.1108412
-  // skillId: 5
-  // skillLevel: 0
-  // reportingTime: 04:18
-  // rating: 0
-  // requiredWorkers: 12
-  // dailyWage: 133
-  // audio:
-  // video:
-  // projectId: 78
-  // description: working
-  // contactNumber: 911234
-  // manDays: 12
-  // isFood: true
-  // isAccomodation: true
-  // skillTypeId: Skilled
-  // cityName: W496+98, Jumma Khan Goth Hussain Hazara goth Gulshan-e-Iqbal, Karachi, Karachi City, Sindh, Pakistan
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -289,7 +166,7 @@ const CreateNewJob = ({ navigation }) => {
                 color: Colors.FormText,
               }}
               iconStyle={styles.iconStyle}
-              data={projectsListSimple.map((project) => ({
+              data={projects.map((project) => ({
                 label: project?.name,
                 value: project?.projectId,
                 ...project,
@@ -391,7 +268,7 @@ const CreateNewJob = ({ navigation }) => {
               }}
               iconStyle={styles.iconStyle}
               // data={data}
-              data={skillsList?.map((ele) => ({
+              data={skills?.map((ele) => ({
                 label: ele?.name,
                 value: ele?.skillId,
               }))}

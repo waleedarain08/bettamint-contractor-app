@@ -1,58 +1,35 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
-  Dimensions,
   Pressable,
   Modal,
   LogBox,
   RefreshControl,
   Linking,
+  ToastAndroid,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-// import Logo from "../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
+import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
-import DropDownPicker from "react-native-dropdown-picker";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import { LocationIcon, Search, BackIcon, Cross } from "../../icons";
 import { Building, Whatsapp } from "../../icons";
-import { useSelector, useDispatch } from "react-redux";
 import { Searchbar } from "react-native-paper";
-import {
-  completeJob,
-  getAllJobsAction,
-  jobsListReducer,
-  loadingCompleteJob,
-  loadingJobs,
-  selectedJobAction,
-} from "../../redux/slices/jobSlice";
-
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import { authToken, userData } from "../../redux/slices/authSlice";
 import moment from "moment";
 import { Dropdown } from "react-native-element-dropdown";
-import { skillsListReducer } from "../../redux/slices/workerSlice";
-import { getSkillsAction } from "../../redux/slices/workerSlice";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { useFocusEffect } from "@react-navigation/native";
 import RestrictedScreen from "../../components/RestrictedScreen";
+import { useAuth } from "../../context/authContext";
+import { useGeneralContext } from "../../context/generalContext";
+import { useJob } from "../../context/jobContext";
 LogBox.ignoreAllLogs();
 
 const Jobs = ({ navigation }) => {
-  const [details, setDetails] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const { user } = useAuth();
+  const { projects, skills, labourContractorList } = useGeneralContext();
+  const { loading, jobs, getJobs, setSelectedJob, completeJob } = useJob();
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -62,49 +39,37 @@ const Jobs = ({ navigation }) => {
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
   const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
   const [masterDataAttSource, setMasterDataAttSource] = useState([]);
   const [searchAttendance, setSearchAttendance] = useState("");
 
-  const dispatch = useDispatch();
-  const skillsList = useSelector(skillsListReducer);
-  // console.log('Skills', skillsList)
-  const usersList = useSelector(usersListReducer);
-
-  const jobsList = useSelector(jobsListReducer);
-  const isLoading = useSelector(loadingJobs);
-  const token = useSelector(authToken);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const isLoadingCompJob = useSelector(loadingCompleteJob);
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const roles = user?.user?.role?.roleFeatureSets;
   const isJobsListPresent = roles.some(
     (item) => item.featureSet.name === "Jobs List"
   );
 
-  //   useEffect(() => {}, []);
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(getAllJobsAction(token, 0));
-      dispatch(getUsersAction(token));
+  const getData = async (contractorId = 0) => {
+    getJobs(contractorId).catch((error) => {
+      console.log(error);
+    });
+  };
 
+  useFocusEffect(
+    useCallback(() => {
+      getData();
       return () => {};
-    }, [isLoadingCompJob])
+    }, [])
   );
+
   useEffect(() => {
-    setFilteredDataAttSource(jobsList);
-    setMasterDataAttSource(jobsList);
-  }, [jobsList]);
+    setFilteredDataAttSource(jobs);
+    setMasterDataAttSource(jobs);
+  }, [jobs?.length]);
+
   const searchFilterAttendanceFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataAttSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.jobName
           ? item.jobName.toUpperCase()
           : "".toUpperCase();
@@ -115,30 +80,16 @@ const Jobs = ({ navigation }) => {
       setFilteredDataAttSource(newData);
       setSearchAttendance(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataAttSource(masterDataAttSource);
       setSearchAttendance(text);
     }
   };
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
-    );
-  }, [usersList]);
-  useEffect(() => {
-    dispatch(getSkillsAction(token));
-  }, []);
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-  }, [selectedProject]);
 
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+    setFilteredDataSource(projects);
+    setMasterDataSource(projects);
+  }, [projects?.length]);
 
-  // Search function for project list
   const searchFilterFunction = (text) => {
     if (text) {
       const newData = masterDataSource.filter(function (item) {
@@ -161,7 +112,6 @@ const Jobs = ({ navigation }) => {
         transparent={true}
         visible={openSearchUserModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenSearchUserModal(!openSearchUserModal);
         }}
       >
@@ -171,8 +121,6 @@ const Jobs = ({ navigation }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
           }}
         >
           <View
@@ -211,18 +159,6 @@ const Jobs = ({ navigation }) => {
                   size={22}
                   color={Colors.Black}
                 />
-                {/* <Pressable
-					  onPress={() => {
-						setSelectedContractor(null);
-						setOpenFilterModal(false);
-						setUserFilter(null);
-					  }}
-					  style={{ marginTop: 3 }}
-					>
-					  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
-						Clear Filter
-					  </Text>
-					</Pressable> */}
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
@@ -314,7 +250,8 @@ const Jobs = ({ navigation }) => {
                     setSelectedSkills(null);
                     setOpenFilterModal(false);
                     setFilterJob(null);
-                    dispatch(getAllJobsAction(token, 0));
+                    getData();
+                    // dispatch(getAllJobsAction(token, 0));
                   }}
                   style={{ marginTop: 3 }}
                 >
@@ -342,7 +279,7 @@ const Jobs = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={skillsList?.map((ele) => ({
+                data={skills?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
                 }))}
@@ -355,7 +292,7 @@ const Jobs = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedSkills(item);
                   setFilterJob(
-                    jobsList?.filter((ele) => ele.skillId === item?.value)
+                    jobs?.filter((ele) => ele.skillId === item?.value)
                   );
                 }}
               />
@@ -378,7 +315,7 @@ const Jobs = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
+                data={labourContractorList?.map((ele) => ({
                   label: ele?.fullName,
                   value: ele?.userId,
                 }))}
@@ -391,7 +328,8 @@ const Jobs = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
                   setSelectedSkills(null);
-                  dispatch(getAllJobsAction(token, item?.value));
+                  // dispatch(getAllJobsAction(token, item?.value));
+                  getData(item?.value);
                 }}
               />
             </View>
@@ -428,7 +366,8 @@ const Jobs = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => {
               navigation.navigate("JobDetails");
-              dispatch(selectedJobAction(item));
+              // dispatch(selectedJobAction(item));
+              setSelectedJob(item);
             }}
             style={{
               justifyContent: "center",
@@ -447,7 +386,18 @@ const Jobs = ({ navigation }) => {
           <TouchableOpacity
             onPress={() => {
               //   console.log(item);
-              dispatch(completeJob(token, item?.jobId));
+              completeJob(item?.jobId)
+                .then((res) => {
+                  getData();
+                })
+                .catch((error) => {
+                  console.log(error);
+                  ToastAndroid.show(
+                    "Something went wrong while completing job!",
+                    ToastAndroid.SHORT
+                  );
+                });
+              // dispatch(completeJob(token, item?.jobId));
             }}
             disabled={item?.isCompleted}
             style={{
@@ -651,9 +601,9 @@ const Jobs = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
-                  dispatch(getAllJobsAction(token, 0));
+                  getData();
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
@@ -737,7 +687,7 @@ const Jobs = ({ navigation }) => {
                       onPress={() => {
                         setSelectedProject(item);
                         setFilterJob(
-                          jobsList?.filter(
+                          jobs?.filter(
                             (ele) => ele?.projectId === item?.projectId
                           )
                         );

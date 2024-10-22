@@ -12,46 +12,27 @@ import {
   Modal,
   RefreshControl,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Menu from "../../assets/icons/Menu.png";
+import { ScrollView, TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
 import { Building, Search, BackIcon, Cross } from "../../icons";
-import { useSelector, useDispatch } from "react-redux";
 import { Searchbar } from "react-native-paper";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import {
-  paymentsListReducer,
-  getPaymentsAction,
-  loadingPayments,
-  getAllPaymentsAction,
-  allPaymentsListReducer,
-} from "../../redux/slices/paymentSlice";
-import {
-  attendanceListReducer,
-  saveProjectDataAction,
-  selectAttendanceAction,
-  loadingAttendance,
-} from "../../redux/slices/attendanceSlice";
 import CheckBox from "@react-native-community/checkbox";
-import { authToken, userData } from "../../redux/slices/authSlice";
-import {
-  getSkillsAction,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import RestrictedScreen from "../../components/RestrictedScreen";
+import { useAuth } from "../../context/authContext";
+import { useGeneralContext } from "../../context/generalContext";
+import { useAttendance } from "../../context/attendanceContext";
 LogBox.ignoreAllLogs();
+
 const Payments = ({ navigation }) => {
+  const { user } = useAuth();
+  const { projects, skills, labourContractorList } = useGeneralContext();
+  const { loading, attendance, getAttendance, setSelectedAttendance } =
+    useAttendance();
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
-  const [toggleCheckBoxSep, setToggleCheckBoxSep] = useState(false);
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -62,23 +43,20 @@ const Payments = ({ navigation }) => {
   const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
   const [paymentsList, setPaymentsList] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
-  const dispatch = useDispatch();
-  const [count, setCount] = useState(1);
-  //   const payments = useSelector(paymentsListReducer);
-  const attendanceList = useSelector(allPaymentsListReducer);
-  const skillsList = useSelector(skillsListReducer);
-  const usersList = useSelector(usersListReducer);
-  const isLoading = useSelector(loadingPayments);
-  // const isLoadingAttendance = useSelector(loadingPayments);
-  const token = useSelector(authToken);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
 
-  const userInfo = useSelector(userData);
+  const getData = (
+    projectId = projects[0]?.projectId,
+    contractorId = 0,
+    skillId = ""
+  ) => {
+    getAttendance(projectId, contractorId, skillId).catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
+  };
 
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const roles = user?.user?.role?.roleFeatureSets;
   const isPaymentListPresent = roles.some(
     (item) => item.featureSet.name === "Payment List"
   );
@@ -87,80 +65,29 @@ const Payments = ({ navigation }) => {
     { label: "Online", value: "Online" },
     { label: "Offline", value: "Offline" },
   ];
-  // console.log('list---', attendanceList)
   useEffect(() => {
-    dispatch(
-      getAllPaymentsAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0,
-        1,
-        15,
-        "",
-        0
-      )
-    );
-    if (attendanceList?.attendances?.length) {
-      setPaymentsList(attendanceList?.attendances);
+    getData(selectedProject?.projectId || projects[0]?.projectId, 0, "");
+    if (attendance?.attendances?.length) {
+      setPaymentsList(attendance?.attendances);
     }
-  }, [selectedProject, attendanceList?.attendances?.length]);
+  }, [selectedProject, attendance?.attendances?.length]);
 
   useEffect(() => {
-    dispatch(getSkillsAction(token));
-    dispatch(getUsersAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
-  }, []);
-
-  useEffect(() => {
-    dispatch(
-      getAllPaymentsAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0,
-        count,
-        15,
-        selectedSkills?.value || "",
-        0
-      )
-    );
-    // console.log('useEffect')
-  }, [count]);
-
-  useEffect(() => {
-    if (attendanceList?.attendances?.length > 0) {
+    if (attendance?.attendances?.length > 0) {
       setPaymentsList((prev) => {
-        return [...(prev || []), ...(attendanceList?.attendances || [])];
+        return [...(prev || []), ...(attendance?.attendances || [])];
       });
-      // console.log('PAYMENT---', paymentsList?.length)
-      // setMasterDataAttSource((prev) => {
-      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
-      // });
-
-      // console.log("attendanceList", filteredDataAttSource[0]);
-      // console.log("attendanceList", attendanceList?.attendances[0]);
     }
-  }, [attendanceList?.attendances, selectedSkills]);
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
-    );
-  }, [usersList]);
+  }, [attendance?.attendances, selectedSkills]);
 
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+    setFilteredDataSource(projects);
+    setMasterDataSource(projects);
+  }, [projects?.length]);
 
-  // useEffect(() => {
-  // 	dispatch(getPaymentsAction());
-  // }, [selectedProject]);
   const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
@@ -168,15 +95,10 @@ const Payments = ({ navigation }) => {
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
     }
   };
-  const [data, setData] = useState({
-    array: attendanceList?.attendances,
-  });
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
@@ -184,11 +106,9 @@ const Payments = ({ navigation }) => {
     return (
       <Modal
         animationType="slide"
-        // transparent={true}
         presentationStyle="pageSheet"
         visible={openFilterModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenFilterModal(!openFilterModal);
         }}
       >
@@ -244,17 +164,10 @@ const Payments = ({ navigation }) => {
                     setSelectedContractor(null);
                     setSelectedSkills(null);
                     setSelectedStatus(null);
-                    dispatch(
-                      getAllPaymentsAction(
-                        token,
-                        selectedProject?.projectId ||
-                          projectsListSimple[0]?.projectId,
-                        0,
-                        1,
-                        15,
-                        "",
-                        0
-                      )
+                    getData(
+                      selectedProject?.projectId || projects[0]?.projectId,
+                      0,
+                      ""
                     );
                     setOpenFilterModal(false);
                     setFilteredAttendance(null);
@@ -296,7 +209,7 @@ const Payments = ({ navigation }) => {
                   setSelectedStatus(item);
                   setSelectedSkills(null);
                   setFilteredAttendance(
-                    attendanceList?.attendances?.filter(
+                    attendance?.attendances?.filter(
                       (ele) => ele.workerTypeId === item?.value
                     )
                   );
@@ -321,7 +234,7 @@ const Payments = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={skillsList?.map((ele) => ({
+                data={skills?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.name,
                 }))}
@@ -335,7 +248,7 @@ const Payments = ({ navigation }) => {
                   setSelectedSkills(item);
                   setSelectedStatus(null);
                   setFilteredAttendance(
-                    attendanceList?.attendances?.filter(
+                    attendance?.attendances?.filter(
                       (ele) => ele.sKillName === item?.value
                     )
                   );
@@ -360,7 +273,7 @@ const Payments = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
+                data={labourContractorList?.map((ele) => ({
                   label: ele?.fullName,
                   value: ele?.userId,
                 }))}
@@ -374,17 +287,9 @@ const Payments = ({ navigation }) => {
                   setSelectedContractor(item);
                   setSelectedStatus(null);
                   setSelectedSkills(null);
-                  dispatch(
-                    getAllPaymentsAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      item?.value,
-                      1,
-                      15,
-                      "",
-                      0
-                    )
+                  getData(
+                    selectedProject?.projectId || projects[0]?.projectId,
+                    item?.value
                   );
                 }}
               />
@@ -409,7 +314,7 @@ const Payments = ({ navigation }) => {
       return;
     }
     // if (!isChecked) {
-    let data = attendanceList?.attendances?.map((item) => {
+    let data = attendance?.attendances?.map((item) => {
       if (item.workerId === workerId && item.jobId === jobId) {
         return {
           ...item,
@@ -476,7 +381,7 @@ const Payments = ({ navigation }) => {
         <TouchableOpacity
           onPress={() => {
             navigation.navigate("PaymentMusterCard");
-            dispatch(selectAttendanceAction(item));
+            setSelectedAttendance(item);
           }}
           style={{
             backgroundColor: "#ECE5FC",
@@ -589,8 +494,8 @@ const Payments = ({ navigation }) => {
                 >
                   {selectedProject
                     ? selectedProject?.name
-                    : projectsListSimple
-                    ? projectsListSimple[0]?.name
+                    : projects
+                    ? projects[0]?.name
                     : "Select a project"}
                 </Text>
               </View>
@@ -669,24 +574,15 @@ const Payments = ({ navigation }) => {
               // marginBottom: 10
             }}
           >
-            {!attendanceList?.attendances ||
-            attendanceList?.attendances?.length === 0 ? (
+            {!attendance?.attendances ||
+            attendance?.attendances?.length === 0 ? (
               <ScrollView
                 refreshControl={
                   <RefreshControl
-                    refreshing={isLoading}
+                    refreshing={loading}
                     onRefresh={() => {
-                      dispatch(
-                        getAllPaymentsAction(
-                          token,
-                          selectedProject?.projectId ||
-                            projectsListSimple[0]?.projectId,
-                          0,
-                          1,
-                          15,
-                          "",
-                          0
-                        )
+                      getData(
+                        selectedProject?.projectId || projects[0]?.projectId
                       );
                     }}
                     tintColor={Colors.Primary}
@@ -713,24 +609,11 @@ const Payments = ({ navigation }) => {
               <FlatList
                 refreshControl={
                   <RefreshControl
-                    refreshing={isLoading}
+                    refreshing={loading}
                     onRefresh={() => {
-                      dispatch(
-                        getAllPaymentsAction(
-                          token,
-                          selectedProject?.projectId ||
-                            projectsListSimple[0]?.projectId,
-                          0,
-                          1,
-                          15,
-                          "",
-                          0
-                        )
+                      getData(
+                        selectedProject?.projectId || projects[0]?.projectId
                       );
-                      setCount(1)
-                    }}
-                    onEndReached={() => {
-                      setCount(count + 1);
                     }}
                     tintColor={Colors.Primary}
                     colors={[Colors.Purple, Colors.Primary]}
@@ -848,7 +731,6 @@ const Payments = ({ navigation }) => {
                       onPress={() => {
                         setSelectedProject(item);
                         setOpenSearchModal(false);
-                        setData();
                       }}
                     >
                       <Text

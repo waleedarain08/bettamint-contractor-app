@@ -17,13 +17,6 @@ import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
 import { BarChart, PieChart } from "react-native-gifted-charts";
 import Modal from "react-native-modal";
-import { loadingUsers } from "../../redux/slices/userSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { authToken, userData } from "../../redux/slices/authSlice";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
 import RestrictedScreen from "../../components/RestrictedScreen";
 import {
   BackIcon,
@@ -34,37 +27,20 @@ import {
   Search,
 } from "../../icons";
 import { Searchbar } from "react-native-paper";
-import {
-  countReducer,
-  getAttendanceTrendline,
-  getContractorsStats,
-  getFinancialProgressMetrics,
-  getLabourExpenseMetrics,
-  getLabourTurnoverMetrics,
-  getPayments,
-  getWorkerSkills,
-  getWorkforceMetrics,
-} from "../../redux/slices/countsSlice";
 import moment from "moment";
 import DatePicker from "react-native-date-picker";
-import {
-  getFinancialProgressData,
-  getProjectBudget,
-  productivityReducer,
-} from "../../redux/slices/productivitySlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { useAuth } from "../../context/authContext";
 import { useGeneralContext } from "../../context/generalContext";
-import { useFocusEffect } from "@react-navigation/native";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-
 LogBox.ignoreAllLogs();
 
 const Dashboard = ({ navigation }) => {
   // Context instance
   const { user } = useAuth();
   const {
+    loading,
     projects,
     getStatsCount,
     statsCount,
@@ -74,55 +50,25 @@ const Dashboard = ({ navigation }) => {
     paymentsGraphData,
     getContractorsGraphData,
     contractorsGraphData,
+    getWorkersSkill,
+    workersSkill,
+    getFinancialCount,
+    financialCount,
+    getWorkForce,
+    workForceMetrics,
+    getLabourTurnover,
+    labourTurnover,
+    getLabourExpense,
+    labourExpense,
+    getProjectBudgetData,
+    projectBudgetGraph,
+    getFinancialProgress,
+    financialProgressGraph,
   } = useGeneralContext();
 
   // Initial Dates
   const startDate = moment().startOf("week").format("YYYY-MM-DD HH:mm:ss");
   const endDate = moment().endOf("week").format("YYYY-MM-DD HH:mm:ss");
-
-  const getData = async () => {
-    const promises = [];
-
-    // Add getStatsCount to the promises array
-    promises.push(
-      getStatsCount().catch((error) => {
-        ToastAndroid.show(error.message, ToastAndroid.SHORT);
-      })
-    );
-
-    // Add getAttendanceGraphData only if projects exist
-    if (projects !== null && projects.length > 0) {
-      promises.push(
-        getAttendanceGraphData(
-          projects[0]?.projectId,
-          startDate,
-          endDate
-        ).catch((error) => {
-          ToastAndroid.show(error.message, ToastAndroid.SHORT);
-        })
-      );
-      promises.push(
-        getPaymentsGraphData(projects[0]?.projectId, startDate, endDate).catch(
-          (error) => {
-            ToastAndroid.show(error.message, ToastAndroid.SHORT);
-          }
-        )
-      );
-      promises.push(
-        getContractorsGraphData(projects[0]?.projectId, startDate).catch(
-          (error) => {
-            ToastAndroid.show(error.message, ToastAndroid.SHORT);
-          }
-        )
-      );
-    }
-
-    // Execute all promises and wait for them to settle
-    await Promise.allSettled(promises);
-  };
-  useEffect(() => {
-    getData();
-  }, [projects?.length]);
 
   // Local States
   const [openSearchModal, setOpenSearchModal] = useState(false);
@@ -162,26 +108,6 @@ const Dashboard = ({ navigation }) => {
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
 
-  //! INSTANCES
-  const dispatch = useDispatch();
-
-  //! SELECTORS
-  const token = useSelector(authToken);
-  const isLoading = useSelector(loadingUsers);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const {
-    workerSkill,
-    // attendanceGraphData,
-    contractorsStats,
-    payments,
-    financialProgressMetrics,
-    workforceMetrics,
-    labourTurnoverMetrics,
-    labourExpenseMetrics,
-  } = useSelector(countReducer);
-  const { projectBudgetData, financialGraphData } =
-    useSelector(productivityReducer);
-  // User Role instance
   const roles = user?.user?.role?.roleFeatureSets;
   const isDashboardPresent = roles.some(
     (item) => item.featureSet.name === "Dashboard"
@@ -191,17 +117,8 @@ const Dashboard = ({ navigation }) => {
     return Math.ceil(number / multiple) * multiple;
   }
 
-  // Set projects list initially
-  useFocusEffect(
-    React.useCallback(() => {
-      setFilteredDataSource(projects);
-      setMasterDataSource(projects);
-    }, [projects])
-  );
-
   //! LIFE-CYCLE-METHODS --------------------------------
   useEffect(() => {
-    // dispatch(getAllProjectsSimpleAction(token));
     setSelectedAttendanceProject(null);
     setAttendanceSelectedDate(new Date());
     setSelectedPaymentProject(null);
@@ -210,49 +127,56 @@ const Dashboard = ({ navigation }) => {
     setPieSelectedDate(new Date());
   }, []);
 
-  useEffect(() => {
-    if (projects) {
-      // dispatch(
-      //   getPayments(
-      //     token,
-      //     projects[0]?.projectId,
-      //     moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-      //     moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-      //   )
-      // );
-      // dispatch(
-      //   getContractorsStats(
-      //     token,
-      //     projects[0]?.projectId,
-      //     moment().format("YYYY-MM-DD")
-      //   )
-      // );
-      dispatch(
-        getWorkerSkills(
-          token,
-          "2022-08-31T19:00:00Z",
-          moment().utc().format(),
-          projects[0]?.projectId
-        )
-      );
-      setCurrentProjectBudget(projects[0]?.projectId);
-      setCurrentProjectFinancial(projects[0]?.projectId);
-      setCurrentProjectLabourTurnover(projects[0]?.projectId);
-      // Metrics
-      dispatch(getFinancialProgressMetrics(token, projects[0]?.projectId));
-      dispatch(getWorkforceMetrics(token, projects[0]?.projectId));
-      dispatch(getLabourTurnoverMetrics(token, projects[0]?.projectId));
-      dispatch(getProjectBudget(token, projects[0]?.projectId));
-      dispatch(getFinancialProgressData(token, projects[0]?.projectId));
-      dispatch(getLabourExpenseMetrics(token, projects[0]?.projectId));
+  const getData = async () => {
+    if (!projects || projects.length === 0) {
+      console.log("No projects found.");
+      return;
     }
-  }, [projects]);
 
-  /**
-   * Restructured attendance graph array
-   *
-   * @returns Array
-   */
+    const projectId = projects[0]?.projectId;
+    const promises = [];
+    promises.push(getStatsCount());
+
+    if (projectId) {
+      promises.push(getAttendanceGraphData(projectId, startDate, endDate));
+      promises.push(getPaymentsGraphData(projectId, startDate, endDate));
+      promises.push(getContractorsGraphData(projectId, startDate));
+      promises.push(getWorkersSkill(startDate, endDate, projectId));
+      promises.push(getFinancialCount(projectId));
+      promises.push(getWorkForce(projectId));
+      promises.push(getLabourTurnover(projectId));
+      promises.push(getLabourExpense(projectId));
+      promises.push(getProjectBudgetData(projectId)); // Uncomment if needed
+      promises.push(getFinancialProgress(projectId));
+    }
+
+    // Set the current project data
+    setCurrentProjectBudget(projectId);
+    setCurrentProjectFinancial(projectId);
+    setCurrentProjectLabourTurnover(projectId);
+    setFilteredDataSource(projects);
+    setMasterDataSource(projects);
+
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === "rejected") {
+        ToastAndroid.show(
+          result.reason.message || "Error occurred",
+          ToastAndroid.SHORT
+        );
+        console.error("Error in promise:", result.reason);
+      } else {
+        console.log("Promise resolved:", result.value);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (projects?.length > 0) {
+      getData();
+    }
+  }, [projects?.length]);
+
   const attendanceGraphsData = () => {
     return attendanceGraphData?.flatMap((item) => [
       {
@@ -276,19 +200,12 @@ const Dashboard = ({ navigation }) => {
       let attendanceValues =
         attendanceGraphData &&
         attendanceGraphData?.map((item) => item.Present || item.Absent);
-
-      // Find the maximum value from the array
       const attendanceMaxValue = Math?.max(...attendanceValues);
       attendanceMax = roundToNearestMultiple(attendanceMaxValue, 100);
     }
     return attendanceMax;
   };
 
-  /**
-   * Restructured Payment graph array
-   *
-   * @returns Array
-   */
   const paymentGraphData = () => {
     return paymentsGraphData?.map((item) => ({
       value: item?.DueAmount <= 0 ? 0 : item?.DueAmount,
@@ -302,19 +219,12 @@ const Dashboard = ({ navigation }) => {
     if (paymentsGraphData) {
       let paymentValues =
         paymentsGraphData && paymentsGraphData?.map((item) => item.DueAmount);
-
-      // Find the maximum value from the array
       const paymentMaxValue = Math?.max(...paymentValues);
       paymentMax = roundToNearestMultiple(paymentMaxValue, 1000);
     }
     return paymentMax;
   };
 
-  /**
-   * Restructured Contractor graph array
-   *
-   * @returns Array
-   */
   const contractorGraphData = () => {
     return (
       contractorsGraphData &&
@@ -325,15 +235,10 @@ const Dashboard = ({ navigation }) => {
     );
   };
 
-  /**
-   * Restructured Worker skills graph array
-   *
-   * @returns Array
-   */
   const getSkillGraphData = () => {
     return (
-      workerSkill &&
-      workerSkill?.map((item, index) => ({
+      workersSkill &&
+      workersSkill?.map((item, index) => ({
         label: item?.skill,
         stacks: item?.data?.map((ele) => ({
           value: ele?.count,
@@ -350,8 +255,8 @@ const Dashboard = ({ navigation }) => {
 
   const getSkillMaxValue = () => {
     let skillMax = 100;
-    if (workerSkill) {
-      for (const skill of workerSkill) {
+    if (workersSkill) {
+      for (const skill of workersSkill) {
         const skillSum = skill?.data?.reduce(
           (acc, curr) => acc + curr.count,
           0
@@ -365,7 +270,7 @@ const Dashboard = ({ navigation }) => {
   };
 
   const budgetGraphsData = () => {
-    return projectBudgetData?.graphData?.flatMap((item) => [
+    return projectBudgetGraph?.graphData?.flatMap((item) => [
       {
         value: item.budgetedCost || 0,
         label: item.label,
@@ -382,13 +287,10 @@ const Dashboard = ({ navigation }) => {
   };
 
   const getBudgetMaxValue = () => {
-    let maxCost = 100; // Initialize with negative infinity to ensure any value in the array will be greater
-
-    // if (!projectBudgetData?.graphData) {
-    for (const item of projectBudgetData?.graphData || []) {
+    let maxCost = 100;
+    for (const item of projectBudgetGraph?.graphData || []) {
       maxCost = Math.max(maxCost, item.actualCost, item.budgetedCost);
     }
-    // }
     let attendanceMax = roundToNearestMultiple(maxCost, 100);
     return attendanceMax;
   };
@@ -396,8 +298,8 @@ const Dashboard = ({ navigation }) => {
   // Get financial progress graph data
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
-    if (financialGraphData && financialGraphData.length) {
-      financialGraphData?.forEach((item) => {
+    if (financialProgressGraph && financialProgressGraph.length) {
+      financialProgressGraph?.forEach((item) => {
         const month = item.month;
         const labelToCostMap = {};
         if (Array.isArray(item?.costbySOW)) {
@@ -426,10 +328,6 @@ const Dashboard = ({ navigation }) => {
         resultArray.push({ stacks, label: month });
       });
     }
-    //   const arr = resultArray.map((item) => {
-    //     item.stacks.length === 0&& (
-    //   item.stacks.push({value: 0, color: "gray"
-    // })));
     const arr = resultArray?.map((item) => {
       if (item?.stacks?.length === 0) {
         item?.stacks?.push({ value: 0, color: "white" });
@@ -444,12 +342,7 @@ const Dashboard = ({ navigation }) => {
     const value = item.stacks[0].value;
     return value > max ? roundToNearestMultiple(value, 100) : max;
   }, 0);
-
-  // Get color for the label
   function getColorForLabel(label) {
-    // Define your color logic based on the label here
-    // You can use a switch or other logic to assign colors
-    // For simplicity, I'm using some example colors
     const colorMap = {
       Earthwork: "orange",
       "Civil Works": "#4ABFF4",
@@ -465,15 +358,11 @@ const Dashboard = ({ navigation }) => {
       Miscellaneous: "cyan",
       "General & NMR": "magenta",
     };
-    return colorMap[label] || "gray"; // Default to gray if no color is defined
+    return colorMap[label] || "gray";
   }
 
-  // const terminations = labourTurnoverMetrics && labourTurnoverMetrics?.terminations;
-  // if (!terminations) {
-  //   throw new Error("labourTurnoverMetrics.terminations is undefined");
-  // }
   const allZero = ["jobEnded", "noShow", "misconduct", "tardiness"].every(
-    (key) => labourTurnoverMetrics?.terminations[key] === 0
+    (key) => labourTurnover?.terminations[key] === 0
   );
 
   const data = allZero
@@ -486,24 +375,24 @@ const Dashboard = ({ navigation }) => {
       ]
     : [
         {
-          value: labourTurnoverMetrics?.terminations.jobEnded || 0,
+          value: labourTurnover?.terminations.jobEnded || 0,
           color: Colors.Primary,
-          text: `${labourTurnoverMetrics?.terminations.jobEnded || 0}%`,
+          text: `${labourTurnover?.terminations.jobEnded || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.terminations.noShow || 0,
+          value: labourTurnover?.terminations.noShow || 0,
           color: Colors.Purple,
-          text: `${labourTurnoverMetrics?.terminations.noShow || 0}%`,
+          text: `${labourTurnover?.terminations.noShow || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.terminations.misconduct || 0,
+          value: labourTurnover?.terminations.misconduct || 0,
           color: "#FFE6AE",
-          text: `${labourTurnoverMetrics?.terminations.misconduct || 0}%`,
+          text: `${labourTurnover?.terminations.misconduct || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.terminations.tardiness || 0,
+          value: labourTurnover?.terminations.tardiness || 0,
           color: "#ABDFDF",
-          text: `${labourTurnoverMetrics?.terminations.tardiness || 0}%`,
+          text: `${labourTurnover?.terminations.tardiness || 0}%`,
         },
       ];
 
@@ -512,7 +401,7 @@ const Dashboard = ({ navigation }) => {
     "emergency",
     "delayedPayment",
     "betterWages",
-  ].every((key) => labourTurnoverMetrics?.voluntaryExits[key] === 0);
+  ].every((key) => labourTurnover?.voluntaryExits[key] === 0);
 
   const voluntaryExitsData = allZeroVoluntary
     ? [
@@ -524,68 +413,59 @@ const Dashboard = ({ navigation }) => {
       ]
     : [
         {
-          value: labourTurnoverMetrics?.voluntaryExits?.takingBreak || 0,
+          value: labourTurnover?.voluntaryExits?.takingBreak || 0,
           color: Colors.Primary,
-          text: `${labourTurnoverMetrics?.voluntaryExits?.takingBreak || 0}%`,
+          text: `${labourTurnover?.voluntaryExits?.takingBreak || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.voluntaryExits?.emergency || 0,
+          value: labourTurnover?.voluntaryExits?.emergency || 0,
           color: Colors.Purple,
-          text: `${labourTurnoverMetrics?.voluntaryExits?.emergency || 0}%`,
+          text: `${labourTurnover?.voluntaryExits?.emergency || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.voluntaryExits?.delayedPayment || 0,
+          value: labourTurnover?.voluntaryExits?.delayedPayment || 0,
           color: "#FFE6AE",
-          text: `${
-            labourTurnoverMetrics?.voluntaryExits?.delayedPayment || 0
-          }%`,
+          text: `${labourTurnover?.voluntaryExits?.delayedPayment || 0}%`,
         },
         {
-          value: labourTurnoverMetrics?.voluntaryExits?.betterWages || 0,
+          value: labourTurnover?.voluntaryExits?.betterWages || 0,
           color: "#ABDFDF",
-          text: `${labourTurnoverMetrics?.voluntaryExits?.betterWages || 0}%`,
+          text: `${labourTurnover?.voluntaryExits?.betterWages || 0}%`,
         },
       ];
 
   //! GET GRAPHS DATA WHILE SELECTING PROJECTS
   const getGraphsData = (item) => {
     if (selectedGraph === "Attendance") {
-      dispatch(
-        getAttendanceTrendline(
-          token,
-          item?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
+      getAttendanceGraphData(item?.projectId, startDate, endDate).catch(
+        (error) => {
+          ToastAndroid.show(error.message, ToastAndroid.SHORT);
+        }
       );
     } else if (selectedGraph === "Payment") {
-      dispatch(
-        getPayments(
-          token,
-          item?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
+      getPaymentsGraphData(item?.projectId, startDate, endDate).catch(
+        (error) => {
+          console.log("Error in getting payments:", error);
+        }
       );
-      dispatch(getWorkforceMetrics(token, item?.projectId));
-      dispatch(getLabourExpenseMetrics(token, item?.projectId));
+      getWorkForce(item?.projectId).catch((error) => {
+        console.log("Error in getting workforce:", error);
+      });
+      getLabourExpense(item?.projectId).catch((error) => {
+        console.log("Error in getting labour expense:", error);
+      });
     } else if (selectedGraph === "Contractor") {
-      dispatch(
-        getContractorsStats(
-          token,
-          item?.projectId,
-          moment().format("YYYY-MM-DD")
-        )
-      );
+      getContractorsGraphData(item?.projectId, startDate).catch((error) => {
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      });
     } else {
-      dispatch(
-        getWorkerSkills(
-          token,
-          "2022-08-31T19:00:00Z",
-          moment().utc().format(),
-          item?.projectId
-        )
-      );
+      getWorkersSkill(
+        "2022-08-31T19:00:00Z",
+        moment().utc().format(),
+        item?.projectId
+      ).catch((error) => {
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      });
     }
   };
 
@@ -607,56 +487,52 @@ const Dashboard = ({ navigation }) => {
     const endOfWeek = moment(date).endOf("week"); // Saturday
 
     if (date) {
-      dispatch(
-        getAttendanceTrendline(
-          token,
-          selectedAttendanceProject?.projectId
-            ? selectedAttendanceProject?.projectId
-            : projects[0]?.projectId,
-          startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
-          endOfWeek.format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
+      getAttendanceGraphData(
+        selectedAttendanceProject?.projectId
+          ? selectedAttendanceProject?.projectId
+          : projects[0]?.projectId,
+        startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
+        endOfWeek.format("YYYY-MM-DD HH:mm:ss")
+      ).catch((error) => {
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      });
     } else {
-      dispatch(
-        getAttendanceTrendline(
-          token,
-          selectedAttendanceProject?.projectId
-            ? selectedAttendanceProject?.projectId
-            : projects[0]?.projectId,
-          moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-          moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-        )
-      );
+      getAttendanceGraphData(
+        selectedAttendanceProject?.projectId
+          ? selectedAttendanceProject?.projectId
+          : projects[0]?.projectId,
+        moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
+        moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
+      ).catch((error) => {
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+      });
     }
   };
 
   const onChangeDatePayments = (date) => {
     const startOfWeek = moment(date).startOf("week"); // Sunday
     const endOfWeek = moment(date).endOf("week"); // Saturday
-    dispatch(
-      getPayments(
-        token,
-        selectedPaymentProject?.projectId
-          ? selectedPaymentProject?.projectId
-          : projects[0]?.projectId,
-        startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
-        endOfWeek.format("YYYY-MM-DD HH:mm:ss")
-      )
-    );
+    getPaymentsGraphData(
+      selectedPaymentProject?.projectId
+        ? selectedPaymentProject?.projectId
+        : projects[0]?.projectId,
+      startOfWeek.format("YYYY-MM-DD HH:mm:ss"),
+      endOfWeek.format("YYYY-MM-DD HH:mm:ss")
+    ).catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
   };
 
   const onChangePieDate = (date) => {
     setPieSelectedDate(date);
-    dispatch(
-      getContractorsStats(
-        token,
-        selectedContractorProject?.projectId
-          ? selectedContractorProject?.projectId
-          : projects[0]?.projectId,
-        moment(date).format("YYYY-MM-DD")
-      )
-    );
+    getContractorsGraphData(
+      selectedContractorProject?.projectId
+        ? selectedContractorProject?.projectId
+        : projects[0]?.projectId,
+      moment(date).format("YYYY-MM-DD")
+    ).catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
   };
 
   const searchFilterFunction = (text) => {
@@ -788,63 +664,10 @@ const Dashboard = ({ navigation }) => {
             contentContainerStyle={{}}
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
                   if (projects) {
-                    dispatch(
-                      getAttendanceTrendline(
-                        token,
-                        projects[0]?.projectId,
-                        moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-                        moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-                      )
-                    );
-                    dispatch(
-                      getPayments(
-                        token,
-                        projects[0]?.projectId,
-                        moment().startOf("week").format("YYYY-MM-DD HH:mm:ss"),
-                        moment().endOf("week").format("YYYY-MM-DD HH:mm:ss")
-                      )
-                    );
-                    dispatch(
-                      getContractorsStats(
-                        token,
-                        projects[0]?.projectId,
-                        moment().format("YYYY-MM-DD")
-                      )
-                    );
-                    dispatch(
-                      getWorkerSkills(
-                        token,
-                        "2022-08-31T19:00:00Z",
-                        moment().utc().format(),
-                        projects[0]?.projectId
-                      )
-                    );
-                    setCurrentProjectBudget(projects[0]?.projectId);
-                    setCurrentProjectFinancial(projects[0]?.projectId);
-                    setCurrentProjectLabourTurnover(projects[0]?.projectId);
-                    // Metrics
-                    dispatch(
-                      getFinancialProgressMetrics(token, projects[0]?.projectId)
-                    );
-                    dispatch(
-                      getWorkforceMetrics(token, projects[0]?.projectId)
-                    );
-                    dispatch(
-                      getLabourExpenseMetrics(token, projects[0]?.projectId)
-                    );
-                    dispatch(
-                      getLabourTurnoverMetrics(token, projects[0]?.projectId)
-                    );
-                    dispatch(getProjectBudget(token, projects[0]?.projectId));
-                    dispatch(
-                      getFinancialProgressData(
-                        token,
-                        projectsListSimple[0]?.projectId
-                      )
-                    );
+                    getData();
                   }
                 }}
                 tintColor={Colors.Primary}
@@ -931,8 +754,8 @@ const Dashboard = ({ navigation }) => {
                       >
                         {selectedAttendanceProject
                           ? selectedAttendanceProject?.name
-                          : projectsListSimple
-                          ? projectsListSimple[0]?.name
+                          : projects
+                          ? projects[0]?.name
                           : "Select a project"}
                       </Text>
                     </View>
@@ -1080,8 +903,8 @@ const Dashboard = ({ navigation }) => {
                       >
                         {selectedPaymentProject
                           ? selectedPaymentProject?.name
-                          : projectsListSimple
-                          ? projectsListSimple[0]?.name
+                          : projects
+                          ? projects[0]?.name
                           : "Select a project"}
                       </Text>
                     </View>
@@ -1144,9 +967,8 @@ const Dashboard = ({ navigation }) => {
                     Average{"\n"}Daily Wage
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 16 }]}>
-                    {labourExpenseMetrics?.averageDailyWage
-                      ? "₹" +
-                        labourExpenseMetrics?.averageDailyWage?.toLocaleString()
+                    {labourExpense?.averageDailyWage
+                      ? "₹" + labourExpense?.averageDailyWage?.toLocaleString()
                       : "0"}
                   </Text>
                 </View>
@@ -1168,9 +990,9 @@ const Dashboard = ({ navigation }) => {
                       { color: Colors.Purple, fontSize: 16 },
                     ]}
                   >
-                    {labourExpenseMetrics?.totalExpenseForLast30Days
+                    {labourExpense?.totalExpenseForLast30Days
                       ? "₹" +
-                        labourExpenseMetrics?.totalExpenseForLast30Days?.toLocaleString()
+                        labourExpense?.totalExpenseForLast30Days?.toLocaleString()
                       : "0"}
                   </Text>
                 </View>
@@ -1223,7 +1045,7 @@ const Dashboard = ({ navigation }) => {
                         textAlign: "center",
                       }}
                     >
-                      {workforceMetrics}
+                      {workForceMetrics}
                     </Text>
                   </View>
                 </View>
@@ -1279,8 +1101,8 @@ const Dashboard = ({ navigation }) => {
                         >
                           {selectedContractorProject
                             ? selectedContractorProject?.name
-                            : projectsListSimple
-                            ? projectsListSimple[0]?.name
+                            : projects
+                            ? projects[0]?.name
                             : "Select a project"}
                         </Text>
                       </View>
@@ -1432,8 +1254,8 @@ const Dashboard = ({ navigation }) => {
                     >
                       {selectedSkillProject
                         ? selectedSkillProject?.name
-                        : projectsListSimple
-                        ? projectsListSimple[0]?.name
+                        : projects
+                        ? projects[0]?.name
                         : "Select a project"}
                     </Text>
                   </View>
@@ -1449,7 +1271,7 @@ const Dashboard = ({ navigation }) => {
                     }}
                   >
                     Supervisor:{" "}
-                    {workerSkill
+                    {workersSkill
                       ?.map((item) =>
                         item.data.find(
                           (skill) => skill.skillType === "Supervisor"
@@ -1466,7 +1288,7 @@ const Dashboard = ({ navigation }) => {
                     }}
                   >
                     Skilled:{" "}
-                    {workerSkill
+                    {workersSkill
                       ?.map((item) =>
                         item.data.find((skill) => skill.skillType === "Skilled")
                       )
@@ -1481,7 +1303,7 @@ const Dashboard = ({ navigation }) => {
                     }}
                   >
                     Helper:{" "}
-                    {workerSkill
+                    {workersSkill
                       ?.map((item) =>
                         item.data.find((skill) => skill.skillType === "Helper")
                       )
@@ -1556,9 +1378,8 @@ const Dashboard = ({ navigation }) => {
                         }}
                         iconStyle={styles.iconStyle}
                         data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
+                          Array.isArray(projects) && projects.length > 0
+                            ? projects.map((ele) => ({
                                 label: ele?.name,
                                 value: ele?.projectId,
                                 ...ele,
@@ -1577,17 +1398,22 @@ const Dashboard = ({ navigation }) => {
                         value={currentProjectBudget}
                         onChange={(item) => {
                           if (item) {
-                            setCurrentProjectBudget(item);
-                            dispatch(getProjectBudget(token, item?.value));
+                            setCurrentProjectBudget(item?.value);
+                            getProjectBudgetData(item?.value).catch((error) => {
+                              ToastAndroid.show(
+                                error.message,
+                                ToastAndroid.SHORT
+                              );
+                            });
                           } else {
-                            setCurrentProjectBudget(
-                              projectsListSimple[0]?.projectId
-                            );
-                            dispatch(
-                              getProjectBudget(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
+                            setCurrentProjectBudget(projects[0]?.projectId);
+                            getProjectBudgetData(projects[0]?.projectId).catch(
+                              (error) => {
+                                ToastAndroid.show(
+                                  error.message,
+                                  ToastAndroid.SHORT
+                                );
+                              }
                             );
                           }
                         }}
@@ -1613,7 +1439,7 @@ const Dashboard = ({ navigation }) => {
               </View>
               <View style={styles.barChart}>
                 <BarChart
-                  data={projectBudgetData && budgetGraphsData()}
+                  data={projectBudgetGraph && budgetGraphsData()}
                   barWidth={6}
                   spacing={30}
                   roundedTop
@@ -1622,7 +1448,7 @@ const Dashboard = ({ navigation }) => {
                   yAxisTextStyle={{ color: "gray" }}
                   xAxisTextStyle={{ color: "gray" }}
                   noOfSections={5}
-                  maxValue={projectBudgetData && getBudgetMaxValue()}
+                  maxValue={projectBudgetGraph && getBudgetMaxValue()}
                   frontColor={Colors.Black}
                   height={180}
                   renderTooltip={(e) => {
@@ -1651,7 +1477,7 @@ const Dashboard = ({ navigation }) => {
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 14 }]}>
                     {`₹${
-                      projectBudgetData?.budgetedCost?.toLocaleString() || "0"
+                      projectBudgetGraph?.budgetedCost?.toLocaleString() || "0"
                     }`}
                   </Text>
                 </View>
@@ -1664,7 +1490,7 @@ const Dashboard = ({ navigation }) => {
                     ]}
                   >
                     {`₹${
-                      projectBudgetData?.actualCost?.toLocaleString() || "0"
+                      projectBudgetGraph?.actualCost?.toLocaleString() || "0"
                     }`}
                   </Text>
                 </View>
@@ -1706,12 +1532,12 @@ const Dashboard = ({ navigation }) => {
                       paddingLeft: 5,
                     }}
                   >
-                    {projectBudgetData &&
-                    typeof projectBudgetData.budgetedCost === "number" &&
-                    typeof projectBudgetData.actualCost === "number"
+                    {projectBudgetGraph &&
+                    typeof projectBudgetGraph.budgetedCost === "number" &&
+                    typeof projectBudgetGraph.actualCost === "number"
                       ? `₹${(
-                          projectBudgetData?.budgetedCost -
-                          projectBudgetData?.actualCost
+                          projectBudgetGraph?.budgetedCost -
+                          projectBudgetGraph?.actualCost
                         ).toLocaleString()}`
                       : "0"}
                   </Text>
@@ -1753,9 +1579,8 @@ const Dashboard = ({ navigation }) => {
                         }}
                         iconStyle={styles.iconStyle}
                         data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
+                          Array.isArray(projects) && projects.length > 0
+                            ? projects.map((ele) => ({
                                 label: ele?.name,
                                 value: ele?.projectId,
                                 ...ele,
@@ -1774,28 +1599,24 @@ const Dashboard = ({ navigation }) => {
                         value={currentProjectFinancial}
                         onChange={(item) => {
                           if (item) {
-                            setCurrentProjectFinancial(item);
-                            dispatch(
-                              getFinancialProgressData(token, item?.value)
-                            );
-                            dispatch(
-                              getFinancialProgressMetrics(token, item?.value)
-                            );
+                            setCurrentProjectFinancial(item?.value);
+                            getFinancialProgress(item?.value).catch((error) => {
+                              console.log("error", error);
+                            });
+                            getFinancialCount(item?.value).catch((error) => {
+                              console.log("error", error);
+                            });
                           } else {
-                            setCurrentProjectFinancial(
-                              projectsListSimple[0]?.projectId
+                            setCurrentProjectFinancial(projects[0]?.projectId);
+                            getFinancialProgress(projects[0]?.projectId).catch(
+                              (error) => {
+                                console.log("error", error);
+                              }
                             );
-                            dispatch(
-                              getFinancialProgressData(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
-                            );
-                            dispatch(
-                              getFinancialProgressMetrics(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
+                            getFinancialCount(projects[0]?.projectId).catch(
+                              (error) => {
+                                console.log("error", error);
+                              }
                             );
                           }
                         }}
@@ -1825,7 +1646,8 @@ const Dashboard = ({ navigation }) => {
                   noOfSections={4}
                   maxValue={highestValue || 100}
                   stackData={
-                    financialGraphData && getFinancialProgressGraphData()
+                    financialProgressGraph?.length &&
+                    getFinancialProgressGraphData()
                   }
                   renderTooltip={(e) => {
                     return (
@@ -1864,9 +1686,9 @@ const Dashboard = ({ navigation }) => {
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 16 }]}>
                     {currentPresent?.length > 0
-                      ? financialProgressMetrics?.requiredProductionRate
+                      ? financialCount?.requiredProductionRate
                         ? "₹" +
-                          financialProgressMetrics?.requiredProductionRate?.toLocaleString()
+                          financialCount?.requiredProductionRate?.toLocaleString()
                         : "0"
                       : 0}
                   </Text>
@@ -1890,9 +1712,9 @@ const Dashboard = ({ navigation }) => {
                     ]}
                   >
                     {currentPresent?.length > 0
-                      ? financialProgressMetrics?.actualProductionRate
+                      ? financialCount?.actualProductionRate
                         ? "₹" +
-                          financialProgressMetrics?.actualProductionRate?.toLocaleString()
+                          financialCount?.actualProductionRate?.toLocaleString()
                         : "0"
                       : 0}
                   </Text>
@@ -1934,9 +1756,8 @@ const Dashboard = ({ navigation }) => {
                         }}
                         iconStyle={styles.iconStyle}
                         data={
-                          Array.isArray(projectsListSimple) &&
-                          projectsListSimple.length > 0
-                            ? projectsListSimple.map((ele) => ({
+                          Array.isArray(projects) && projects.length > 0
+                            ? projects.map((ele) => ({
                                 label: ele?.name,
                                 value: ele?.projectId,
                                 ...ele,
@@ -1955,19 +1776,18 @@ const Dashboard = ({ navigation }) => {
                         value={currentProjectLabourTurnover}
                         onChange={(item) => {
                           if (item) {
-                            setCurrentProjectLabourTurnover(item);
-                            dispatch(
-                              getLabourTurnoverMetrics(token, item?.value)
-                            );
+                            setCurrentProjectLabourTurnover(item?.value);
+                            getLabourTurnover(item?.value).catch((error) => {
+                              console.log("error", error);
+                            });
                           } else {
                             setCurrentProjectLabourTurnover(
-                              projectsListSimple[0]?.projectId
+                              projects[0]?.projectId
                             );
-                            dispatch(
-                              getLabourTurnoverMetrics(
-                                token,
-                                projectsListSimple[0]?.projectId
-                              )
+                            getLabourTurnover(projects[0]?.projectId).catch(
+                              (error) => {
+                                console.log("error", error);
+                              }
                             );
                           }
                         }}
@@ -1993,11 +1813,11 @@ const Dashboard = ({ navigation }) => {
                     Terminations
                   </Text>
                 </View>
-                {labourTurnoverMetrics &&
-                labourTurnoverMetrics?.terminations?.jobEnded === 0 &&
-                labourTurnoverMetrics?.terminations?.noShow === 0 &&
-                labourTurnoverMetrics?.terminations?.misconduct === 0 &&
-                labourTurnoverMetrics?.terminations?.tardiness === 0 ? (
+                {labourTurnover &&
+                labourTurnover?.terminations?.jobEnded === 0 &&
+                labourTurnover?.terminations?.noShow === 0 &&
+                labourTurnover?.terminations?.misconduct === 0 &&
+                labourTurnover?.terminations?.tardiness === 0 ? (
                   <Text
                     style={{
                       fontFamily: "Lexend-Regular",
@@ -2025,8 +1845,7 @@ const Dashboard = ({ navigation }) => {
                             { color: Colors.Primary },
                           ]}
                         >
-                          Job Ended:{" "}
-                          {labourTurnoverMetrics?.terminations?.jobEnded}%
+                          Job Ended: {labourTurnover?.terminations?.jobEnded}%
                         </Text>
                       </View>
                       <View
@@ -2039,8 +1858,7 @@ const Dashboard = ({ navigation }) => {
                             { color: Colors.Purple },
                           ]}
                         >
-                          No Show: {labourTurnoverMetrics?.terminations?.noShow}
-                          %
+                          No Show: {labourTurnover?.terminations?.noShow}%
                         </Text>
                       </View>
                     </View>
@@ -2060,8 +1878,8 @@ const Dashboard = ({ navigation }) => {
                             { color: "yellow" },
                           ]}
                         >
-                          Misconduct:{" "}
-                          {labourTurnoverMetrics?.terminations?.misconduct}%
+                          Misconduct: {labourTurnover?.terminations?.misconduct}
+                          %
                         </Text>
                       </View>
                       <View
@@ -2074,8 +1892,7 @@ const Dashboard = ({ navigation }) => {
                             { color: "#A1E7E6" },
                           ]}
                         >
-                          Tardiness:{" "}
-                          {labourTurnoverMetrics?.terminations?.tardiness}%
+                          Tardiness: {labourTurnover?.terminations?.tardiness}%
                         </Text>
                       </View>
                     </View>
@@ -2111,11 +1928,11 @@ const Dashboard = ({ navigation }) => {
                     Voluntary Exits
                   </Text>
                 </View>
-                {labourTurnoverMetrics &&
-                labourTurnoverMetrics?.voluntaryExits?.takingBreak === 0 &&
-                labourTurnoverMetrics?.voluntaryExits?.emergency === 0 &&
-                labourTurnoverMetrics?.voluntaryExits?.delayedPayment === 0 &&
-                labourTurnoverMetrics?.voluntaryExits?.betterWages === 0 ? (
+                {labourTurnover &&
+                labourTurnover?.voluntaryExits?.takingBreak === 0 &&
+                labourTurnover?.voluntaryExits?.emergency === 0 &&
+                labourTurnover?.voluntaryExits?.delayedPayment === 0 &&
+                labourTurnover?.voluntaryExits?.betterWages === 0 ? (
                   <Text
                     style={{
                       fontFamily: "Lexend-Medium",
@@ -2145,7 +1962,7 @@ const Dashboard = ({ navigation }) => {
                           ]}
                         >
                           Taking Break:{" "}
-                          {labourTurnoverMetrics?.voluntaryExits?.takingBreak}%
+                          {labourTurnover?.voluntaryExits?.takingBreak}%
                         </Text>
                       </View>
                       <View
@@ -2158,8 +1975,8 @@ const Dashboard = ({ navigation }) => {
                             { color: Colors.Purple },
                           ]}
                         >
-                          Emergency:{" "}
-                          {labourTurnoverMetrics?.voluntaryExits?.emergency}%
+                          Emergency: {labourTurnover?.voluntaryExits?.emergency}
+                          %
                         </Text>
                       </View>
                     </View>
@@ -2180,11 +1997,7 @@ const Dashboard = ({ navigation }) => {
                           ]}
                         >
                           Payment Delayed:{" "}
-                          {
-                            labourTurnoverMetrics?.voluntaryExits
-                              ?.delayedPayment
-                          }
-                          %
+                          {labourTurnover?.voluntaryExits?.delayedPayment}%
                         </Text>
                       </View>
                       <View
@@ -2198,7 +2011,7 @@ const Dashboard = ({ navigation }) => {
                           ]}
                         >
                           Better Wages:{" "}
-                          {labourTurnoverMetrics?.voluntaryExits?.betterWages}%
+                          {labourTurnover?.voluntaryExits?.betterWages}%
                         </Text>
                       </View>
                     </View>
@@ -2227,8 +2040,8 @@ const Dashboard = ({ navigation }) => {
                   </Text>
                   <Text style={[styles.graphBottomTextBold, { fontSize: 14 }]}>
                     {`${
-                      labourTurnoverMetrics
-                        ? labourTurnoverMetrics?.averageTurnOverRate?.toLocaleString()
+                      labourTurnover
+                        ? labourTurnover?.averageTurnOverRate?.toLocaleString()
                         : "0"
                     }`}
                   </Text>
@@ -2244,8 +2057,8 @@ const Dashboard = ({ navigation }) => {
                     ]}
                   >
                     {`${
-                      labourTurnoverMetrics
-                        ? labourTurnoverMetrics?.workersExited.toLocaleString()
+                      labourTurnover
+                        ? labourTurnover?.workersExited.toLocaleString()
                         : "0"
                     }`}
                   </Text>

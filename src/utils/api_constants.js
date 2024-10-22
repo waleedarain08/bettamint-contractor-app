@@ -50,9 +50,44 @@ export const API = {
   register: `${base_url}/dashboard/Lead`,
   // General Routes
   getProjects: `${base_url}/dashboard/Project/getallsimple`,
-  getStatsCount : `${base_url}/Dashboard/stats/count`,
+  getStatsCount: `${base_url}/Dashboard/stats/count`,
   getAttendanceGraphData: `${base_url}/Dashboard/stats/attendancetrendline`,
   getPaymentsGraphData: `${base_url}/Dashboard/stats/payments`,
   getContractorsGraphData: `${base_url}/Dashboard/stats/contractors`,
   getWorkersSkill: `${base_url}/Dashboard/stats/workerskill`,
+  getFinancialCount: `${base_url}/Dashboard/stats/financial-progress-metrics`,
+  getWorkForceMetrics: `${base_url}/Dashboard/stats/workforce-metrics`,
+  getLabourTurnoverMetrics: `${base_url}/Dashboard/stats/labour-turnover-metrics`,
+  getLabourExpenseMetrics: `${base_url}/Dashboard/stats/labour-expense-metrics`,
+  getProjectBudgetGraphData: `${base_url}/dashboard/Productivity/graph/costdetails`,
+  getFinancialProgressGraphData: `${base_url}/dashboard/Productivity/graph/costbymonth`,
+  getSkills: `${base_url}/app/Skills`,
+  getUsers: `${base_url}/dashboard/User/getall`,
+  getLabourContractors: `${base_url}/dashboard/User/labourcontractor`,
+  getScopeList: `${base_url}/dashboard/Productivity/getscopelist`,
+  // Attendance Routes
+  getAttendance: `${base_url}/dashboard/Attendance/getbyproject/v2`,
+  getAttendanceMusterCard: `${base_url}/dashboard/Attendance/mustercard`,
+  approveAttendance: `${base_url}/dashboard/Attendance/approve`,
+  markAttendance: `${base_url}/dashboard/Attendance/markattendance`,
+  // Worker Routes
+  delistWorker: `${base_url}/dashboard/Job/delist`,
+  // Job Routes
+  getJobs: `${base_url}/dashboard/Job/getall`,
+  completeJob: `${base_url}/dashboard/Job/complete`,
+  createJob: `${base_url}/dashboard/Job/createjob`,
+  // Project Routes
+  getAllProjects: `${base_url}/dashboard/Project/getall`,
+  getMappingProjects: `${base_url}/dashboard/Project/getformapping`,
+  getLabourProjects: `${base_url}/dashboard/User/project`,
+  createProject: `${base_url}/dashboard/Project/addupdateproject`,
+  // Worker Routes
+  getWorkers: `${base_url}/Dashboard/worker`,
+  createWorker: `${base_url}/dashboard/worker/addupdateworker`,
+  // Roles Routes
+  getFeatureSetV2: `${base_url}/dashboard/FeatureSet/access-rights`,
+  getFeatures: `${base_url}/dashboard/FeatureSet`,
+  getRoles: `${base_url}/dashboard/Role`,
+  createRole: `${base_url}/dashboard/Role`,
+  createUser: `${base_url}/dashboard/User/addupdateuser`,
 };

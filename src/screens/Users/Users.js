@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -32,46 +32,12 @@ import { Searchbar } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
 import { RefreshControl } from "react-native-gesture-handler";
 import { useFocusEffect } from "@react-navigation/native";
+import { useGeneralContext } from "../../context/generalContext";
 LogBox.ignoreAllLogs();
-const DATA = [
-  {
-    name: "Rajesh Kumar",
-    occupation: "Plumber",
-    userId: "7890",
-    email: "email@email.com",
-    role: "Super Admin",
-  },
-  {
-    name: "Manoj Beddi",
-    occupation: "Plumber",
-    userId: "7890",
-    email: "email@email.com",
-    role: "Admin",
-  },
-  {
-    name: "Kirshen kumar",
-    occupation: "Plumber",
-    userId: "7890",
-    email: "email@email.com",
-    role: "Contractor",
-  },
-  {
-    name: "Arvind Kumar",
-    occupation: "Plumber",
-    userId: "7890",
-    email: "email@email.com",
-    role: "Admin",
-  },
-  {
-    name: "Rajesh Kumar",
-    occupation: "Plumber",
-    userId: "7890",
-    email: "email@email.com",
-    role: "Admin",
-  },
-];
 
 const Users = ({ navigation }) => {
+  const { loading, users, getUsers, labourContractorList } =
+    useGeneralContext();
   const [details, setDetails] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -82,31 +48,24 @@ const Users = ({ navigation }) => {
   const [userFilter, setUserFilter] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
 
-  const token = useSelector(authToken);
-  const usersList = useSelector(usersListReducer);
-  const isLoading = useSelector(loadingUsers);
-  const dispatch = useDispatch();
-  useEffect(() => {
-    dispatch(getUsersAction(token));
-  }, []);
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(getUsersAction(token));
+  const getData = async () => {
+    getUsers().catch((error) => console.log("Error", error));
+  };
 
+  useFocusEffect(
+    useCallback(() => {
+      getData();
       return () => {};
     }, [])
   );
   useEffect(() => {
-    setFilteredDataSource(usersList);
-    setMasterDataSource(usersList);
-  }, [usersList]);
+    setFilteredDataSource(users);
+    setMasterDataSource(users);
+  }, [users?.length]);
+
   const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.fullName
           ? item.fullName.toUpperCase()
           : "".toUpperCase();
@@ -116,8 +75,6 @@ const Users = ({ navigation }) => {
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
     }
@@ -127,11 +84,9 @@ const Users = ({ navigation }) => {
     return (
       <Modal
         animationType="slide"
-        // transparent={true}
         presentationStyle="pageSheet"
         visible={openFilterModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenFilterModal(!openFilterModal);
         }}
       >
@@ -140,17 +95,12 @@ const Users = ({ navigation }) => {
             flex: 1,
             alignItems: "center",
             marginTop: 20,
-            // justifyContent: "center",
-            // backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
           }}
         >
           <View
             style={{
               width: "100%",
               backgroundColor: Colors.White,
-              // height: 200,
               borderRadius: 10,
               padding: 15,
             }}
@@ -197,13 +147,6 @@ const Users = ({ navigation }) => {
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
-              {/* <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Gray }}
-                >
-                  Filer By:
-                </Text>
-              </View> */}
               <Dropdown
                 style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
@@ -214,9 +157,14 @@ const Users = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={[
-                  { label: "Labour Contractor", value: "LabourContractor" },
-                ]}
+                data={
+                  labourContractorList?.length
+                    ? labourContractorList?.map((ele) => ({
+                        label: ele?.fullName,
+                        value: ele?.userId,
+                      }))
+                    : []
+                }
                 maxHeight={800}
                 labelField="label"
                 valueField="value"
@@ -226,7 +174,7 @@ const Users = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
                   setUserFilter(
-                    usersList?.filter((ele) => ele.leadTypeId === item?.value)
+                    users?.filter((ele) => ele.leadTypeId === item?.value)
                   );
                 }}
               />
@@ -243,7 +191,6 @@ const Users = ({ navigation }) => {
         transparent={true}
         visible={openSearchModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenSearchModal(!openSearchModal);
         }}
       >
@@ -253,8 +200,6 @@ const Users = ({ navigation }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
           }}
         >
           <View
@@ -391,8 +336,14 @@ const Users = ({ navigation }) => {
         </View>
       </View>
       <Spacer bottom={13} />
-      <View style={{ flexDirection: "row", justifyContent: "space-between", width: '100%' }}>
-        <View style={{ alignItems: "center", width: '15%' }}>
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          width: "100%",
+        }}
+      >
+        <View style={{ alignItems: "center", width: "15%" }}>
           <Text style={styles.flatlistSubHeading}>User Id</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -400,7 +351,7 @@ const Users = ({ navigation }) => {
             {item.userId}
           </Text>
         </View>
-        <View style={{ alignItems: "center", width: '60%' }}>
+        <View style={{ alignItems: "center", width: "60%" }}>
           <Text style={styles.flatlistSubHeading}>Email Address</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -408,7 +359,7 @@ const Users = ({ navigation }) => {
             {item.emailAddress}
           </Text>
         </View>
-        <View style={{ alignItems: "center", width: '20%' }}>
+        <View style={{ alignItems: "center", width: "20%" }}>
           <Text style={styles.flatlistSubHeading}>Role</Text>
           <Text
             style={[styles.flatlistText, { textAlign: "center", marginTop: 5 }]}
@@ -517,8 +468,8 @@ const Users = ({ navigation }) => {
         <FlatList
           refreshControl={
             <RefreshControl
-              refreshing={isLoading}
-              onRefresh={() => dispatch(getUsersAction(token))}
+              refreshing={loading}
+              onRefresh={() => getData()}
               tintColor={Colors.Primary}
               colors={[Colors.Purple, Colors.Primary]}
             />
@@ -531,7 +482,6 @@ const Users = ({ navigation }) => {
       </View>
       {renderFilterModal()}
       {renderSearchModal()}
-      {/* </ScrollView> */}
     </View>
   );
 };
@@ -668,7 +618,7 @@ const styles = StyleSheet.create({
     fontFamily: "Lexend-Bold",
     fontSize: 10,
     color: Colors.Black,
-	// paddingHorizontal: 10
+    // paddingHorizontal: 10
   },
   modalView: {
     paddingTop: Platform.OS === "android" ? 0 : 50,

@@ -10,6 +10,7 @@ import {
   LogBox,
   Alert,
   Pressable,
+  ToastAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
 import Logo from "../../assets/images/logo.png";
@@ -39,15 +40,17 @@ import {
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
 import {
-  createRole,
+  // createRole,
   rolesResponseReducer,
 } from "../../redux/slices/rolesSlice";
-
-const screenWidth = Dimensions.get("window").width;
+import { useGeneralContext } from "../../context/generalContext";
+import { useUser } from "../../context/userContext";
 LogBox.ignoreAllLogs();
 
 const CreateNewUser = ({ navigation, route }) => {
-  const [toggleCheckBox, setToggleCheckBox] = useState(false);
+  const { projects } = useGeneralContext();
+  const { loading, roles, featuresList, userRights, createRole, createUser } =
+    useUser();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [userRole, setUseRole] = useState(null);
@@ -55,41 +58,10 @@ const CreateNewUser = ({ navigation, route }) => {
   const [activeRolesAndRights, setActiveRolesAndRights] = useState({});
   const [roleName, setRoleName] = useState("");
   const [errors, setErrors] = useState(false);
-  const userInfo = route?.params?.userInfo;
-  const {
-    loading: loadingRoles,
-    rolesList,
-    res,
-  } = useSelector(rolesResponseReducer);
 
   // Selectors
-  const {
-    loading,
-    featuresList,
-    featuresListV2: userRights,
-  } = useSelector(featuresReducer);
   const token = useSelector(authToken);
-  const roles = useSelector(rolesReducer);
-  const projectsList = useSelector(projectsListSimpleReducer);
-
   const dispatch = useDispatch();
-
-  // useEffect
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(getFeatures(token));
-      dispatch(getFeaturesV2(token));
-      dispatch(getRoles(token));
-      dispatch(getAllProjectsSimpleAction(token));
-      return () => {};
-    }, [dispatch, token])
-  );
-  // UseEffect
-  // useEffect(() => {
-  //   dispatch(getRoles(token));
-  // }, []);
-
-  // console.log("featuresList", roles);
 
   const handleSubmit = async () => {
     if (!roleName) {
@@ -122,7 +94,7 @@ const CreateNewUser = ({ navigation, route }) => {
       featureSets: featureListArray,
     };
     console.log("ROLE--->>>", role);
-    let resp = await dispatch(createRole(role));
+    // let resp = await dispatch(createRole(role));
   };
 
   function generatePassword(length) {
@@ -367,8 +339,8 @@ const CreateNewUser = ({ navigation, route }) => {
               autoScroll={false}
               inputSearchStyle={{ color: Colors.Black }}
               data={
-                projectsList?.length
-                  ? projectsList?.map((ele) => ({
+                projects?.length
+                  ? projects?.map((ele) => ({
                       label: ele?.name,
                       value: ele.projectId,
                     }))
@@ -399,8 +371,8 @@ const CreateNewUser = ({ navigation, route }) => {
               }}
               iconStyle={styles.iconStyle}
               autoScroll={false}
-              // search
-              // searchPlaceholder="Search Skill"
+              search
+              searchPlaceholder="Search Roles"
               inputSearchStyle={{ color: Colors.Black }}
               data={
                 roles?.length
@@ -410,20 +382,13 @@ const CreateNewUser = ({ navigation, route }) => {
                     }))
                   : []
               }
-              maxHeight={500}
+              maxHeight={300}
               labelField="label"
               valueField="value"
               placeholder={"Select Role"}
               value={userRole}
-              // onFocus={() => {
-              //   // setIsFocus(true);
-              //   dispatch(getRoles(token));
-              // }}
-              // onBlur={() => setIsFocus(false)}
               onChange={(item) => {
                 setUseRole(item?.value);
-
-                // setIsFocus(false);
               }}
             />
           </View>
@@ -471,41 +436,13 @@ const CreateNewUser = ({ navigation, route }) => {
           onPress={async () => {
             const password = generatePassword(8);
             if (!fullName) {
-              Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: "Please enter full name.",
-                topOffset: 10,
-                position: "top",
-                visibilityTime: 4000,
-              });
+              ToastAndroid.show("Please enter full name.", ToastAndroid.SHORT);
             } else if (!email) {
-              Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: "Please enter email.",
-                topOffset: 10,
-                position: "top",
-                visibilityTime: 4000,
-              });
+              ToastAndroid.show("Please enter email.", ToastAndroid.SHORT);
             } else if (project?.length === 0) {
-              Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: "Please select projects.",
-                topOffset: 10,
-                position: "top",
-                visibilityTime: 4000,
-              });
+              ToastAndroid.show("Please select project.", ToastAndroid.SHORT);
             } else if (!userRole && !roleName) {
-              Toast.show({
-                type: "error",
-                text1: "Error",
-                text2: "Please select user role.",
-                topOffset: 10,
-                position: "top",
-                visibilityTime: 4000,
-              });
+              ToastAndroid.show("Please select role.", ToastAndroid.SHORT);
             } else {
               if (!roleName) {
                 setErrors(true);
@@ -535,43 +472,38 @@ const CreateNewUser = ({ navigation, route }) => {
                 featureSets: featureListArray,
               };
               // console.log("ROLE--->>>", role);
-              const response = await dispatch(createRole(token, role));
-              // setTimeout(() => {
+              const response = await createRole(role);
+
               console.log("res===>>>", response);
-              if (response?.status === 200) {
-                const user = {
-                  userId: 0,
-                  username: email,
-                  fullName: fullName,
-                  password: password,
-                  emailAddress: email,
-                  userTypeId: 0,
-                  roleId: roles[roles.length - 1].roleId + 1,
-                  projectIds: project,
-                };
-                const response = await dispatch(createUserAction(token, user));
+              setTimeout(() => {
+                console.log("res===>>>", response);
                 if (response?.status === 200) {
-                  navigation.goBack();
-                  Toast.show({
-                    type: "success",
-                    text1: "User Created",
-                    text2: "User Created successfully.",
-                    topOffset: 10,
-                    position: "top",
-                    visibilityTime: 4000,
-                  });
-                } else {
-                  Toast.show({
-                    type: "error",
-                    text1: "Error",
-                    text2: "Something went wrong!",
-                    topOffset: 10,
-                    position: "top",
-                    visibilityTime: 4000,
-                  });
+                  const user = {
+                    userId: 0,
+                    username: email,
+                    fullName: fullName,
+                    password: password,
+                    emailAddress: email,
+                    userTypeId: 0,
+                    roleId: roles[roles.length - 1].roleId + 1,
+                    projectIds: project,
+                  };
+                  // const response = await dispatch(createUserAction(token, user));
+                  const response = createUser(user);
+                  if (response?.status === 200) {
+                    navigation.goBack();
+                    ToastAndroid.show(
+                      "User created successfully.",
+                      ToastAndroid.SHORT
+                    );
+                  } else {
+                    ToastAndroid.show(
+                      "User already exists.",
+                      ToastAndroid.SHORT
+                    );
+                  }
                 }
-              }
-              // }, 2000);
+              }, 2000);
             }
           }}
         >

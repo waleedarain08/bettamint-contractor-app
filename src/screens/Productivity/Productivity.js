@@ -98,6 +98,8 @@ import { launchImageLibrary } from "react-native-image-picker";
 import { BarChart } from "react-native-gifted-charts";
 import ActionButton from "./components/ActionButton";
 import CostProgress from "./components/CostProgress";
+import { useAuth } from "../../context/authContext";
+import { useGeneralContext } from "../../context/generalContext";
 
 LogBox.ignoreAllLogs();
 
@@ -1039,6 +1041,8 @@ const Row = (props) => {
 };
 
 const Productivity = ({ navigation }) => {
+  const { user } = useAuth();
+  const { projects } = useGeneralContext();
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
@@ -1082,8 +1086,8 @@ const Productivity = ({ navigation }) => {
   const [greenTooltip, setGreenTooltip] = useState(false);
   const { selectedNote } = useSelector(fieldNoteReducer);
   const [workerOrderId, setWorkerOrderId] = useState(null);
-  const userInfo = useSelector(userData);
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  // const userInfo = useSelector(userData);
+  const roles = user?.user?.role?.roleFeatureSets;
 
   const measurementAccess =
     roles &&
@@ -1108,7 +1112,7 @@ const Productivity = ({ navigation }) => {
     financialGraphLoading,
   } = useSelector(productivityReducer);
   // const { fieldNoteList, loading } = useSelector(fieldNoteReducer);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
+  // const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
   const labourContractorList = useSelector(labourContractorReducer);
   const randomId = Math.floor(100000 + Math.random() * 900000);
@@ -1141,34 +1145,34 @@ const Productivity = ({ navigation }) => {
   ]);
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(getSkillsAction(token));
-      dispatch(getUsersAction(token));
-      dispatch(getAllProjectsSimpleAction(token));
+      // dispatch(getSkillsAction(token));
+      // dispatch(getUsersAction(token));
+      // dispatch(getAllProjectsSimpleAction(token));
       dispatch(selectAttendanceAction(null));
       dispatch(removeMusterData());
       dispatch(getFieldNoteList(token));
       dispatch(getScopeList(token));
       dispatch(getUnitList(token));
 
-      if (projectsListSimple.length > 0) {
-        const projectId = projectsListSimple[0]?.projectId;
+      if (projects.length > 0) {
+        const projectId = projects[0]?.projectId;
         dispatch(getLabourContactorAction(token, projectId));
       }
 
       return () => {};
-    }, [dispatch, token, projectsListSimple])
+    }, [dispatch, token, projects?.length])
   );
 
   useEffect(() => {
-    if (projectsListSimple.length > 0) {
-      const projectId = projectsListSimple[0]?.projectId;
+    if (projects.length > 0) {
+      const projectId = projects[0]?.projectId;
       dispatch(getBOQList(token, projectId));
     }
-  }, [dispatch, token, projectsListSimple]);
+  }, [dispatch, token, projects]);
 
   useEffect(() => {
-    if (projectsListSimple.length > 0) {
-      const project = projectsListSimple[0];
+    if (projects.length > 0) {
+      const project = projects[0];
       const projectId = project?.projectId;
 
       setCurrentProjectProgress(projectId);
@@ -1186,7 +1190,7 @@ const Productivity = ({ navigation }) => {
       dispatch(getProjectBudget(token, projectId));
       dispatch(getFinancialProgressData(token, projectId));
     }
-  }, [dispatch, token, projectsListSimple]);
+  }, [dispatch, token, projects?.length]);
 
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
@@ -1303,10 +1307,10 @@ const Productivity = ({ navigation }) => {
       dispatch(getBOQProgress(token, item.value));
       dispatch(getBOQMetrics(token, item.value));
     } else {
-      dispatch(getBOQProgress(token, projectsListSimple[0]?.projectId));
-      setCurrentProjectDetail(projectsListSimple[0]);
-      setCurrentProject(projectsListSimple[0]?.projectId);
-      dispatch(getBOQMetrics(projectsListSimple[0]?.projectId));
+      dispatch(getBOQProgress(token, projects[0]?.projectId));
+      setCurrentProjectDetail(projects[0]);
+      setCurrentProject(projects[0]?.projectId);
+      dispatch(getBOQMetrics(projects[0]?.projectId));
     }
   };
   const getProjectProgressMaxValue = () => {
@@ -1881,9 +1885,9 @@ const Productivity = ({ navigation }) => {
       setCurrentProjectProgressGraph(item.value);
       dispatch(getProjectProgressGraph(token, item.value));
     } else {
-      setCurrentProjectProgressGraph(projectsListSimple[0]?.projectId);
+      setCurrentProjectProgressGraph(projects[0]?.projectId);
       dispatch(
-        getProjectProgressGraph(token, projectsListSimple[0]?.projectId)
+        getProjectProgressGraph(token, projects[0]?.projectId)
       );
     }
   };
@@ -2005,8 +2009,8 @@ const Productivity = ({ navigation }) => {
                     >
                       {selectedProject
                         ? `${selectedProject?.label?.substring(0, 10)}...`
-                        : projectsListSimple
-                        ? `${projectsListSimple[0]?.name?.substring(0, 10)}...`
+                        : projects
+                        ? `${projects[0]?.name?.substring(0, 10)}...`
                         : "Select a project"}
                     </Text>
                   </View>
@@ -2249,7 +2253,7 @@ const Productivity = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={projectsListSimple?.map((ele) => ({
+                data={projects?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.projectId,
                 }))}
@@ -2465,7 +2469,7 @@ const Productivity = ({ navigation }) => {
                       color: Colors.FormText,
                     }}
                     iconStyle={styles.iconStyle}
-                    data={projectsListSimple?.map((ele) => ({
+                    data={projects?.map((ele) => ({
                       label: ele?.name,
                       value: ele?.projectId,
                     }))}
@@ -2486,11 +2490,11 @@ const Productivity = ({ navigation }) => {
                         // dispatch(getContractors(project?.projectId));
                       } else {
                         dispatch(
-                          getBOQList(token, projectsListSimple[0]?.projectId)
+                          getBOQList(token, projects[0]?.projectId)
                         );
 
                         setCurrentProjectProgress(
-                          projectsListSimple[0]?.projectId
+                          projects[0]?.projectId
                         );
                         // dispatch(getContractors(projectClassificationList[0]?.projectId));
                       }
@@ -2668,7 +2672,7 @@ const Productivity = ({ navigation }) => {
                     color: Colors.FormText,
                   }}
                   iconStyle={styles.iconStyle}
-                  data={projectsListSimple.map((ele) => ({
+                  data={projects.map((ele) => ({
                     label: ele.name,
                     value: ele.projectId,
                   }))}
@@ -2866,8 +2870,8 @@ const Productivity = ({ navigation }) => {
                 showsVerticalScrollIndicator={false}
                 iconStyle={styles.iconStyle}
                 data={
-                  projectsListSimple.length
-                    ? projectsListSimple?.map((ele) => ({
+                  projects.length
+                    ? projects?.map((ele) => ({
                         label: ele?.name,
                         value: ele?.projectId,
                         ...ele,
@@ -2907,7 +2911,7 @@ const Productivity = ({ navigation }) => {
                 title={"Update"}
               />
             ))}
-          {(userInfo?.user?.role?.name === "SuperAdmin" ||
+          {(user?.user?.role?.name === "SuperAdmin" ||
             Number(measurementAccess) === 3) && (
             <ActionButton
               onPress={() => {
@@ -3199,7 +3203,7 @@ const Productivity = ({ navigation }) => {
                     showsVerticalScrollIndicator={false}
                     iconStyle={styles.iconStyle}
                     containerStyle={{ width: 250 }}
-                    data={projectsListSimple?.map((ele) => ({
+                    data={projects?.map((ele) => ({
                       label: ele?.name,
                       value: ele?.projectId,
                       ...ele,
@@ -3267,7 +3271,7 @@ const Productivity = ({ navigation }) => {
                         color: Colors.FormText,
                       }}
                       iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
+                      data={projects?.map((ele) => ({
                         label: ele?.name,
                         value: ele?.projectId,
                         ...ele,
@@ -3285,12 +3289,12 @@ const Productivity = ({ navigation }) => {
                           );
                         } else {
                           setCurrentProjectFinancial(
-                            projectsListSimple[0]?.projectId
+                            projects[0]?.projectId
                           );
                           dispatch(
                             getFinancialProgressData(
                               token,
-                              projectsListSimple[0]?.projectId
+                              projects[0]?.projectId
                             )
                           );
                         }
@@ -3340,30 +3344,6 @@ const Productivity = ({ navigation }) => {
                     </View>
                   );
                 }}
-                // stackData={[
-                //   {
-                //     stacks: [
-                //       { value: 10, color: "orange" },
-                //       { value: 20, color: "#4ABFF4", marginBottom: 2 },
-                //     ],
-                //     label: "Jan",
-                //   },
-                //   {
-                //     stacks: [
-                //       { value: 10, color: "#4ABFF4" },
-                //       { value: 11, color: "orange", marginBottom: 2 },
-                //       { value: 15, color: "#28B2B3", marginBottom: 2 },
-                //     ],
-                //     label: "Mar",
-                //   },
-                //   {
-                //     stacks: [
-                //       { value: 14, color: "orange" },
-                //       { value: 18, color: "#4ABFF4", marginBottom: 2 },
-                //     ],
-                //     label: "Feb",
-                //   },
-                // ]}
                 width={800}
               />
             </ScrollView>
@@ -3404,7 +3384,7 @@ const Productivity = ({ navigation }) => {
                         color: Colors.FormText,
                       }}
                       iconStyle={styles.iconStyle}
-                      data={projectsListSimple?.map((ele) => ({
+                      data={projects?.map((ele) => ({
                         label: ele?.name,
                         value: ele?.projectId,
                         ...ele,
@@ -3420,12 +3400,12 @@ const Productivity = ({ navigation }) => {
                           dispatch(getProjectBudget(token, item?.value));
                         } else {
                           setCurrentProjectBudget(
-                            projectsListSimple[0]?.projectId
+                            projects[0]?.projectId
                           );
                           dispatch(
                             getProjectBudget(
                               token,
-                              projectsListSimple[0]?.projectId
+                              projects[0]?.projectId
                             )
                           );
                         }

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Image,
   ImageBackground,
   StyleSheet,
   FlatList,
@@ -11,111 +10,84 @@ import {
   Modal,
   LogBox,
   RefreshControl,
+  ToastAndroid,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
+import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-import { useSelector, useDispatch } from "react-redux";
-import DropDownPicker from "react-native-dropdown-picker";
 import { Searchbar } from "react-native-paper";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { Building, Search, BackIcon, Cross, TickIcon } from "../../icons";
-import {
-  getAllProjectsAction,
-  projectsListReducer,
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-  loadingProject,
-  selectProjectAction,
-  getProjectsForMapping,
-  projectsForMappingReducer,
-  projectsForLabourReducer,
-  getProjectsForLabour,
-} from "../../redux/slices/projectSlice";
-import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
-import { authToken, userData } from "../../redux/slices/authSlice";
+import { Building, Search, BackIcon, Cross } from "../../icons";
+import { assetsUrl } from "../../utils/api_constants";
 import RestrictedScreen from "../../components/RestrictedScreen";
 import { useFocusEffect } from "@react-navigation/native";
+import { useGeneralContext } from "../../context/generalContext";
+import { useAuth } from "../../context/authContext";
+import { useProject } from "../../context/projectContext";
 LogBox.ignoreAllLogs();
 
 const Projects = ({ navigation }) => {
-  const [details, setDetails] = useState(null);
-  const [open, setOpen] = useState(false);
+  const { user } = useAuth();
+  const { projects } = useGeneralContext();
+  const {
+    loading,
+    allProjects,
+    getAllProjects,
+    mappingProjects,
+    getMappingProjects,
+    setSelectedProject,
+    getLabourProjects,
+  } = useProject();
   const [openSearchModal, setOpenSearchModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
   const [search, setSearch] = useState("");
-  const token = useSelector(authToken);
-  //! INSTANCES
-  const dispatch = useDispatch();
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
-  //! SELECTORS
-  const projectsList = useSelector(projectsListReducer);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const projectForMapping = useSelector(projectsForMappingReducer);
-  const projectForLabour = useSelector(projectsForLabourReducer);
-  const isLoading = useSelector(loadingProject);
-  const userInfo = useSelector(userData);
+  const getData = () => {
+    getAllProjects().catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
+  };
+
+  const getMappingProjectsData = () => {
+    getMappingProjects().catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
+  };
 
   //! LIFE CYCLE
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(getAllProjectsAction(token));
-      return () => {};
-    }, [])
-  );
-  // useEffect(() => {
-  //   dispatch(getAllProjectsSimpleAction(token));
-  //   if (userInfo?.user?.leadTypeId === "LabourContractor") {
-  //     dispatch(getProjectsForMapping(token));
-  //   } else {
-  //     dispatch(getAllProjectsSimpleAction(token));
-  //   }
-  // }, [userInfo]);
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(getAllProjectsSimpleAction(token));
-      if (userInfo?.user?.leadTypeId === "LabourContractor") {
-        dispatch(getProjectsForMapping(token));
+      if (user?.user?.leadTypeId === "LabourContractor") {
+        getMappingProjectsData();
       } else {
-        dispatch(getAllProjectsSimpleAction(token));
+        getData();
       }
 
       return () => {};
-    }, [userInfo])
+    }, [user])
   );
-  const onValueChange = (value) => {
-    setSelectedProject(value);
-  };
+
   useEffect(() => {
-    if (userInfo?.user?.leadTypeId === "LabourContractor") {
-      setFilteredDataSource(projectForMapping);
-      setMasterDataSource(projectForMapping);
-      console.log("projectForMapping")
+    if (user?.user?.leadTypeId === "LabourContractor") {
+      setFilteredDataSource(mappingProjects);
+      setMasterDataSource(mappingProjects);
     } else {
-      setFilteredDataSource(projectsListSimple);
-      setMasterDataSource(projectsListSimple);
-      console.log("projectsListSimple")
+      setFilteredDataSource(projects);
+      setMasterDataSource(projects);
     }
+  }, [mappingProjects?.length, projects?.length]);
 
-    // setFilteredDataSource(projectForMapping);
-    // setMasterDataSource(projectForMapping);
-  }, [projectForMapping, projectsListSimple]);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const roles = user?.user?.role?.roleFeatureSets;
   const isProjectListPresent = roles.some(
     (item) => item.featureSet.name === "Project List"
   );
 
   const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource?.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
@@ -123,8 +95,6 @@ const Projects = ({ navigation }) => {
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
     }
@@ -134,7 +104,7 @@ const Projects = ({ navigation }) => {
       style={styles.item}
       onPress={() => {
         navigation.navigate("ProjectDetails", { projectId: item?.projectId });
-        dispatch(selectProjectAction(item));
+        setSelectedProject(item);
       }}
     >
       <View
@@ -234,7 +204,7 @@ const Projects = ({ navigation }) => {
       <View style={styles.header} />
       {isProjectListPresent ? (
         <>
-          {userInfo?.user?.leadTypeId === "LabourContractor" ? (
+          {user?.user?.leadTypeId === "LabourContractor" ? (
             <View style={styles.graph}>
               <Pressable
                 onPress={() => {
@@ -267,10 +237,10 @@ const Projects = ({ navigation }) => {
                       { fontFamily: "Lexend-SemiBold", color: Colors.Black },
                     ]}
                   >
-                    {selectedProject
-                      ? selectedProject?.name
-                      : projectForMapping
-                      ? projectForMapping[0]?.name
+                    {selectedProjectId
+                      ? selectedProjectId?.name
+                      : mappingProjects
+                      ? mappingProjects[0]?.name
                       : "Select a project"}
                   </Text>
                 </View>
@@ -278,12 +248,13 @@ const Projects = ({ navigation }) => {
               <View style={{ flexDirection: "row", width: "28%" }}>
                 <TouchableOpacity
                   onPress={() => {
-                    dispatch(
-                      getProjectsForLabour(token, selectedProject.projectId)
-                    );
-                    setTimeout(() => {
-                      dispatch(getAllProjectsAction(token));
-                    }, 1000);
+                    getLabourProjects(selectedProjectId.projectId)
+                      .then(() => {
+                        getData();
+                      })
+                      .catch((error) => {
+                        ToastAndroid.show(error.message, ToastAndroid.SHORT);
+                      });
                   }}
                   style={{
                     backgroundColor: "#ECE5FC",
@@ -348,10 +319,10 @@ const Projects = ({ navigation }) => {
                       { fontFamily: "Lexend-SemiBold", color: Colors.Black },
                     ]}
                   >
-                    {selectedProject
-                      ? selectedProject?.name
-                      : projectsListSimple
-                      ? projectsListSimple[0]?.name
+                    {selectedProjectId
+                      ? selectedProjectId?.name
+                      : projects
+                      ? projects[0]?.name
                       : "Select a project"}
                   </Text>
                 </View>
@@ -396,15 +367,15 @@ const Projects = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
-                  dispatch(getAllProjectsAction(token));
+                  getData();
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            data={projectsList}
+            data={allProjects}
             renderItem={({ item }) => <Item item={item} />}
             keyExtractor={(item) => item.id}
           />
@@ -481,7 +452,7 @@ const Projects = ({ navigation }) => {
                         borderColor: Colors.FormBorder,
                       }}
                       onPress={() => {
-                        setSelectedProject(item);
+                        setSelectedProjectId(item);
                         setOpenSearchModal(false);
                       }}
                     >

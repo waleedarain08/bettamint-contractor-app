@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,34 +7,23 @@ import {
   LogBox,
   Modal,
   Pressable,
-  ActivityIndicator,
   RefreshControl,
   ScrollView,
+  ToastAndroid,
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
 import { BackIcon, Building, Cross, Search, TickIcon } from "../../icons";
 import { Searchbar } from "react-native-paper";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import {
-  getAllWorkersAction,
-  getSkillsAction,
-  selectWorkerAction,
-  workerLoading,
-  workersListReducer,
-} from "../../redux/slices/workerSlice";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import { authToken } from "../../redux/slices/authSlice";
-import { getAllJobsAction } from "../../redux/slices/jobSlice";
-
+import { useGeneralContext } from "../../context/generalContext";
+import { useWorker } from "../../context/workerContext";
+import { useFocusEffect } from "@react-navigation/native";
 LogBox.ignoreAllLogs();
+
 const Workers = ({ navigation }) => {
+  const { projects, labourContractorList } = useGeneralContext();
+  const { loading, workers, getWorkers, setSelectedWorker } = useWorker();
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -42,54 +31,34 @@ const Workers = ({ navigation }) => {
   const [search, setSearch] = useState("");
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedContractor, setSelectedContractor] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
   const [filteredDataAttSource, setFilteredDataAttSource] = useState([]);
   const [masterDataAttSource, setMasterDataAttSource] = useState([]);
   const [searchAttendance, setSearchAttendance] = useState("");
 
-  const dispatch = useDispatch();
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const workersList = useSelector(workersListReducer);
-  const isLoading = useSelector(workerLoading);
-  const usersList = useSelector(usersListReducer);
-  const token = useSelector(authToken);
-
-
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-    dispatch(getUsersAction(token));
-    dispatch(getAllJobsAction(token, 0));
-  }, []);
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
+  const getData = async (
+    projectId = selectedProject?.projectId || projects[0]?.projectId,
+    contractorId = 0
+  ) => {
+    getWorkers(projectId, contractorId).catch((err) =>
+      ToastAndroid.show(err.message, ToastAndroid.SHORT)
     );
-  }, [usersList]);
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      getData();
+    }, [])
+  );
+
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
-  useEffect(() => {
-    dispatch(getSkillsAction(token));
-  }, []);
-  useEffect(() => {
-    dispatch(
-      getAllWorkersAction(
-        token,
-        selectedProject?.projectId || projectsListSimple[0]?.projectId,
-        0
-      )
-    );
-  }, [selectedProject]);
+    setFilteredDataSource(projects);
+    setMasterDataSource(projects);
+  }, [projects?.length]);
 
   const searchFilterFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.name ? item.name.toUpperCase() : "".toUpperCase();
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
@@ -97,8 +66,6 @@ const Workers = ({ navigation }) => {
       setFilteredDataSource(newData);
       setSearch(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataSource(masterDataSource);
       setSearch(text);
     }
@@ -107,16 +74,13 @@ const Workers = ({ navigation }) => {
   const rowColors = ["#F3F4F4", "#FFFFFF"];
 
   useEffect(() => {
-    setFilteredDataAttSource(workersList);
-    setMasterDataAttSource(workersList);
-  }, [workersList]);
+    setFilteredDataAttSource(workers);
+    setMasterDataAttSource(workers);
+  }, [workers?.length]);
+
   const searchFilterAttendanceFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataAttSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.fullName
           ? item.fullName.toUpperCase()
           : "".toUpperCase();
@@ -126,12 +90,11 @@ const Workers = ({ navigation }) => {
       setFilteredDataAttSource(newData);
       setSearchAttendance(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataAttSource(masterDataAttSource);
       setSearchAttendance(text);
     }
   };
+
   const renderSearchModal = () => {
     return (
       <Modal
@@ -139,7 +102,6 @@ const Workers = ({ navigation }) => {
         transparent={true}
         visible={openSearchUserModal}
         onRequestClose={() => {
-          // Alert.alert("Modal has been closed.");
           setOpenSearchUserModal(!openSearchUserModal);
         }}
       >
@@ -149,15 +111,12 @@ const Workers = ({ navigation }) => {
             alignItems: "center",
             justifyContent: "center",
             backgroundColor: "rgba(0,0,0,0.2)",
-            //   width: '90%',
-            //   height: 200
           }}
         >
           <View
             style={{
               width: "80%",
               backgroundColor: Colors.White,
-              // height: 200,
               borderRadius: 10,
               padding: 15,
             }}
@@ -189,18 +148,6 @@ const Workers = ({ navigation }) => {
                   size={22}
                   color={Colors.Black}
                 />
-                {/* <Pressable
-                  onPress={() => {
-                    setSelectedContractor(null);
-                    setOpenFilterModal(false);
-                    setUserFilter(null);
-                  }}
-                  style={{ marginTop: 3 }}
-                >
-                  <Text style={{ fontFamily: "Lexend-Medium", fontSize: 10 }}>
-                    Clear Filter
-                  </Text>
-                </Pressable> */}
               </View>
             </View>
             <View style={{ marginVertical: 10 }}>
@@ -210,7 +157,6 @@ const Workers = ({ navigation }) => {
                   borderRadius: 4,
                   borderWidth: 1,
                   width: "100%",
-                  // height: 50,
                   marginTop: 10,
                   borderColor: Colors.LightGray,
                 }}
@@ -244,7 +190,7 @@ const Workers = ({ navigation }) => {
           style={{
             flex: 1,
             alignItems: "center",
-            marginTop: 20
+            marginTop: 20,
             // justifyContent: "center",
             // backgroundColor: "rgba(0,0,0,0.2)",
             //   width: '90%',
@@ -291,13 +237,9 @@ const Workers = ({ navigation }) => {
                   onPress={() => {
                     setSelectedContractor(null);
                     setOpenFilterModal(false);
-                    dispatch(
-                      getAllWorkersAction(
-                        token,
-                        selectedProject?.projectId ||
-                          projectsListSimple[0]?.projectId,
-                        0
-                      )
+                    getData(
+                      selectedProject?.projectId || projects[0]?.projectId,
+                      0
                     );
                   }}
                   style={{ marginTop: 3 }}
@@ -326,7 +268,7 @@ const Workers = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
+                data={labourContractorList?.map((ele) => ({
                   label: ele?.fullName,
                   value: ele?.userId,
                 }))}
@@ -338,13 +280,9 @@ const Workers = ({ navigation }) => {
                 onChange={(item) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
-                  dispatch(
-                    getAllWorkersAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      item?.value
-                    )
+                  getData(
+                    selectedProject?.projectId || projects[0]?.projectId,
+                    item?.value
                   );
                 }}
               />
@@ -415,7 +353,7 @@ const Workers = ({ navigation }) => {
             <TouchableOpacity
               onPress={() => {
                 navigation.navigate("WorkerDetails");
-                dispatch(selectWorkerAction(item));
+                setSelectedWorker(item);
               }}
               style={{
                 backgroundColor: "#ECE5FC",
@@ -514,8 +452,8 @@ const Workers = ({ navigation }) => {
             >
               {selectedProject
                 ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
+                : projects
+                ? projects[0]?.name
                 : "Select a project"}
             </Text>
           </View>
@@ -580,16 +518,17 @@ const Workers = ({ navigation }) => {
           flex: 1,
         }}
       >
-        {workersList?.length === 0 || !workersList ? (
+        {workers?.length === 0 || !workers ? (
           <ScrollView
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() =>
-                  dispatch(
-                    getAllWorkersAction(token, selectedProject?.projectId, 0)
-                  )
-                }
+                refreshing={loading}
+                onRefresh={() => {
+                  getData(
+                    selectedProject?.projectId || projects[0]?.projectId,
+                    0
+                  );
+                }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
@@ -614,12 +553,13 @@ const Workers = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() =>
-                  dispatch(
-                    getAllWorkersAction(token, selectedProject?.projectId, 0)
-                  )
-                }
+                refreshing={loading}
+                onRefresh={() => {
+                  getData(
+                    selectedProject?.projectId || projects[0]?.projectId,
+                    0
+                  );
+                }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
@@ -627,7 +567,7 @@ const Workers = ({ navigation }) => {
             data={
               filteredDataAttSource?.length !== 0
                 ? filteredDataAttSource
-                : workersList
+                : workers
             }
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
@@ -709,6 +649,7 @@ const Workers = ({ navigation }) => {
                   onPress={() => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
+                    getData(item.projectId, 0);
                   }}
                 >
                   <Text

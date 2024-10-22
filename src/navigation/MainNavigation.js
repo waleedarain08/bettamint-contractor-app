@@ -120,11 +120,10 @@ const Drawer = createDrawerNavigator();
 LogBox.ignoreAllLogs();
 
 const PaymentNavigator = ({ navigation }) => {
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
-  const isPaymentListPresent = roles.some(
-    (item) => item.featureSet.name === "Payment List"
+  const { user } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
+  const isPaymentListPresent = roles?.some(
+    (item) => item?.featureSet?.name === "Payment List"
   );
 
   return (
@@ -290,9 +289,8 @@ const PaymentNavigator = ({ navigation }) => {
 };
 
 const JobsNavigator = ({ navigation }) => {
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const { user } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
   const isJobsListPresent = roles.some(
     (item) => item.featureSet.name === "Jobs List"
   );
@@ -483,11 +481,10 @@ const JobsNavigator = ({ navigation }) => {
 };
 
 const AttendanceNavigator = ({ navigation }) => {
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
-  const isAttendanceListPresent = roles.some(
-    (item) => item.featureSet.name === "Attendance List"
+  const { user } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
+  const isAttendanceListPresent = roles?.some(
+    (item) => item?.featureSet?.name === "Attendance List"
   );
   return (
     <AttendanceStack.Navigator
@@ -640,9 +637,8 @@ const AttendanceNavigator = ({ navigation }) => {
   );
 };
 const AttendanceOnlyNavigator = ({ navigation }) => {
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
+  const { user } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
   const isAttendanceListPresent = roles.some(
     (item) => item.featureSet.name === "Attendance List"
   );
@@ -1013,11 +1009,10 @@ const WorkersNavigator = ({ navigation }) => {
 
 const ProjectNavigator = ({ navigation }) => {
   const project = useSelector(selectedProjectReducer);
-  const userInfo = useSelector(userData);
-
-  const roles = userInfo?.user?.role?.roleFeatureSets;
-  const isProjectListPresent = roles.some(
-    (item) => item.featureSet.name === "Project List"
+  const { user } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
+  const isProjectListPresent = roles?.some(
+    (item) => item?.featureSet?.name === "Project List"
   );
   const projectBoundariesAccess = roles.some(
     (item) =>
@@ -1025,7 +1020,7 @@ const ProjectNavigator = ({ navigation }) => {
       Number(item.accessRightId) !== 1
   );
   const showPressable =
-    userInfo?.user?.role?.name === "SuperAdmin" ||
+    user?.user?.role?.name === "SuperAdmin" ||
     (isProjectListPresent && projectBoundariesAccess);
 
   const dispatch = useDispatch();
@@ -1537,7 +1532,6 @@ const FieldNotesNavigator = ({ navigation }) => {
 };
 
 const ProductivityNavigator = ({ navigation }) => {
-  const userInfo = useSelector(userData);
   return (
     <ProductivityStack.Navigator
       screenOptions={{
@@ -1716,6 +1710,7 @@ const ProductivityNavigator = ({ navigation }) => {
 
 function MainNavigation({ navigation }) {
   const { user, setUser } = useAuth();
+  const roles = user?.user?.role?.roleFeatureSets;
   useEffect(() => {
     setTimeout(() => {
       SplashScreen.hide();
@@ -1743,8 +1738,6 @@ function MainNavigation({ navigation }) {
       background: "#fff",
     },
   };
-
-  const roles = user?.user?.role?.roleFeatureSets;
 
   // Array of expected names
   const expectedNames = [
@@ -1984,7 +1977,6 @@ function TabNavigator({ navigation }) {
     }),
     [isOpened]
   );
-  const userdata = useSelector(userData);
   const roles = user?.user?.role?.roleFeatureSets;
 
   const isDashboardPresent = roles.some(

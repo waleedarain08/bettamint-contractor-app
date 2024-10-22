@@ -4,50 +4,38 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Dimensions,
   LogBox,
   Pressable,
   RefreshControl,
-  TextInput,
   ScrollView,
   TouchableOpacity,
   PermissionsAndroid,
+  ToastAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "../../utils/Colors";
 import { Searchbar } from "react-native-paper";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  getAllAttendanceAction,
-  attendanceListReducer,
-  saveProjectDataAction,
-  selectAttendanceAction,
-  loadingAttendance,
-  removeMusterData,
-} from "../../redux/slices/attendanceSlice";
-import {
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-} from "../../redux/slices/projectSlice";
 import { Building, Search, BackIcon, Cross } from "../../icons";
-import { authToken } from "../../redux/slices/authSlice";
-import {
-  getSkillsAction,
-  markWorkerJob,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import { getUsersAction, usersListReducer } from "../../redux/slices/userSlice";
 import SearchWorkerModal from "../../components/SearchWorkerModal";
 import { useFocusEffect } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
+import { useAttendance } from "../../context/attendanceContext";
+import { useGeneralContext } from "../../context/generalContext";
 
 LogBox.ignoreAllLogs();
 
 const Attendance = ({ navigation }) => {
+  const {
+    loading,
+    getAttendance,
+    attendance,
+    delistWorker,
+    setSelectedAttendance,
+  } = useAttendance();
+  const { projects, skills, labourContractorList, setProject, project } =
+    useGeneralContext();
   const [openSearchModal, setOpenSearchModal] = useState(false);
-  const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
   const [masterDataSource, setMasterDataSource] = useState([]);
   const [search, setSearch] = useState("");
@@ -57,25 +45,11 @@ const Attendance = ({ navigation }) => {
   const [openDeListModal, setOpenDeListModal] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [filteredAttendance, setFilteredAttendance] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [selectedContractor, setSelectedContractor] = useState(null);
   const [delistReason, setDelistReason] = useState(null);
   const [selectedWorker, setSelectedWorker] = useState(null);
-  const [labourContractors, setLabourContractors] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
-  const [count, setCount] = useState(1);
-  const dispatch = useDispatch();
-
-  const attendanceList = useSelector(attendanceListReducer);
-  const skillsList = useSelector(skillsListReducer);
-  const usersList = useSelector(usersListReducer);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const isLoading = useSelector(loadingAttendance);
-  const token = useSelector(authToken);
-  let pageNum = 1;
-  // const page = React.useRef(1);
 
   const status = [
     { label: "No Show", value: "NoShow" },
@@ -83,6 +57,16 @@ const Attendance = ({ navigation }) => {
     { label: "Misconduct", value: "Misconduct" },
     { label: "Job Ended", value: "JobEnded" },
   ];
+
+  const getData = (
+    projectId = projects[0]?.projectId,
+    contractorId = 0,
+    skillId = ""
+  ) => {
+    getAttendance(projectId, contractorId, skillId).catch((error) => {
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
+    });
+  };
 
   const getLocationPermission = async () => {
     try {
@@ -108,7 +92,6 @@ const Attendance = ({ navigation }) => {
   const getCurrentLocation = () => {
     Geolocation.getCurrentPosition(
       (position) => {
-        // setCurrentPosition(position);
         console.log(position);
       },
       (error) => {
@@ -119,124 +102,35 @@ const Attendance = ({ navigation }) => {
   };
   useFocusEffect(
     React.useCallback(() => {
-      if (projectsListSimple) {
-        dispatch(
-          getAllAttendanceAction(
-            token,
-            projectsListSimple[0]?.projectId,
-            0,
-            1,
-            15,
-            "",
-            0
-          )
-        );
-        setSelectedProject(projectsListSimple[0]);
-        dispatch(saveProjectDataAction(projectsListSimple[0]));
+      if (projects?.length > 0) {
+        getData();
+        setProject(projects[0]);
+        setFilteredDataSource(projects);
+        setMasterDataSource(projects);
         getLocationPermission();
       }
       return () => {};
-    }, [projectsListSimple && projectsListSimple[0]?.projectId])
+    }, [projects.length])
   );
-  // useEffect(() => {
-  //   dispatch(getSkillsAction(token));
-  //   dispatch(getUsersAction(token));
-  //   dispatch(getAllProjectsSimpleAction(token));
-  //   dispatch(selectAttendanceAction(null));
-  //   dispatch(removeMusterData());
-  // }, []);
+
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(getSkillsAction(token));
-      dispatch(getUsersAction(token));
-      dispatch(getAllProjectsSimpleAction(token));
-      dispatch(selectAttendanceAction(null));
-      dispatch(removeMusterData());
-      setCount(1);
+      setSelectedAttendance(null);
       setFilteredDataAttSource([]);
       return () => {};
     }, [])
   );
-  useEffect(() => {
-    setLabourContractors(
-      usersList?.filter((ele) => ele?.leadTypeId === "LabourContractor")
-    );
-  }, [usersList]);
-  // console.log("filteredDataAttSource", attendanceList?.attendances);
-  // useEffect(() => {
-  //   const projectId =
-  //     projectsListSimple?.[0]?.projectId || selectedProject?.projectId;
-  //   if (projectId) {
-  //     dispatch(
-  //       getAllAttendanceAction(
-  //         token,
-  //         projectId,
-  //         0,
-  //         1,
-  //         15,
-  //         selectedSkills?.value || "",
-  //         selectedOrder?.value || 0
-  //       )
-  //     );
-  //   }
-  // }, [selectedProject]);
 
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
-
-  useEffect(() => {
-    if (attendanceList?.attendances?.length > 0) {
-      console.log('USE EFFECT---->>>>>')
-      setFilteredDataAttSource(attendanceList?.attendances);
-      setMasterDataAttSource(attendanceList?.attendances);
-      // setFilteredDataAttSource((prev) => {
-      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
-      // });
-      // setMasterDataAttSource((prev) => {
-      //   return [...(prev || []), ...(attendanceList?.attendances || [])];
-      // });
-
-      // console.log("attendanceList", filteredDataAttSource[0]);
-      // console.log("attendanceList", attendanceList?.attendances[0]);
+    if (attendance?.attendances?.length > 0) {
+      setFilteredDataAttSource(attendance?.attendances);
+      setMasterDataAttSource(attendance?.attendances);
     }
-    // console.log("filteredDataAttSource", filteredAttendance);
-  }, [attendanceList?.attendances, selectedSkills]);
-  // console.log("filteredDataAttSource", filteredDataAttSource);
-  // useEffect(() => {
-  //   if (attendanceList?.attendances?.length > 0) {
-  //     console.log("selectedOrder", selectedOrder);
-  //     if (selectedOrder?.value === 1) {
-  //       setFilteredDataAttSource((prev) => {
-  //         return [...(attendanceList?.attendances || [])];
-  //       });
-  //       setMasterDataAttSource((prev) => {
-  //         return [...(attendanceList?.attendances || [])];
-  //       });
-  //     } else {
-  //       setFilteredDataAttSource((prev) => {
-  //         return [...(attendanceList?.attendances || [])];
-  //       });
-  //       setMasterDataAttSource((prev) => {
-  //         return [...(attendanceList?.attendances || [])];
-  //       });
-  //     }
+  }, [attendance?.attendances, selectedSkills]);
 
-  //     // console.log("attendanceList", filteredDataAttSource[0]);
-  //     // console.log("attendanceList", attendanceList?.attendances[0]);
-  //   } else {
-  //     setFilteredDataAttSource([]);
-  //     setMasterDataAttSource([]);
-  //   }
-  // }, [selectedSkills, selectedOrder]);
   const searchFilterAttendanceFunction = (text) => {
-    // Check if searched text is not blank
     if (text) {
-      // Inserted text is not blank
-      // Filter the masterDataSource and update FilteredDataSource
       const newData = masterDataAttSource.filter(function (item) {
-        // Applying filter for the inserted text in search bar
         const itemData = item.workerName
           ? item.workerName.toUpperCase()
           : "".toUpperCase();
@@ -247,8 +141,6 @@ const Attendance = ({ navigation }) => {
       setFilteredDataAttSource(newData);
       setSearchAttendance(text);
     } else {
-      // Inserted text is blank
-      // Update FilteredDataSource with masterDataSource
       setFilteredDataAttSource(masterDataAttSource);
       setSearchAttendance(text);
     }
@@ -313,20 +205,12 @@ const Attendance = ({ navigation }) => {
                     setSelectedContractor(null);
                     setSelectedSkills(null);
                     setSelectedStatus(null);
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId ||
-                          projectsListSimple[0]?.projectId,
-                        0,
-                        count,
-                        15,
-                        "",
-                        0
-                      )
+                    getData(
+                      project?.projectId || projects[0]?.projectId,
+                      0,
+                      ""
                     );
                     setOpenFilterModal(false);
-                    setFilteredAttendance(null);
                   }}
                   style={{ marginTop: 3 }}
                 >
@@ -370,11 +254,6 @@ const Attendance = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedStatus(item);
                   setSelectedSkills(null);
-                  setFilteredAttendance(
-                    attendanceList?.attendances?.filter(
-                      (ele) => ele.workerTypeId === item?.value
-                    )
-                  );
                 }}
               />
             </View>
@@ -396,7 +275,7 @@ const Attendance = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={skillsList?.map((ele) => ({
+                data={skills?.map((ele) => ({
                   label: ele?.name,
                   value: ele?.skillId,
                 }))}
@@ -409,26 +288,13 @@ const Attendance = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedSkills(item);
                   setSelectedStatus(null);
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0,
-                      count,
-                      15,
-                      item?.value,
-                      0
-                    )
+                  getData(
+                    project?.projectId || projects[0]?.projectId,
+                    0,
+                    item?.value
                   );
                   setFilteredDataAttSource([]);
                   setMasterDataAttSource([]);
-                  // console.log(skillsList)
-                  // setFilteredAttendance(
-                  //   attendanceList?.attendances?.filter(
-                  //     (ele) => ele.sKillName === item?.value
-                  //   )
-                  // );
                 }}
               />
             </View>
@@ -450,7 +316,7 @@ const Attendance = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={labourContractors?.map((ele) => ({
+                data={labourContractorList?.map((ele) => ({
                   label: ele?.fullName,
                   value: ele?.userId,
                 }))}
@@ -464,80 +330,14 @@ const Attendance = ({ navigation }) => {
                   setSelectedContractor(item);
                   setSelectedStatus(null);
                   setSelectedSkills(null);
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      item?.value,
-                      count,
-                      15,
-                      "",
-                      0
-                    )
+                  getData(
+                    project?.projectId || projects[0]?.projectId,
+                    item?.value,
+                    ""
                   );
-                  // setFilteredAttendance(
-                  //   attendanceList?.filter(
-                  //     (ele) => ele.sKillName === item?.value
-                  //   )
-                  // );
                 }}
               />
             </View>
-            {/* <View style={{ marginVertical: 10 }}>
-              <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
-                >
-                  By Worker Name
-                </Text>
-              </View>
-              <Dropdown
-                style={styles.dropdown}
-                placeholderStyle={styles.placeholderStyle}
-                selectedTextStyle={styles.selectedTextStyle}
-                itemTextStyle={{
-                  fontFamily: "Lexend-Regular",
-                  fontSize: 13,
-                  color: Colors.FormText,
-                }}
-                iconStyle={styles.iconStyle}
-                data={[
-                  { label: "Ascending", value: 0 },
-                  { label: "Descending", value: 1 },
-                ]}
-                maxHeight={300}
-                labelField="label"
-                valueField="value"
-                placeholder={"Select Order"}
-                value={selectedOrder}
-                onChange={(item) => {
-                  setOpenFilterModal(false);
-                  setSelectedOrder(item);
-                  setSelectedStatus(null);
-                  setSelectedSkills(null);
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0,
-                      count,
-                      15,
-                      "",
-                      item?.value
-                    )
-                  );
-                  setFilteredDataAttSource([]);
-                  setMasterDataAttSource([]);
-                  // setFilteredAttendance(
-                  //   attendanceList?.filter(
-                  //     (ele) => ele.sKillName === item?.value
-                  //   )
-                  // );
-                }}
-              />
-            </View> */}
           </View>
         </View>
       </Modal>
@@ -589,13 +389,6 @@ const Attendance = ({ navigation }) => {
               </View>
             </View>
             <View style={{ marginVertical: 20 }}>
-              {/* <View style={{ marginVertical: 5 }}>
-                <Text
-                  style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
-                >
-                  By Status
-                </Text>
-              </View> */}
               <Dropdown
                 style={styles.dropdown}
                 placeholderStyle={styles.placeholderStyle}
@@ -619,51 +412,33 @@ const Attendance = ({ navigation }) => {
                     workerId: selectedWorker?.workerId,
                     reason: item?.value,
                   };
-                  // console.log("item", obj);
-                  const resp = await dispatch(markWorkerJob(token, obj));
-                  console.log("resp", resp);
-                  if (resp?.status === 200) {
-                    setOpenDeListModal(false);
-                    setDelistReason(null);
-                    Toast.show({
-                      type: "info",
-                      text1: "Success",
-                      text2: "Worker removed successfully!",
-                      topOffset: 10,
-                      position: "top",
-                      visibilityTime: 4000,
+                  delistWorker(obj)
+                    .then((res) => {
+                      console.log("res", res);
+                      if (res?.status === 200) {
+                        setOpenDeListModal(false);
+                        setDelistReason(null);
+                        ToastAndroid.show(
+                          "Worker removed successfully!",
+                          ToastAndroid.LONG
+                        );
+                        getData(
+                          project?.projectId,
+                          0,
+                          selectedSkills?.value || ""
+                        );
+                      } else {
+                        setOpenDeListModal(false);
+                        setDelistReason(null);
+                        ToastAndroid.show(
+                          "Some thing went wrong!",
+                          ToastAndroid.LONG
+                        );
+                      }
+                    })
+                    .catch((error) => {
+                      ToastAndroid.show(error.message, ToastAndroid.LONG);
                     });
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId,
-                        0,
-                        count,
-                        15,
-                        "",
-                        0
-                      )
-                    );
-                  } else {
-                    setOpenDeListModal(false);
-                    setDelistReason(null);
-                    Toast.show({
-                      type: "error",
-                      text1: "Error",
-                      text2: "Some thing went wrong!",
-                      topOffset: 10,
-                      position: "top",
-                      visibilityTime: 4000,
-                    });
-                  }
-                  // setOpenFilterModal(false);
-                  // setSelectedStatus(item);
-                  // setSelectedSkills(null);
-                  // setFilteredAttendance(
-                  //   attendanceList?.filter(
-                  //     (ele) => ele.workerTypeId === item?.value
-                  //   )
-                  // );
                 }}
               />
             </View>
@@ -725,9 +500,7 @@ const Attendance = ({ navigation }) => {
           <Pressable
             onPress={() => {
               navigation.navigate("AttendanceMusterCard");
-              // setTimeout(() => {
-              dispatch(selectAttendanceAction(item));
-              // }, 0);
+              setSelectedAttendance(item);
             }}
             style={{
               backgroundColor: "#ECE5FC",
@@ -761,16 +534,6 @@ const Attendance = ({ navigation }) => {
               Remove
             </Text>
           </Pressable>
-          {/* <Text
-            style={{
-              color: "red",
-              fontSize: 10,
-              fontFamily: "Lexend-Regular",
-              textAlign: "center",
-            }}
-          >
-            Remove
-          </Text> */}
         </View>
       </View>
     </View>
@@ -784,11 +547,9 @@ const Attendance = ({ navigation }) => {
             alignItems: "center",
             width: "100%",
             justifyContent: "space-between",
-            // paddingVertical: 15,
             paddingHorizontal: 8,
             backgroundColor: Colors.White,
             height: 50,
-            // borderRadius: 10
             borderTopLeftRadius: 10,
             borderTopRightRadius: 25,
           }}
@@ -817,12 +578,7 @@ const Attendance = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <View style={styles.header} />
-      <Pressable
-        // onPress={() => {
-        //   setOpenSearchModal(true);
-        // }}
-        style={styles.graph}
-      >
+      <Pressable style={styles.graph}>
         <Pressable
           onPress={() => {
             setOpenSearchModal(true);
@@ -853,27 +609,15 @@ const Attendance = ({ navigation }) => {
                 { fontFamily: "Lexend-SemiBold", color: Colors.Black },
               ]}
             >
-              {selectedProject
-                ? selectedProject?.name
-                : projectsListSimple
-                ? projectsListSimple[0]?.name
+              {project
+                ? project?.name
+                : projects
+                ? projects[0]?.name
                 : "Select a project"}
             </Text>
           </View>
         </Pressable>
         <View style={{ flexDirection: "row" }}>
-          {/* <TouchableOpacity
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Sort By</Text>
-          </TouchableOpacity> */}
           <Pressable
             onPress={() => {
               setOpenFilterModal(true);
@@ -911,28 +655,6 @@ const Attendance = ({ navigation }) => {
           worker Check-In & Geolocation Tracking during work hours.
         </Text>
       </View>
-      {/* <ScrollView> */}
-      {/* <ScrollView
-        refreshControl={
-          <RefreshControl
-            refreshing={isLoading}
-            onRefresh={() => {
-              dispatch(
-                getAllAttendanceAction(
-                  token,
-                  selectedProject?.projectId ||
-                    projectsListSimple[0]?.projectId,
-                  0
-                )
-              );
-            }}
-            tintColor={Colors.Primary}
-            colors={[Colors.Purple, Colors.Primary]}
-          />
-        }
-        showsHorizontalScrollIndicator={false}
-        style={{ flex: 1 }}
-      > */}
       <View
         style={{
           backgroundColor: Colors.White,
@@ -951,59 +673,13 @@ const Attendance = ({ navigation }) => {
           flex: 1,
         }}
       >
-        {/* {!attendanceList || attendanceList?.length === 0 ? (
-            <ScrollView
-              refreshControl={
-                <RefreshControl
-                  refreshing={isLoading}
-                  onRefresh={() => {
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId, 0
-                      )
-                    );
-                  }}
-                  tintColor={Colors.Primary}
-                  colors={[Colors.Purple, Colors.Primary]}
-                />
-              }
-              contentContainerStyle={{
-                flex: 1,
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-            >
-              <Text
-                style={{
-                  fontFamily: "Lexend-Medium",
-                  fontSize: 18,
-                  color: Colors.Gray,
-                }}
-              >
-                No Record Found!
-              </Text>
-            </ScrollView>
-          ) : ( */}
         {!filteredDataAttSource || filteredDataAttSource?.length === 0 ? (
           <ScrollView
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0,
-                      1,
-                      15,
-                      "",
-                      0
-                    )
-                  );
+                  getData(project?.projectId || projects[0]?.projectId, 0, "");
                   setSelectedSkills(null);
                 }}
                 tintColor={Colors.Primary}
@@ -1030,31 +706,9 @@ const Attendance = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
+                refreshing={loading}
                 onRefresh={() => {
-                  dispatch(
-                    getAllAttendanceAction(
-                      token,
-                      selectedProject?.projectId ||
-                        projectsListSimple[0]?.projectId,
-                      0,
-                      1,
-                      15,
-                      "",
-                      0
-                    )
-                  );
-                  // setFilteredDataAttSource([]);
-                  // setMasterDataAttSource([]);
-                  // if (attendanceList?.attendances?.length > 0) {
-                  //   // setMasterDataAttSource((prev) => {
-                  //   //   return [...(prev || []), ...(attendanceList?.attendances || [])];
-                  //   // });
-
-                  //   // console.log("attendanceList", filteredDataAttSource[0]);
-                  //   // console.log("attendanceList", attendanceList?.attendances[0]);
-                  // }
-                  // setCount(1);
+                  getData(project?.projectId || projects[0]?.projectId, 0, "");
                   setSelectedSkills(null);
                   setSelectedContractor(null);
                 }}
@@ -1062,10 +716,6 @@ const Attendance = ({ navigation }) => {
                 colors={[Colors.Purple, Colors.Primary]}
               />
             }
-            // onEndReached={() => {
-            //   setCount(count + 1);
-            // }}
-            // onEndReachedThreshold={0.7}
             data={filteredDataAttSource}
             renderItem={({ item, index }) => <Item item={item} index={index} />}
             keyExtractor={(item) => item.id}
@@ -1153,22 +803,11 @@ const Attendance = ({ navigation }) => {
                     borderColor: Colors.FormBorder,
                   }}
                   onPress={() => {
-                    setSelectedProject(item);
-                    dispatch(
-                      getAllAttendanceAction(
-                        token,
-                        item?.projectId,
-                        0,
-                        1,
-                        15,
-                        "",
-                        0
-                      )
-                    );
+                    // setSelectedProject(item);
+                    setProject(item);
+                    getData(item?.projectId, 0, selectedSkills?.value || "");
                     setOpenSearchModal(false);
-                    dispatch(saveProjectDataAction(item));
                     setFilteredDataAttSource([]);
-                    setCount(1);
                   }}
                 >
                   <Text

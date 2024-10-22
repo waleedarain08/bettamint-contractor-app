@@ -2,119 +2,32 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  Image,
   ImageBackground,
   StyleSheet,
   FlatList,
-  Dimensions,
-  Pressable,
-  Modal,
   LogBox,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
+import { ScrollView } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  getAllProjectsAction,
-  projectsListReducer,
-} from "../../redux/slices/projectSlice";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
+import { Building } from "../../icons";
+import { assetsUrl } from "../../utils/api_constants";
+import { useProject } from "../../context/projectContext";
 LogBox.ignoreAllLogs();
-import { Building, Search, LocationIcon } from "../../icons";
-import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
-import { selectedProjectReducer } from "../../redux/slices/projectSlice";
-const DATA = [
-  {
-    id: "1",
-    title: "Ram Parshad Twin Towers",
-    num: "175",
-    image:
-      "https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    stat: "Daily Stats*",
-    worker: "1247",
-    type: "Residential",
-    days: "30",
-    supervisor: "Laxmi",
-    location:
-      "V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-  },
-  {
-    id: "2",
-    title: "Ram Parshad Twin Towers",
-    num: "175",
-    image:
-      "https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    stat: "Daily Stats*",
-    worker: "1247",
-    type: "Residential",
-    days: "30",
-    supervisor: "Laxmi",
-    location:
-      "V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-  },
-  {
-    id: "3",
-    title: "Ram Parshad Twin Towers",
-    num: "175",
-    image:
-      "https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    stat: "Daily Stats*",
-    worker: "1247",
-    type: "Residential",
-    days: "30",
-    supervisor: "Laxmi",
-    location:
-      "V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-  },
-  {
-    id: "4",
-    title: "Ram Parshad Twin Towers",
-    num: "175",
-    image:
-      "https://images.pexels.com/photos/302769/pexels-photo-302769.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2",
-    stat: "Daily Stats*",
-    worker: "1247",
-    type: "Residential",
-    days: "30",
-    supervisor: "Laxmi",
-    location:
-      "V.Nagar, Tisaiyanvilai, Tirunelveli Natak vin 5703, New Dehli, India",
-  },
-];
 
-const ProjectDetails = ({ navigation, route }) => {
-  const [details, setDetails] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const projectsList = useSelector(projectsListReducer);
+const ProjectDetails = ({}) => {
   const [location, setLocation] = useState(null);
-  const project = useSelector(selectedProjectReducer);
-  const latitude = 26.0435693;
-  const longitude = 68.947998;
+  const { selectedProject } = useProject();
 
   fetch(
-    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${project?.latitude}&lon=${project?.longitude}`
+    `https://nominatim.openstreetmap.org/reverse?format=json&lat=${selectedProject?.latitude}&lon=${selectedProject?.longitude}`
   )
     .then((response) => response.json())
     .then((data) => setLocation(data.display_name))
     .catch((error) => console.error(error));
-  console.log("project", project);
+
   return (
-    // <View style={styles.container}>
-    <ScrollView
-      contentContainerStyle={
-        {
-          // flexGrow: 1,
-          // justifyContent: "space-between",
-        }
-      }
-    >
+    <ScrollView>
       <View style={styles.header} />
       <View
         style={{
@@ -126,7 +39,7 @@ const ProjectDetails = ({ navigation, route }) => {
         <View style={styles.modalView}>
           <View style={{ width: "95%", margin: 10, borderRadius: 30 }}>
             <ImageBackground
-              source={{ uri: assetsUrl + project?.url }}
+              source={{ uri: assetsUrl + selectedProject?.url }}
               imageStyle={{ borderRadius: 10 }}
               style={{
                 // marginHorizontal: 20,
@@ -156,7 +69,9 @@ const ProjectDetails = ({ navigation, route }) => {
                 >
                   <View>
                     <Text style={styles.modalText}>Project</Text>
-                    <Text style={styles.modalHeading}>{project?.name}</Text>
+                    <Text style={styles.modalHeading}>
+                      {selectedProject?.name}
+                    </Text>
                   </View>
                   <Building size={20} color={Colors.White} />
                 </View>
@@ -182,7 +97,7 @@ const ProjectDetails = ({ navigation, route }) => {
                 PROJECT TYPE
               </Text>
               <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                {project?.projectTypeId}
+                {selectedProject?.projectTypeId}
               </Text>
             </View>
             <View
@@ -197,7 +112,7 @@ const ProjectDetails = ({ navigation, route }) => {
               </Text>
 
               <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                {project?.requiredWorkers}
+                {selectedProject?.requiredWorkers}
               </Text>
             </View>
             <View
@@ -211,7 +126,7 @@ const ProjectDetails = ({ navigation, route }) => {
                 Active Workers
               </Text>
               <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                {project?.activeWorkers}
+                {selectedProject?.activeWorkers}
               </Text>
             </View>
             <View
@@ -225,7 +140,7 @@ const ProjectDetails = ({ navigation, route }) => {
                 Project Area In SQFTS
               </Text>
               <Text style={[styles.modalHeading, { color: Colors.Black }]}>
-                {project?.projectArea}
+                {selectedProject?.projectArea}
               </Text>
             </View>
 
@@ -255,7 +170,7 @@ const ProjectDetails = ({ navigation, route }) => {
                 VIEW BUDGET
               </Text>
               <FlatList
-                data={project?.scopeOfWorks}
+                data={selectedProject?.scopeOfWorks}
                 keyExtractor={(item) => item.scopeOfWorkId}
                 renderItem={({ item }) => (
                   <View
@@ -304,7 +219,7 @@ const ProjectDetails = ({ navigation, route }) => {
                         width: "20%",
                       }}
                     >
-                      ₹ {item.costPerSqFeet * project?.projectArea}
+                      ₹ {item.costPerSqFeet * selectedProject?.projectArea}
                     </Text>
                   </View>
                 )}
@@ -394,7 +309,7 @@ const ProjectDetails = ({ navigation, route }) => {
                       }}
                     >
                       ₹{" "}
-                      {project?.scopeOfWorks
+                      {selectedProject?.scopeOfWorks
                         ?.reduce(
                           (accumulator, currentValue) =>
                             accumulator + currentValue.costPerSqFeet,
@@ -411,12 +326,12 @@ const ProjectDetails = ({ navigation, route }) => {
                       }}
                     >
                       ₹{" "}
-                      {project?.scopeOfWorks
+                      {selectedProject?.scopeOfWorks
                         ?.reduce(
                           (accumulator, currentValue) =>
                             accumulator +
                             currentValue.costPerSqFeet *
-                              project?.projectArea,
+                              selectedProject?.projectArea,
                           0
                         )
                         .toLocaleString()}
