@@ -23,6 +23,7 @@ import {
   markAttendance,
   todaysAttendanceListReducer,
   getTodaysAttendanceAction,
+  getAttendanceApproveActionV2,
 } from "../../redux/slices/attendanceSlice";
 import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
@@ -85,6 +86,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   };
 
   const attendanceOptions = [
+    { label: "A", value: 0 },
     { label: "P", value: 8 },
     { label: "1/2 P", value: 4 },
     { label: "P1", value: 9 },
@@ -425,12 +427,13 @@ const ApproveAttendance = ({ navigation, route }) => {
                   setOpenApproveModal(false);
                   setApproveStatus(item);
                   dispatch(
-                    getAttendanceApproveAction(
+                    getAttendanceApproveActionV2(
                       token,
                       selectedAttendance?.jobId,
                       selectedAttendance?.workerId,
                       new Date().toISOString(),
-                      item?.value
+                      item?.value,
+                      item?.label
                     )
                   );
                   setTimeout(() => {

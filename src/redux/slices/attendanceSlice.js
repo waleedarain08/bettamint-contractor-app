@@ -6,6 +6,7 @@ import {
   responseHandler,
   base_url,
   ATTENDANCE_APPROVE_URL,
+  ATTENDANCE_APPROVE_URL_V2,
 } from "../../utils/api_constants";
 import APIServiceManager from "../../services/APIservicemanager";
 import axios from "axios";
@@ -329,6 +330,55 @@ export const getAttendanceApproveAction =
           }
         )
         .then((res) => {
+          const data = responseHandler(res);
+          if (data) {
+            dispatch(getAttendanceApproveSuccess(data));
+          }
+        })
+        .catch((error) => {
+          console.log("ATTENDANCE APPROVE ERROR", error);
+          if (error?.code === 401) {
+            dispatch(logoutAction());
+            Toast.show({
+              type: "error",
+              text1: "Error",
+              text2:
+                "Your session has expired, Please login again to continue.",
+              position: "top",
+              topOffset: 50,
+              visibilityTime: 3000,
+            });
+          }
+          dispatch(getAttendanceApproveFailure());
+        });
+    } catch (error) {
+      if (error?.response?.data?.message === "Unauthorized") {
+        dispatch(logoutAction());
+      }
+      dispatch(getAttendanceApproveFailure());
+    }
+  };
+export const getAttendanceApproveActionV2 =
+  (token, jobId, workerId, dateTime, hours, action) => async (dispatch) => {
+    try {
+      dispatch(getAttendanceApproveRequest());
+      await api
+        .request(
+          "PUT",
+          ATTENDANCE_APPROVE_URL_V2,
+          {
+            approvedAction: action,
+            dateTime: dateTime,
+            hours: hours,
+            jobId: jobId,
+            workerId: workerId,
+          },
+          {
+            Authorization: token,
+          }
+        )
+        .then((res) => {
+          console.log("Approve Attendance Response----->>>>", res);
           const data = responseHandler(res);
           if (data) {
             dispatch(getAttendanceApproveSuccess(data));
