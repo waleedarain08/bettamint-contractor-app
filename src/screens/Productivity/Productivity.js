@@ -13,6 +13,7 @@ import {
   TouchableOpacity,
   Appearance,
   TouchableHighlight,
+  ToastAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import Menu from "../../assets/icons/Menu.png";
@@ -60,7 +61,7 @@ import {
 } from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import {
-  getLabourContactorAction,
+  // getLabourContactorAction,
   getUsersAction,
   labourContractorReducer,
   usersListReducer,
@@ -81,12 +82,10 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import {
   getUnitList,
-  getScopeList,
   productivityReducer,
   addBOQ,
   getBOQList,
   addProgress,
-  getScopeListDetail,
   getBOQProgress,
   getBOQMetrics,
   getProjectProgressGraph,
@@ -1042,7 +1041,17 @@ const Row = (props) => {
 
 const Productivity = ({ navigation }) => {
   const { user } = useAuth();
-  const { projects } = useGeneralContext();
+  const {
+    projects,
+    labourContractorList,
+    getLabourContractors,
+    scopeList,
+    unitList,
+    getFinancialProgress,
+    financialProgressGraph,
+    getProjectBudgetData,
+    projectBudgetGraph,
+  } = useGeneralContext();
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
@@ -1086,7 +1095,6 @@ const Productivity = ({ navigation }) => {
   const [greenTooltip, setGreenTooltip] = useState(false);
   const { selectedNote } = useSelector(fieldNoteReducer);
   const [workerOrderId, setWorkerOrderId] = useState(null);
-  // const userInfo = useSelector(userData);
   const roles = user?.user?.role?.roleFeatureSets;
 
   const measurementAccess =
@@ -1097,8 +1105,6 @@ const Productivity = ({ navigation }) => {
 
   const dispatch = useDispatch();
   const {
-    unitList,
-    scopeList,
     loading,
     boqList,
     boqProgress,
@@ -1106,15 +1112,8 @@ const Productivity = ({ navigation }) => {
     metrics,
     projectProgressData,
     projectProgressDataLoading,
-    projectBudgetData,
-    projectBudgetLoading,
-    financialGraphData,
-    financialGraphLoading,
   } = useSelector(productivityReducer);
-  // const { fieldNoteList, loading } = useSelector(fieldNoteReducer);
-  // const projectsListSimple = useSelector(projectsListSimpleReducer);
   const token = useSelector(authToken);
-  const labourContractorList = useSelector(labourContractorReducer);
   const randomId = Math.floor(100000 + Math.random() * 900000);
 
   const [rowList, setRowList] = useState([
@@ -1145,19 +1144,9 @@ const Productivity = ({ navigation }) => {
   ]);
   useFocusEffect(
     React.useCallback(() => {
-      // dispatch(getSkillsAction(token));
-      // dispatch(getUsersAction(token));
-      // dispatch(getAllProjectsSimpleAction(token));
       dispatch(selectAttendanceAction(null));
       dispatch(removeMusterData());
       dispatch(getFieldNoteList(token));
-      dispatch(getScopeList(token));
-      dispatch(getUnitList(token));
-
-      if (projects.length > 0) {
-        const projectId = projects[0]?.projectId;
-        dispatch(getLabourContactorAction(token, projectId));
-      }
 
       return () => {};
     }, [dispatch, token, projects?.length])
@@ -1169,6 +1158,53 @@ const Productivity = ({ navigation }) => {
       dispatch(getBOQList(token, projectId));
     }
   }, [dispatch, token, projects]);
+
+  const getData = async () => {
+    if (!projects || projects.length === 0) {
+      console.log("No projects found.");
+      return;
+    }
+
+    const projectId = projects[0]?.projectId;
+    const promises = [];
+    // promises.push(getStatsCount());
+
+    if (projectId) {
+      // promises.push(getAttendanceGraphData(projectId, startDate, endDate));
+      // promises.push(getPaymentsGraphData(projectId, startDate, endDate));
+      // promises.push(getContractorsGraphData(projectId, startDate));
+      // promises.push(getWorkersSkill(startDate, endDate, projectId));
+      // promises.push(getFinancialCount(projectId));
+      // promises.push(getWorkForce(projectId));
+      // promises.push(getLabourTurnover(projectId));
+      // promises.push(getLabourExpense(projectId));
+      promises.push(getProjectBudgetData(projectId));
+      promises.push(getFinancialProgress(projectId));
+    }
+
+    // Set the current project data
+    setCurrentProjectBudget(projectId);
+    setCurrentProjectFinancial(projectId);
+
+    const results = await Promise.allSettled(promises);
+    results.forEach((result) => {
+      if (result.status === "rejected") {
+        ToastAndroid.show(
+          result.reason.message || "Error occurred",
+          ToastAndroid.SHORT
+        );
+        console.error("Error in promise:", result.reason);
+      } else {
+        console.log("Promise resolved:", result.value);
+      }
+    });
+  };
+
+  useEffect(() => {
+    if (projects?.length > 0) {
+      getData();
+    }
+  }, [projects?.length]);
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -1187,15 +1223,13 @@ const Productivity = ({ navigation }) => {
       dispatch(getBOQProgress(token, projectId));
       dispatch(getBOQMetrics(token, projectId));
       dispatch(getProjectProgressGraph(token, projectId));
-      dispatch(getProjectBudget(token, projectId));
-      dispatch(getFinancialProgressData(token, projectId));
     }
   }, [dispatch, token, projects?.length]);
 
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
-    if (financialGraphData && financialGraphData.length) {
-      financialGraphData?.forEach((item) => {
+    if (financialProgressGraph && financialProgressGraph.length) {
+      financialProgressGraph?.forEach((item) => {
         const month = item.month;
         const labelToCostMap = {};
         if (Array.isArray(item?.costbySOW)) {
@@ -1257,7 +1291,7 @@ const Productivity = ({ navigation }) => {
   }
 
   const budgetGraphsData = () => {
-    return projectBudgetData?.graphData?.flatMap((item) => [
+    return projectBudgetGraph?.graphData?.flatMap((item) => [
       {
         value: item.budgetedCost || 0,
         label: item.label,
@@ -1275,11 +1309,9 @@ const Productivity = ({ navigation }) => {
   const getBudgetMaxValue = () => {
     let maxCost = 100; // Initialize with negative infinity to ensure any value in the array will be greater
 
-    // if (!projectBudgetData?.graphData) {
-    for (const item of projectBudgetData?.graphData || []) {
+    for (const item of projectBudgetGraph?.graphData || []) {
       maxCost = Math.max(maxCost, item.actualCost, item.budgetedCost);
     }
-    // }
     let attendanceMax = roundToNearestMultiple(maxCost, 100);
     return attendanceMax;
   };
@@ -1886,9 +1918,7 @@ const Productivity = ({ navigation }) => {
       dispatch(getProjectProgressGraph(token, item.value));
     } else {
       setCurrentProjectProgressGraph(projects[0]?.projectId);
-      dispatch(
-        getProjectProgressGraph(token, projects[0]?.projectId)
-      );
+      dispatch(getProjectProgressGraph(token, projects[0]?.projectId));
     }
   };
 
@@ -2262,11 +2292,12 @@ const Productivity = ({ navigation }) => {
                 valueField="value"
                 placeholder={"Select Project"}
                 value={project}
-                onChange={(item) => {
+                onChange={async (item) => {
                   setOpenProjectModal(false);
                   setSelectedProject(item);
                   setProject(item.value);
-                  dispatch(getLabourContactorAction(token, item.value));
+                  // dispatch(getLabourContactorAction(token, item.value));
+                  await getLabourContractors(item.value);
                 }}
               />
             </View>
@@ -2478,24 +2509,21 @@ const Productivity = ({ navigation }) => {
                     valueField="value"
                     placeholder={"Project"}
                     value={project}
-                    onChange={(item) => {
+                    onChange={async (item) => {
                       // setOpenFilterModal(false);
                       setProject(item.value);
                       setLabourContractorProgress(0);
-                      dispatch(getLabourContactorAction(token, item.value));
+                      // dispatch(getLabourContactorAction(token, item.value));
+                      await getLabourContractors(item.value);
                       // setListForProgressModal(null);
                       if (item) {
                         dispatch(getBOQList(token, item.value));
                         setCurrentProjectProgress(item.value);
                         // dispatch(getContractors(project?.projectId));
                       } else {
-                        dispatch(
-                          getBOQList(token, projects[0]?.projectId)
-                        );
+                        dispatch(getBOQList(token, projects[0]?.projectId));
 
-                        setCurrentProjectProgress(
-                          projects[0]?.projectId
-                        );
+                        setCurrentProjectProgress(projects[0]?.projectId);
                         // dispatch(getContractors(projectClassificationList[0]?.projectId));
                       }
                     }}
@@ -2687,7 +2715,6 @@ const Productivity = ({ navigation }) => {
                   value={selectedProjectNote}
                   onChange={(item) => {
                     setSelectedProjectNote(item.value);
-                    // dispatch(getLabourContactorAction(token, item.value));
                   }}
                 />
               </View>
@@ -3284,18 +3311,24 @@ const Productivity = ({ navigation }) => {
                       onChange={(item) => {
                         if (item) {
                           setCurrentProjectFinancial(item);
-                          dispatch(
-                            getFinancialProgressData(token, item?.value)
-                          );
+                          // dispatch(
+                          //   getFinancialProgressData(token, item?.value)
+                          // );
+                          getFinancialProgress(item?.value).catch((error) => {
+                            console.log("error", error);
+                          });
                         } else {
-                          setCurrentProjectFinancial(
-                            projects[0]?.projectId
-                          );
-                          dispatch(
-                            getFinancialProgressData(
-                              token,
-                              projects[0]?.projectId
-                            )
+                          setCurrentProjectFinancial(projects[0]?.projectId);
+                          // dispatch(
+                          //   getFinancialProgressData(
+                          //     token,
+                          //     projects[0]?.projectId
+                          //   )
+                          // );
+                          getFinancialProgress(projects[0]?.projectId).catch(
+                            (error) => {
+                              console.log("error", error);
+                            }
                           );
                         }
                       }}
@@ -3397,16 +3430,16 @@ const Productivity = ({ navigation }) => {
                       onChange={(item) => {
                         if (item) {
                           setCurrentProjectBudget(item);
-                          dispatch(getProjectBudget(token, item?.value));
+                          // dispatch(getProjectBudget(token, item?.value));
+                          getProjectBudgetData(item?.value).catch((error) => {
+                            console.log("error", error);
+                          });
                         } else {
-                          setCurrentProjectBudget(
-                            projects[0]?.projectId
-                          );
-                          dispatch(
-                            getProjectBudget(
-                              token,
-                              projects[0]?.projectId
-                            )
+                          setCurrentProjectBudget(projects[0]?.projectId);
+                          getProjectBudgetData(projects[0]?.projectId).catch(
+                            (error) => {
+                              console.log("error", error);
+                            }
                           );
                         }
                       }}

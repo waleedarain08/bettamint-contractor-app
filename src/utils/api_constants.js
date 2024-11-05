@@ -1,10 +1,10 @@
-export const base_url = "https://api-sandbox.bettamint.com/api";
-export const baseUrl = "https://api-sandbox.bettamint.com/api";
-export const assetsUrl = "https://api-sandbox.bettamint.com";
+// export const base_url = "https://api-sandbox.bettamint.com/api";
+// export const baseUrl = "https://api-sandbox.bettamint.com/api";
+// export const assetsUrl = "https://api-sandbox.bettamint.com";
 
-// export const base_url = "https://api-prod.bettamint.com/api";
-// export const baseUrl = "https://api-prod.bettamint.com/api";
-// export const assetsUrl = "https://api-prod.bettamint.com";
+export const base_url = "https://api-prod.bettamint.com/api";
+export const baseUrl = "https://api-prod.bettamint.com/api";
+export const assetsUrl = "https://api-prod.bettamint.com";
 
 // MAP URL
 export const mapUrl = "https://admin.bettamint.com/auth/view";
@@ -65,6 +65,7 @@ export const API = {
   getUsers: `${base_url}/dashboard/User/getall`,
   getLabourContractors: `${base_url}/dashboard/User/labourcontractor`,
   getScopeList: `${base_url}/dashboard/Productivity/getscopelist`,
+  getUnitList: `${base_url}/dashboard/Unit/getall`,
   // Attendance Routes
   getAttendance: `${base_url}/dashboard/Attendance/getbyproject/v2`,
   getAttendanceMusterCard: `${base_url}/dashboard/Attendance/mustercard`,

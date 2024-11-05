@@ -1726,6 +1726,7 @@ function MainNavigation({ navigation }) {
       console.log("TOKEN--->>>", {
         token: JSON.parse(userData).token,
       });
+      console.log("USER--->>>", user);
       setUser(JSON.parse(userData));
     };
     getUser();
@@ -2199,3 +2200,37 @@ function TabNavigator({ navigation }) {
 }
 
 export default MainNavigation;
+
+const old = {
+  token:
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2IiwibmJmIjoxNzMwODQyMTE1LCJleHAiOjE3MzE3MDYxMTUsImlhdCI6MTczMDg0MjExNX0.mRtP369uMICesm8uMao8WJMcCiR7nI0qY2--1E9GTZk",
+  user: {
+    address: null,
+    bankAccountNumber: null,
+    bankName: null,
+    city: null,
+    companyName: null,
+    contractorId: null,
+    country: null,
+    emailAddress: "admin@bettamint.com",
+    fullName: "Bettamint",
+    ifscCode: null,
+    lead: null,
+    leadId: null,
+    leadTypeId: null,
+    phoneNumber: null,
+    pinCode: null,
+    project: null,
+    role: { name: "SuperAdmin", roleFeatureSets: [Array], roleId: 3 },
+    roleId: 3,
+    scopeOfWork: null,
+    state: null,
+    userId: 36,
+    userProjects: [[Object]],
+    userTypeId: "SuperAdmin",
+    username: "admin@bettamint.com",
+    usersCount: 0,
+    virtualAccountNumber: "91000362022071401",
+    workerCount: 0,
+  },
+};

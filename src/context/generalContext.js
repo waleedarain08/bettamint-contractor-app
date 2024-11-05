@@ -25,6 +25,7 @@ const GeneralProvider = ({ children }) => {
   const [labourContractorList, setLabourContractorList] = useState([]);
   const [project, setProject] = useState(null);
   const [scopeList, setScopeList] = useState([]);
+  const [unitList, setUnitList] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [users, setUsers] = useState([]);
 
@@ -36,6 +37,7 @@ const GeneralProvider = ({ children }) => {
     getLabourContractors();
     getScopeList();
     getJobs();
+    getUnitList();
   }, [user]);
 
   const getProjects = async () => {
@@ -355,6 +357,17 @@ const GeneralProvider = ({ children }) => {
     }
   };
 
+  const getUnitList = async () => {
+    try {
+      const response = await apiCall("GET", API.getUnitList, null, user.token);
+      setUnitList(response);
+    } catch (error) {
+      throw new Error(
+        error.message || "Something went wrong, while fetching unit list!"
+      );
+    }
+  };
+
   return (
     <MainContext.Provider
       value={{
@@ -393,6 +406,8 @@ const GeneralProvider = ({ children }) => {
         jobs,
         getUsers,
         users,
+        getUnitList,
+        unitList,
       }}
     >
       {children}
