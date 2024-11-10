@@ -166,7 +166,7 @@ const Dashboard = ({ navigation }) => {
         );
         console.error("Error in promise:", result.reason);
       } else {
-        console.log("Promise resolved:", result.value);
+        // console.log("Promise resolved:", result.value);
       }
     });
   };

@@ -8,21 +8,24 @@ import {
   SectionList,
   ActivityIndicator,
   ToastAndroid,
+  TextInput,
 } from "react-native";
 import { Colors } from "../../utils/Colors";
-import { Building } from "../../icons";
+import { Building, VectorIcon } from "../../icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { Dropdown } from "react-native-element-dropdown";
 import { useProductivity } from "../../context/productivityContext";
 import { useGeneralContext } from "../../context/generalContext";
+import { TouchableOpacity } from "react-native";
 
-const ViewBoq = () => {
+const UpdateBoq = () => {
   const { projects } = useGeneralContext();
   const { getListOfBOQV2, boqListGCViewMode, loading } = useProductivity();
   const [selectedProject, setSelectedProject] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
+  const [progress, setProgress] = useState({});
   const transformedArray = boqListGCViewMode.map((item) => ({
     title: {
       sow: item.scopeOfWorkName,
@@ -56,119 +59,6 @@ const ViewBoq = () => {
 
     return () => clearTimeout(timer);
   }, []);
-
-  // const renderAssignContractorModal = () => {
-  //   return (
-  //     <Modal
-  //       isVisible={openAssignModal}
-  //       useNativeDriver={true}
-  //       backdropColor={Colors.DarkGray}
-  //       backdropOpacity={0.6}
-  //       backdropTransitionInTiming={200}
-  //       onBackdropPress={() => setOpenAssignModal(!openAssignModal)}
-  //     >
-  //       <View
-  //         style={{
-  //           flex: 1,
-  //           alignItems: "center",
-  //           justifyContent: "center",
-  //         }}
-  //       >
-  //         <View
-  //           style={{
-  //             width: "88%",
-  //             backgroundColor: Colors.White,
-  //             height: 450,
-  //             borderRadius: 10,
-  //             padding: 15,
-  //           }}
-  //         >
-  //           <View
-  //             style={{
-  //               flexDirection: "row",
-  //               alignItems: "center",
-  //               justifyContent: "space-between",
-  //             }}
-  //           >
-  //             <View>
-  //               <Text
-  //                 style={{
-  //                   fontFamily: "Lexend-Medium",
-  //                   color: Colors.Black,
-  //                   fontSize: 16,
-  //                   // marginBottom: 10,
-  //                 }}
-  //               >
-  //                 Assign Contractor
-  //               </Text>
-  //             </View>
-  //             <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
-  //               <Cross
-  //                 onPress={() => {
-  //                   setOpenAssignModal(!openAssignModal);
-  //                 }}
-  //                 size={22}
-  //                 color={Colors.Black}
-  //               />
-  //             </View>
-  //           </View>
-  //           <View style={{ marginTop: 15 }}>
-  //             <Dropdown
-  //               style={styles.dropdown}
-  //               placeholderStyle={styles.placeholderStyle}
-  //               selectedTextStyle={styles.selectedTextStyle}
-  //               itemTextStyle={{
-  //                 fontFamily: "Lexend-Regular",
-  //                 fontSize: 13,
-  //                 color: Colors.FormText,
-  //               }}
-  //               iconStyle={styles.iconStyle}
-  //               autoScroll={false}
-  //               inputSearchStyle={{ color: Colors.Black }}
-  //               data={
-  //                 labourContractorList?.length
-  //                   ? labourContractorList?.map((ele) => ({
-  //                       label: ele?.fullName,
-  //                       value: ele?.userId,
-  //                     }))
-  //                   : []
-  //               }
-  //               maxHeight={300}
-  //               labelField="label"
-  //               valueField="value"
-  //               placeholder={"Select Contractor"}
-  //               value={contractor}
-  //               onChange={async (item) => {
-  //                 setContractor(item.value);
-  //                 let resp = await dispatch(
-  //                   assignContractorFieldNote(
-  //                     token,
-  //                     currFieldNote?.fieldNoteId,
-  //                     item?.value
-  //                   )
-  //                 );
-  //                 if (resp?.status === 200) {
-  //                   dispatch(getFieldNoteList(token));
-  //                   setOpenAssignModal(false);
-  //                   setContractor(null);
-  //                   setSelectedProject(null);
-  //                   Toast.show({
-  //                     type: "info",
-  //                     text1: "Contractor assigned",
-  //                     text2: "Contractor assigned successfully.",
-  //                     topOffset: 10,
-  //                     position: "top",
-  //                     visibilityTime: 4000,
-  //                   });
-  //                 }
-  //               }}
-  //             />
-  //           </View>
-  //         </View>
-  //       </View>
-  //     </Modal>
-  //   );
-  // };
 
   if (initialLoading) {
     return (
@@ -429,6 +319,59 @@ const ViewBoq = () => {
                           </Text>
                         </View>
                       </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>
+                            Today's Progress:{" "}
+                          </Text>
+                          <TextInput
+                            placeholder="Enter Today's Progress"
+                            placeholderTextColor={Colors.FormText}
+                            style={styles.remarksInput}
+                            value={progress.todayProgress}
+                            onChangeText={(text) => {
+                              setProgress({
+                                ...progress,
+                                todayProgress: text,
+                              });
+                            }}
+                          />
+                        </View>
+                        <View style={styles.width}>
+                          <Text style={styles.itemDesHeader}>Remarks: </Text>
+                          <TextInput
+                            placeholder="Enter Remarks"
+                            placeholderTextColor={Colors.FormText}
+                            style={styles.remarksInput}
+                            value={progress.remarks}
+                            onChangeText={(text) => {
+                              setProgress({
+                                ...progress,
+                                remarks: text,
+                              });
+                            }}
+                          />
+                        </View>
+                      </View>
+                      <View style={styles.desCon}>
+                        <View style={styles.width}>
+                          {/* <Text style={styles.itemDesHeader}>Upload: </Text> */}
+                          <TouchableOpacity style={styles.uploadBtn}>
+                            <VectorIcon
+                              type={"Entypo"}
+                              name="attachment"
+                              size={20}
+                              color={Colors.Primary}
+                            />
+                            <Text style={styles.uploadText}>Upload</Text>
+                          </TouchableOpacity>
+                        </View>
+                        <View style={styles.width}>
+                          <TouchableOpacity style={styles.submitBtn}>
+                            <Text style={styles.submitText}>Save</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
                     </View>
                   ))
                 )}
@@ -461,7 +404,7 @@ const ViewBoq = () => {
   );
 };
 
-export default ViewBoq;
+export default UpdateBoq;
 
 const styles = StyleSheet.create({
   container: {
@@ -644,5 +587,54 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.Black,
     marginLeft: 10,
+  },
+  remarksInput: {
+    fontFamily: "Lexend-Regular",
+    fontSize: 12,
+    color: Colors.Black,
+    borderWidth: 2,
+    borderColor: Colors.Gray,
+    borderRadius: 5,
+    padding: 5,
+    width: "90%",
+    height: 40,
+    marginTop: 8,
+    elevation: 5,
+    backgroundColor: Colors.White,
+  },
+  uploadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    // borderWidth: 2,
+    borderColor: Colors.Gray,
+    borderRadius: 5,
+    // paddingLeft: 20,
+    width: "90%",
+    elevation: 5,
+    backgroundColor: Colors.White,
+    marginTop: 19,
+    height: 50,
+  },
+  uploadText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 14,
+    color: Colors.Primary,
+    marginLeft: 15,
+  },
+  submitBtn: {
+    backgroundColor: Colors.Primary,
+    width: "90%",
+    height: 50,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 5,
+    elevation: 5,
+    marginTop: 19,
+  },
+  submitText: {
+    fontFamily: "Lexend-Medium",
+    fontSize: 14,
+    color: Colors.White,
   },
 });

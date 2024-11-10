@@ -104,6 +104,7 @@ import ViewBoq from "../screens/Productivity/ViewBoq";
 import VerifyBoq from "../screens/Productivity/VerifyBoq";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/authContext";
+import UpdateBoq from "../screens/Productivity/UpdateBoq";
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -1704,6 +1705,59 @@ const ProductivityNavigator = ({ navigation }) => {
           ),
         }}
       />
+      <ProductivityStack.Screen
+        name="UpdateBoq"
+        component={UpdateBoq}
+        options={{
+          // headerBackVisible: false,
+          headerTitle: () => (
+            <Text
+              style={{
+                fontSize: 18,
+                fontFamily: "Lexend-Medium",
+                color: Colors.White,
+                // marginHorizontal: 13,
+              }}
+            >
+              Update BOQ List
+            </Text>
+          ),
+          headerTitleAlign: "left",
+          // headerLeft: () => (
+          //   <Pressable onPress={() => navigation.goBack()}>
+          //     <MenuIcon size={30} color={Colors.White} />
+          //   </Pressable>
+          // ),
+          headerRight: () => (
+            <View
+              style={{ flexDirection: "row", justifyContent: "space-evenly" }}
+            >
+              <Pressable
+                style={{ marginLeft: 10 }}
+                onPress={() => navigation.navigate("Profile")}
+              >
+                <Image
+                  source={require("../assets/icons/ProfileButton.png")}
+                  style={{ height: 30, width: 30, marginRight: 8 }}
+                />
+              </Pressable>
+              <Pressable
+                style={{
+                  marginLeft: 0,
+                  height: 30,
+                  width: 30,
+                  backgroundColor: Colors.Purple,
+                  borderRadius: 15,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <NotificationIcon size={22} color={Colors.White} />
+              </Pressable>
+            </View>
+          ),
+        }}
+      />
     </ProductivityStack.Navigator>
   );
 };
@@ -2200,37 +2254,3 @@ function TabNavigator({ navigation }) {
 }
 
 export default MainNavigation;
-
-const old = {
-  token:
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjM2IiwibmJmIjoxNzMwODQyMTE1LCJleHAiOjE3MzE3MDYxMTUsImlhdCI6MTczMDg0MjExNX0.mRtP369uMICesm8uMao8WJMcCiR7nI0qY2--1E9GTZk",
-  user: {
-    address: null,
-    bankAccountNumber: null,
-    bankName: null,
-    city: null,
-    companyName: null,
-    contractorId: null,
-    country: null,
-    emailAddress: "admin@bettamint.com",
-    fullName: "Bettamint",
-    ifscCode: null,
-    lead: null,
-    leadId: null,
-    leadTypeId: null,
-    phoneNumber: null,
-    pinCode: null,
-    project: null,
-    role: { name: "SuperAdmin", roleFeatureSets: [Array], roleId: 3 },
-    roleId: 3,
-    scopeOfWork: null,
-    state: null,
-    userId: 36,
-    userProjects: [[Object]],
-    userTypeId: "SuperAdmin",
-    username: "admin@bettamint.com",
-    usersCount: 0,
-    virtualAccountNumber: "91000362022071401",
-    workerCount: 0,
-  },
-};

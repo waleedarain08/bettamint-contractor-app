@@ -12,6 +12,7 @@ import {
   ImageBackground,
   TextInput,
   KeyboardAvoidingView,
+  ToastAndroid,
 } from "react-native";
 import React, { useEffect, useState } from "react";
 import { Colors } from "../../utils/Colors";
@@ -24,7 +25,7 @@ import Geolocation from "@react-native-community/geolocation";
 import {
   createFieldNoteEntry,
   fieldNoteReducer,
-  getFieldNoteCost,
+  // getFieldNoteCost,
   getScopeList,
 } from "../../redux/slices/fieldNoteSlice";
 import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
@@ -42,16 +43,23 @@ import {
 } from "../../redux/slices/projectSlice";
 import { launchCamera } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useGeneralContext } from "../../context/generalContext";
+import { useFieldNote } from "../../context/fieldNoteContext";
+import { useAuth } from "../../context/authContext";
 
 const NewCreateFieldNotes = () => {
+  const { user } = useAuth();
+  const { scopeList, projects, labourContractorList } = useGeneralContext();
+  const { fieldNote, createFieldNote, getFieldNoteCost, costList } =
+    useFieldNote();
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
   const dispatch = useDispatch();
-  const userInfo = useSelector(userData);
-  const projectsList = useSelector(projectsListSimpleReducer);
-  const { scopeList, selectedNote, costList } = useSelector(fieldNoteReducer);
-  const labourContractorList = useSelector(labourContractorReducer);
+  // const userInfo = useSelector(userData);
+  // const projectsList = useSelector(projectsListSimpleReducer);
+  // const { selectedNote } = useSelector(fieldNoteReducer);
+  // const labourContractorList = useSelector(labourContractorReducer);
 
   const token = useSelector(authToken);
   const navigation = useNavigation();
@@ -82,14 +90,14 @@ const NewCreateFieldNotes = () => {
   const [openDescription, setOpenDescription] = useState(false);
   const [description, setDescription] = useState("");
 
-  const { user } = userInfo;
+  // const { user } = userInfo;
   // console.log('contractorList', costList);
   useEffect(() => {
     setSOWList(scopeList);
   }, [scopeList]);
   useEffect(() => {
-    setProjectList(projectsList);
-  }, [projectsList]);
+    setProjectList(projects);
+  }, [projects.length]);
   useEffect(() => {
     setContractorList(labourContractorList);
   }, [labourContractorList]);
@@ -122,9 +130,6 @@ const NewCreateFieldNotes = () => {
 
   useEffect(() => {
     getLocationPermission();
-    dispatch(getScopeList(token));
-    dispatch(getLabourContactorAction(token));
-    dispatch(getAllProjectsSimpleAction(token));
     getAsyncData();
   }, []);
 
@@ -276,9 +281,9 @@ const NewCreateFieldNotes = () => {
       );
       formData.append("Location", currentLocation);
       formData.append("Description", description);
-      selectedNote &&
-        formData.append("FieldNoteId", parseInt(selectedNote?.fieldNoteId, 10));
-      !selectedNote &&
+      fieldNote &&
+        formData.append("FieldNoteId", parseInt(fieldNote?.fieldNoteId, 10));
+      !fieldNote &&
         formData.append("Image", {
           name: fieldPicForm?.assets[0]?.fileName,
           type: fieldPicForm?.assets[0]?.type,
@@ -286,30 +291,48 @@ const NewCreateFieldNotes = () => {
         });
       formData.append("DateTime", `${moment(date).format("YYYY-MM-DD HH:mm")}`);
       console.log("FORMDATA", formData);
-      const response = await dispatch(createFieldNoteEntry(token, formData));
-      if (response.status === 200) {
-        console.log("Field Note Created", response.status);
-        navigation.goBack();
-        Toast.show({
-          type: "info",
-          text1: selectedNote ? "Field Note Updates" : "Field Note Created",
-          text2: selectedNote
-            ? "Field Note is updated successfully."
-            : "New Field Note is created successfully.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
+      createFieldNote(formData)
+        .then((res) => {
+          console.log("res", res);
+          if (res.status === 200) {
+            navigation.goBack();
+            ToastAndroid.show(
+              fieldNote ? "Field Note Updates" : "Field Note Created",
+              ToastAndroid.SHORT
+            );
+          }
+        })
+        .catch((err) => {
+          console.log("Error----->>>>", err);
+          ToastAndroid.show(
+            err.message || "Something went wrong!",
+            ToastAndroid.SHORT
+          );
         });
-      } else {
-        Toast.show({
-          type: "error",
-          text1: "Error",
-          text2: "Something went wrong, please try again.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 3000,
-        });
-      }
+      // const response = await dispatch(createFieldNoteEntry(token, formData));
+      // if (response.status === 200) {
+      //   console.log("Field Note Created", response.status);
+      //   navigation.goBack();
+      //   Toast.show({
+      //     type: "info",
+      //     text1: fieldNote ? "Field Note Updates" : "Field Note Created",
+      //     text2: fieldNote
+      //       ? "Field Note is updated successfully."
+      //       : "New Field Note is created successfully.",
+      //     topOffset: 10,
+      //     position: "top",
+      //     visibilityTime: 4000,
+      //   });
+      // } else {
+      //   Toast.show({
+      //     type: "error",
+      //     text1: "Error",
+      //     text2: "Something went wrong, please try again.",
+      //     topOffset: 10,
+      //     position: "top",
+      //     visibilityTime: 3000,
+      //   });
+      // }
     }
   };
 
@@ -345,7 +368,6 @@ const NewCreateFieldNotes = () => {
         onRequestClose={() => {
           setOpenScope(false);
         }}
-        presentationStyle="pageSheet"
         transparent
       >
         <View style={styles.modalContainer}>
@@ -427,7 +449,6 @@ const NewCreateFieldNotes = () => {
         onRequestClose={() => {
           setOpenProject(false);
         }}
-        presentationStyle="pageSheet"
         transparent
       >
         <View style={styles.modalContainer}>
@@ -452,7 +473,7 @@ const NewCreateFieldNotes = () => {
                 onChangeText={(text) => {
                   setSearch(text);
                   if (text) {
-                    const filteredList = projectsList.filter((item) =>
+                    const filteredList = projects.filter((item) =>
                       item.name.toLowerCase().includes(text.toLowerCase())
                     );
                     setProjectList(filteredList);
@@ -479,14 +500,25 @@ const NewCreateFieldNotes = () => {
                     console.log("selectedProject", item);
                     console.log("selectedScope", selectedScope);
                     console.log("selectedContractor", selectedContractor);
-                    dispatch(
-                      getFieldNoteCost(
-                        token,
-                        item?.projectId,
-                        selectedScope?.scopeOfWorkId,
-                        selectedContractor?.userId
-                      )
-                    );
+                    getFieldNoteCost(
+                      item?.projectId,
+                      selectedScope?.scopeOfWorkId,
+                      selectedContractor?.userId
+                    ).catch((err) => {
+                      console.log("Error----->>>>", err);
+                      ToastAndroid.show(
+                        err.message || "Something went wrong!",
+                        ToastAndroid.SHORT
+                      );
+                    });
+                    // dispatch(
+                    //   getFieldNoteCost(
+                    //     token,
+                    //     item?.projectId,
+                    //     selectedScope?.scopeOfWorkId,
+                    //     selectedContractor?.userId
+                    //   )
+                    // );
                   }}
                 >
                   <View style={styles.flatlistItemInner}>
@@ -519,8 +551,7 @@ const NewCreateFieldNotes = () => {
         onRequestClose={() => {
           setOpenContractor(false);
         }}
-        // presentationStyle="pageSheet"
-        transparent
+        transparent={true}
       >
         <View style={styles.modalContainer}>
           <View style={styles.innerModalContainer}>
@@ -602,7 +633,6 @@ const NewCreateFieldNotes = () => {
           setOpenCost(false);
         }}
         transparent
-        // presentationStyle="pageSheet"
       >
         <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
           <View style={styles.innerModalContainer}>
@@ -660,7 +690,6 @@ const NewCreateFieldNotes = () => {
           setOpenRemarks(false);
         }}
         transparent
-        // presentationStyle="pageSheet"
       >
         <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
           <View style={styles.innerModalContainer}>
@@ -703,7 +732,6 @@ const NewCreateFieldNotes = () => {
           setOpenDescription(false);
         }}
         transparent
-        // presentationStyle="pageSheet"
       >
         <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
           <View style={styles.innerModalContainer}>
@@ -746,7 +774,6 @@ const NewCreateFieldNotes = () => {
           setOpenLocation(false);
         }}
         transparent
-        // presentationStyle="pageSheet"
       >
         <View style={{ width: "100%", backgroundColor: "#00000090", flex: 1 }}>
           <View style={styles.innerModalContainer}>

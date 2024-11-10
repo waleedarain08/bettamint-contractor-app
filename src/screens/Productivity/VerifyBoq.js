@@ -11,6 +11,7 @@ import {
   TextInput,
   ScrollView,
   Image,
+  ToastAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "../../utils/Colors";
@@ -47,8 +48,12 @@ import Button from "../../components/Button";
 import { launchImageLibrary } from "react-native-image-picker";
 import moment from "moment";
 import Toast from "react-native-toast-message";
+import { useGeneralContext } from "../../context/generalContext";
+import { useProductivity } from "../../context/productivityContext";
 
 const VerifyBoq = ({ navigation }) => {
+  const { projects, labourContractorList, scopeList } = useGeneralContext();
+  const { getBOQListGC, boqListGC, loading } = useProductivity();
   const [selectedProject, setSelectedProject] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
@@ -77,57 +82,7 @@ const VerifyBoq = ({ navigation }) => {
   const [location, setLocation] = useState("");
   const [remarks, setRemarks] = useState("");
   const [measurement, setMeasurement] = useState(false);
-  const dispatch = useDispatch();
 
-  // Selectors!!!
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
-  const token = useSelector(authToken);
-  const labourContractorList = useSelector(labourContractorReducer);
-  const { loading, boqListGC, scopeList } = useSelector(productivityReducer);
-  const a = {
-    boqId: 0,
-    titles: [{ descriptions: [Array], title: "Testing c" }],
-    workOrder: "AC21",
-  };
-  const b = {
-    actionHistory: [Array],
-    amount: 200000,
-    billingCost: 46000,
-    boqCode: "2.2.1",
-    boqId: 64,
-    boqMeasurementActionBy: "",
-    boqMeasurementActionTimestamp: null,
-    boqMeasurementApprovedStatus: null,
-    boqMeasurementRejectStatus: null,
-    boqNumber: "202404PTPI1",
-    boqProgressImage: "",
-    boqQualityActionBy: "",
-    boqQualityActionTimestamp: null,
-    boqQualityRejectStatus: null,
-    budgetedQuantity: 0,
-    contractorBOQProgressId: 426,
-    contractorId: 79,
-    createdOn: "2024-07-10T20:20:38.867",
-    description: "Testing B1",
-    endDate: "2024-04-30T09:46:04",
-    fieldNote: [Object],
-    isMeasurementApproved: false,
-    isQualityApproved: false,
-    measurementLeft: 1540,
-    percentage: 23,
-    quantity: 460,
-    rate: 100,
-    rejectedQuantity: null,
-    remainingQuantity: 0,
-    remarks: null,
-    scopeOfWorkId: 2,
-    scopeOfWorkName: "Civil Works",
-    status: null,
-    title: "Testing B",
-    totalQuantity: 2000,
-    unitName: "kg",
-    workOrderNumber: "AC21",
-  };
   useEffect(() => {
     const timer = setTimeout(() => {
       setInitialLoading(false);
@@ -158,13 +113,22 @@ const VerifyBoq = ({ navigation }) => {
     },
     data: item.dtoboqList.map((boq) => boq),
   }));
+
+  const getData = async (projectId = 0) => {
+    if (projects.length) {
+      setSelectedProject(projectId);
+      getBOQListGC(projectId).catch((error) => {
+        console.log("error", error);
+        ToastAndroid.show(
+          error.message || "Something went wrong while getting BOQ list!",
+          ToastAndroid.SHORT
+        );
+      });
+    }
+  };
   useFocusEffect(
     React.useCallback(() => {
-      // dispatch(
-      //   getLabourContactorAction(token, projectsListSimple[0]?.projectId)
-      // );
-      setSelectedProject(projectsListSimple[0]);
-      dispatch(getBOQListGC(token, projectsListSimple[0]?.projectId));
+      getData(projects[0]?.projectId);
       return () => {};
     }, [])
   );
@@ -1056,8 +1020,8 @@ const VerifyBoq = ({ navigation }) => {
                 showsVerticalScrollIndicator={false}
                 iconStyle={styles.iconStyle}
                 data={
-                  projectsListSimple.length
-                    ? projectsListSimple?.map((ele) => ({
+                  projects.length
+                    ? projects?.map((ele) => ({
                         label: ele?.name,
                         value: ele?.projectId,
                         ...ele,
@@ -1068,16 +1032,14 @@ const VerifyBoq = ({ navigation }) => {
                 labelField="label"
                 valueField="value"
                 placeholder={"Select a Project"}
-                value={selectedProject?.projectId}
+                value={selectedProject}
                 onChange={(item) => {
                   if (item) {
-                    setSelectedProject(item);
-                    dispatch(getBOQListGC(token, item.value));
+                    setSelectedProject(item.value);
+                    getData(item.value);
                   } else {
-                    setSelectedProject(projectsListSimple[0]);
-                    dispatch(
-                      getBOQListGC(token, projectsListSimple[0]?.projectId)
-                    );
+                    setSelectedProject(projects[0]?.value);
+                    getData(projects[0]?.projectId);
                   }
                 }}
               />
@@ -1117,9 +1079,7 @@ const VerifyBoq = ({ navigation }) => {
             sections={transformedArray}
             refreshControl={
               <RefreshControl
-                onRefresh={() =>
-                  dispatch(getBOQListGC(token, selectedProject?.projectId))
-                }
+                onRefresh={() => getData(selectedProject?.projectId)}
                 refreshing={loading}
                 tintColor={Colors.Primary}
                 colors={[Colors.Primary, Colors.Purple]}

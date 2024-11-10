@@ -1,97 +1,36 @@
-import React, { useEffect, useId, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   StyleSheet,
-  FlatList,
   Dimensions,
   LogBox,
   Pressable,
-  RefreshControl,
   TextInput,
   ScrollView,
   TouchableOpacity,
   Appearance,
-  TouchableHighlight,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import Modal from "react-native-modal";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
-import { ActivityIndicator, Searchbar } from "react-native-paper";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  getAllAttendanceAction,
-  attendanceListReducer,
-  saveProjectDataAction,
-  selectAttendanceAction,
-  loadingAttendance,
-  removeMusterData,
-} from "../../redux/slices/attendanceSlice";
-import {
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-} from "../../redux/slices/projectSlice";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import {
   Building,
-  Search,
-  BackIcon,
   Cross,
-  EditIcon,
   DeleteIcon,
-  HomeIcon,
-  HatIcon,
-  PlusSquareIcon,
-  PlusIcon,
   PlusCircleIcon,
   Picture,
   DateIcon,
   ClockIcon,
-  ChatIcon,
   DotIcon,
-  VectorIcon,
+  PlusSquareIcon,
 } from "../../icons";
-import { authToken, userData } from "../../redux/slices/authSlice";
-import {
-  getSkillsAction,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import {
-  // getLabourContactorAction,
-  getUsersAction,
-  labourContractorReducer,
-  usersListReducer,
-} from "../../redux/slices/userSlice";
-import {
-  assignContractorFieldNote,
-  createFieldNoteEntry,
-  deleteFieldNote,
-  editFieldNoteAction,
-  fieldNoteReducer,
-  getFieldNoteList,
-  markFieldNoteAction,
-} from "../../redux/slices/fieldNoteSlice";
 import { Image } from "react-native";
 import { assetsUrl } from "../../utils/api_constants";
 import moment from "moment";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
-import {
-  getUnitList,
-  productivityReducer,
-  addBOQ,
-  getBOQList,
-  addProgress,
-  getBOQProgress,
-  getBOQMetrics,
-  getProjectProgressGraph,
-  getFinancialProgressData,
-  getProjectBudget,
-} from "../../redux/slices/productivitySlice";
 import DatePicker from "react-native-date-picker";
 import { launchImageLibrary } from "react-native-image-picker";
 import { BarChart } from "react-native-gifted-charts";
@@ -99,6 +38,8 @@ import ActionButton from "./components/ActionButton";
 import CostProgress from "./components/CostProgress";
 import { useAuth } from "../../context/authContext";
 import { useGeneralContext } from "../../context/generalContext";
+import { useProductivity } from "../../context/productivityContext";
+import { useFieldNote } from "../../context/fieldNoteContext";
 
 LogBox.ignoreAllLogs();
 
@@ -1052,6 +993,18 @@ const Productivity = ({ navigation }) => {
     getProjectBudgetData,
     projectBudgetGraph,
   } = useGeneralContext();
+  const {
+    loading,
+    boqProgress,
+    getBOQProgress,
+    boqMetrics,
+    getBOQMetrics,
+    projectProgressGraph,
+    getProjectProgressGraph,
+    getBOQList,
+    addBOQ,
+  } = useProductivity();
+  const { setFieldNote, createFieldNote } = useFieldNote();
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [openUpdateProgressModal, setOpenUpdateProgressModal] = useState(false);
   const [openFieldNote, setOpenFieldNote] = useState(false);
@@ -1093,7 +1046,6 @@ const Productivity = ({ navigation }) => {
   const [updateLoader, setUpdateLoader] = useState(false);
   const [purpleTooltip, setPurpleTooltip] = useState(false);
   const [greenTooltip, setGreenTooltip] = useState(false);
-  const { selectedNote } = useSelector(fieldNoteReducer);
   const [workerOrderId, setWorkerOrderId] = useState(null);
   const roles = user?.user?.role?.roleFeatureSets;
 
@@ -1102,18 +1054,6 @@ const Productivity = ({ navigation }) => {
     roles.filter(
       (item) => item.featureSet.route === "MEASUREMENT_MANAGEMENT"
     )[0]?.accessRightId;
-
-  const dispatch = useDispatch();
-  const {
-    loading,
-    boqList,
-    boqProgress,
-    boqProgressLoading,
-    metrics,
-    projectProgressData,
-    projectProgressDataLoading,
-  } = useSelector(productivityReducer);
-  const token = useSelector(authToken);
   const randomId = Math.floor(100000 + Math.random() * 900000);
 
   const [rowList, setRowList] = useState([
@@ -1142,22 +1082,6 @@ const Productivity = ({ navigation }) => {
       ],
     },
   ]);
-  useFocusEffect(
-    React.useCallback(() => {
-      dispatch(selectAttendanceAction(null));
-      dispatch(removeMusterData());
-      dispatch(getFieldNoteList(token));
-
-      return () => {};
-    }, [dispatch, token, projects?.length])
-  );
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      const projectId = projects[0]?.projectId;
-      dispatch(getBOQList(token, projectId));
-    }
-  }, [dispatch, token, projects]);
 
   const getData = async () => {
     if (!projects || projects.length === 0) {
@@ -1167,19 +1091,23 @@ const Productivity = ({ navigation }) => {
 
     const projectId = projects[0]?.projectId;
     const promises = [];
-    // promises.push(getStatsCount());
 
     if (projectId) {
-      // promises.push(getAttendanceGraphData(projectId, startDate, endDate));
-      // promises.push(getPaymentsGraphData(projectId, startDate, endDate));
-      // promises.push(getContractorsGraphData(projectId, startDate));
-      // promises.push(getWorkersSkill(startDate, endDate, projectId));
-      // promises.push(getFinancialCount(projectId));
-      // promises.push(getWorkForce(projectId));
-      // promises.push(getLabourTurnover(projectId));
-      // promises.push(getLabourExpense(projectId));
       promises.push(getProjectBudgetData(projectId));
       promises.push(getFinancialProgress(projectId));
+      promises.push(getBOQProgress(projectId));
+      promises.push(getBOQMetrics(projectId));
+      promises.push(getProjectProgressGraph(projectId));
+      // promises.push(getFieldNoteList())
+      promises.push(getBOQList(projectId));
+      setCurrentProjectProgress(projectId);
+      setCurrentProjectDetail(projects[0]);
+      setCurrentProject(projectId);
+      setProject(projectId);
+      setCurrentProjectBOQ(projectId);
+      setCurrentProjectProgressGraph(projectId);
+      setCurrentProjectBudget(projectId);
+      setCurrentProjectFinancial(projectId);
     }
 
     // Set the current project data
@@ -1193,9 +1121,9 @@ const Productivity = ({ navigation }) => {
           result.reason.message || "Error occurred",
           ToastAndroid.SHORT
         );
-        console.error("Error in promise:", result.reason);
+        console.error("Error in promise");
       } else {
-        console.log("Promise resolved:", result.value);
+        // console.log("Promise resolved");
       }
     });
   };
@@ -1205,26 +1133,6 @@ const Productivity = ({ navigation }) => {
       getData();
     }
   }, [projects?.length]);
-
-  useEffect(() => {
-    if (projects.length > 0) {
-      const project = projects[0];
-      const projectId = project?.projectId;
-
-      setCurrentProjectProgress(projectId);
-      setCurrentProjectDetail(project);
-      setCurrentProject(projectId);
-      setProject(projectId);
-      setCurrentProjectBOQ(projectId);
-      setCurrentProjectProgressGraph(projectId);
-      setCurrentProjectBudget(projectId);
-      setCurrentProjectFinancial(projectId);
-
-      dispatch(getBOQProgress(token, projectId));
-      dispatch(getBOQMetrics(token, projectId));
-      dispatch(getProjectProgressGraph(token, projectId));
-    }
-  }, [dispatch, token, projects?.length]);
 
   const getFinancialProgressGraphData = () => {
     let resultArray = [];
@@ -1317,7 +1225,7 @@ const Productivity = ({ navigation }) => {
   };
 
   const projectProgressGraphsData = () => {
-    return projectProgressData?.graphData?.flatMap((item) => [
+    return projectProgressGraph?.graphData?.flatMap((item) => [
       {
         value: item?.overallProgress < 0 ? 0 : item?.overallProgress,
         label: item.label,
@@ -1336,21 +1244,29 @@ const Productivity = ({ navigation }) => {
     if (item) {
       setCurrentProject(item.value);
       setCurrentProjectDetail(item);
-      dispatch(getBOQProgress(token, item.value));
-      dispatch(getBOQMetrics(token, item.value));
+      getBOQProgress(item.value).catch((error) => {
+        console.log("error----->>>>", error);
+      });
+      getBOQMetrics(item.value).catch((error) => {
+        console.log("error----->>>>", error);
+      });
     } else {
-      dispatch(getBOQProgress(token, projects[0]?.projectId));
+      getBOQProgress(projects[0]?.projectId).catch((error) => {
+        console.log("error----->>>>", error);
+      });
       setCurrentProjectDetail(projects[0]);
       setCurrentProject(projects[0]?.projectId);
-      dispatch(getBOQMetrics(projects[0]?.projectId));
+      getBOQMetrics(projects[0]?.projectId).catch((error) => {
+        console.log("error----->>>>", error);
+      });
     }
   };
   const getProjectProgressMaxValue = () => {
     let progressMax = 100;
-    if (projectProgressData?.graphData) {
+    if (projectProgressGraph?.graphData) {
       let progressValues =
-        projectProgressData?.graphData &&
-        projectProgressData?.graphData?.map((item) => item?.overallProgress);
+        projectProgressGraph?.graphData &&
+        projectProgressGraph?.graphData?.map((item) => item?.overallProgress);
       // Find the maximum value from the array
       const progressMaxValue = Math?.max(...progressValues);
       progressMax = roundToNearestMultiple(progressMaxValue, 50);
@@ -1561,41 +1477,41 @@ const Productivity = ({ navigation }) => {
     setRowList(updatedData);
   };
 
-  const addProgressEntery = async (boqId, value) => {
-    let obj = {
-      boqProgressId: 0,
-      quantity: value,
-      boqId,
-    };
+  // const addProgressEntery = async (boqId, value) => {
+  //   let obj = {
+  //     boqProgressId: 0,
+  //     quantity: value,
+  //     boqId,
+  //   };
 
-    let resp = await dispatch(addProgress(token, obj));
+  //   let resp = await dispatch(addProgress(token, obj));
 
-    if (resp?.status === 200) {
-      let resp = await dispatch(
-        getBOQList(token, currentProjectProgress, LabourContractorProgress)
-      );
-      if (resp?.status === 200) {
-        Toast.show({
-          type: "info",
-          text1: "Success",
-          text2: "Progress marked successfully!",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
-        });
-      }
-    } else {
-      // toast.failure("Something went wrong!");
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Something went wrong!",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
-    }
-  };
+  //   if (resp?.status === 200) {
+  //     let resp = await dispatch(
+  //       getBOQList(token, currentProjectProgress, LabourContractorProgress)
+  //     );
+  //     if (resp?.status === 200) {
+  //       Toast.show({
+  //         type: "info",
+  //         text1: "Success",
+  //         text2: "Progress marked successfully!",
+  //         topOffset: 10,
+  //         position: "top",
+  //         visibilityTime: 4000,
+  //       });
+  //     }
+  //   } else {
+  //     // toast.failure("Something went wrong!");
+  //     Toast.show({
+  //       type: "error",
+  //       text1: "Error",
+  //       text2: "Something went wrong!",
+  //       topOffset: 10,
+  //       position: "top",
+  //       visibilityTime: 4000,
+  //     });
+  //   }
+  // };
   const handleSubmitBOQ = async () => {
     let changedRowList = [];
 
@@ -1733,64 +1649,44 @@ const Productivity = ({ navigation }) => {
       endDate: date,
       workOrderNumber: workerOrderId,
     };
-    let resp = await dispatch(addBOQ(token, schemaObject));
-    if (resp?.status === 200) {
-      Toast.show({
-        type: "info",
-        text1: "Success",
-        text2: "BOQ created successfully.",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
-      setRowList([
-        {
-          rowId: 1,
-          boqId: 0,
-          scopeOfWorkId: scopeList[0]?.scopeOfWorkId,
-          titles: [
-            {
-              id: randomId,
-              scopeOfWorkDetailId: "",
-              title: "",
-              description: "",
-              unitId: 0,
-              rate: 0,
-              quantity: 0,
-              timeline: 0,
-              scopeListDetail: [],
-              descriptions: [],
-              scopeOfWorkOrderId: 1,
-              titleOrderId: 1,
-              descriptionOrderId: 1,
-              EndDate: moment().format("YYYY-MM-DD"),
-            },
-          ],
-        },
-      ]);
-      setProject(null);
-      setContractor(null);
-      setWorkerOrderId(null);
-      setDate(new Date());
-      setOpenFilterModal(false);
-    } else if (resp?.status === 404) {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: resp?.data?.error,
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
-    } else {
-      Toast.show({
-        type: "error",
-        text1: "Error",
-        text2: "Some Went Wrong While Saving BOQ's",
-        topOffset: 10,
-        position: "top",
-        visibilityTime: 4000,
-      });
+    try {
+      let resp = await addBOQ(schemaObject);
+      if (resp?.status === 200) {
+        ToastAndroid.show("BOQ created successfully.", ToastAndroid.SHORT);
+        setRowList([
+          {
+            rowId: 1,
+            boqId: 0,
+            scopeOfWorkId: scopeList[0]?.scopeOfWorkId,
+            titles: [
+              {
+                id: randomId,
+                scopeOfWorkDetailId: "",
+                title: "",
+                description: "",
+                unitId: 0,
+                rate: 0,
+                quantity: 0,
+                timeline: 0,
+                scopeListDetail: [],
+                descriptions: [],
+                scopeOfWorkOrderId: 1,
+                titleOrderId: 1,
+                descriptionOrderId: 1,
+                EndDate: moment().format("YYYY-MM-DD"),
+              },
+            ],
+          },
+        ]);
+        setProject(null);
+        setContractor(null);
+        setWorkerOrderId(null);
+        setDate(new Date());
+        setOpenFilterModal(false);
+      }
+    } catch (error) {
+      console.log("ERROR--->>>", error);
+      ToastAndroid.show(error.message, ToastAndroid.SHORT);
     }
   };
   const handleImagePicker = async () => {
@@ -1895,19 +1791,15 @@ const Productivity = ({ navigation }) => {
         `${moment(date).format("YYYY-MM-DD")} ${moment(time).format("HH:mm")}`
       );
 
-      const response = await dispatch(createFieldNoteEntry(token, formData));
-      if (response.status === 200) {
-        setOpenFieldNote(false);
-        Toast.show({
-          type: "info",
-          text1: "Field Note Created",
-          text2: selectedNote
-            ? "Field Note is updated successfully."
-            : "New Field Note is created successfully.",
-          topOffset: 10,
-          position: "top",
-          visibilityTime: 4000,
-        });
+      try {
+        const response = await createFieldNote(formData);
+        if (response.status === 200) {
+          setOpenFieldNote(false);
+          ToastAndroid.show("Field Note Created", ToastAndroid.SHORT);
+        }
+      } catch (error) {
+        console.log("ERROR--->>>", error);
+        ToastAndroid.show(error.message, ToastAndroid.SHORT);
       }
     }
   };
@@ -1915,10 +1807,14 @@ const Productivity = ({ navigation }) => {
   const onChangeProgressProject = (item) => {
     if (item) {
       setCurrentProjectProgressGraph(item.value);
-      dispatch(getProjectProgressGraph(token, item.value));
+      getProjectProgressGraph(item.value).catch((error) => {
+        console.log("Error----->>>>", error);
+      });
     } else {
       setCurrentProjectProgressGraph(projects[0]?.projectId);
-      dispatch(getProjectProgressGraph(token, projects[0]?.projectId));
+      getProjectProgressGraph(projects[0]?.projectId).catch((error) => {
+        console.log("Error----->>>>", error);
+      });
     }
   };
 
@@ -2181,8 +2077,11 @@ const Productivity = ({ navigation }) => {
                 </Pressable>
               </View>
               <View style={{ width: "35%" }}>
-                <Pressable
-                  onPress={() => {
+                {loading ? (
+                  <ActivityIndicator size="small" color={Colors.White} />
+                ) : (
+                  <Pressable
+                    onPress={() => {
                     handleSubmitBOQ();
                   }}
                   style={{
@@ -2203,8 +2102,9 @@ const Productivity = ({ navigation }) => {
                     }}
                   >
                     Submit
-                  </Text>
-                </Pressable>
+                    </Text>
+                  </Pressable>
+                )}
               </View>
             </View>
           </View>
@@ -2296,7 +2196,6 @@ const Productivity = ({ navigation }) => {
                   setOpenProjectModal(false);
                   setSelectedProject(item);
                   setProject(item.value);
-                  // dispatch(getLabourContactorAction(token, item.value));
                   await getLabourContractors(item.value);
                 }}
               />
@@ -2510,21 +2409,19 @@ const Productivity = ({ navigation }) => {
                     placeholder={"Project"}
                     value={project}
                     onChange={async (item) => {
-                      // setOpenFilterModal(false);
                       setProject(item.value);
                       setLabourContractorProgress(0);
-                      // dispatch(getLabourContactorAction(token, item.value));
                       await getLabourContractors(item.value);
-                      // setListForProgressModal(null);
                       if (item) {
-                        dispatch(getBOQList(token, item.value));
                         setCurrentProjectProgress(item.value);
-                        // dispatch(getContractors(project?.projectId));
+                        getBOQList(item.value).catch((error) => {
+                          console.log("ERROR--->>>", error);
+                        });
                       } else {
-                        dispatch(getBOQList(token, projects[0]?.projectId));
-
+                        getBOQList(projects[0]?.projectId).catch((error) => {
+                          console.log("ERROR--->>>", error);
+                        });
                         setCurrentProjectProgress(projects[0]?.projectId);
-                        // dispatch(getContractors(projectClassificationList[0]?.projectId));
                       }
                     }}
                   />
@@ -2853,7 +2750,7 @@ const Productivity = ({ navigation }) => {
               }}
             >
               <Text style={styles.buttonText}>
-                {selectedNote ? "Update Note" : "Create Note"}
+                {setFieldNote ? "Update Note" : "Create Note"}
               </Text>
             </TouchableOpacity>
             <TouchableOpacity
@@ -2930,10 +2827,11 @@ const Productivity = ({ navigation }) => {
             ) : (
               <ActionButton
                 onPress={() => {
-                  setUpdateLoader(true);
-                  setTimeout(() => {
-                    setUpdateLoader(false);
-                  }, 10000);
+                  navigation.navigate("UpdateBoq");
+                  // setUpdateLoader(true);
+                  // setTimeout(() => {
+                  //   setUpdateLoader(false);
+                  // }, 10000);
                 }}
                 title={"Update"}
               />
@@ -2943,10 +2841,6 @@ const Productivity = ({ navigation }) => {
             <ActionButton
               onPress={() => {
                 navigation.navigate("VerifyProgress");
-                // setVerifyLoader(true);
-                // setTimeout(() => {
-                //   setVerifyLoader(false);
-                // }, 10000);
               }}
               title={"Verify"}
             />
@@ -3212,7 +3106,7 @@ const Productivity = ({ navigation }) => {
           contentContainerStyle={{ alignItems: "center" }}
         >
           <View style={{ width: "99%" }}>
-            <CostProgress metrics={metrics} />
+            <CostProgress metrics={boqMetrics} />
           </View>
           <View style={styles.scrollGraph}>
             <View style={styles.graphsHeader}>
@@ -3311,20 +3205,11 @@ const Productivity = ({ navigation }) => {
                       onChange={(item) => {
                         if (item) {
                           setCurrentProjectFinancial(item);
-                          // dispatch(
-                          //   getFinancialProgressData(token, item?.value)
-                          // );
                           getFinancialProgress(item?.value).catch((error) => {
                             console.log("error", error);
                           });
                         } else {
                           setCurrentProjectFinancial(projects[0]?.projectId);
-                          // dispatch(
-                          //   getFinancialProgressData(
-                          //     token,
-                          //     projects[0]?.projectId
-                          //   )
-                          // );
                           getFinancialProgress(projects[0]?.projectId).catch(
                             (error) => {
                               console.log("error", error);
@@ -3430,7 +3315,6 @@ const Productivity = ({ navigation }) => {
                       onChange={(item) => {
                         if (item) {
                           setCurrentProjectBudget(item);
-                          // dispatch(getProjectBudget(token, item?.value));
                           getProjectBudgetData(item?.value).catch((error) => {
                             console.log("error", error);
                           });

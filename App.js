@@ -27,6 +27,7 @@ import { JobProvider } from "./src/context/jobContext";
 import { WorkerProvider } from "./src/context/workerContext";
 import { ProductivityProvider } from "./src/context/productivityContext";
 import { UserProvider } from "./src/context/userContext";
+import { FieldNoteProvider } from "./src/context/fieldNoteContext";
 
 enableLatestRenderer();
 
@@ -71,11 +72,13 @@ const App = () => {
               <ProjectProvider>
                 <WorkerProvider>
                   <UserProvider>
-                    <ProductivityProvider>
-                      <SafeAreaView />
-                      <StatusBar backgroundColor={Colors.Primary} />
-                      <MainNavigation />
-                    </ProductivityProvider>
+                    <FieldNoteProvider>
+                      <ProductivityProvider>
+                        <SafeAreaView />
+                        <StatusBar backgroundColor={Colors.Primary} />
+                        <MainNavigation />
+                      </ProductivityProvider>
+                    </FieldNoteProvider>
                   </UserProvider>
                 </WorkerProvider>
               </ProjectProvider>

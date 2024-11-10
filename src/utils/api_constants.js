@@ -91,4 +91,13 @@ export const API = {
   getRoles: `${base_url}/dashboard/Role`,
   createRole: `${base_url}/dashboard/Role`,
   createUser: `${base_url}/dashboard/User/addupdateuser`,
+  // Field Note Routes
+  getFieldNotes: `${base_url}/dashboard/FieldNote`,
+  getFieldNotesByProject: `${base_url}/dashboard/FieldNote/project`,
+  getFieldNoteCosts: `${base_url}/dashboard/FieldNote/getcostcodes`,
+  createFieldNote: `${base_url}/dashboard/FieldNote`,
+  deleteFieldNote: `${base_url}/dashboard/FieldNote`,
+  markFieldNoteAction: `${base_url}/dashboard/FieldNote/action`,
+  verifyFieldNote: `${base_url}/dashboard/FieldNote/verify`,
+  assignContractor: `${base_url}/dashboard/FieldNote/contractor`,
 };

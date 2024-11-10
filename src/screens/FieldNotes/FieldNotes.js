@@ -11,6 +11,7 @@ import {
   TextInput,
   ScrollView,
   TouchableOpacity,
+  ToastAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
 import Menu from "../../assets/icons/Menu.png";
@@ -42,37 +43,40 @@ import {
   Picture,
 } from "../../icons";
 import { authToken } from "../../redux/slices/authSlice";
-import {
-  getSkillsAction,
-  skillsListReducer,
-} from "../../redux/slices/workerSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import {
-  getLabourContactorAction,
-  getUsersAction,
-  labourContractorReducer,
-  usersListReducer,
-} from "../../redux/slices/userSlice";
-import {
-  assignContractorFieldNote,
-  deleteFieldNote,
+  // assignContractorFieldNote,
+  // deleteFieldNote,
   editFieldNoteAction,
-  fieldNoteReducer,
-  getFieldNoteList,
-  getScopeList,
-  markFieldNoteAction,
-  verifyFieldNote,
+  // fieldNoteReducer,
+  // getFieldNoteList,
+  // markFieldNoteAction,
+  // verifyFieldNote,
 } from "../../redux/slices/fieldNoteSlice";
 import { Image } from "react-native";
 import { assetsUrl } from "../../utils/api_constants";
-import moment from "moment";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import { launchImageLibrary } from "react-native-image-picker";
+import { useGeneralContext } from "../../context/generalContext";
+import { useFieldNote } from "../../context/fieldNoteContext";
 
 LogBox.ignoreAllLogs();
 
 const FieldNotes = ({ navigation }) => {
+  const { projects, labourContractorList, scopeList, setProject } =
+    useGeneralContext();
+  const {
+    fieldNoteList,
+    loading,
+    getFieldNoteList,
+    markFieldNote,
+    deleteFieldNote,
+    assignContractorFieldNote,
+    verifyFieldNote,
+    setFieldNote,
+    fieldNote,
+  } = useFieldNote();
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
   const [filteredDataSource, setFilteredDataSource] = useState([]);
@@ -92,29 +96,26 @@ const FieldNotes = ({ navigation }) => {
   const [verifyImageUri, setVerifyImageUri] = useState(null);
   const dispatch = useDispatch();
 
-  const { fieldNoteList, loading, scopeList } = useSelector(fieldNoteReducer);
-  const projectsListSimple = useSelector(projectsListSimpleReducer);
+  // const { fieldNoteList, loading } = useSelector(fieldNoteReducer);
   const token = useSelector(authToken);
-  const labourContractorList = useSelector(labourContractorReducer);
 
+  const getData = (projectId = 0) => {
+    getFieldNoteList(projectId).catch((err) => {
+      console.log(err);
+    });
+  };
+  // console.log(fieldNoteList)
   useFocusEffect(
     React.useCallback(() => {
-      dispatch(getSkillsAction(token));
-      dispatch(getUsersAction(token));
-      dispatch(getAllProjectsSimpleAction(token));
-      dispatch(selectAttendanceAction(null));
-      dispatch(removeMusterData());
-      dispatch(getFieldNoteList(token));
-      dispatch(getScopeList(token));
-      dispatch(getLabourContactorAction(token));
+      getData();
       return () => {};
     }, [])
   );
 
   useEffect(() => {
-    setFilteredDataSource(projectsListSimple);
-    setMasterDataSource(projectsListSimple);
-  }, [projectsListSimple]);
+    setFilteredDataSource(projects);
+    setMasterDataSource(projects);
+  }, [projects.length]);
 
   useEffect(() => {
     setFilteredDataNoteSource(fieldNoteList);
@@ -293,13 +294,21 @@ const FieldNotes = ({ navigation }) => {
               <View style={{ alignItems: "flex-end", flexDirection: "row" }}>
                 <Pressable
                   onPress={() => {
-                    let res = dispatch(
-                      deleteFieldNote(token, currFieldNote?.fieldNoteId)
-                    );
-                    setOpenActionModal(false);
-                    setTimeout(() => {
-                      dispatch(getFieldNoteList(token));
-                    }, 1000);
+                    deleteFieldNote(currFieldNote?.fieldNoteId)
+                      .then((res) => {
+                        getData();
+                        setOpenActionModal(false);
+                        ToastAndroid.show(
+                          "Field note deleted successfully!",
+                          ToastAndroid.SHORT
+                        );
+                      })
+                      .catch((err) => {
+                        ToastAndroid.show(
+                          err.message || "Something went wrong!",
+                          ToastAndroid.SHORT
+                        );
+                      });
                   }}
                 >
                   <DeleteIcon
@@ -311,7 +320,7 @@ const FieldNotes = ({ navigation }) => {
                 <Pressable
                   onPress={() => {
                     navigation.navigate("CreateFieldNotes");
-                    dispatch(editFieldNoteAction(currFieldNote));
+                    setFieldNote(currFieldNote);
                     setOpenActionModal(false);
                   }}
                 >
@@ -358,17 +367,6 @@ const FieldNotes = ({ navigation }) => {
                 value={selectedAction}
                 onChange={async (item) => {
                   setSelectedAction(item.value);
-                  // let resp = await dispatch(
-                  //   markFieldNoteAction(
-                  //     token,
-                  //     currFieldNote?.fieldNoteId,
-                  //     item?.value
-                  //   )
-                  // );
-                  // if (resp?.status === 200) {
-                  //   dispatch(getFieldNoteList(token));
-                  //   setOpenActionModal(false);
-                  // }
                 }}
               />
             </View>
@@ -434,17 +432,23 @@ const FieldNotes = ({ navigation }) => {
                   const formData = new FormData();
                   formData.append("Action", selectedAction);
                   formData.append("VerificationImage", verifyImage?.assets[0]);
-                  let resp = await dispatch(
-                    markFieldNoteAction(
-                      token,
-                      currFieldNote?.fieldNoteId,
-                      formData
-                    )
-                  );
-                  if (resp?.status === 200) {
-                    dispatch(getFieldNoteList(token));
-                    setOpenActionModal(false);
-                  }
+                  markFieldNote(currFieldNote?.fieldNoteId, formData)
+                    .then((res) => {
+                      console.log("res", res);
+                      getData();
+                      setOpenActionModal(false);
+                      ToastAndroid.show(
+                        "Field note marked successfully!",
+                        ToastAndroid.SHORT
+                      );
+                    })
+                    .catch((err) => {
+                      ToastAndroid.show(
+                        err.message || "Something went wrong!",
+                        ToastAndroid.SHORT
+                      );
+                      console.log(err);
+                    });
                 }}
                 disabled={!selectedAction || !verifyImageUri}
                 style={{
@@ -558,27 +562,26 @@ const FieldNotes = ({ navigation }) => {
                 value={contractor}
                 onChange={async (item) => {
                   setContractor(item.value);
-                  let resp = await dispatch(
-                    assignContractorFieldNote(
-                      token,
-                      currFieldNote?.fieldNoteId,
-                      item?.value
-                    )
-                  );
-                  if (resp?.status === 200) {
-                    dispatch(getFieldNoteList(token));
-                    setOpenAssignModal(false);
-                    setContractor(null);
-                    setSelectedProject(null);
-                    Toast.show({
-                      type: "info",
-                      text1: "Contractor assigned",
-                      text2: "Contractor assigned successfully.",
-                      topOffset: 10,
-                      position: "top",
-                      visibilityTime: 4000,
+                  assignContractorFieldNote(
+                    currFieldNote?.fieldNoteId,
+                    item?.value
+                  )
+                    .then((res) => {
+                      console.log("res", res);
+                      getData();
+                      setOpenAssignModal(false);
+                      setContractor(null);
+                      ToastAndroid.show(
+                        "Contractor assigned successfully!",
+                        ToastAndroid.SHORT
+                      );
+                    })
+                    .catch((err) => {
+                      ToastAndroid.show(
+                        err.message || "Something went wrong!",
+                        ToastAndroid.SHORT
+                      );
                     });
-                  }
                 }}
               />
             </View>
@@ -644,7 +647,8 @@ const FieldNotes = ({ navigation }) => {
                 <Pressable
                   onPress={() => {
                     setScope(null);
-                    dispatch(getFieldNoteList(token));
+                    // dispatch(getFieldNoteList(token));
+                    getData();
                     setOpenFilterModal(false);
                   }}
                   style={{ marginTop: 3 }}
@@ -860,13 +864,22 @@ const FieldNotes = ({ navigation }) => {
             }}
             onPress={async () => {
               console.log("VERIFY", item?.fieldNoteId);
-              let res = await dispatch(
-                verifyFieldNote(token, item?.fieldNoteId)
-              );
-              console.log("RES", res);
-              if (res?.status === 200) {
-                dispatch(getFieldNoteList(token));
-              }
+              verifyFieldNote(item?.fieldNoteId)
+                .then((res) => {
+                  console.log("RES", res);
+                  getData();
+                  ToastAndroid.show(
+                    "Field note verified successfully!",
+                    ToastAndroid.SHORT
+                  );
+                })
+                .catch((err) => {
+                  console.log(err);
+                  ToastAndroid.show(
+                    err.message || "Something went wrong!",
+                    ToastAndroid.SHORT
+                  );
+                });
             }}
             disabled={item?.verifiedAction}
           >
@@ -1050,7 +1063,9 @@ const FieldNotes = ({ navigation }) => {
               <RefreshControl
                 refreshing={loading}
                 onRefresh={() => {
-                  dispatch(getFieldNoteList(token));
+                  // dispatch(getFieldNoteList(token));
+                  setSelectedProject(null);
+                  getData();
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
@@ -1078,8 +1093,9 @@ const FieldNotes = ({ navigation }) => {
               <RefreshControl
                 refreshing={loading}
                 onRefresh={() => {
-                  dispatch(getFieldNoteList(token));
+                  // dispatch(getFieldNoteList(token));
                   setSelectedProject(null);
+                  getData();
                 }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
@@ -1168,8 +1184,8 @@ const FieldNotes = ({ navigation }) => {
                   onPress={() => {
                     setSelectedProject(item);
                     setOpenSearchModal(false);
-                    dispatch(saveProjectDataAction(item));
-                    dispatch(getFieldNoteList(token, item?.projectId));
+                    setProject(item);
+                    getData(item?.projectId);
                   }}
                 >
                   <Text
