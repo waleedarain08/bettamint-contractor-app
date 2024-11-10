@@ -17,15 +17,19 @@ import { Dropdown } from "react-native-element-dropdown";
 import { useProductivity } from "../../context/productivityContext";
 import { useGeneralContext } from "../../context/generalContext";
 import { TouchableOpacity } from "react-native";
+import DocumentPicker from "react-native-document-picker";
 
 const UpdateBoq = () => {
   const { projects } = useGeneralContext();
-  const { getListOfBOQV2, boqListGCViewMode, loading } = useProductivity();
+  const { getListOfBOQV2, boqListGCViewMode, loading, addProgress } =
+    useProductivity();
   const [selectedProject, setSelectedProject] = useState(null);
   const [showMore, setShowMore] = useState(false);
   const [openFilterModal, setOpenFilterModal] = useState(false);
   const [initialLoading, setInitialLoading] = useState(true);
   const [progress, setProgress] = useState({});
+  const [selectedBoq, setSelectedBoq] = useState(null);
+  const [selectedFile, setSelectedFile] = useState(null);
   const transformedArray = boqListGCViewMode.map((item) => ({
     title: {
       sow: item.scopeOfWorkName,
@@ -59,6 +63,24 @@ const UpdateBoq = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  const pickFile = async () => {
+    try {
+      const file = await DocumentPicker.pick({
+        type: [DocumentPicker.types.allFiles],
+        allowMultiSelection: false,
+        transitionStyle: "flipHorizontal",
+      });
+      console.log("file", file);
+      setSelectedFile(file[0]);
+    } catch (error) {
+      console.log("error", error);
+      ToastAndroid.show(
+        error.message || "Something went wrong while uploading file!",
+        ToastAndroid.SHORT
+      );
+    }
+  };
 
   if (initialLoading) {
     return (
@@ -328,12 +350,17 @@ const UpdateBoq = () => {
                             placeholder="Enter Today's Progress"
                             placeholderTextColor={Colors.FormText}
                             style={styles.remarksInput}
-                            value={progress.todayProgress}
+                            keyboardType="numeric"
+                            value={progress[desc.boqCode]?.todayProgress || ""}
                             onChangeText={(text) => {
-                              setProgress({
-                                ...progress,
-                                todayProgress: text,
-                              });
+                              const numericValue = text;
+                              setProgress((prev) => ({
+                                ...prev,
+                                [desc.boqCode]: {
+                                  ...prev[desc.boqCode],
+                                  todayProgress: numericValue,
+                                },
+                              }));
                             }}
                           />
                         </View>
@@ -343,32 +370,95 @@ const UpdateBoq = () => {
                             placeholder="Enter Remarks"
                             placeholderTextColor={Colors.FormText}
                             style={styles.remarksInput}
-                            value={progress.remarks}
+                            value={progress[desc.boqCode]?.remarks || ""}
                             onChangeText={(text) => {
-                              setProgress({
-                                ...progress,
-                                remarks: text,
-                              });
+                              setProgress((prev) => ({
+                                ...prev,
+                                [desc.boqCode]: {
+                                  ...prev[desc.boqCode],
+                                  remarks: text,
+                                },
+                              }));
                             }}
                           />
                         </View>
                       </View>
                       <View style={styles.desCon}>
                         <View style={styles.width}>
-                          {/* <Text style={styles.itemDesHeader}>Upload: </Text> */}
-                          <TouchableOpacity style={styles.uploadBtn}>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setSelectedBoq(desc.boqCode);
+                              pickFile();
+                            }}
+                            style={styles.uploadBtn}
+                          >
                             <VectorIcon
                               type={"Entypo"}
                               name="attachment"
                               size={20}
                               color={Colors.Primary}
                             />
-                            <Text style={styles.uploadText}>Upload</Text>
+                            <Text style={styles.uploadText}>
+                              {selectedBoq === desc.boqCode
+                                ? selectedFile
+                                  ? selectedFile?.name.slice(0, 8)
+                                  : "Upload"
+                                : "Upload"}
+                            </Text>
                           </TouchableOpacity>
                         </View>
                         <View style={styles.width}>
-                          <TouchableOpacity style={styles.submitBtn}>
-                            <Text style={styles.submitText}>Save</Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              let formData = new FormData();
+                              formData.append("boqProgressId", 0);
+                              formData.append(
+                                "quantity",
+                                parseInt(progress[desc.boqCode]?.todayProgress)
+                              );
+                              formData.append("boqId", item.boqId);
+                              formData.append(
+                                "remarks",
+                                progress[desc.boqCode]?.remarks
+                              );
+                              formData.append("image", {
+                                uri: selectedFile?.uri,
+                                type: selectedFile?.type,
+                                name: selectedFile?.name,
+                              });
+                              addProgress(formData)
+                                .then((res) => {
+                                  ToastAndroid.show(
+                                    "Progress saved successfully!",
+                                    ToastAndroid.SHORT
+                                  );
+                                  setProgress((prev) => ({
+                                    ...prev,
+                                    [desc.boqCode]: {
+                                      todayProgress: "",
+                                      remarks: "",
+                                    },
+                                  }));
+                                  setSelectedFile(null);
+                                })
+                                .catch((err) => {
+                                  ToastAndroid.show(
+                                    err.message ||
+                                      "Something went wrong while saving progress!",
+                                    ToastAndroid.SHORT
+                                  );
+                                });
+                            }}
+                            style={styles.submitBtn}
+                          >
+                            {loading ? (
+                              <ActivityIndicator
+                                size="small"
+                                color={Colors.White}
+                              />
+                            ) : (
+                              <Text style={styles.submitText}>Save</Text>
+                            )}
                           </TouchableOpacity>
                         </View>
                       </View>

@@ -241,6 +241,40 @@ const ProductivityProvider = ({ children }) => {
     }
   };
 
+  const addProgress = async (data) => {
+    try {
+      setLoading(true);
+      const response = await axios.post(
+        `${base_url}/dashboard/Productivity/addupdateboqprogress`,
+        data,
+        {
+          headers: {
+            Authorization: user?.token,
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      console.log("Response--->>>>", response);
+      if (response?.status === 200) {
+        setLoading(false);
+      } else {
+        throw new Error(
+          addingProgressFailure(
+            "Something went wrong while saving BOQ progress!"
+          )
+        );
+      }
+      return response;
+    } catch (error) {
+      console.log("Error in addProgress--->>>", error);
+      throw new Error(
+        error.message || "Something went wrong while saving BOQ progress!"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <ProductivityContext.Provider
       value={{
@@ -258,6 +292,7 @@ const ProductivityProvider = ({ children }) => {
         getListOfBOQV2,
         boqListGC,
         getBOQListGC,
+        addProgress,
       }}
     >
       {children}

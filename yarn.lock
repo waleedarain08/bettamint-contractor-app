@@ -3586,6 +3586,7 @@ __metadata:
     react-native-collapsible: ^1.6.1
     react-native-date-picker: ^4.2.10
     react-native-device-info: ^10.6.0
+    react-native-document-picker: ^9.3.1
     react-native-dropdown-picker: ^5.4.6
     react-native-element-dropdown: ^2.9.0
     react-native-geolocation-service: ^5.3.1
@@ -9073,6 +9074,22 @@ __metadata:
   peerDependencies:
     react-native: "*"
   checksum: 7a7cc438844552aef687b4a5b8efd0cd0a2959e0a3b771febfbe0b6a9ca8ff05a563e2912b30b83523bd3d5143d6616ca8fac0476abf01936a726e1578211ebb
+  languageName: node
+  linkType: hard
+
+"react-native-document-picker@npm:^9.3.1":
+  version: 9.3.1
+  resolution: "react-native-document-picker@npm:9.3.1"
+  dependencies:
+    invariant: ^2.2.4
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+    react-native-windows: "*"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 5979e4b93f15e0568ae70b70cc2304cd727f20939a58412d483517942df6d3cf3821319b3b7934bcaa2866ed1918ef9e8de9933ce6953209340abe3455403e0d
   languageName: node
   linkType: hard
 
