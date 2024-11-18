@@ -69,7 +69,7 @@ export const API = {
   // Attendance Routes
   getAttendance: `${base_url}/dashboard/Attendance/getbyproject/v2`,
   getAttendanceMusterCard: `${base_url}/dashboard/Attendance/mustercard`,
-  approveAttendance: `${base_url}/dashboard/Attendance/approve`,
+  approveAttendance: `${base_url}/dashboard/Attendance/approve-attendance`,
   markAttendance: `${base_url}/dashboard/Attendance/markattendance`,
   // Worker Routes
   delistWorker: `${base_url}/dashboard/Job/delist`,

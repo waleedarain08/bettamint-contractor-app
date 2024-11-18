@@ -32,6 +32,7 @@ const AttendanceMusterCard = ({}) => {
   const [approveStatus, setApproveStatus] = useState(null);
   const attendance = mustercardAttendance?.attendance;
   const attendanceOptions = [
+    { label: "A", value: 0 },
     { label: "P", value: 8 },
     { label: "1/2 P", value: 4 },
     { label: "P1", value: 9 },
@@ -96,7 +97,8 @@ const AttendanceMusterCard = ({}) => {
                   selectedAttendance?.jobId,
                   selectedAttendance?.workerId,
                   selectedDate,
-                  item?.value
+                  item?.value,
+                  item?.label
                 )
                   .then((res) => {
                     if (res) {

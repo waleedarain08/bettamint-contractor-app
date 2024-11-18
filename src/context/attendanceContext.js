@@ -1,8 +1,9 @@
 import React, { createContext, useState } from "react";
-import { API } from "../utils/api_constants";
+import { API, baseUrl } from "../utils/api_constants";
 import { useContext } from "react";
 import { apiCall } from "../services/response_handler";
 import { useAuth } from "./authContext";
+import axios from "axios";
 
 const AttendanceContext = createContext();
 
@@ -78,23 +79,34 @@ const AttendanceProvider = ({ children }) => {
   };
 
   const approveAttendance = async (
-    jobId = 0,
-    workerId = 0,
-    dateTime = "",
-    hours = 0
+    jobId,
+    workerId,
+    dateTime,
+    hours = 8,
+    approvedAction
   ) => {
     try {
-      setLoading(true);
-      const response = await apiCall(
-        "POST",
-        `${API.approveAttendance}?jobId=${jobId}&workerId=${workerId}&dateTime=${dateTime}&hours=${hours}`,
-        null,
-        user.token
+      // if (projectId) {
+
+      const response = await axios.put(
+        `${baseUrl}/dashboard/Attendance/approve-attendance`,
+        {
+          jobId,
+          workerId,
+          dateTime,
+          hours,
+          approvedAction,
+        },
+        {
+          headers: {
+            Authorization: user?.token,
+          },
+        }
       );
       return response;
-    } catch (error) {
+    } catch (e) {
       throw new Error(
-        error.message || "Something went wrong, while approving attendance!"
+        e.message || "Something went wrong while approving attendance!"
       );
     } finally {
       setLoading(false);

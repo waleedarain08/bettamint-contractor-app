@@ -81,6 +81,7 @@ const ApproveAttendance = ({ navigation, route }) => {
   };
 
   const attendanceOptions = [
+    { label: "A", value: 0 },
     { label: "P", value: 8 },
     { label: "1/2 P", value: 4 },
     { label: "P1", value: 9 },
@@ -93,8 +94,9 @@ const ApproveAttendance = ({ navigation, route }) => {
     { label: "PP", value: 16 },
   ];
 
+  console.log("Project", project);
   const getData = (
-    projectId = projects[0]?.projectId,
+    projectId = project?.projectId,
     contractorId = 0,
     skillId = ""
   ) => {
@@ -107,7 +109,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       getData();
       getCurrentLocation();
       return () => {};
-    }, [project, projects?.length])
+    }, [project])
   );
 
   const getCurrentLocation = () => {
@@ -167,10 +169,7 @@ const ApproveAttendance = ({ navigation, route }) => {
         longitude: currentPosition?.coords?.longitude,
       });
       if (response) {
-        getData(
-          project?.projectId || projects[0]?.projectId,
-          selectedContractor?.value || 0
-        );
+        getData(project?.projectId, selectedContractor?.value || 0);
         ToastAndroid.show(
           "Attendance marked successfully!",
           ToastAndroid.SHORT
@@ -263,7 +262,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
                   getData(
-                    project?.projectId || projects[0]?.projectId,
+                    project?.projectId,
                     item?.value
                   );
                 }}
@@ -366,7 +365,8 @@ const ApproveAttendance = ({ navigation, route }) => {
                     selectedAttendance?.jobId,
                     selectedAttendance?.workerId,
                     new Date().toISOString(),
-                    item?.value
+                    item?.value,
+                    item?.label
                   )
                     .then((res) => {
                       if (res) {
@@ -374,7 +374,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                           "Attendance Approved",
                           ToastAndroid.SHORT
                         );
-                        getData(project?.projectId || projects[0]?.projectId);
+                        getData(project?.projectId);
                         setApproveStatus(null);
                       } else {
                         ToastAndroid.show(
@@ -728,7 +728,7 @@ const ApproveAttendance = ({ navigation, route }) => {
             <RefreshControl
               refreshing={loading}
               onRefresh={() => {
-                getData(project?.projectId || projects[0]?.projectId);
+                getData(project?.projectId);
               }}
               tintColor={Colors.Primary}
               colors={[Colors.Purple, Colors.Primary]}

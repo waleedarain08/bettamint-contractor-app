@@ -1146,8 +1146,8 @@ const Dashboard = ({ navigation }) => {
                   >
                     <Text
                       style={{
-                        width: "25%",
-                        fontSize: 12,
+                        width: "27%",
+                        fontSize: 11,
                         fontFamily: "Lexend-SemiBold",
                         color: Colors.ListHeaderText,
                       }}
@@ -1157,7 +1157,7 @@ const Dashboard = ({ navigation }) => {
                     <Text
                       style={{
                         width: "72%",
-                        fontSize: 12,
+                        fontSize: 11,
                         fontFamily: "Lexend-SemiBold",
                         color: Colors.ListHeaderText,
                         textAlign: "center",
@@ -1177,7 +1177,7 @@ const Dashboard = ({ navigation }) => {
                     >
                       <Text
                         style={{
-                          width: "25%",
+                          width: "27%",
                           fontFamily: "Lexend-Regular",
                           fontSize: 12,
                           color: Colors.Gray,

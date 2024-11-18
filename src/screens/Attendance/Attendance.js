@@ -50,6 +50,7 @@ const Attendance = ({ navigation }) => {
   const [delistReason, setDelistReason] = useState(null);
   const [selectedWorker, setSelectedWorker] = useState(null);
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
+  const [currentProject, setCurrentProject] = useState(null);
 
   const status = [
     { label: "No Show", value: "NoShow" },
@@ -105,6 +106,7 @@ const Attendance = ({ navigation }) => {
       if (projects?.length > 0) {
         getData();
         setProject(projects[0]);
+        setCurrentProject(projects[0].projectId);
         setFilteredDataSource(projects);
         setMasterDataSource(projects);
         getLocationPermission();
@@ -169,7 +171,7 @@ const Attendance = ({ navigation }) => {
         backdropColor={Colors.DarkGray}
         backdropOpacity={0.6}
         backdropTransitionInTiming={200}
-        onBackdropPress={() => setOpenSearchModal(!openFilterModal)}
+        onBackdropPress={() => setOpenFilterModal(!openFilterModal)}
       >
         <View style={styles.filterModalContainer}>
           <View style={styles.filterInnerCon}>
@@ -205,11 +207,7 @@ const Attendance = ({ navigation }) => {
                     setSelectedContractor(null);
                     setSelectedSkills(null);
                     setSelectedStatus(null);
-                    getData(
-                      project?.projectId || projects[0]?.projectId,
-                      0,
-                      ""
-                    );
+                    getData(project?.projectId, 0, "");
                     setOpenFilterModal(false);
                   }}
                   style={{ marginTop: 3 }}
@@ -579,7 +577,87 @@ const Attendance = ({ navigation }) => {
     <View style={styles.container}>
       <View style={styles.header} />
       <Pressable style={styles.graph}>
-        <Pressable
+        <View style={styles.dropdownContainer}>
+          <View style={{ width: "10%" }}>
+            <View style={styles.buildingIconBg}>
+              <Building size={18} color={Colors.LightGray} />
+            </View>
+          </View>
+          <View style={{ width: "58%" }}>
+            <Text style={[styles.selectText, { paddingLeft: 0 }]}>
+              Select a Project
+            </Text>
+            <Dropdown
+              placeholderStyle={styles.placeholderStyle}
+              selectedTextStyle={styles.selectedTextStyle}
+              itemTextStyle={{
+                fontFamily: "Lexend-Regular",
+                fontSize: 13,
+                color: Colors.Black,
+              }}
+              showsVerticalScrollIndicator={false}
+              iconStyle={styles.iconStyle}
+              data={
+                projects.length
+                  ? projects?.map((ele) => ({
+                      label: ele?.name,
+                      value: ele?.projectId,
+                      ...ele,
+                    }))
+                  : []
+              }
+              maxHeight={300}
+              labelField="label"
+              valueField="value"
+              placeholder={"Select a Project"}
+              value={currentProject}
+              onChange={(item) => {
+                if (item) {
+                  setCurrentProject(item);
+                  setProject(item);
+                  getData(item?.projectId, 0, selectedSkills?.value || "");
+                  setOpenSearchModal(false);
+                  setFilteredDataAttSource([]);
+                } else {
+                  setCurrentProject(null);
+                  setProject(null);
+                }
+              }}
+            />
+          </View>
+          <View style={{ flexDirection: "row", width: "25%" }}>
+            <Pressable
+              onPress={() => {
+                setOpenFilterModal(true);
+              }}
+              style={{
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 3,
+                paddingHorizontal: 9,
+                paddingVertical: 7,
+              }}
+            >
+              <Text style={styles.smallButton}>Filter</Text>
+            </Pressable>
+            <TouchableOpacity
+              onPress={() => setOpenSearchUserModal(true)}
+              style={{
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "#ECE5FC",
+                padding: 5,
+                margin: 5,
+                borderRadius: 3,
+                paddingHorizontal: 7,
+              }}
+            >
+              <Search size={13} color={Colors.Secondary} />
+            </TouchableOpacity>
+          </View>
+        </View>
+        {/* <Pressable
           onPress={() => {
             setOpenSearchModal(true);
           }}
@@ -616,38 +694,7 @@ const Attendance = ({ navigation }) => {
                 : "Select a project"}
             </Text>
           </View>
-        </Pressable>
-        <View style={{ flexDirection: "row" }}>
-          <Pressable
-            onPress={() => {
-              setOpenFilterModal(true);
-            }}
-            style={{
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 9,
-              paddingVertical: 7,
-            }}
-          >
-            <Text style={styles.smallButton}>Filter</Text>
-          </Pressable>
-          <TouchableOpacity
-            onPress={() => setOpenSearchUserModal(true)}
-            style={{
-              justifyContent: "center",
-              alignItems: "center",
-              backgroundColor: "#ECE5FC",
-              padding: 5,
-              margin: 5,
-              borderRadius: 3,
-              paddingHorizontal: 7,
-            }}
-          >
-            <Search size={13} color={Colors.Secondary} />
-          </TouchableOpacity>
-        </View>
+        </Pressable> */}
       </Pressable>
       <View style={{ alignItems: "flex-end", paddingRight: 20, width: "100%" }}>
         <Text style={{ fontSize: 10, textAlign: "right", color: Colors.White }}>
@@ -1022,5 +1069,19 @@ const styles = StyleSheet.create({
     height: "90%",
     borderRadius: 10,
     padding: 15,
+  },
+  dropdownContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    width: "100%",
+  },
+  buildingIconBg: {
+    backgroundColor: "#F7F8F9",
+    borderRadius: 25,
+    width: 35,
+    height: 35,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
