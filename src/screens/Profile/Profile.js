@@ -24,12 +24,14 @@ import {
   EditIcon,
 } from "../../icons";
 import Spacer from "../../components/Spacer";
-import { useSelector } from "react-redux";
-import { userData } from "../../redux/slices/authSlice";
+//import { useSelector } from "react-redux";
+//import { userData } from "../../redux/slices/authSlice";
+import {useAuth} from "../../context/authContext";
 const img =
   "https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
 const Profile = ({ navigation }) => {
-  const { user } = useSelector(userData);
+  const { user } = useAuth().user;
+  console.log(user);
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -85,11 +87,11 @@ const Profile = ({ navigation }) => {
             >
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
-                <Text style={styles.headingText}>First Name</Text>
-                <Text style={styles.text}>N/A</Text>
+                <Text style={styles.headingText}>Full Name</Text>
+                <Text style={styles.text}>{user?.fullName}</Text>
               </View>
             </View>
-            <View
+            {/* <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -104,7 +106,7 @@ const Profile = ({ navigation }) => {
                 <Text style={styles.headingText}>Last Name</Text>
                 <Text style={styles.text}>N/A</Text>
               </View>
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: "row",

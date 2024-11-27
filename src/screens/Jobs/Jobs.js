@@ -73,7 +73,7 @@ const Jobs = ({ navigation }) => {
         const itemData = item.jobName
           ? item.jobName.toUpperCase()
           : "".toUpperCase();
-        console.log(itemData);
+        //console.log(itemData);
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });

@@ -104,8 +104,8 @@ android {
         applicationId "com.bettamintcontractor"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 59
-        versionName "1.3.5"
+        versionCode 60
+        versionName "1.3.6"
     }
 
     splits {

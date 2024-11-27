@@ -136,7 +136,7 @@ const Attendance = ({ navigation }) => {
         const itemData = item.workerName
           ? item.workerName.toUpperCase()
           : "".toUpperCase();
-        console.log(itemData);
+        //console.log(itemData);
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });

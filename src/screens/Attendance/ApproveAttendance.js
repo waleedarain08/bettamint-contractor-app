@@ -170,10 +170,7 @@ const ApproveAttendance = ({ navigation, route }) => {
       });
       if (response) {
         getData(project?.projectId, selectedContractor?.value || 0);
-        ToastAndroid.show(
-          "Attendance marked successfully!",
-          ToastAndroid.SHORT
-        );
+        //ToastAndroid.show("Attendance marked successfully!",ToastAndroid.SHORT);
         let key =
           attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
         let updatedArray = filterAttendance.map((item) =>
@@ -187,7 +184,7 @@ const ApproveAttendance = ({ navigation, route }) => {
         setFilterAttendance(updatedArray);
       }
     } catch (error) {
-      ToastAndroid.show("Something went wrong!", ToastAndroid.SHORT);
+      //ToastAndroid.show("Something went wrong!", ToastAndroid.SHORT);
     }
   };
 
