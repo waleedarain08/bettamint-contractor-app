@@ -161,7 +161,7 @@ const PaymentNavigator = ({ navigation }) => {
           ),
           headerRight: () => (
             <View style={{ flexDirection: "row", alignItems: "center" }}>
-              {isPaymentListPresent && (
+              {/* {isPaymentListPresent && (
                 <Pressable
                   style={{
                     height: 30,
@@ -177,7 +177,7 @@ const PaymentNavigator = ({ navigation }) => {
                 >
                   <RestoreIcon size={22} color={Colors.White} />
                 </Pressable>
-              )}
+              )} */}
               <Pressable
                 style={{ marginLeft: 8 }}
                 onPress={() => navigation.navigate("Profile")}

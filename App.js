@@ -45,7 +45,7 @@ const App = () => {
       if (updateNeeded && updateNeeded.isNeeded) {
         Alert.alert(
           "Please Update App",
-          "You will have to update your app to the latest version to continue using Bettamint - Contractor.",
+          "You will have to update your app to the latest version to continue using Bettamint.",
           [
             {
               text: "Update",

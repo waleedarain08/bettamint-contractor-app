@@ -94,7 +94,7 @@ const ApproveAttendance = ({ navigation, route }) => {
     { label: "PP", value: 16 },
   ];
 
-  console.log("Project", project);
+  //console.log("Project", project);
   const getData = (
     projectId = project?.projectId,
     contractorId = 0,
