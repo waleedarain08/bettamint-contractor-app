@@ -485,7 +485,7 @@ const AttendanceNavigator = ({ navigation }) => {
   const { user } = useAuth();
   const roles = user?.user?.role?.roleFeatureSets;
   const isAttendanceListPresent = roles?.some(
-    (item) => item?.featureSet?.name === "Attendance List"
+    (item) => item?.featureSet?.name === "Attendance List" || item?.featureSet?.name === "Muster Roll Management" || item?.featureSet?.name === "Attendance Marking"
   );
   return (
     <AttendanceStack.Navigator
@@ -559,12 +559,12 @@ const AttendanceNavigator = ({ navigation }) => {
                       </Text>
                     </View>
                   </Pressable>
-                  <Pressable style={{ marginLeft: 5 }}>
+                  {/* <Pressable style={{ marginLeft: 5 }}>
                     <Image
                       source={require("../assets/icons/download.png")}
                       style={{ height: 30, width: 30, marginRight: 0 }}
                     />
-                  </Pressable>
+                  </Pressable> */}
                 </>
               )}
               <Pressable

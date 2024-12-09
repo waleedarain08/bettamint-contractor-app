@@ -46,7 +46,7 @@ const Jobs = ({ navigation }) => {
 
   const roles = user?.user?.role?.roleFeatureSets;
   const isJobsListPresent = roles.some(
-    (item) => item.featureSet.name === "Jobs List"
+    (item) => item.featureSet.name === "Jobs List" || item?.featureSet?.name === "Worker Onboarding"
   );
 
   const getData = async (contractorId = 0) => {

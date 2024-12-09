@@ -123,7 +123,7 @@ const Dashboard = ({ navigation }) => {
   // User Role instance
   const roles = userInfo?.user?.role?.roleFeatureSets;
   const isDashboardPresent = roles.some(
-    (item) => item.featureSet.name === "Dashboard"
+    (item) => item.featureSet.name === "Dashboard" || item.featureSet.name === "Worker Onboarding"
   );
 
   function roundToNearestMultiple(number, multiple) {
