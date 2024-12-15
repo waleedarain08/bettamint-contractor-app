@@ -28,6 +28,7 @@ import { WorkerProvider } from "./src/context/workerContext";
 import { ProductivityProvider } from "./src/context/productivityContext";
 import { UserProvider } from "./src/context/userContext";
 import { FieldNoteProvider } from "./src/context/fieldNoteContext";
+import { PaymentProvider } from "./src/context/paymentContext";
 
 //enableLatestRenderer();
 
@@ -68,21 +69,23 @@ const App = () => {
       <AuthProvider>
         <GeneralProvider>
           <AttendanceProvider>
-            <JobProvider>
-              <ProjectProvider>
-                <WorkerProvider>
-                  <UserProvider>
-                    <FieldNoteProvider>
-                      <ProductivityProvider>
-                        <SafeAreaView />
-                        <StatusBar backgroundColor={Colors.Primary} />
-                        <MainNavigation />
-                      </ProductivityProvider>
-                    </FieldNoteProvider>
-                  </UserProvider>
-                </WorkerProvider>
-              </ProjectProvider>
-            </JobProvider>
+            <PaymentProvider>
+              <JobProvider>
+                <ProjectProvider>
+                  <WorkerProvider>
+                    <UserProvider>
+                      <FieldNoteProvider>
+                        <ProductivityProvider>
+                          <SafeAreaView />
+                          <StatusBar backgroundColor={Colors.Primary} />
+                          <MainNavigation />
+                        </ProductivityProvider>
+                      </FieldNoteProvider>
+                    </UserProvider>
+                  </WorkerProvider>
+                </ProjectProvider>
+              </JobProvider>
+            </PaymentProvider>
           </AttendanceProvider>
         </GeneralProvider>
       </AuthProvider>

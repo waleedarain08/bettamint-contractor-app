@@ -2,32 +2,16 @@ import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
-  Dimensions,
   Pressable,
   Modal,
   LogBox,
 } from "react-native";
-import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-// import Logo from "../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
+import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import Spacer from "../../components/Spacer";
-// import BarChart from "../assets/images/barchart.png";
-// import LineChart from "../assets/images/linechart.png";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-import { User, Tick, Cross, Search, Building } from "../../icons";
-import { useDispatch, useSelector } from "react-redux";
-import { authToken } from "../../redux/slices/authSlice";
-import {
-  getUsersAction,
-  loadingUsers,
-  usersListReducer,
-} from "../../redux/slices/userSlice";
+import { Cross, Search } from "../../icons";
 import { Searchbar } from "react-native-paper";
 import { Dropdown } from "react-native-element-dropdown";
 import { RefreshControl } from "react-native-gesture-handler";

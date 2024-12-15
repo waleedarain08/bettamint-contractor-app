@@ -1,48 +1,18 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
-  Image,
-  ImageBackground,
   StyleSheet,
   FlatList,
-  Dimensions,
   LogBox,
-  Alert,
-  Pressable,
   ToastAndroid,
 } from "react-native";
 import { TextInput, ScrollView, TouchableOpacity } from "react-native";
-import Logo from "../../assets/images/logo.png";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import { Picture, RupeesIcon, User, Email, LockIcon } from "../../icons";
+import { User, Email } from "../../icons";
 import Spacer from "../../components/Spacer";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import CheckBox from "@react-native-community/checkbox";
-import DropDownPicker from "react-native-dropdown-picker";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  createUserAction,
-  featuresReducer,
-  getFeatures,
-  getFeaturesV2,
-  getRoles,
-  rolesReducer,
-} from "../../redux/slices/userSlice";
-import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown, MultiSelect } from "react-native-element-dropdown";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import Toast from "react-native-toast-message";
-import { useFocusEffect } from "@react-navigation/native";
-import {
-  // createRole,
-  rolesResponseReducer,
-} from "../../redux/slices/rolesSlice";
 import { useGeneralContext } from "../../context/generalContext";
 import { useUser } from "../../context/userContext";
 LogBox.ignoreAllLogs();
@@ -58,10 +28,6 @@ const CreateNewUser = ({ navigation, route }) => {
   const [activeRolesAndRights, setActiveRolesAndRights] = useState({});
   const [roleName, setRoleName] = useState("");
   const [errors, setErrors] = useState(false);
-
-  // Selectors
-  const token = useSelector(authToken);
-  const dispatch = useDispatch();
 
   const handleSubmit = async () => {
     if (!roleName) {

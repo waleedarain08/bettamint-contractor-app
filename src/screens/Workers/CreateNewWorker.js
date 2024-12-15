@@ -18,36 +18,17 @@ import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
 import { CardIcon, Picture } from "../../icons";
 import Spacer from "../../components/Spacer";
-import DropDownPicker from "react-native-dropdown-picker";
 import { Dropdown } from "react-native-element-dropdown";
-
-import { useDispatch, useSelector } from "react-redux";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
 import { launchImageLibrary } from "react-native-image-picker";
-import {
-  getSkillsAction,
-  selectedWorkerReducer,
-  skillsListReducer,
-  updateWorkerAction,
-} from "../../redux/slices/workerSlice";
 import { assetsUrl } from "../../utils/api_constants";
-import { authToken } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
-import { getAllJobsAction, jobsListReducer } from "../../redux/slices/jobSlice";
 import { useGeneralContext } from "../../context/generalContext";
 import { useWorker } from "../../context/workerContext";
-export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
-export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
-const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const CreateNewWorker = ({ navigation }) => {
   const { projects, skills, jobs } = useGeneralContext();
-  const { createWorker } = useWorker();
-  const dispatch = useDispatch();
+  const { createWorker, selectedWorker } = useWorker();
   const [skillValue, setSkillValue] = useState(null);
   const [genderValue, setGenderValue] = useState(null);
   const [skillLevelValue, setSkillLevelValue] = useState(null);
@@ -63,9 +44,6 @@ const CreateNewWorker = ({ navigation }) => {
   const [filterJobs, setFilterJob] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [selectedJob, setSelectedJob] = useState(null);
-  const token = useSelector(authToken);
-
-  const worker = useSelector(selectedWorkerReducer);
 
   const data = [
     { label: "Supervisor", value: "Supervisor" },
@@ -76,31 +54,31 @@ const CreateNewWorker = ({ navigation }) => {
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
   ];
-  const selectedProfilePic = worker?.workerDocuments?.filter(
+  const selectedProfilePic = selectedWorker?.workerDocuments?.filter(
     (ele) => ele?.documentId === "ProfilePicture"
   );
-  const selectedAadharCard = worker?.workerDocuments?.filter(
+  const selectedAadharCard = selectedWorker?.workerDocuments?.filter(
     (ele) => ele?.documentId === "IdentityCard"
   );
   useEffect(() => {
-    if (worker) {
-      setFullName(worker?.fullName);
-      setGenderValue(worker?.gender);
-      setSkillLevelValue(worker?.workerSkills[0]?.skillTypeId);
-      setPhoneNumber(worker?.phoneNumber);
-      setBankName(worker?.bankName);
-      setSkillValue(worker?.workerSkills[0]?.skill?.name?.toString());
-      setBankAccountNumber(worker?.bankAccountNumber);
+    if (selectedWorker) {
+      setFullName(selectedWorker?.fullName);
+      setGenderValue(selectedWorker?.gender);
+      setSkillLevelValue(selectedWorker?.workerSkills[0]?.skillTypeId);
+      setPhoneNumber(selectedWorker?.phoneNumber);
+      setBankName(selectedWorker?.bankName);
+      setSkillValue(selectedWorker?.workerSkills[0]?.skill?.name?.toString());
+      setBankAccountNumber(selectedWorker?.bankAccountNumber);
       setProfilePic(assetsUrl + selectedProfilePic[0]?.url);
       setAadharCard(assetsUrl + selectedAadharCard[0]?.url);
-      setIfscCode(worker?.ifscCode);
+      setIfscCode(selectedWorker?.ifscCode);
     }
-  }, [worker]);
+  }, [selectedWorker]);
 
   const submitHandler = async () => {
     const formData = new FormData();
-    const workerId = worker ? worker?.workerId : 0;
-    const status = worker ? worker?.status : "Init";
+    const workerId = selectedWorker ? selectedWorker?.workerId : 0;
+    const status = selectedWorker ? selectedWorker?.status : "Init";
     formData.append("SkillId", parseInt(skillValue, 10));
     formData.append("SkillTypeId", skillLevelValue);
     formData.append("WorkerId", parseInt(workerId, 10));
@@ -116,51 +94,19 @@ const CreateNewWorker = ({ navigation }) => {
     formData.append("PoliceVerification", true);
     formData.append("Gender", genderValue);
 
-    console.log("Form Data", formData);
-
     const response = await createWorker(
       formData,
-      profilePicForm,
-      aadharCardForm
+      aadharCardForm,
+      profilePicForm
     );
 
-    console.log("Response", response);
-    // if (typeof createWorker === "function") {
-    // createWorker(formData, profilePicForm, aadharCardForm)
-    //   .then((response) => {
-    //     if (response.status === 200) {
-    //       // navigation.goBack();
-    //       ToastAndroid.show("Worker Created", ToastAndroid.SHORT);
-    //     }
-    //   })
-    //   .catch((error) => {
-    //     console.log("Error", error);
-    //     ToastAndroid.show(error.message, ToastAndroid.SHORT);
-    //   });
-    // } else {
-    //   console.error("createWorker is not a function");
-    //   ToastAndroid.show(
-    //     "Internal error: createWorker is not a function",
-    //     ToastAndroid.SHORT
-    //   );
-    // }
+    if (response.status === 200) {
+      navigation.goBack();
+      ToastAndroid.show("Worker Created", ToastAndroid.SHORT);
+    } else {
+      ToastAndroid.show(response.message, ToastAndroid.SHORT);
+    }
   };
-  // const response = await dispatch(
-  //   updateWorkerAction(token, formData, aadharCardForm, profilePicForm)
-  // );
-  // if (response.status === 200) {
-  //   navigation.goBack();
-  //   Toast.show({
-  //     type: "info",
-  //     text1: worker ? "Worker Updated" : "Worker Created",
-  //     text2: worker
-  //       ? "Worker is updated successfully."
-  //       : "Worker is created successfully.",
-  //     topOffset: 10,
-  //     position: "top",
-  //     visibilityTime: 4000,
-  //   });
-  // }
 
   const handleImagePicker = async () => {
     const result = await launchImageLibrary({
@@ -654,7 +600,7 @@ const CreateNewWorker = ({ navigation }) => {
           }}
         >
           <Text style={styles.buttonText}>
-            {!worker ? "Create Worker" : "Update Worker"}
+            {!selectedWorker ? "Create Worker" : "Update Worker"}
           </Text>
         </TouchableOpacity>
         <TouchableOpacity

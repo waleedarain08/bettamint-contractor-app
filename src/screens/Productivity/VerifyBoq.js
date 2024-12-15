@@ -15,15 +15,8 @@ import {
 } from "react-native";
 import Modal from "react-native-modal";
 import { Colors } from "../../utils/Colors";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-} from "../../redux/slices/projectSlice";
 import {
   Building,
-  Search,
-  Cross,
   VectorIcon,
   DateIcon,
   ClockIcon,
@@ -31,18 +24,6 @@ import {
 } from "../../icons";
 import { useFocusEffect } from "@react-navigation/native";
 import { Dropdown } from "react-native-element-dropdown";
-import { authToken } from "../../redux/slices/authSlice";
-import {
-  getLabourContactorAction,
-  labourContractorReducer,
-} from "../../redux/slices/userSlice";
-import {
-  getBOQListGC,
-  getListOfBOQV2,
-  productivityReducer,
-  rejectBOQProgress,
-} from "../../redux/slices/productivitySlice";
-import CheckBox from "@react-native-community/checkbox";
 import { RadioButton } from "react-native-radio-buttons-group";
 import Button from "../../components/Button";
 import { launchImageLibrary } from "react-native-image-picker";

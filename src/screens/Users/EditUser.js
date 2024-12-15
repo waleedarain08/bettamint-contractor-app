@@ -35,11 +35,15 @@ import {
 } from "../../redux/slices/projectSlice";
 import Toast from "react-native-toast-message";
 import { useFocusEffect } from "@react-navigation/native";
+import { useGeneralContext } from "../../context/generalContext";
+import { useAuth } from "../../context/authContext";
 
 const screenWidth = Dimensions.get("window").width;
 LogBox.ignoreAllLogs();
 
 const EditUser = ({ navigation, route }) => {
+  const {projects} = useGeneralContext();
+  const {user} = useAuth();
   const [toggleCheckBox, setToggleCheckBox] = useState(false);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -48,7 +52,6 @@ const EditUser = ({ navigation, route }) => {
   const [userRole, setUseRole] = useState(null);
   const [project, setProject] = useState([]);
 
-  const projectsList = useSelector(projectsListSimpleReducer);
 
   const userInfo = route?.params?.userInfo;
   const token = useSelector(authToken);
@@ -214,8 +217,8 @@ const EditUser = ({ navigation, route }) => {
               searchPlaceholder="Search Project"
               inputSearchStyle={{ color: Colors.Black }}
               data={
-                projectsList?.length
-                  ? projectsList?.map((ele) => ({
+                projects?.length
+                  ? projects?.map((ele) => ({
                       label: ele?.name,
                       value: ele.projectId,
                     }))

@@ -22,6 +22,7 @@ import { Dropdown } from "react-native-element-dropdown";
 //   paymentsListReducer,
 // } from "../../redux/slices/paymentSlice";
 import { useGeneralContext } from "../../context/generalContext";
+import { usePayment } from "../../context/paymentContext";
 
 const PaymentHistory = ({ navigation }) => {
   const [open, setOpen] = useState(false);
@@ -33,49 +34,28 @@ const PaymentHistory = ({ navigation }) => {
     { label: "Infrastructure", value: "Infrastructure" },
   ]);
   const { projects } = useGeneralContext();
+  const { paymentHistoryList, getPaymentHistory } = usePayment();
   const [openStartDate, setStartOpen] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
   const [openEndDate, setEndOpen] = useState(false);
   const [endDate, setEndDate] = useState(new Date());
   const [selectedProject, setSelectedProject] = useState(null);
 
-  // const projectsList = useSelector(projectsListSimpleReducer);
-  // const paymentHistoryList = useSelector(paymentsListReducer);
-  const paymentHistoryList = [
-    {
-      id: "1",
-      workerName: "John Doe",
-      jobName: "Plumber",
-      paidDate: "12/2020",
-      transactionStatusId: "Paid",
-      amount: "₹ 1000",
-    },
-    {
-      id: "2",
-      workerName: "John Doe",
-      jobName: "Plumber",
-      paidDate: "12/2020",
-      transactionStatusId: "Paid",
-      amount: "₹ 1000",
-    },
-    {
-      id: "3",
-      workerName: "John Doe",
-      jobName: "Plumber",
-      paidDate: "12/2020",
-      transactionStatusId: "Paid",
-      amount: "₹ 1000",
-    },
-  ];
-  // const isLoading = useSelector(loadingPayments);
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
 
-  // useEffect(() => {
-  //   dispatch(getAllProjectsSimpleAction(token));
-  //   dispatch(getPaymentHistory(token));
-  // }, []);
+  const getData = async () => {
+    try {
+      const response = await getPaymentHistory();
+      console.log("response", response);
+    } catch (error) {
+      // console.log("error", error);
+    }
+  };
+  useEffect(() => {
+    getData();
+  }, []);
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
   const Item = ({ item, index }) => (
