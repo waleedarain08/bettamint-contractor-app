@@ -24,12 +24,13 @@ import {
   EditIcon,
 } from "../../icons";
 import Spacer from "../../components/Spacer";
-import { useSelector } from "react-redux";
-import { userData } from "../../redux/slices/authSlice";
+import { useAuth } from "../../context/authContext";
 const img =
   "https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
 const Profile = ({ navigation }) => {
-  const { user } = useSelector(userData);
+  const { user } = useAuth();
+
+
   return (
     <View style={styles.container}>
       <View style={styles.header} />
@@ -50,17 +51,18 @@ const Profile = ({ navigation }) => {
           </View>
 
           <View style={{ width: "65%", justifyContent: "center" }}>
-            <Text style={styles.title}>{user?.fullName}</Text>
+            <Text style={styles.title}>{user?.user?.fullName}</Text>
             <Spacer top={10} />
             <Text style={[styles.typeText, { color: Colors.Secondary }]}>
-              {`Role: ${user?.role?.name}`}
+              {`Role: ${user?.user?.role?.name}`}
             </Text>
             <Spacer top={5} />
-            <Text style={styles.typeText}> {`Username: ${user?.username}`}</Text>
+            <Text style={styles.typeText}>
+              {" "}
+              {`Username: ${user?.user?.username}`}
+            </Text>
           </View>
-          <View>
-            {/* <EditIcon size={20} color={Colors.Secondary} /> */}
-          </View>
+          <View>{/* <EditIcon size={20} color={Colors.Secondary} /> */}</View>
         </View>
         <View style={{ alignItems: "center", justifyContent: "center" }}>
           <View
@@ -118,7 +120,7 @@ const Profile = ({ navigation }) => {
               <TypeIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Account Type</Text>
-                <Text style={styles.text}>{user?.role?.name}</Text>
+                <Text style={styles.text}>{user?.user?.role?.name}</Text>
               </View>
             </View>
             <View
@@ -134,7 +136,7 @@ const Profile = ({ navigation }) => {
               <Email size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Email Address</Text>
-                <Text style={styles.text}>{user?.emailAddress}</Text>
+                <Text style={styles.text}>{user?.user?.emailAddress}</Text>
               </View>
             </View>
             <View
@@ -170,7 +172,7 @@ const Profile = ({ navigation }) => {
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
                 <Text style={styles.headingText}>Username</Text>
-                <Text style={styles.text}>{user?.username}</Text>
+                <Text style={styles.text}>{user?.user?.username}</Text>
               </View>
             </View>
             <View

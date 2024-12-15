@@ -13,15 +13,12 @@ import { Colors } from "../../utils/Colors";
 import { ClockIcon, DateIcon, LocationIcon, RupeesIcon } from "../../icons";
 import Spacer from "../../components/Spacer";
 import CheckBox from "@react-native-community/checkbox";
-import { useDispatch, useSelector } from "react-redux";
 import { Dropdown } from "react-native-element-dropdown";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { GOOGLE_API_KEY } from "../../utils/api_constants";
-import { authToken } from "../../redux/slices/authSlice";
 import { useGeneralContext } from "../../context/generalContext";
 import { useJob } from "../../context/jobContext";
-import { useAuth } from "../../context/authContext";
 
 LogBox.ignoreAllLogs();
 
@@ -75,7 +72,6 @@ const CreateNewJob = ({ navigation }) => {
           .then((response) => {
             const address = response.results[0].formatted_address;
             setJobLocation(address);
-            // console.log("city: ", address);
           })
           .catch((e) => {
             console.log(e);

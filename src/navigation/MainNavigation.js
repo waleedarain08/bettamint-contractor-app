@@ -1,37 +1,16 @@
 import "react-native-gesture-handler";
-import React, { useEffect, useState } from "react";
-import {
-  Image,
-  Platform,
-  Text,
-  View,
-  LogBox,
-  Switch,
-  Linking,
-  StyleSheet,
-  Pressable,
-} from "react-native";
+import React, { useEffect } from "react";
+import { Image, Platform, Text, View, LogBox, Pressable } from "react-native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import {
-  NavigationContainer,
-  DefaultTheme,
-  useNavigation,
-  // DarkTheme,
-} from "@react-navigation/native";
+import { NavigationContainer, DefaultTheme } from "@react-navigation/native";
 import Animated, {
-  interpolateNode,
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-
 import Logo from "../assets/images/logo.png";
-import Menu from "../assets/icons/Menu.png";
 import { useDrawerStatus } from "@react-navigation/drawer";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import {
-  createDrawerNavigator,
-  useDrawerProgress,
-} from "@react-navigation/drawer";
+import { createDrawerNavigator } from "@react-navigation/drawer";
 import Profile from "../screens/Profile/Profile";
 import Payments from "../screens/Payments/Payments";
 import Attendance from "../screens/Attendance/Attendance";
@@ -39,14 +18,11 @@ import { Colors } from "../utils/Colors";
 import Workers from "../screens/Workers/Workers";
 import Login from "../screens/Auth/Login";
 import Password from "../screens/Auth/Password";
-import Otp from "../screens/Auth/Otp";
-import SelectLanguage from "../screens/Auth/SelectLanguage";
 import ChangePassword from "../screens/Auth/ChangePassword";
 import ForgotPassword from "../screens/Auth/ForgotPassword";
 import Dashboard from "../screens/Dashboard/Dashboard";
 import Projects from "../screens/Project/Projects";
 import CustomDrawer from "./CustomDrawer";
-import MainLayout from "../screens/MainLayout";
 import CreateNewProject from "../screens/Project/CreateNewProject";
 import ProjectDetails from "../screens/Project/ProjectDetails";
 import PaymentMusterCard from "../screens/Payments/PaymentMusterCard";
@@ -64,47 +40,22 @@ import Signup from "../screens/Auth/Signup";
 import PayOnline from "../screens/Payments/PayOnline";
 import PaymentHistory from "../screens/Payments/PaymentHistory";
 import PaymentInvoice from "../screens/Payments/PaymentInvoice";
-import {
-  Building,
-  AttendanceIcon,
-  JobIcon,
-  DashboardIcon,
-  PaymentIcon,
-  PlusIcon,
-  MenuIcon,
-  DonwloadIcon,
-  NotificationIcon,
-  EditIcon,
-  DotIcon,
-  RestoreIcon,
-} from "../icons";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  selectWorkerAction,
-  selectedWorkerReducer,
-} from "../redux/slices/workerSlice";
-import { authToken, userData } from "../redux/slices/authSlice";
+import { PlusIcon, MenuIcon, NotificationIcon, RestoreIcon } from "../icons";
 import { navigationRef } from "./NavigationRef";
-import {
-  selectProjectAction,
-  selectedProjectReducer,
-} from "../redux/slices/projectSlice";
-import { emptyPaymentListAction } from "../redux/slices/paymentSlice";
 import EditUser from "../screens/Users/EditUser";
 import FieldNotes from "../screens/FieldNotes/FieldNotes";
 import AttendanceDrawer from "./AttendanceDrawer";
 import CreateFieldNotes from "../screens/FieldNotes/CreateFieldNotes";
-import {
-  editFieldNoteAction,
-  fieldNoteReducer,
-} from "../redux/slices/fieldNoteSlice";
 import Productivity from "../screens/Productivity/Productivity";
-import GCProductivity from "../screens/Productivity/GCProductivity";
 import ViewBoq from "../screens/Productivity/ViewBoq";
 import VerifyBoq from "../screens/Productivity/VerifyBoq";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "../context/authContext";
 import UpdateBoq from "../screens/Productivity/UpdateBoq";
+import { useWorker } from "../context/workerContext";
+import { useProject } from "../context/projectContext";
+import { useFieldNote } from "../context/fieldNoteContext";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 const PaymentStack = createNativeStackNavigator();
@@ -823,8 +774,7 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
 };
 
 const WorkersNavigator = ({ navigation }) => {
-  const worker = useSelector(selectedWorkerReducer);
-  const dispatch = useDispatch();
+  const { selectedWorker, setSelectedWorker } = useWorker();
   return (
     <WorkerStack.Navigator
       screenOptions={{
@@ -870,7 +820,7 @@ const WorkersNavigator = ({ navigation }) => {
               <Pressable
                 onPress={() => {
                   navigation.navigate("CreateNewWorker");
-                  dispatch(selectWorkerAction(null));
+                  setSelectedWorker(null);
                 }}
                 style={{
                   backgroundColor: Colors.Purple,
@@ -932,7 +882,7 @@ const WorkersNavigator = ({ navigation }) => {
                 // marginHorizontal: 13,
               }}
             >
-              {!worker ? "Add New Worker" : "Edit Worker"}
+              {!selectedWorker ? "Add New Worker" : "Edit Worker"}
             </Text>
           ),
           headerRight: () => (
@@ -1009,7 +959,7 @@ const WorkersNavigator = ({ navigation }) => {
 };
 
 const ProjectNavigator = ({ navigation }) => {
-  const project = useSelector(selectedProjectReducer);
+  const { selectedProject, setSelectedProject } = useProject();
   const { user } = useAuth();
   const roles = user?.user?.role?.roleFeatureSets;
   const isProjectListPresent = roles?.some(
@@ -1024,7 +974,6 @@ const ProjectNavigator = ({ navigation }) => {
     user?.user?.role?.name === "SuperAdmin" ||
     (isProjectListPresent && projectBoundariesAccess);
 
-  const dispatch = useDispatch();
   return (
     <ProjectStack.Navigator
       screenOptions={{
@@ -1071,7 +1020,7 @@ const ProjectNavigator = ({ navigation }) => {
                 <Pressable
                   onPress={() => {
                     navigation.navigate("CreateNewProject");
-                    dispatch(selectProjectAction(null));
+                    setSelectedProject(null);
                   }}
                   style={{
                     backgroundColor: Colors.Purple,
@@ -1139,7 +1088,7 @@ const ProjectNavigator = ({ navigation }) => {
                 color: Colors.White,
               }}
             >
-              {project ? "Update Project" : "Create New Project"}
+              {selectedProject ? "Update Project" : "Create New Project"}
             </Text>
           ),
           headerRight: () => (
@@ -1413,8 +1362,8 @@ const UserNavigator = ({ navigation }) => (
 );
 
 const FieldNotesNavigator = ({ navigation }) => {
-  const { selectedNote } = useSelector(fieldNoteReducer);
-  const dispatch = useDispatch();
+  const { fieldNote, setFieldNote } = useFieldNote();
+
   return (
     <FieldNotesStack.Navigator
       screenOptions={{
@@ -1455,7 +1404,7 @@ const FieldNotesNavigator = ({ navigation }) => {
               <Pressable
                 onPress={() => {
                   navigation.navigate("CreateFieldNotes");
-                  dispatch(editFieldNoteAction(null));
+                  setFieldNote(null);
                 }}
                 style={{
                   backgroundColor: Colors.Purple,
@@ -1523,7 +1472,7 @@ const FieldNotesNavigator = ({ navigation }) => {
                 color: Colors.White,
               }}
             >
-              {selectedNote ? "Update Field Note" : "Create Field Note"}
+              {fieldNote ? "Update Field Note" : "Create Field Note"}
             </Text>
           ),
         }}

@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   FlatList,
-  Dimensions,
   LogBox,
   Modal,
   Pressable,
@@ -14,27 +13,10 @@ import {
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import { Building, Cross, Search } from "../../icons";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  projectDataReducer,
-  getAttendanceApproveAction,
-  loadingAttendance,
-  markAttendance,
-  todaysAttendanceListReducer,
-  getTodaysAttendanceAction,
-} from "../../redux/slices/attendanceSlice";
-import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
-import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { Searchbar } from "react-native-paper";
-import {
-  getLabourContactorAction,
-  labourContractorReducer,
-  usersListReducer,
-} from "../../redux/slices/userSlice";
 import { useFocusEffect } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
 import { useAttendance } from "../../context/attendanceContext";
 import { useGeneralContext } from "../../context/generalContext";
@@ -187,7 +169,8 @@ const ApproveAttendance = ({ navigation, route }) => {
         setFilterAttendance(updatedArray);
       }
     } catch (error) {
-      ToastAndroid.show("Something went wrong!", ToastAndroid.SHORT);
+      console.log("error", error);
+      // ToastAndroid.show("Something went wrong!", ToastAndroid.SHORT);
     }
   };
 
@@ -261,10 +244,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                 onChange={(item) => {
                   setOpenFilterModal(false);
                   setSelectedContractor(item);
-                  getData(
-                    project?.projectId,
-                    item?.value
-                  );
+                  getData(project?.projectId, item?.value);
                 }}
               />
             </View>

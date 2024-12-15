@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
   Modal,
-  ScrollView,
   FlatList,
   ImageBackground,
   TextInput,
@@ -17,51 +16,26 @@ import {
 import React, { useEffect, useState } from "react";
 import { Colors } from "../../utils/Colors";
 import { Cross, Search, VectorIcon } from "../../icons";
-import { useDispatch, useSelector } from "react-redux";
-import { authToken, userData } from "../../redux/slices/authSlice";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Geolocation from "@react-native-community/geolocation";
-import {
-  createFieldNoteEntry,
-  fieldNoteReducer,
-  // getFieldNoteCost,
-  getScopeList,
-} from "../../redux/slices/fieldNoteSlice";
-import { GOOGLE_API_KEY, assetsUrl } from "../../utils/api_constants";
+import { GOOGLE_API_KEY } from "../../utils/api_constants";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
-import { SearchBar } from "react-native-screens";
 import { Searchbar } from "react-native-paper";
-import {
-  getLabourContactorAction,
-  labourContractorReducer,
-} from "../../redux/slices/userSlice";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
 import { launchCamera } from "react-native-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useGeneralContext } from "../../context/generalContext";
 import { useFieldNote } from "../../context/fieldNoteContext";
-import { useAuth } from "../../context/authContext";
 
 const NewCreateFieldNotes = () => {
-  const { user } = useAuth();
   const { scopeList, projects, labourContractorList } = useGeneralContext();
   const { fieldNote, createFieldNote, getFieldNoteCost, costList } =
     useFieldNote();
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
-  const dispatch = useDispatch();
-  // const userInfo = useSelector(userData);
-  // const projectsList = useSelector(projectsListSimpleReducer);
-  // const { selectedNote } = useSelector(fieldNoteReducer);
-  // const labourContractorList = useSelector(labourContractorReducer);
 
-  const token = useSelector(authToken);
   const navigation = useNavigation();
   // States
   const [open, setOpen] = useState(false);
@@ -90,8 +64,6 @@ const NewCreateFieldNotes = () => {
   const [openDescription, setOpenDescription] = useState(false);
   const [description, setDescription] = useState("");
 
-  // const { user } = userInfo;
-  // console.log('contractorList', costList);
   useEffect(() => {
     setSOWList(scopeList);
   }, [scopeList]);
@@ -108,7 +80,7 @@ const NewCreateFieldNotes = () => {
       return () => {};
     }, [])
   );
-  // console.log('labourContractorList', labourContractorList);
+
   const getAsyncData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("fieldNote");

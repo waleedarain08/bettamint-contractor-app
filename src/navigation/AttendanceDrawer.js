@@ -3,39 +3,12 @@ import React from "react";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Colors } from "../utils/Colors";
 import { Logout, Right } from "../icons";
-import { useDispatch, useSelector } from "react-redux";
-import { logoutAction, userData } from "../redux/slices/authSlice";
 import { getVersion } from "react-native-device-info";
-import { emptyAttendanceAction } from "../redux/slices/attendanceSlice";
-import { emptyAllProjectsSimpleAction } from "../redux/slices/projectSlice";
+import { useAuth } from "../context/authContext";
 
 const AttendanceDrawer = ({ navigation }) => {
-  const userdata = useSelector(userData);
-  const roles = userdata?.user?.role?.roleFeatureSets;
+  const { logout } = useAuth();
 
-  const isDashboardPresent = roles.some(
-    (item) => item.featureSet.name === "Dashboard"
-  );
-  const isProjectListPresent = roles.some(
-    (item) => item.featureSet.name === "Project List"
-  );
-  const isJobsListPresent = roles.some(
-    (item) => item.featureSet.name === "Jobs List"
-  );
-  const isAttendanceListPresent = roles.some(
-    (item) => item.featureSet.name === "Attendance List"
-  );
-  const isWorkerListPresent = roles.some(
-    (item) => item.featureSet.name === "Worker List"
-  );
-  const isPaymentListPresent = roles.some(
-    (item) => item.featureSet.name === "Payment List"
-  );
-  const isUsersListPresent = roles.some(
-    (item) => item.featureSet.name === "Users List"
-  );
-
-  const dispatch = useDispatch();
   const routes = [
     {
       name: "Attendance",
@@ -55,15 +28,6 @@ const AttendanceDrawer = ({ navigation }) => {
           "Please install this app and start getting Workers, AppLink :https://play.google.com/store/apps/details?id=com.bettamint",
         url: "https://play.google.com/store/apps/details?id=com.bettamint",
       });
-      if (result.action === Share.sharedAction) {
-        if (result.activityType) {
-          // shared with activity type of result.activityType
-        } else {
-          // shared
-        }
-      } else if (result.action === Share.dismissedAction) {
-        // dismissed
-      }
     } catch (error) {
       alert(error.message);
     }
@@ -126,10 +90,7 @@ const AttendanceDrawer = ({ navigation }) => {
         <View>
           <Pressable
             onPress={() => {
-              // navigation.navigate("SelectLanguage");
-              dispatch(logoutAction());
-              dispatch(emptyAttendanceAction());
-              dispatch(emptyAllProjectsSimpleAction());
+              logout();
             }}
             style={{
               marginVertical: 35,

@@ -10,50 +10,19 @@ import {
   RefreshControl,
   Appearance,
 } from "react-native";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Colors } from "../../utils/Colors";
-import DropDownPicker from "react-native-dropdown-picker";
 import DatePicker from "react-native-date-picker";
 import moment from "moment";
 import { DateIcon } from "../../icons";
-import {
-  getAllProjectsSimpleAction,
-  projectsListSimpleReducer,
-} from "../../redux/slices/projectSlice";
-import { useDispatch, useSelector } from "react-redux";
-import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import {
-  getPaymentHistory,
-  loadingPayments,
-  paymentsListReducer,
-} from "../../redux/slices/paymentSlice";
-const DATA = [
-  {
-    id: "1",
-    name: "John Doe",
-    job: "Plumber",
-    amount: "₹ 1000",
-    date: "12/2020",
-    status: "Paid",
-  },
-  {
-    id: "2",
-    name: "John Doe",
-    job: "Plumber",
-    amount: "₹ 1000",
-    date: "12/2020",
-    status: "Paid",
-  },
-  {
-    id: "3",
-    name: "John Doe",
-    job: "Plumber",
-    amount: "₹ 1000",
-    date: "12/2020",
-    status: "Paid",
-  },
-];
+// import {
+//   getPaymentHistory,
+//   loadingPayments,
+//   paymentsListReducer,
+// } from "../../redux/slices/paymentSlice";
+import { useGeneralContext } from "../../context/generalContext";
+
 const PaymentHistory = ({ navigation }) => {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(null);
@@ -63,25 +32,50 @@ const PaymentHistory = ({ navigation }) => {
     { label: "Hospitality", value: "Hospitality" },
     { label: "Infrastructure", value: "Infrastructure" },
   ]);
-  const dispatch = useDispatch();
+  const { projects } = useGeneralContext();
   const [openStartDate, setStartOpen] = useState(false);
   const [startDate, setStartDate] = useState(new Date());
   const [openEndDate, setEndOpen] = useState(false);
   const [endDate, setEndDate] = useState(new Date());
   const [selectedProject, setSelectedProject] = useState(null);
 
-  const token = useSelector(authToken);
-  const projectsList = useSelector(projectsListSimpleReducer);
-  const paymentHistoryList = useSelector(paymentsListReducer);
-  const isLoading = useSelector(loadingPayments);
+  // const projectsList = useSelector(projectsListSimpleReducer);
+  // const paymentHistoryList = useSelector(paymentsListReducer);
+  const paymentHistoryList = [
+    {
+      id: "1",
+      workerName: "John Doe",
+      jobName: "Plumber",
+      paidDate: "12/2020",
+      transactionStatusId: "Paid",
+      amount: "₹ 1000",
+    },
+    {
+      id: "2",
+      workerName: "John Doe",
+      jobName: "Plumber",
+      paidDate: "12/2020",
+      transactionStatusId: "Paid",
+      amount: "₹ 1000",
+    },
+    {
+      id: "3",
+      workerName: "John Doe",
+      jobName: "Plumber",
+      paidDate: "12/2020",
+      transactionStatusId: "Paid",
+      amount: "₹ 1000",
+    },
+  ];
+  // const isLoading = useSelector(loadingPayments);
   const colorScheme = Appearance.getColorScheme();
   const isDarkMode = colorScheme === "dark";
   const textColor = isDarkMode ? "white" : "black";
 
-  useEffect(() => {
-    dispatch(getAllProjectsSimpleAction(token));
-    dispatch(getPaymentHistory(token));
-  }, []);
+  // useEffect(() => {
+  //   dispatch(getAllProjectsSimpleAction(token));
+  //   dispatch(getPaymentHistory(token));
+  // }, []);
 
   const rowColors = ["#F3F4F4", "#FFFFFF"];
   const Item = ({ item, index }) => (
@@ -222,10 +216,14 @@ const PaymentHistory = ({ navigation }) => {
                 color: Colors.FormText,
               }}
               iconStyle={styles.iconStyle}
-              data={projectsList.map((ele) => ({
-                label: ele.name,
-                value: ele.projectId,
-              }))}
+              data={
+                projects?.length
+                  ? projects?.map((ele) => ({
+                      label: ele.name,
+                      value: ele.projectId,
+                    }))
+                  : []
+              }
               autoScroll={false}
               search
               searchPlaceholder="Search project"
@@ -332,16 +330,16 @@ const PaymentHistory = ({ navigation }) => {
               },
             ]}
             disabled={!selectedProject}
-            onPress={() => {
-              dispatch(
-                getPaymentHistory(
-                  token,
-                  selectedProject.value,
-                  startDate?.toISOString(),
-                  endDate?.toISOString()
-                )
-              );
-            }}
+            // onPress={() => {
+            //   dispatch(
+            //     getPaymentHistory(
+            //       token,
+            //       selectedProject.value,
+            //       startDate?.toISOString(),
+            //       endDate?.toISOString()
+            //     )
+            //   );
+            // }}
           >
             <Text style={[styles.buttonText]}>Get Payment History</Text>
           </TouchableOpacity>
@@ -350,17 +348,17 @@ const PaymentHistory = ({ navigation }) => {
           <FlatList
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() => {
-                  dispatch(
-                    getPaymentHistory(
-                      token,
-                      selectedProject?.value,
-                      startDate?.toISOString(),
-                      endDate?.toISOString()
-                    )
-                  );
-                }}
+                // refreshing={isLoading}
+                // onRefresh={() => {
+                //   dispatch(
+                //     getPaymentHistory(
+                //       token,
+                //       selectedProject?.value,
+                //       startDate?.toISOString(),
+                //       endDate?.toISOString()
+                //     )
+                //   );
+                // }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />
@@ -376,17 +374,17 @@ const PaymentHistory = ({ navigation }) => {
           <ScrollView
             refreshControl={
               <RefreshControl
-                refreshing={isLoading}
-                onRefresh={() => {
-                  dispatch(
-                    getPaymentHistory(
-                      token,
-                      selectedProject?.value,
-                      startDate?.toISOString(),
-                      endDate?.toISOString()
-                    )
-                  );
-                }}
+                // refreshing={isLoading}
+                // onRefresh={() => {
+                //   dispatch(
+                //     getPaymentHistory(
+                //       token,
+                //       selectedProject?.value,
+                //       startDate?.toISOString(),
+                //       endDate?.toISOString()
+                //     )
+                //   );
+                // }}
                 tintColor={Colors.Primary}
                 colors={[Colors.Purple, Colors.Primary]}
               />

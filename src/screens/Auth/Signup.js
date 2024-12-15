@@ -2,33 +2,20 @@ import {
   StyleSheet,
   Text,
   View,
-  ImageBackground,
   TextInput,
-  TouchableOpacity,
   Image,
   Pressable,
   ToastAndroid,
 } from "react-native";
 import React, { useState } from "react";
-import Vector from "../../assets/images/bgvector.png";
 import Profile from "../../assets/icons/Profile.png";
-import Spacer from "../../components/Spacer";
 import { Colors } from "../../utils/Colors";
-import {
-  CardText,
-  Phone,
-  Email,
-  TypeIcon,
-  PersonIcon,
-  EditIcon,
-  PackageIcon,
-} from "../../icons";
+import { CardText, Phone, Email, TypeIcon, PackageIcon } from "../../icons";
 import { Dropdown } from "react-native-element-dropdown";
-import { useDispatch } from "react-redux";
-import { userSignupAction } from "../../redux/slices/authSlice";
 import Toast from "react-native-toast-message";
 import { useAuth } from "../../context/authContext";
 import Button from "../../components/Button";
+
 const Signup = ({ navigation }) => {
   const { register, loading } = useAuth();
   const [firstName, setFirstName] = useState(null);
@@ -38,7 +25,6 @@ const Signup = ({ navigation }) => {
   const [Package, setPackage] = useState(null);
   const [email, setEmail] = useState(null);
   const [phone, setPhone] = useState(null);
-  const dispatch = useDispatch();
 
   const handleSignUp = async () => {
     if (!firstName) {

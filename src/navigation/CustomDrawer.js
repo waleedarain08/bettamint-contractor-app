@@ -3,16 +3,11 @@ import React from "react";
 import { DrawerContentScrollView } from "@react-navigation/drawer";
 import { Colors } from "../utils/Colors";
 import { Logout, Right } from "../icons";
-import { useDispatch, useSelector } from "react-redux";
-import { logoutAction, userData } from "../redux/slices/authSlice";
 import { getVersion } from "react-native-device-info";
-import { emptyAttendanceAction } from "../redux/slices/attendanceSlice";
-import { emptyAllProjectsSimpleAction } from "../redux/slices/projectSlice";
 import { useAuth } from "../context/authContext";
 
 const CustomDrawer = ({ navigation }) => {
-  const userdata = useSelector(userData);
-  const {user, logout} = useAuth();
+  const { user, logout } = useAuth();
   const roles = user?.user?.role?.roleFeatureSets;
 
   const fieldNotesAccess =
@@ -42,7 +37,6 @@ const CustomDrawer = ({ navigation }) => {
     (item) => item.featureSet.name === "Users List"
   );
 
-  const dispatch = useDispatch();
   const routes = [
     {
       name: "Dashboard",

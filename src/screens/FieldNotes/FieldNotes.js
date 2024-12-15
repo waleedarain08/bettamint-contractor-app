@@ -8,29 +8,13 @@ import {
   LogBox,
   Pressable,
   RefreshControl,
-  TextInput,
   ScrollView,
   TouchableOpacity,
   ToastAndroid,
 } from "react-native";
 import Modal from "react-native-modal";
-import Menu from "../../assets/icons/Menu.png";
 import { Colors } from "../../utils/Colors";
-import Spacer from "../../components/Spacer";
 import { Searchbar } from "react-native-paper";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  getAllAttendanceAction,
-  attendanceListReducer,
-  saveProjectDataAction,
-  selectAttendanceAction,
-  loadingAttendance,
-  removeMusterData,
-} from "../../redux/slices/attendanceSlice";
-import {
-  projectsListSimpleReducer,
-  getAllProjectsSimpleAction,
-} from "../../redux/slices/projectSlice";
 export const SLIDER_WIDTH = Dimensions.get("window").width + 80;
 export const ITEM_WIDTH = Math.round(SLIDER_WIDTH * 0.7);
 import {
@@ -42,21 +26,10 @@ import {
   DeleteIcon,
   Picture,
 } from "../../icons";
-import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
-import {
-  // assignContractorFieldNote,
-  // deleteFieldNote,
-  editFieldNoteAction,
-  // fieldNoteReducer,
-  // getFieldNoteList,
-  // markFieldNoteAction,
-  // verifyFieldNote,
-} from "../../redux/slices/fieldNoteSlice";
 import { Image } from "react-native";
 import { assetsUrl } from "../../utils/api_constants";
 import { useFocusEffect } from "@react-navigation/native";
-import Toast from "react-native-toast-message";
 import { launchImageLibrary } from "react-native-image-picker";
 import { useGeneralContext } from "../../context/generalContext";
 import { useFieldNote } from "../../context/fieldNoteContext";
@@ -75,7 +48,6 @@ const FieldNotes = ({ navigation }) => {
     assignContractorFieldNote,
     verifyFieldNote,
     setFieldNote,
-    fieldNote,
   } = useFieldNote();
   const [openSearchModal, setOpenSearchModal] = useState(false);
   const [selectedProject, setSelectedProject] = useState(null);
@@ -94,17 +66,13 @@ const FieldNotes = ({ navigation }) => {
   const [currFieldNote, setCurrFieldNote] = useState(null);
   const [verifyImage, setVerifyImage] = useState(null);
   const [verifyImageUri, setVerifyImageUri] = useState(null);
-  const dispatch = useDispatch();
-
-  // const { fieldNoteList, loading } = useSelector(fieldNoteReducer);
-  const token = useSelector(authToken);
 
   const getData = (projectId = 0) => {
     getFieldNoteList(projectId).catch((err) => {
       console.log(err);
     });
   };
-  // console.log(fieldNoteList)
+
   useFocusEffect(
     React.useCallback(() => {
       getData();
