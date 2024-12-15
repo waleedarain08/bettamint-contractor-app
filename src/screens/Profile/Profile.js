@@ -87,11 +87,11 @@ const Profile = ({ navigation }) => {
             >
               <PersonIcon size={20} color={Colors.Secondary} />
               <View style={{ paddingLeft: 15 }}>
-                <Text style={styles.headingText}>First Name</Text>
-                <Text style={styles.text}>N/A</Text>
+                <Text style={styles.headingText}>Full Name</Text>
+                <Text style={styles.text}>{user?.fullName}</Text>
               </View>
             </View>
-            <View
+            {/* <View
               style={{
                 flexDirection: "row",
                 alignItems: "center",
@@ -106,7 +106,7 @@ const Profile = ({ navigation }) => {
                 <Text style={styles.headingText}>Last Name</Text>
                 <Text style={styles.text}>N/A</Text>
               </View>
-            </View>
+            </View> */}
             <View
               style={{
                 flexDirection: "row",

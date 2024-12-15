@@ -16,7 +16,7 @@ import { Provider } from "react-redux";
 import store from "./src/redux/store";
 import { PersistGate } from "redux-persist/integration/react";
 import { persistStore } from "redux-persist";
-import { enableLatestRenderer } from "react-native-maps";
+//import { enableLatestRenderer } from "react-native-maps";
 import Toast from "react-native-toast-message";
 import VersionCheck from "react-native-version-check";
 import { AuthProvider } from "./src/context/authContext";
@@ -29,7 +29,7 @@ import { ProductivityProvider } from "./src/context/productivityContext";
 import { UserProvider } from "./src/context/userContext";
 import { FieldNoteProvider } from "./src/context/fieldNoteContext";
 
-enableLatestRenderer();
+//enableLatestRenderer();
 
 const persistor = persistStore(store);
 
@@ -45,7 +45,7 @@ const App = () => {
       if (updateNeeded && updateNeeded.isNeeded) {
         Alert.alert(
           "Please Update App",
-          "You will have to update your app to the latest version to continue using Bettamint - Contractor.",
+          "You will have to update your app to the latest version to continue using Bettamint.",
           [
             {
               text: "Update",

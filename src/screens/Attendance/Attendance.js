@@ -52,11 +52,16 @@ const Attendance = ({ navigation }) => {
   const [openSearchUserModal, setOpenSearchUserModal] = useState(false);
   const [currentProject, setCurrentProject] = useState(null);
 
-  const status = [
+  const removeStatus = [
     { label: "No Show", value: "NoShow" },
     { label: "Tardiness", value: "Tardiness" },
     { label: "Misconduct", value: "Misconduct" },
     { label: "Job Ended", value: "JobEnded" },
+  ];
+
+  const status = [
+    { label: "Online", value: "Online" },
+    { label: "Offline", value: "Offline" },
   ];
 
   const getData = (
@@ -136,7 +141,7 @@ const Attendance = ({ navigation }) => {
         const itemData = item.workerName
           ? item.workerName.toUpperCase()
           : "".toUpperCase();
-        console.log(itemData);
+        //console.log(itemData);
         const textData = text.toUpperCase();
         return itemData.indexOf(textData) > -1;
       });
@@ -224,7 +229,7 @@ const Attendance = ({ navigation }) => {
                 </Pressable>
               </View>
             </View>
-            <View style={{ marginVertical: 10 }}>
+            {/* <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
                   style={{ fontFamily: "Lexend-Medium", color: Colors.Black }}
@@ -252,9 +257,16 @@ const Attendance = ({ navigation }) => {
                   setOpenFilterModal(false);
                   setSelectedStatus(item);
                   setSelectedSkills(null);
+                  getData(
+                    project?.projectId || projects[0]?.projectId,
+                    0,
+                    item?.value
+                  );
+                  setFilteredDataAttSource([]);
+                  setMasterDataAttSource([]);
                 }}
               />
-            </View>
+            </View> */}
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
                 <Text
@@ -397,7 +409,7 @@ const Attendance = ({ navigation }) => {
                   color: Colors.FormText,
                 }}
                 iconStyle={styles.iconStyle}
-                data={status}
+                data={removeStatus}
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
@@ -412,7 +424,7 @@ const Attendance = ({ navigation }) => {
                   };
                   delistWorker(obj)
                     .then((res) => {
-                      console.log("res", res);
+                      //console.log("res", res);
                       if (res?.status === 200) {
                         setOpenDeListModal(false);
                         setDelistReason(null);

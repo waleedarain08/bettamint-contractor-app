@@ -110,7 +110,7 @@ const Dashboard = ({ navigation }) => {
 
   const roles = user?.user?.role?.roleFeatureSets;
   const isDashboardPresent = roles.some(
-    (item) => item.featureSet.name === "Dashboard"
+    (item) => item.featureSet.name === "Dashboard" || item.featureSet.name === "Worker Onboarding"
   );
 
   function roundToNearestMultiple(number, multiple) {
@@ -1073,7 +1073,7 @@ const Dashboard = ({ navigation }) => {
                 </Pressable>
               </View>
             </View>
-            {user?.user?.leadTypeId !== "LabourContractor" && (
+            {/* {user?.user?.leadTypeId !== "LabourContractor" && (
               <View style={styles.scrollGraph}>
                 <View style={styles.graphsHeader}>
                   <Text style={styles.graphHeadingText}>Contractors Data</Text>
@@ -1230,7 +1230,7 @@ const Dashboard = ({ navigation }) => {
                   ))}
                 </View>
               </View>
-            )}
+            )} */}
             <View style={styles.scrollGraph}>
               <View style={styles.graphsHeader}>
                 <Text style={styles.graphHeadingText}>Workers by Skills</Text>

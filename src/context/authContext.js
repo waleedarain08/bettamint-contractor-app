@@ -22,7 +22,7 @@ const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await apiCall(
         "POST",
-        API.login + `?username=${username}&password=${password}`,
+        API.login + `?username=${encodeURIComponent(username)}&password=${encodeURIComponent(password)}`,
         null
       );
       const state = {

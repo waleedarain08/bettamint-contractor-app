@@ -16,26 +16,31 @@ const CustomDrawer = ({ navigation }) => {
       ?.accessRightId !== 1;
 
   const isDashboardPresent = roles.some(
-    (item) => item.featureSet.name === "Dashboard"
+    (item) => item.featureSet.name === "Dashboard" || item.featureSet.name === "Worker Onboarding"
   );
   const isProjectListPresent = roles.some(
     (item) => item.featureSet.name === "Project List"
   );
   const isJobsListPresent = roles.some(
-    (item) => item.featureSet.name === "Jobs List"
+    (item) => item.featureSet.name === "Jobs List" || item.featureSet.name === "Worker Onboarding"
   );
   const isAttendanceListPresent = roles.some(
     (item) => item.featureSet.name === "Attendance List"
   );
   const isWorkerListPresent = roles.some(
-    (item) => item.featureSet.name === "Worker List"
+    (item) => item.featureSet.name === "Worker List" || item.featureSet.name === "Worker Onboarding"
   );
   const isPaymentListPresent = roles.some(
-    (item) => item.featureSet.name === "Payment List"
+    (item) => item.featureSet.name === "Payment List" || item.featureSet.name === "Payroll" || item.featureSet.name === "Payments"
   );
   const isUsersListPresent = roles.some(
     (item) => item.featureSet.name === "Users List"
   );
+
+  const isProductivityPresent = roles.some(
+    (item) => item.featureSet.name === "Measurement Submission" || item.featureSet.name === "Quality Management" ||  item.featureSet.name === "Change Management" ||  item.featureSet.name === "Variation Management"|| item.featureSet.name === "Users List"
+  );
+
 
   const routes = [
     {
@@ -70,7 +75,7 @@ const CustomDrawer = ({ navigation }) => {
       name: "Productivity",
       route: "Productivity",
       id: 9,
-      access: isUsersListPresent,
+      access: isProductivityPresent,
     },
     { name: "My Profile", route: "Profile", id: 10, access: true },
     { name: "Share App", route: "Share", id: 11, access: true },

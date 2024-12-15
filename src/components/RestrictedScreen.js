@@ -1,12 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Colors } from "../utils/Colors";
-import { RestrictedIcon } from "../icons";
+//import { RestrictedIcon } from "../icons";
 
 const RestrictedScreen = () => {
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-      <RestrictedIcon color={Colors.Danger} size={150} />
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center",padding:"2%"}}>
+      {/* <RestrictedIcon color={Colors.Danger} size={150} /> */}
       <Text
         style={{
           color: Colors.Black,
@@ -15,7 +15,7 @@ const RestrictedScreen = () => {
           textAlign: "center",
         }}
       >
-        You are restricted to view this data!
+        Please contact your site admin to access this data.
       </Text>
     </View>
   );
