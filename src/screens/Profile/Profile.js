@@ -31,7 +31,7 @@ const img =
   "https://images.pexels.com/photos/417273/pexels-photo-417273.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2";
 const Profile = ({ navigation }) => {
   const { user } = useAuth().user;
-  console.log(user);
+  //console.log(user);
   return (
     <View style={styles.container}>
       <View style={styles.header} />

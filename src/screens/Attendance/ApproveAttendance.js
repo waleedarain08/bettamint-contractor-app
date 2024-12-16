@@ -14,29 +14,30 @@ import {
 import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import { Building, Cross, Search } from "../../icons";
-import { useSelector, useDispatch } from "react-redux";
-import {
-  projectDataReducer,
-  getAttendanceApproveAction,
-  loadingAttendance,
-  markAttendance,
-  todaysAttendanceListReducer,
-  getTodaysAttendanceAction,
-} from "../../redux/slices/attendanceSlice";
-import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
+// import { useSelector, useDispatch } from "react-redux";
+// import {
+//   projectDataReducer,
+//   getAttendanceApproveAction,
+//   loadingAttendance,
+//   markAttendance,
+//   todaysAttendanceListReducer,
+//   getTodaysAttendanceAction,
+// } from "../../redux/slices/attendanceSlice";
+//import { projectsListSimpleReducer } from "../../redux/slices/projectSlice";
 import moment from "moment";
 import { authToken } from "../../redux/slices/authSlice";
 import { Dropdown } from "react-native-element-dropdown";
 import { Searchbar } from "react-native-paper";
-import {
-  getLabourContactorAction,
-  labourContractorReducer,
-  usersListReducer,
-} from "../../redux/slices/userSlice";
+// import {
+//   getLabourContactorAction,
+//   labourContractorReducer,
+//   usersListReducer,
+// } from "../../redux/slices/userSlice";
 import { useFocusEffect } from "@react-navigation/native";
 import Toast from "react-native-toast-message";
 import Geolocation from "react-native-geolocation-service";
 import { useAttendance } from "../../context/attendanceContext";
+import {useAuth} from "../../context/authContext";
 import { useGeneralContext } from "../../context/generalContext";
 
 LogBox.ignoreAllLogs();
@@ -94,12 +95,20 @@ const ApproveAttendance = ({ navigation, route }) => {
     { label: "PP", value: 16 },
   ];
 
+  const { user } = useAuth().user;
+
   //console.log("Project", project);
   const getData = (
     projectId = project?.projectId,
     contractorId = 0,
     skillId = ""
   ) => {
+    const routes = navigation.getState()?.routes;
+    const prevRoute = routes[routes.length - 2];
+    //console.log("hhhhhhhhhhhhhhhhhhhh",user.userProjects[0].projectId)
+    if(typeof prevRoute==="undefined"){
+      projectId=user.userProjects[0].projectId;
+    }
     getAttendance(projectId, contractorId, skillId).catch((error) => {
       ToastAndroid.show(error.message, ToastAndroid.SHORT);
     });
@@ -218,9 +227,16 @@ const ApproveAttendance = ({ navigation, route }) => {
         <View style={styles.filterContainer}>
           <View style={styles.filterInnerContainer}>
             <View style={styles.filterHeaderCon}>
-              <View>
-                <Text style={styles.filterText}>Filter</Text>
-              </View>
+              <Pressable onPress={()=>{
+                setOpenFilterModal(false);
+                setSelectedContractor(null);
+                getData(
+                  project?.projectId,
+                  0
+                );
+              }}>
+                <Text style={styles.filterText}>Clear Filter</Text>
+              </Pressable>
               <View style={{ alignItems: "flex-end" }}>
                 <Cross
                   onPress={() => {
@@ -234,7 +250,7 @@ const ApproveAttendance = ({ navigation, route }) => {
 
             <View style={{ marginVertical: 10 }}>
               <View style={{ marginVertical: 5 }}>
-                <Text style={styles.contactorText}>By Contractor</Text>
+                <Text style={styles.contactorText}>Filter By Contractor</Text>
               </View>
               <Dropdown
                 style={styles.dropdown}
@@ -952,9 +968,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   filterText: {
-    fontFamily: "Lexend-Medium",
-    color: Colors.Black,
-    fontSize: 16,
+    fontFamily: "Lexend-Small",
+    color: Colors.Gray,
+    fontSize: 14,
+    textDecorationLine:"underline"
   },
   contactorText: { fontFamily: "Lexend-Medium", color: Colors.Gray },
   dropdownItemText: {

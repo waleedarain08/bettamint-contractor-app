@@ -654,7 +654,7 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
         },
       }}
     >
-      <AttendanceOnlyStack.Screen
+      {/* <AttendanceOnlyStack.Screen
         name="AttendanceStack"
         component={Attendance}
         options={{
@@ -699,8 +699,6 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
                   >
                     <View
                       style={{
-                        // flexDirection: "row",
-                        // justifyContent: "space-between",
                         alignItems: "center",
                       }}
                     >
@@ -715,12 +713,6 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
                       </Text>
                     </View>
                   </Pressable>
-                  {/* <Pressable style={{ marginLeft: 5 }}>
-                    <Image
-                      source={require("../assets/icons/download.png")}
-                      style={{ height: 30, width: 30, marginRight: 0 }}
-                    />
-                  </Pressable> */}
                 </>
               )}
               <Pressable
@@ -735,8 +727,8 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
             </View>
           ),
         }}
-      />
-      <AttendanceOnlyStack.Screen
+      /> */}
+      {/* <AttendanceOnlyStack.Screen
         name="AttendanceMusterCard"
         component={AttendanceMusterCard}
         options={{
@@ -762,11 +754,16 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
             </Pressable>
           ),
         }}
-      />
+      /> */}
       <AttendanceOnlyStack.Screen
         name="ApproveAttendance"
         component={ApproveAttendance}
         options={{
+          headerLeft: () => (
+            <Pressable onPress={() => navigation.openDrawer()}>
+              <MenuIcon size={30} color={Colors.White} />
+            </Pressable>
+          ),
           headerTitle: () => (
             <Text
               style={{
@@ -780,14 +777,7 @@ const AttendanceOnlyNavigator = ({ navigation }) => {
               Today's Muster Roll
             </Text>
           ),
-          headerRight: () => (
-            <Pressable onPress={() => navigation.navigate("Profile")}>
-              <Image
-                source={require("../assets/icons/ProfileButton.png")}
-                style={{ height: 30, width: 30, marginRight: 5 }}
-              />
-            </Pressable>
-          ),
+          
         }}
       />
       <AttendanceOnlyStack.Screen
@@ -1797,9 +1787,7 @@ function MainNavigation({ navigation }) {
   // Array of expected names
   const expectedNames = [
     "Attendance List",
-    "Attendance Detail",
-    "Communication ",
-    "Profile",
+    "Attendance Marking"
   ];
 
   // Function to check if only the expected names are present
@@ -2037,6 +2025,7 @@ function TabNavigator({ navigation }) {
   const isDashboardPresent = roles.some(
     (item) => item?.featureSet?.name === "Dashboard"
   );
+  
   return (
     <Animated.View style={[style, { flex: 1 }]}>
       <Tab.Navigator
