@@ -10,8 +10,9 @@ import {
   Pressable,
   RefreshControl,
   ToastAndroid,
+  TouchableOpacity
 } from "react-native";
-import { TouchableOpacity } from "react-native";
+// import { TouchableOpacity } from "react-native";
 import { Colors } from "../../utils/Colors";
 import { Building, Cross, Search } from "../../icons";
 // import { useSelector, useDispatch } from "react-redux";
@@ -178,7 +179,7 @@ const ApproveAttendance = ({ navigation, route }) => {
         longitude: currentPosition?.coords?.longitude,
       });
       if (response) {
-        getData(project?.projectId, selectedContractor?.value || 0);
+        //getData(project?.projectId, selectedContractor?.value || 0);
         //ToastAndroid.show("Attendance marked successfully!",ToastAndroid.SHORT);
         let key =
           attendanceType === "CheckIn" ? "todayCheckIn" : "todayCheckOut";
@@ -457,7 +458,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   {convertTimeToIST(item?.todayCheckIn)}
                 </Text>
               ) : (
-                <Pressable
+                <TouchableOpacity
                   style={styles.checkInButton}
                   onPress={() => {
                     handleOfflineWorkerAttendance(
@@ -470,7 +471,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   <View>
                     <Text style={styles.checkInText}>Check-In</Text>
                   </View>
-                </Pressable>
+                </TouchableOpacity>
               )}
             </View>
           ) : (
@@ -490,7 +491,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   {convertTimeToIST(item?.todayCheckOut)}
                 </Text>
               ) : item?.todayCheckIn ? (
-                <Pressable
+                <TouchableOpacity
                   style={styles.checkOutButton}
                   onPress={() => {
                     handleOfflineWorkerAttendance(
@@ -503,7 +504,7 @@ const ApproveAttendance = ({ navigation, route }) => {
                   <View>
                     <Text style={styles.checkOutText}>Check-Out</Text>
                   </View>
-                </Pressable>
+                </TouchableOpacity>
               ) : (
                 <Text style={styles.flatListText}>-</Text>
               )}
@@ -730,6 +731,11 @@ const ApproveAttendance = ({ navigation, route }) => {
         </View>
       </Pressable>
       <View style={styles.descriptionTextCon}>
+        <TouchableOpacity onPress={()=>getData(project?.projectId)}>
+          <Text style={styles.refreshText}>
+          Refresh List  
+          </Text>
+        </TouchableOpacity>
         <Text style={styles.descriptionText}>
           Attendance is validated via two-factor authentication*{"\n"} i.e.
           worker Check-In & Geolocation Tracking during work hours.
@@ -1130,11 +1136,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 7,
   },
   descriptionTextCon: {
-    alignItems: "flex-end",
+    flexDirection:"row",
+    alignItems: "center",
+    justifyContent:"space-between",
     marginHorizontal: 0,
     width: "93%",
   },
   descriptionText: { fontSize: 10, textAlign: "right", color: Colors.White },
+  refreshText: { fontSize: 16, textAlign: "left", color: Colors.WhiteGray, textDecorationLine:"underline", fontWeight:'700' },
   flatListContainer: {
     backgroundColor: Colors.White,
     alignItems: "center",
